@@ -1,0 +1,256 @@
+<header>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        Khám phá ngay sản phẩm trà thảo mộc thiên nhiên của Floralia Herbal Tea!
+    </div>
+
+   <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm" style="height: 80px;">
+        <div class="container">
+
+            <!-- Logo -->
+            <a class="navbar-brand" href="#">
+                <img src="/assets/images/logo.png" class="logo">
+            </a>
+
+            <!-- Nút 3 gạch -->
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menu"
+                    aria-controls="menu"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- MENU -->
+            <div class="collapse navbar-collapse" id="menu">
+
+                <ul class="navbar-nav mx-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/home">TRANG CHỦ</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/about">GIỚI THIỆU</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="Trangsanpham.html">
+                            SẢN PHẨM
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item"
+                                href="Trangsanpham.html?danhmuc=tra-thao-moc">
+                                    Trà thảo mộc
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                href="Trangsanpham.html?danhmuc=tra-thao-moc-mix">
+                                    Trà thảo mộc mix
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                href="Trangsanpham.html?danhmuc=do-uong-kem-tra">
+                                    Đồ uống kèm trà
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                href="Trangsanpham.html?danhmuc=am-tra">
+                                    Ấm trà
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                href="Trangsanpham.html?danhmuc=set-qua-tang">
+                                    Set quà tặng
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="Trangblog.html">BLOG</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="Trangkhuyenmai.html">KHUYẾN MÃI</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="doitra.html">
+                            HỖ TRỢ
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="doitra.html">Chính sách đổi trả</a></li>
+                            <li><a class="dropdown-item" href="baomat.html">Chính sách bảo mật</a></li>
+                            <li><a class="dropdown-item" href="dieukhoan.html">Điều khoản dịch vụ</a></li>
+                            <li><a class="dropdown-item" href="faq.html">Câu hỏi thường gặp</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="lienhe.html">LIÊN HỆ</a>
+                    </li>
+
+                </ul>
+
+                <!-- ICON GROUP -->
+                <div class="icon-group">
+
+                    <!-- Search -->
+                    <div class="search-container-box" style="position: relative; display: inline-block;">
+                        <a href="javascript:void(0);">
+                            <i class="bi bi-search" id="searchBtn"></i>
+                        </a>
+
+                        <div class="search-dropdown" id="searchDropdown">
+
+                            <div class="search-dropdown-arrow"></div>
+
+                            <h3>TÌM KIẾM</h3>
+
+                            <hr class="search-divider">
+
+                            <div class="search-bar-box">
+                                <input type="text"
+                                    id="searchInput"
+                                    placeholder="Tìm kiếm sản phẩm...">
+
+                                <button type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+
+                            <div class="search-results-list" id="searchResults"></div>
+
+                            <div class="search-more-footer">
+                                <a href="Trangsanpham.html"
+                                id="searchMoreLink">
+                                    Xem tất cả sản phẩm
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- User -->
+                    <div class="nav-item dropdown" id="userMenuDropdown">
+
+                        <a routerLink="/login" id="userIconLink">
+                            <i class="bi bi-person"></i>
+                        </a>
+
+                        <ul class="dropdown-menu" id="userDropdownContent">
+                            <li><a class="dropdown-item" href="trangtaikhoan.html">Tài khoản của tôi</a></li>
+                            <li><a class="dropdown-item" href="order-history.html">Đơn hàng của tôi</a></li>
+                            <li><a class="dropdown-item" href="trangyeuthich.html">Sản phẩm yêu thích</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="btnLogout">Đăng xuất</a></li>
+                        </ul>
+
+                    </div>
+
+                    <!-- Cart -->
+                    <a href="#" id="cart-btn">
+                        <i class="bi bi-bag"></i>
+                        <span class="cart-badge">0</span>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    </nav>
+        <!-- 4 nút cố định ở dưới góc phải-- -->
+        <div class="contact-buttons" id="contactButtons">
+            <a href="mix-tra.html" class="btn-contact btn-mix-tra">
+                <span class="mix-invite-text">Tự mix trà theo sở thích cá nhân! <br>Khám phá ngay 🍃</span>
+                <i class="bi bi-cup-hot-fill"></i> 
+            </a>
+            <a href="tel:0123456789" class="btn-contact btn-phone" title="Gọi ngay">
+                <i class="bi bi-telephone-fill"></i>
+            </a>
+            
+            <a href="https://zalo.me/your_id" target="_blank" class="btn-contact btn-zalo" title="Chat Zalo">
+                <span class="zalo-text">Zalo</span>
+            </a>
+            
+            <a href="https://m.me/your_page" target="_blank" class="btn-contact btn-messenger" title="Chat Facebook Messenger">
+                <i class="bi bi-messenger"></i>
+            </a>
+        </div>
+
+        <!-- CART SIDEBAR -->
+        <div class="cart-overlay">
+            <div class="cart-sidebar">
+
+            <!-- Header -->
+            <div class="cart-header">
+                <h3>
+                    Giỏ hàng
+                    (<span id="cart-count">0</span>)
+                </h3>
+
+                <button id="close-cart">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="cart-body">
+                <!-- EMPTY -->
+                <div class="cart-empty">
+                    <i class="bi bi-bag-heart"></i>
+                    <h4>Giỏ hàng của bạn đang trống</h4>
+
+                    <p>
+                        Hãy khám phá những dòng trà
+                        thảo mộc thiên nhiên của Floralia.
+                    </p>
+
+                    <button class="continue-shopping" onclick="location.href='Trangsanpham.html'">
+                        Tiếp tục mua sắm
+                    </button>
+                </div>
+
+                <!-- PRODUCT LIST -->
+                <div class="cart-items">
+                </div>
+                
+            <!-- Footer -->
+
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span id="total-items">
+                        0 sản phẩm
+                    </span>
+                    <strong id="total-price">
+                        0đ
+                    </strong>
+                </div>
+                <a class="checkout-btn" href="javascript:void(0)">
+                    Thanh toán
+                </a>
+
+                <a class="view-cart-btn" href="../../tranggiohanglon.html">
+                    Xem giỏ hàng
+                </a>
+            </div>
+        </div>
+    </div>  
+</div>
+</header>    

@@ -1,0 +1,30 @@
+export interface Products {
+  sku: string;
+  slug: string;
+  name: string;
+  category: string;
+  categorySlug: string;
+  featured: boolean;
+  price: number;
+  oldPrice: number;
+  minPrice: number;
+  discount: number;
+  isSale: boolean;
+  stock: number;
+  sold: number;
+  thumbnail: string;
+  images: string[];
+  ratingAverage: number;
+  ratingCount: number;
+  description: string;
+  tags: string[];
+  benefits: string[];
+  variants: {
+    sku: string;
+    label: string;
+    price: number;
+    oldPrice: number;
+    stock: number;
+    isDefault: boolean;
+  }[];
+}

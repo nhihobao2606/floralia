@@ -1,0 +1,3845 @@
+[
+  {
+    "sku": "TTM001",
+    "slug": "hong-diep-tra-tra-atiso-do-nguyen-nu",
+    "name": "Hồng Diệp Trà – Trà Atiso Đỏ Nguyên Nụ",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Chua thanh, thơm dịu",
+    "color": "Đỏ tím",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM001-100G",
+        "label": "Hộp 100g",
+        "type": "weight",
+        "weightGram": 100,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 101000,
+        "oldPrice": 123000,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM001-200G",
+        "label": "Hộp 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 180000,
+        "oldPrice": 220000,
+        "stock": 22,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM001-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 414000,
+        "oldPrice": 506000,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM001-G10",
+        "label": "Hộp 10 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 50,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 56000,
+        "oldPrice": 69000,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM001-G20",
+        "label": "Hộp 20 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 113000,
+        "oldPrice": 138000,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM001-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 32000,
+        "oldPrice": 40000,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM001-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 65000,
+        "oldPrice": 79000,
+        "stock": 3,
+        "isDefault": false
+      }
+    ],
+    "price": 180000,
+    "oldPrice": 220000,
+    "discount": 18,
+    "isSale": true,
+    "minPrice": 32000,
+    "stock": 40,
+    "status": "Còn hàng",
+    "sold": 295,
+    "benefits": [
+      "thanh-loc",
+      "giam-stress",
+      "thanh-tam"
+    ],
+    "tags": [
+      "Thanh lọc",
+      "Giảm stress",
+      "Thanh tâm"
+    ],
+    "thumbnail": "3.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Trà Atiso Đỏ được làm từ những cánh hoa atiso đỏ sấy khô tự nhiên, có vị chua thanh đặc trưng và hương thơm dịu nhẹ. Sản phẩm chứa nhiều chất dưỡng nhan, hỗ trợ giảm stress, giải độc cơ thể và giúp làn da tươi sáng hơn khi sử dụng thường xuyên.",
+    "story": "Hồng Diệp Trà bắt nguồn từ những vùng đồi ngập nắng, nơi những đóa hoa Atiso Đỏ (Bụp Giấm) hấp thụ tinh hoa của đất trời để kết tinh nên sắc đỏ kiêu kỳ. Mỗi nụ hoa được thu hoạch thủ công vào sáng sớm, khi sương còn đọng trên cánh, rồi đem sấy lạnh lưu hương. Hồng Diệp Trà không chỉ là một thức uống thanh mát, mà là câu chuyện về sự tươi trẻ, mang sắc đỏ rực rỡ nuôi dưỡng nét thanh xuân và sự tĩnh tại trong tâm hồn bạn.",
+    "usage": [
+      "Giảm stress, giải độc cơ thể",
+      "Hỗ trợ tiêu hóa và giảm cảm giác đầy bụng",
+      "Bổ sung chất dưỡng nhan",
+      "Hỗ trợ làm thanh tâm"
+    ],
+    "instructions": [
+      "Hãm 3–5 nụ hoa Atiso Đỏ với 200ml - 250ml nước sôi (khoảng 90°C) trong vòng 5–7 phút để trà tiết ra màu đỏ tím và vị chua thanh trọn vẹn.",
+      "Có thể thêm đường phèn, mật ong hoặc cỏ ngọt nếu muốn giảm vị chua.",
+      "Thưởng thức ngon hơn khi uống lạnh bằng cách thêm đá hoặc để ngăn mát tủ lạnh."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM002",
+    "slug": "thanh-sac-tra-tra-thanh-tam-an-moc",
+    "name": "Thanh Sắc Trà – Trà Thanh Tâm An Mộc",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 18,
+    "flavorNote": "Ngọt thanh nho đen, thoảng hoa cúc",
+    "color": "Đen tím",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM002-G10V3",
+        "label": "Hộp 10 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 3,
+        "price": 116000,
+        "oldPrice": 0,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM002-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 127000,
+        "oldPrice": 0,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM002-G20V3",
+        "label": "Hộp 20 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 3,
+        "price": 210000,
+        "oldPrice": 0,
+        "stock": 14,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM002-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 231000,
+        "oldPrice": 0,
+        "stock": 7,
+        "isDefault": false
+      }
+    ],
+    "price": 210000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 116000,
+    "stock": 35,
+    "status": "Còn hàng",
+    "sold": 92,
+    "benefits": [
+      "duong-nhan",
+      "thanh-tam"
+    ],
+    "tags": [
+      "Dưỡng nhan",
+      "Thanh tâm",
+      "Tăng đề kháng"
+    ],
+    "thumbnail": "9.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Thanh Sắc Trà được chế biến từ những quả nho đen sấy khô tự nhiên, mang hương thơm dịu nhẹ và vị ngọt thanh đặc trưng. Trà được phối theo hai mức vị: bản 3 vị gồm nho đen, hoa cúc và táo đỏ; bản 5 vị thêm hoa hồng và kỷ tử cho hương thơm đầy đặn, sắc trà tím hồng đậm hơn. Sản phẩm giàu dưỡng chất, phù hợp cho những người muốn chăm sóc sức khỏe và làm đẹp từ bên trong.",
+    "story": "Thanh Sắc Trà là bản hòa ca ngọt ngào được chắt lọc từ những quả nho đen mọng nước, sinh trưởng tự nhiên tại các vùng nông trại hữu cơ trong lành. Được thu hoạch vào độ chín hoàn hảo khi hàm lượng anthocyanin đạt mức cao nhất, từng quả nho trải qua quy trình sấy lạnh khép kín để giữ trọn vẹn sắc đen tím huyền bí cùng vị ngọt thanh tự nhiên. Không chỉ là một tách trà, Thanh Sắc Trà chính là liệu pháp 'An Mộc' nuôi dưỡng làn da, giúp bạn rũ bỏ những lo âu, xoa dịu các nốt mụn nội tiết và đánh thức vẻ đẹp rạng rỡ, tươi trẻ vốn có từ sâu bên trong. Bản 3 vị mộc mạc, ngọt thanh; bản 5 vị thêm hoa hồng và kỷ tử như một lời chúc dịu dàng cho làn da và giấc ngủ.",
+    "usage": [
+      "Hỗ trợ dưỡng nhan và làm chậm quá trình lão hóa",
+      "Giúp cơ thể thư giãn, giảm mệt mỏi",
+      "Hỗ trợ làm thanh tâm và duy trì làn da tươi sáng",
+      "Bổ sung dưỡng chất tự nhiên cho cơ thể"
+    ],
+    "instructions": [
+      "Hãm 5–7g Thanh Sắc Trà với khoảng 250ml nước nóng (ở nhiệt độ từ 85–90°C).",
+      "Đậy kín nắp và đợi trong vòng 7–10 phút để quả nho đen nở đều, tiết ra trọn vẹn vị ngọt thanh và sắc tím đặc trưng.",
+      "Ngon hơn khi thưởng thức ấm vào buổi tối để thư giãn tinh thần, hoặc thêm đá viên để biến tấu thành một thức uống giải nhiệt thanh mát cho ngày hè."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM003",
+    "slug": "hoang-cuc-tra-tra-cuc-vang",
+    "name": "Hoàng Cúc Trà – Trà Cúc Vàng",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Thanh nhẹ, thơm hoa cúc",
+    "color": "Vàng",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM003-150G",
+        "label": "Hộp 150g",
+        "type": "weight",
+        "weightGram": 150,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 150000,
+        "oldPrice": 190000,
+        "stock": 30,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM003-200G",
+        "label": "Hộp 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 200000,
+        "oldPrice": 253000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM003-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 460000,
+        "oldPrice": 583000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM003-G10",
+        "label": "Hộp 10 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 50,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 62000,
+        "oldPrice": 79000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM003-G20",
+        "label": "Hộp 20 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 125000,
+        "oldPrice": 158000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM003-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 36000,
+        "oldPrice": 46000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM003-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 72000,
+        "oldPrice": 91000,
+        "stock": 5,
+        "isDefault": false
+      }
+    ],
+    "price": 150000,
+    "oldPrice": 190000,
+    "discount": 21,
+    "isSale": true,
+    "minPrice": 36000,
+    "stock": 60,
+    "status": "Còn hàng",
+    "sold": 188,
+    "benefits": [
+      "giam-stress"
+    ],
+    "tags": [
+      "An thần",
+      "Giảm stress",
+      "Ngủ ngon"
+    ],
+    "thumbnail": "31.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Trà Hoa Cúc Vàng được tuyển chọn từ những bông cúc vàng nguyên bông, sấy khô bằng công nghệ hiện đại để giữ nguyên màu sắc và hương thơm tự nhiên. Trà có vị thanh nhẹ, hương thơm dễ chịu, giúp thư giãn tinh thần và mang lại cảm giác dễ chịu sau những giờ làm việc căng thẳng.",
+    "story": "Hoàng Cúc Trà mang trong mình nét đẹp hoài cổ và thanh tao, gợi nhớ về những tách trà tiến vua thời xưa. Những bông kim cúc vàng ươm được thu hái thủ công vào thời điểm nở rộ nhất của mùa thu, khi các dưỡng chất tự nhiên tích tụ trọn vẹn trong từng lớp cánh. Qua quy trình sấy lạnh khép kín tiên tiến, sắc vàng rực rỡ và hương thơm tinh khiết của hoa được giữ lại nguyên bản. Mỗi tách trà như một khoảng lặng bình yên, giúp xoa dịu những ồn ã của cuộc sống hiện đại và đưa tâm hồn bạn trở về với sự tĩnh tại, an nhiên.",
+    "usage": [
+      "Hỗ trợ thư giãn và giảm căng thẳng",
+      "Giúp ngủ ngon và ngủ sâu hơn",
+      "Giảm stress và làm mát cơ thể",
+      "Hỗ trợ giảm cảm giác mệt mỏi"
+    ],
+    "instructions": [
+      "Thả 3–5 bông cúc vàng vào tách và hãm với khoảng 200ml - 250ml nước nóng (từ 85–90°C).",
+      "Đậy kín nắp, chờ khoảng 5–7 phút để nụ hoa từ từ nở trọn và tỏa hương thơm dịu nhẹ đặc trưng.",
+      "Nên kết hợp cùng chút mật ong hoặc vài lát cam thảo để tạo vị ngọt hậu mượt mà, thưởng thức tốt nhất vào buổi tối trước khi đi ngủ 30 phút."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM004",
+    "slug": "hoa-moc-tra-tra-gao-lut-ngu-hoa",
+    "name": "Hòa Mộc Trà – Trà Gạo Lứt Ngũ Hoa",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 12,
+    "flavorNote": "Thơm bùi gạo lứt, thoảng hương hoa",
+    "color": "Nâu vàng",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM004-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 130,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 79000,
+        "oldPrice": 99000,
+        "stock": 9,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM004-G10V7",
+        "label": "Hộp 10 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 130,
+        "packCount": 10,
+        "flavorCount": 7,
+        "price": 88000,
+        "oldPrice": 110000,
+        "stock": 9,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM004-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 260,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 144000,
+        "oldPrice": 180000,
+        "stock": 9,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM004-G20V7",
+        "label": "Hộp 20 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 260,
+        "packCount": 20,
+        "flavorCount": 7,
+        "price": 160000,
+        "oldPrice": 200000,
+        "stock": 18,
+        "isDefault": true
+      }
+    ],
+    "price": 160000,
+    "oldPrice": 200000,
+    "discount": 20,
+    "isSale": true,
+    "minPrice": 79000,
+    "stock": 45,
+    "status": "Còn hàng",
+    "sold": 84,
+    "benefits": [
+      "thanh-loc"
+    ],
+    "tags": [
+      "Thanh lọc",
+      "Giảm cân",
+      "Tiêu hóa"
+    ],
+    "thumbnail": "74.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Trà Gạo Lứt Ngũ Hoa là sự kết hợp giữa gạo lứt huyết rồng rang thơm và các loại hoa thảo mộc tự nhiên, mang đến hương vị thanh dịu, dễ uống. Trà có hai mức vị: bản 5 vị gồm gạo lứt rang, hoa cúc, hoa hồng, hoa lài và cỏ ngọt; bản 7 vị thêm hoa bách hợp và hoa đào để đủ \"ngũ hoa\" với hương thơm tròn đầy. Sản phẩm thích hợp cho những người yêu thích chế độ ăn lành mạnh và muốn chăm sóc sức khỏe từ những nguyên liệu tự nhiên.",
+    "story": "Trà Gạo Lứt Ngũ Hoa là sự giao thoa tinh tế giữa nét mộc mạc của đồng quê và hương sắc rực rỡ của khu vườn thảo mộc. Những hạt gạo lứt huyết rồng được rang đều tay đến độ thơm ngậy, kết hợp hài hòa cùng các loại hoa thảo mộc khô tự nhiên (đủ năm sắc hoa ở bản 7 vị). Từng ngụm trà không chỉ mang lại sự ấm áp của ngũ cốc mà còn phảng phất hương thơm thanh khiết của hoa cỏ, tạo nên một thức uống cân bằng giúp nuôi dưỡng vóc dáng, làm dịu tâm trí và mang lại nguồn năng lượng sống xanh mát lành mỗi ngày.",
+    "usage": [
+      "Hỗ trợ thanh lọc cơ thể",
+      "Giúp kiểm soát cân nặng",
+      "Hỗ trợ tiêu hóa và giảm đầy bụng",
+      "Bổ sung dưỡng chất từ ngũ cốc tự nhiên"
+    ],
+    "instructions": [
+      "Cho khoảng 10–15g Trà Gạo Lứt Ngũ Hoa vào ấm hoặc bình thủy tinh.",
+      "Rót từ 300ml - 400ml nước sôi ở nhiệt độ khoảng 90–95°C vào hãm.",
+      "Đậy kín nắp trong vòng 8–10 phút để gạo lứt mềm ra và các loại hoa tỏa hết hương thơm. Thưởng thức ấm ấm hoặc thêm đá tùy sở thích."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM005",
+    "slug": "ngu-linh-thang-nhan-sam-ngu-bao-tra-nam",
+    "name": "Ngũ Linh Thang – Nhân Sâm Ngũ Bảo Trà Nam",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 18,
+    "flavorNote": "Ngọt đượm nhân sâm, táo đỏ",
+    "color": "Nâu vàng đỏ",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM005-G10V3",
+        "label": "Hộp 10 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 150,
+        "packCount": 10,
+        "flavorCount": 3,
+        "price": 139000,
+        "oldPrice": 173000,
+        "stock": 6,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM005-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 150,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 154000,
+        "oldPrice": 193000,
+        "stock": 6,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM005-G10V7",
+        "label": "Hộp 10 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 150,
+        "packCount": 10,
+        "flavorCount": 7,
+        "price": 169000,
+        "oldPrice": 212000,
+        "stock": 6,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM005-G20V3",
+        "label": "Hộp 20 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 300,
+        "packCount": 20,
+        "flavorCount": 3,
+        "price": 252000,
+        "oldPrice": 315000,
+        "stock": 6,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM005-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 300,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 280000,
+        "oldPrice": 350000,
+        "stock": 20,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM005-G20V7",
+        "label": "Hộp 20 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 300,
+        "packCount": 20,
+        "flavorCount": 7,
+        "price": 308000,
+        "oldPrice": 385000,
+        "stock": 6,
+        "isDefault": false
+      }
+    ],
+    "price": 280000,
+    "oldPrice": 350000,
+    "discount": 20,
+    "isSale": true,
+    "minPrice": 139000,
+    "stock": 50,
+    "status": "Còn hàng",
+    "sold": 215,
+    "benefits": [
+      "bo-khi-huyet"
+    ],
+    "tags": [
+      "Bổ khí huyết",
+      "Tăng sức đề kháng",
+      "Dành cho nam"
+    ],
+    "thumbnail": "19.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Ngũ Linh Thang là bài trà bồi bổ dành cho nam giới, có vị ngọt đượm, hậu thanh ấm. Trà được phối theo ba mức vị: bản 3 vị gồm nhân sâm, kỷ tử và táo đỏ; bản 5 vị (công thức \"ngũ bảo\" nguyên bản) thêm long nhãn và hoa cúc; bản 7 vị thêm hoàng kỳ và cam thảo cho vị đậm, hậu ngọt sâu. Trà giúp bồi bổ khí huyết, giảm mệt mỏi và nâng cao sức đề kháng.",
+    "story": "Ngũ Linh Thang lấy cảm hứng từ quan niệm \"ngũ bảo\" trong Đông y: năm vị thảo mộc quý cùng nhau nuôi dưỡng khí huyết. Nhân sâm cho sức bền, kỷ tử và táo đỏ bổ máu, long nhãn an thần, hoa cúc làm dịu hậu vị. Mỗi chén trà là một nhịp nghỉ ấm áp cho người đàn ông bận rộn, giúp lấy lại sức lực và sự tỉnh táo sau ngày dài. Bản 5 vị giữ trọn tinh thần ngũ bảo; bản 3 vị gọn nhẹ cho người mới bắt đầu, còn bản 7 vị đậm đà hơn cho những ngày cần bồi bổ nhiều.",
+    "usage": [
+      "Hỗ trợ bồi bổ khí huyết, phục hồi sức lực",
+      "Giảm mệt mỏi, giúp tinh thần minh mẫn",
+      "Tăng cường sức đề kháng",
+      "Thư giãn và hỗ trợ giấc ngủ"
+    ],
+    "instructions": [
+      "Cho khoảng 10–15g Ngũ Linh Thang (nhân sâm, kỷ tử, táo đỏ, và long nhãn, hoa cúc... tùy bản 3, 5 hoặc 7 vị) vào ấm.",
+      "Rót 250ml - 300ml nước nóng ở nhiệt độ từ 90–95°C vào hãm.",
+      "Đậy nắp trong 7–10 phút để các vị thảo mộc ngấm đều. Có thể dùng thìa dầm nhẹ táo đỏ cho vị đậm đà, và ăn cả bã (nhân sâm, táo đỏ, long nhãn, kỷ tử) sau khi uống."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM006",
+    "slug": "le-ha-tra-tra-hoa-ruou-mam-xoi",
+    "name": "Lệ Hạ Trà – Trà Hoa Rượu Mâm Xôi",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Mix",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 18,
+    "flavorNote": "Ngọt nồng mâm xôi, hương hoa",
+    "color": "Nâu vàng",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM006-G10V3",
+        "label": "Hộp 10 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 130,
+        "packCount": 10,
+        "flavorCount": 3,
+        "price": 138000,
+        "oldPrice": 176000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM006-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 130,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 151000,
+        "oldPrice": 194000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM006-G20V3",
+        "label": "Hộp 20 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 260,
+        "packCount": 20,
+        "flavorCount": 3,
+        "price": 250000,
+        "oldPrice": 320000,
+        "stock": 14,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM006-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 260,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 275000,
+        "oldPrice": 352000,
+        "stock": 7,
+        "isDefault": false
+      }
+    ],
+    "price": 250000,
+    "oldPrice": 320000,
+    "discount": 22,
+    "isSale": true,
+    "minPrice": 138000,
+    "stock": 35,
+    "status": "Còn hàng",
+    "sold": 262,
+    "benefits": [
+      "duong-nhan",
+      "bo-khi-huyet"
+    ],
+    "tags": [
+      "Dưỡng nhan",
+      "Bổ khí huyết",
+      "Giảm mệt mỏi"
+    ],
+    "thumbnail": "147.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Lệ Hạ Trà kết hợp mâm xôi sấy cùng táo đỏ và long nhãn, điểm thêm hương hoa thảo mộc. Vị ngọt thanh, hương trái cây thoang thoảng như men rượu nhẹ. Trà có hai mức vị: bản 3 vị gồm mâm xôi, táo đỏ và long nhãn; bản 5 vị thêm hoa hồng và hoa cúc cho hương hoa rõ nét hơn. Trà giúp cơ thể thư giãn, bồi bổ khí huyết và làm sáng mịn làn da.",
+    "story": "Lệ Hạ Trà lấy cảm hứng từ những chiều hoàng hôn mùa hạ nhuộm vàng rực rỡ, mang trong mình sự nồng nàn và quyến rũ của quả mâm xôi chín mọng hòa quyện cùng sắc hoa thảo mộc thanh tao. Thức uống này giống như một ly cocktail không cồn của tự nhiên, nơi hương thơm ngọt ngào như men rượu dịu nhẹ đan xen vào vị ngọt hậu của táo đỏ và long nhãn. Mỗi ngụm Lệ Hạ Trà là một lần bạn được nuông chiều các giác quan, đánh thức sự tươi trẻ, rạng ngời và tận hưởng cảm giác thư thái tuyệt đối như đang đứng giữa một cánh đồng hoa lộng gió. Bản 3 vị thuần trái cây, ngọt hậu; bản 5 vị điểm thêm hoa hồng và hoa cúc cho hương thơm nồng nàn hơn.",
+    "usage": [
+      "Hỗ trợ bồi bổ khí huyết, điều hòa cơ thể",
+      "Giúp thanh lọc cơ thể, giải độc gan",
+      "Nuôi dưỡng làn da hồng hào, chống lão hóa",
+      "Thư giãn thần kinh, cải thiện chất lượng giấc ngủ"
+    ],
+    "instructions": [
+      "Cho khoảng 10–12g Lệ Hạ Trà vào ấm pha trà hoặc ly thủy tinh chịu nhiệt.",
+      "Rót 250ml - 300ml nước sôi (ở nhiệt độ từ 85–90°C) vào hãm.",
+      "Đậy kín nắp và đợi từ 5–7 phút để mâm xôi và các loại hoa thảo mộc tiết ra màu nước nâu vàng sóng sánh và hương thơm nồng nàn. Thưởng thức nóng để thư giãn sâu hoặc thêm đá, vài lát chanh tươi để có một ly trà hoa quả nhiệt đới tuyệt vời."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM007",
+    "slug": "kim-tam-tra-tra-hoa-tam-that",
+    "name": "Kim Tâm Trà - Trà Hoa Tam Thất",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Đắng nhẹ, hậu ngọt sâu",
+    "color": "Xanh lá",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM007-150G",
+        "label": "Hộp 150g",
+        "type": "weight",
+        "weightGram": 150,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 180000,
+        "oldPrice": 0,
+        "stock": 24,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM007-200G",
+        "label": "Hộp 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 240000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM007-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 552000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM007-G10",
+        "label": "Hộp 10 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 50,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 75000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM007-G20",
+        "label": "Hộp 20 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 150000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM007-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 43000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM007-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 86000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      }
+    ],
+    "price": 180000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 43000,
+    "stock": 42,
+    "status": "Còn hàng",
+    "sold": 112,
+    "benefits": [
+      "giam-stress"
+    ],
+    "tags": [
+      "Giảm stress",
+      "Hạ huyết áp",
+      "An thần"
+    ],
+    "thumbnail": "22.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Kim Tâm Trà được thu hái từ những nụ hoa tam thất non tuyển chọn, giữ trọn vẹn lớp dưỡng chất quý giá. Trà có vị đắng nhẹ ban đầu và để lại hậu vị ngọt thanh sâu nơi cổ họng, mang lại hiệu quả vượt trội trong việc điều hòa huyết áp và cải thiện giấc ngủ.",
+    "story": "Kim Tâm Trà bắt nguồn từ những vùng núi cao mờ sương, nơi cây tam thất hấp thụ linh khí của đất trời vùng cao Tây Bắc để nuôi dưỡng nên những nụ hoa quý giá. Được ví như vị thuốc an thần tự nhiên của đại ngàn, từng nụ hoa tam thất bao tử tròn mẩy được người dân bản địa thu hái thủ công từ sáng sớm, khi dưỡng chất saponin dồi dào nhất. Trải qua quá trình sấy lạnh khép kín khắt khe, Kim Tâm Trà giữ trọn sắc xanh mộc mạc cùng vị đắng thanh đặc trưng. Đây không chỉ là một tách trà, mà là liệu pháp an yên cho tâm trí, giúp vỗ về giấc ngủ sau những lo toan, đưa bạn trở lại trạng thái cân bằng và tĩnh tại nhất.",
+    "usage": [
+      "Hỗ trợ ổn định huyết áp và sức khỏe tim mạch",
+      "Giảm căng thẳng, an thần, hỗ trợ giấc ngủ",
+      "Giảm stress, hỗ trợ thanh lọc gan",
+      "Hỗ trợ giảm mỡ máu"
+    ],
+    "instructions": [
+      "Thả từ 3–5 nụ hoa tam thất (Kim Tâm Trà) vào tách hoặc ấm thủy tinh.",
+      "Rót khoảng 200ml - 250ml nước sôi ở nhiệt độ từ 90–95°C vào ấm.",
+      "Đậy kín nắp và hãm trà trong vòng 5–8 phút để hoa tam thất tiết ra màu nước xanh nhạt sóng sánh. Trà hoa tam thất có thể châm nước từ 2–3 lần cho đến khi nhạt vị, uống rất tốt vào buổi tối trước khi đi ngủ."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM008",
+    "slug": "hong-van-tra-tra-hoa-hong-tay-tang",
+    "name": "Hồng Vân Trà - Trà Hoa Hồng Tây Tạng",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Hương hồng nồng nàn, thanh nhẹ",
+    "color": "Hồng đỏ",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM008-100G",
+        "label": "Hộp 100g",
+        "type": "weight",
+        "weightGram": 100,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 317000,
+        "oldPrice": 370000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM008-300G",
+        "label": "Hộp 300g",
+        "type": "weight",
+        "weightGram": 300,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 850000,
+        "oldPrice": 990000,
+        "stock": 16,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM008-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 1417000,
+        "oldPrice": 1650000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM008-G10",
+        "label": "Hộp 10 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 50,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 177000,
+        "oldPrice": 206000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM008-G20",
+        "label": "Hộp 20 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 354000,
+        "oldPrice": 412000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM008-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 102000,
+        "oldPrice": 119000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM008-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 204000,
+        "oldPrice": 238000,
+        "stock": 2,
+        "isDefault": false
+      }
+    ],
+    "price": 850000,
+    "oldPrice": 990000,
+    "discount": 14,
+    "isSale": true,
+    "minPrice": 102000,
+    "stock": 28,
+    "status": "Còn hàng",
+    "sold": 208,
+    "benefits": [
+      "thanh-tam",
+      "duong-nhan",
+      "giam-stress"
+    ],
+    "tags": [
+      "Thanh tâm",
+      "Dưỡng nhan",
+      "Giảm stress"
+    ],
+    "thumbnail": "26.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Hồng Vân Trà sử dụng những nụ hoa hồng thượng hạng từ vùng núi cao Tây Tạng hoang sơ. Hương thơm nồng nàn quyến rũ đặc trưng kết hợp với vị trà thanh nhẹ, không chỉ là thức uống tinh tế mà còn là 'liều thuốc bổ' quý giá cho làn da và tinh thần.",
+    "story": "Hồng Vân Trà là báu vật tinh túy được dệt nên từ những rặng núi cao Tây Tạng quanh năm mây mờ che phủ. Nơi khí hậu khắc nghiệt với chênh lệch nhiệt độ ngày đêm lớn, những bụi hoa hồng hoang dã buộc phải tích tụ nguồn dưỡng chất mạnh mẽ nhất để nở rộ. Từng nụ hoa được thu hoạch hoàn toàn bằng tay khi còn ngậm sương sớm, trải qua quy trình sấy lạnh bí truyền để giữ trọn vẹn lớp tinh dầu quý báu và sắc hồng đỏ kiêu sa. Mỗi tách Hồng Vân Trà lan tỏa hương thơm nồng nàn sang trọng, tựa như những đám mây hồng lãng mạn, mang đến liệu pháp nuôi dưỡng dung nhan tối thượng và xoa dịu mọi giông bão trong tâm hồn bạn.",
+    "usage": [
+      "Cung cấp độ ẩm, làm mờ vết thâm và dưỡng da hồng hào",
+      "Hỗ trợ điều hòa kinh nguyệt, giảm đau bụng kinh",
+      "Xoa dịu thần kinh, giảm stress và mệt mỏi tinh thần",
+      "Hỗ trợ tăng cường hệ miễn dịch và hệ tiêu hóa"
+    ],
+    "instructions": [
+      "Thả 3–5 nụ hoa hồng Tây Tạng vào ấm thủy tinh hoặc tách trà.",
+      "Rót khoảng 250ml nước nóng ở nhiệt độ từ 85–90°C vào (tránh dùng nước quá sôi làm cháy tinh dầu hoa).",
+      "Đậy nắp hãm trong 5–7 phút để nụ hoa tỏa hương nồng nàn và ngả sắc nước hồng nhạt. Có thể kết hợp thêm vài lát táo đỏ hoặc một chút mật ong để tăng thêm hương vị ngọt ngào."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM009",
+    "slug": "bach-cuc-an-tra-tra-cuc-trang",
+    "name": "Bạch Cúc An Trà - Trà Cúc Trắng",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Thanh mát, dịu nhẹ vị cúc trắng",
+    "color": "Trắng ngà",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM009-100G",
+        "label": "Hộp 100g",
+        "type": "weight",
+        "weightGram": 100,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 118000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM009-200G",
+        "label": "Hộp 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 210000,
+        "oldPrice": 0,
+        "stock": 18,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM009-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 483000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM009-G10",
+        "label": "Hộp 10 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 50,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 66000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM009-G20",
+        "label": "Hộp 20 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 131000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM009-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 38000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM009-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 76000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      }
+    ],
+    "price": 210000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 38000,
+    "stock": 36,
+    "status": "Còn hàng",
+    "sold": 270,
+    "benefits": [
+      "giam-stress"
+    ],
+    "tags": [
+      "Giảm stress",
+      "Sáng mắt",
+      "Thanh nhiệt"
+    ],
+    "thumbnail": "4.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Bạch Cúc An Trà được làm từ những bông bạch cúc (cúc trắng) nguyên bông sấy lạnh. Trà mang hương vị thanh khiết, dịu mát, rất thích hợp cho dân văn phòng, giúp thư giãn thần kinh và làm giảm mỏi mắt sau nhiều giờ làm việc trước màn hình.",
+    "story": "Bạch Cúc An Trà mang cốt cách thanh tao của những đóa bạch cúc trắng ngà, được thu hái thủ công vào đầu thu, khi sương sớm còn đọng trên cánh hoa và dược tính đạt độ chín muồi nhất. Nhờ công nghệ sấy lạnh khép kín, từng cánh hoa giữ trọn sắc trắng tinh khôi cùng hương thơm tinh khiết thoang thoảng. Giữa nhịp sống hối hả, một tách Bạch Cúc An Trà là khoảng lặng bình yên, xoa dịu áp lực và đem lại sự dễ chịu cho đôi mắt của bạn.",
+    "usage": [
+      "Giảm stress, làm mát cơ thể",
+      "Giúp sáng mắt, giảm mỏi mắt và khô mắt",
+      "An thần, hỗ trợ ngủ ngon",
+      "Thanh nhiệt, hỗ trợ giảm nóng trong và mụn nhọt"
+    ],
+    "instructions": [
+      "Thả 5–8 bông bạch cúc vào ấm trà hoặc ly thủy tinh.",
+      "Rót khoảng 200ml - 250ml nước nóng (ở nhiệt độ từ 85–90°C) vào hãm.",
+      "Đậy kín nắp trong vòng 5–7 phút để hoa nở đều và tiết ra trọn vẹn hương vị thanh mát. Thức uống phù hợp cho dân văn phòng dùng vào buổi chiều để giải tỏa căng thẳng, hoặc thêm chút mật ong để tăng vị ngọt hậu."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM010",
+    "slug": "lam-diep-tra-tra-hac-ky-tu",
+    "name": "Lam Diệp Trà – Trà Hắc Kỷ Tử",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 18,
+    "flavorNote": "Chua ngọt dịu hắc kỷ tử",
+    "color": "Đen tím",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM010-100G",
+        "label": "Hộp 100g",
+        "type": "weight",
+        "weightGram": 100,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 103000,
+        "oldPrice": 125000,
+        "stock": 0,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM010-250G",
+        "label": "Hộp 250g",
+        "type": "weight",
+        "weightGram": 250,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 230000,
+        "oldPrice": 280000,
+        "stock": 0,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM010-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 423000,
+        "oldPrice": 515000,
+        "stock": 0,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM010-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 33000,
+        "oldPrice": 40000,
+        "stock": 0,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM010-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 66000,
+        "oldPrice": 81000,
+        "stock": 0,
+        "isDefault": false
+      }
+    ],
+    "price": 230000,
+    "oldPrice": 280000,
+    "discount": 18,
+    "isSale": true,
+    "minPrice": 33000,
+    "stock": 0,
+    "status": "Hết hàng",
+    "sold": 96,
+    "benefits": [
+      "duong-nhan"
+    ],
+    "tags": [
+      "Dưỡng nhan",
+      "Sáng mắt",
+      "Tăng sức đề kháng"
+    ],
+    "thumbnail": "34.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Lam Diệp Trà được làm từ hắc kỷ tử (kỷ tử đen) sấy khô tự nhiên, khi hãm cho sắc xanh tím đặc trưng và vị chua ngọt dịu. Hắc kỷ tử giàu anthocyanin, giúp bổ sung chất chống oxy hóa, hỗ trợ sáng mắt, dưỡng da và tăng cường sức khỏe tổng thể.",
+    "story": "Lam Diệp Trà bắt nguồn từ những cao nguyên khô hạn, nơi cây hắc kỷ tử mọc hoang giữa nắng gió và cho quả đen tím mọng nước, tích tụ lượng anthocyanin dồi dào. Quả được thu hái đúng độ chín rồi sấy nhiệt thấp để giữ trọn sắc tố quý. Khi gặp nước nóng, từng hạt hắc kỷ tử nhuộm nước trà thành sắc xanh lam huyền ảo, nhỏ vài giọt chanh sẽ chuyển sang tím hồng. Một chén Lam Diệp Trà là cách nâng niu đôi mắt và làn da trước nhịp sống hiện đại.",
+    "usage": [
+      "Dưỡng nhan, hỗ trợ chống lão hóa nhờ anthocyanin",
+      "Bổ sung chất chống oxy hóa, tăng sức đề kháng",
+      "Hỗ trợ sáng mắt, giảm mỏi mắt",
+      "Thư giãn tinh thần, làm thanh tâm"
+    ],
+    "instructions": [
+      "Cho khoảng 5–8g (20–30 quả) hắc kỷ tử vào tách hoặc bình thủy tinh.",
+      "Rót 250ml - 300ml nước nóng ở nhiệt độ từ 80–85°C vào hãm (tránh nước sôi 100°C để giữ trọn dưỡng chất).",
+      "Đậy nắp trong 8–10 phút để quả nở mềm và nước chuyển sang sắc xanh lam. Vắt thêm vài giọt chanh để đổi sang màu tím hồng, hoặc thêm đá viên để thành thức uống mát lạnh. Có thể ăn cả bã sau khi uống."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "DU001",
+    "slug": "kim-tinh-duong-duong-phen-vang-quang-ngai",
+    "name": "Kim Tinh Đường – Đường Phèn Vàng Quảng Ngãi",
+    "category": "Đồ uống kèm trà",
+    "categorySlug": "do-uong-kem-tra",
+    "subCategory": "Đường phèn",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Vàng nhạt",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "DU001-200G",
+        "label": "Túi 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 40000,
+        "oldPrice": 49000,
+        "stock": 20,
+        "isDefault": false
+      },
+      {
+        "sku": "DU001-500G",
+        "label": "Túi 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 90000,
+        "oldPrice": 110000,
+        "stock": 40,
+        "isDefault": true
+      },
+      {
+        "sku": "DU001-1000G",
+        "label": "Túi 1kg",
+        "type": "weight",
+        "weightGram": 1000,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 166000,
+        "oldPrice": 202000,
+        "stock": 20,
+        "isDefault": false
+      }
+    ],
+    "price": 90000,
+    "oldPrice": 110000,
+    "discount": 18,
+    "isSale": true,
+    "minPrice": 40000,
+    "stock": 80,
+    "status": "Còn hàng",
+    "sold": 140,
+    "benefits": [],
+    "tags": [
+      "Tạo vị ngọt",
+      "Pha trà",
+      "Thanh mát"
+    ],
+    "thumbnail": "202.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Đường Phèn Vàng Quảng Ngãi nguyên chất được kết tinh từ mật mía tự nhiên, không qua tẩy trắng. Đường có vị ngọt thanh tao, dịu nhẹ chứ không gắt như đường cát, là người bạn đồng hành hoàn hảo để làm dậy vị thơm ngon của các loại trà thảo mộc.",
+    "story": "Kim Tinh Đường giữ trọn cái hồn cốt mộc mạc của mảnh đất mật mía Quảng Ngãi lừng danh. Được kết tinh hoàn toàn tự nhiên từ dòng mật mía nguyên chất đậm đặc và trải qua quá trình cô đặc thủ công nghiêm ngặt, những khối đường phèn mang sắc vàng nhạt lấp lánh như những viên ngọc thô của đất trời mà không cần đến bất kỳ một giọt chất tẩy trắng nào. Không nồng gắt, không lấn lướt, Kim Tinh Đường lặng lẽ đứng sau để nâng tầm hương vị, làm dậy lên cái thanh tao, dịu nhẹ ẩn sâu trong từng cánh trà hoa, mang lại một vị ngọt hậu êm ái trọn vẹn.",
+    "usage": [
+      "Dùng tạo vị ngọt thanh cho các loại trà hoa, trà thảo mộc",
+      "Sử dụng trong các công thức nấu chè dưỡng nhan, chè sen",
+      "Chưng cùng tổ yến, chanh, quất hỗ trợ trị ho",
+      "Gia vị cao cấp cho các món ăn cần vị ngọt thanh nhẹ"
+    ],
+    "instructions": [
+      "Khi pha trà hoa hoặc trà thảo mộc, thả từ 1–3 viên đường phèn nhỏ (tùy khẩu vị) trực tiếp vào ấm hoặc ly cùng lúc với các loại thảo mộc.",
+      "Rót nước nóng vào hãm, khuấy nhẹ tay cho đường tan đều hòa quyện cùng nước trà.",
+      "Đối với các món chè hoặc yến chưng, nên cho đường phèn vào ở công đoạn cuối cùng trước khi tắt bếp để giữ nguyên mùi thơm đặc trưng và vị ngọt thanh khiết nhất."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM011",
+    "slug": "tuyet-lien-tra-tra-hoa-sen-tuyet",
+    "name": "Tuyết Liên Trà - Trà Hoa Sen Tuyết",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Thanh khiết, hương sen dịu",
+    "color": "Trắng ngà",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM011-100G",
+        "label": "Hộp 100g",
+        "type": "weight",
+        "weightGram": 100,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 84000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM011-200G",
+        "label": "Hộp 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 150000,
+        "oldPrice": 0,
+        "stock": 18,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM011-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 345000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM011-G10",
+        "label": "Hộp 10 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 50,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 47000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM011-G20",
+        "label": "Hộp 20 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 94000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM011-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 27000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM011-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 54000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      }
+    ],
+    "price": 150000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 27000,
+    "stock": 36,
+    "status": "Còn hàng",
+    "sold": 168,
+    "benefits": [
+      "thanh-loc",
+      "duong-nhan",
+      "giam-stress",
+      "bo-khi-huyet"
+    ],
+    "tags": [
+      "Thanh lọc",
+      "Dưỡng nhan",
+      "Giảm stress",
+      "Bổ khí huyết"
+    ],
+    "thumbnail": "153.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Tuyết Liên Trà được thu hái thủ công từ loài hoa sen tuyết quý hiếm sinh trưởng trên những vách đá tuyết quanh năm giá lạnh. Thức trà quý tộc này mang hương thơm thanh khiết của núi rừng băng giá, giúp thanh lọc cơ thể từ sâu bên trong và duy trì nét thanh xuân tươi trẻ.",
+    "story": "Tuyết Liên Trà mở ra hành trình đến với những đỉnh núi quanh năm tuyết phủ, nơi loài Thiên Sơn Tuyết Liên kiên cường cắm rễ sâu vào vách đá cằn cỗi và bung nở những cánh hoa trắng ngà tinh khôi giữa làn gió tuyết khắc nghiệt. Được tôn vinh là 'Bách thảo chi vương', mỗi đóa sen tuyết tích tụ tinh hoa thuần khiết nhất của đất trời qua hàng năm trời lặng lẽ sinh trưởng. Trải qua quy trình sấy lạnh khắt khe để bảo toàn trọn vẹn dược tính quý hiếm, Tuyết Liên Trà mang đến sắc nước trong vắt và hương thơm thanh lãnh, dịu mát lan tỏa. Thưởng thức một tách trà là cách bạn đón nhận sự bảo bọc kiên cường từ thiên nhiên, nuôi dưỡng khí huyết dồi dào, đánh thức làn da tươi trẻ và tìm lại sự bình yên, nhẹ nhõm tuyệt đối trong tâm hồn.",
+    "usage": [
+      "Thanh lọc độc tố, làm mát và hỗ trợ trẻ hóa làn da",
+      "Tăng cường tuần hoàn máu, bồi bổ khí huyết cơ thể",
+      "Giải tỏa áp lực, thư giãn tinh thần, hỗ trợ giấc ngủ sâu",
+      "Hỗ trợ nâng cao hệ miễn dịch"
+    ],
+    "instructions": [
+      "Cho khoảng 5–8g Tuyết Liên Trà (hoặc một phần hoa vừa đủ) vào ấm thủy tinh.",
+      "Rót khoảng 250ml - 300ml nước sôi ở nhiệt độ từ 90–95°C vào hãm.",
+      "Đậy kín nắp và đợi từ 7–10 phút để các cánh hoa sen tuyết dần hé nở và tiết ra trọn vẹn dưỡng chất quý giá. Nên thưởng thức trà khi còn ấm để cảm nhận rõ nhất hương vị thanh khiết, thư thái của núi rừng."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM012",
+    "slug": "hong-nhan-tra-tra-ky-tu",
+    "name": "Hồng Nhãn Trà - Trà Kỷ Tử",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Ngọt đượm vị kỷ tử",
+    "color": "Đỏ cam",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM012-100G",
+        "label": "Hộp 100g",
+        "type": "weight",
+        "weightGram": 100,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 131000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM012-300G",
+        "label": "Hộp 300g",
+        "type": "weight",
+        "weightGram": 300,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 350000,
+        "oldPrice": 0,
+        "stock": 18,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM012-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 583000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM012-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 42000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM012-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 84000,
+        "oldPrice": 0,
+        "stock": 3,
+        "isDefault": false
+      }
+    ],
+    "price": 350000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 42000,
+    "stock": 30,
+    "status": "Còn hàng",
+    "sold": 238,
+    "benefits": [
+      "duong-nhan",
+      "bo-khi-huyet"
+    ],
+    "tags": [
+      "Bổ mắt",
+      "Tăng sức đề kháng",
+      "Dưỡng nhan",
+      "Bổ khí huyết"
+    ],
+    "thumbnail": "49.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Hồng Nhãn Trà chọn lọc từ những hạt kỷ tử đỏ hữu cơ size đại, sấy khô tự nhiên giữ trọn độ mọng và vị ngọt đậm đà. Kỷ tử là siêu thực phẩm nổi tiếng giúp bổ gan, sáng mắt và dưỡng nhan tuyệt vời cho mọi lứa tuổi.",
+    "story": "Hồng Nhãn Trà mang trong mình sắc đỏ rực rỡ và tràn đầy sức sống của những hạt kỷ tử Ninh Hạ thượng hạng. Sinh trưởng trên những vùng đất đón nắng gió khắc nghiệt, mỗi hạt kỷ tử hữu cơ size đại được nuôi dưỡng để tích tụ hàm lượng dưỡng chất đậm đặc và quý giá nhất. Trải qua quy trình sấy khô tự nhiên, trà giữ trọn vẹn lớp thịt quả mọng dày cùng vị ngọt thanh đượm tự nhiên. Được ví như 'món quà trường thọ' của y học cổ truyền, Hồng Nhãn Trà không chỉ đánh thức thị lực sáng khỏe trước áp lực của cuộc sống hiện đại mà còn là liều thuốc bổ nuôi dưỡng làn da trẻ trung, bồi đắp khí huyết dồi dào và nâng niu sức khỏe hệ miễn dịch từ sâu bên trong.",
+    "usage": [
+      "Bổ sung Vitamin A, zeaxanthin giúp sáng mắt, giảm mỏi mắt",
+      "Kích thích sản sinh collagen tự nhiên, nuôi dưỡng làn da tươi trẻ",
+      "Tăng cường chức năng miễn dịch, chống suy nhược cơ thể",
+      "Hỗ trợ chức năng gan thận, điều hòa đường huyết"
+    ],
+    "instructions": [
+      "Lấy khoảng 10–15 hạt kỷ tử đỏ (Hồng Nhãn Trà) cho vào tách hoặc ấm thủy tinh.",
+      "Rót từ 200ml - 250ml nước sôi ở nhiệt độ khoảng 85–90°C vào hãm.",
+      "Đậy kín nắp và đợi từ 5–7 phút để hạt kỷ tử nở mọng, tiết ra sắc nước vàng đỏ trong trẻo và vị ngọt thanh tự nhiên. Sau khi uống hết nước trà, nên ăn cả bã quả kỷ tử để hấp thu trọn vẹn hàm lượng dinh dưỡng."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM014",
+    "slug": "chi-ban-tinh-tra-tra-atiso-do-hoa-hong",
+    "name": "Chi Bản Tịnh Trà – Trà Atiso Đỏ Hoa Hồng",
+    "category": "Trà thảo mộc",
+    "categorySlug": "tra-thao-moc",
+    "subCategory": "Nguyên chất",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 24,
+    "flavorNote": "Chua thanh atiso, thơm hoa hồng",
+    "color": "Đỏ hồng",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM014-100G",
+        "label": "Hộp 100g",
+        "type": "weight",
+        "weightGram": 100,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 109000,
+        "oldPrice": 134000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM014-200G",
+        "label": "Hộp 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 195000,
+        "oldPrice": 240000,
+        "stock": 23,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM014-500G",
+        "label": "Hộp 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 449000,
+        "oldPrice": 552000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM014-G10",
+        "label": "Hộp 10 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 50,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 61000,
+        "oldPrice": 75000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM014-G20",
+        "label": "Hộp 20 gói (5g/gói)",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 122000,
+        "oldPrice": 150000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM014-T10",
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 20,
+        "packCount": 10,
+        "flavorCount": 1,
+        "price": 35000,
+        "oldPrice": 43000,
+        "stock": 2,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM014-T20",
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "type": "teabag",
+        "weightGram": 40,
+        "packCount": 20,
+        "flavorCount": 1,
+        "price": 70000,
+        "oldPrice": 86000,
+        "stock": 2,
+        "isDefault": false
+      }
+    ],
+    "price": 195000,
+    "oldPrice": 240000,
+    "discount": 19,
+    "isSale": true,
+    "minPrice": 35000,
+    "stock": 35,
+    "status": "Còn hàng",
+    "sold": 92,
+    "benefits": [
+      "thanh-tam",
+      "giam-stress",
+      "duong-nhan"
+    ],
+    "tags": [
+      "Thanh tâm",
+      "Giảm stress",
+      "Dưỡng nhan"
+    ],
+    "thumbnail": "150.png",
+    "images": [],
+    "ratingAverage": 4.5,
+    "ratingCount": 2,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 1,
+      "5": 1
+    },
+    "reviewCount": 2,
+    "description": "Đây là sự kết hợp hoàn hảo giữa vị chua thanh tự nhiên của hoa atiso đỏ và hương thơm nồng nàn, quyến rũ của nụ hoa hồng sấy khô. Thức uống này mang lại cảm giác thư thái, hỗ trợ điều hòa khí huyết và dưỡng nhan từ sâu bên trong.",
+    "story": "Chi Bản Tịnh Trà mang trong mình vẻ đẹp kiêu sa và lãng mạn như một bức tranh thủy mặc đan xen sắc đỏ nồng nàn. Thức trà là bản hòa tấu đầy nghệ thuật giữa những đài hoa Atiso đỏ (bụp giấm) căng tràn nhựa sống và nụ hoa hồng sấy lạnh nguyên bông thơm ngát. Sắc đỏ hồng lộng lẫy ẩn giấu dòng chảy thanh xuân mạnh mẽ, nơi vị chua thanh sảng khoái của Atiso hòa quyện mượt mà vào hương thơm quyến rũ, ngọt ngào của hoa hồng. Chi Bản Tịnh Trà không đơn thuần là một thức uống nuôi dưỡng diện mạo hồng hào, mà còn là liệu pháp tinh thần thuần khiết, giúp bạn rũ bỏ mọi lo toan, đánh thức năng lượng tích cực và tận hưởng trọn vẹn những phút giây an yên đầy quý phái.",
+    "usage": [
+      "Hỗ trợ dưỡng nhan, làm sáng da",
+      "Giảm căng thẳng, mệt mỏi",
+      "Giảm stress và dưỡng nhan",
+      "Điều hòa khí huyết"
+    ],
+    "instructions": [
+      "Cho khoảng 8–10g Chi Bản Tịnh Trà (gồm hoa atiso và nụ hoa hồng) vào ấm thủy tinh hoặc ly chịu nhiệt.",
+      "Rót từ 250ml - 300ml nước nóng ở nhiệt độ khoảng 85–90°C vào hãm (tránh dùng nước sôi sùng sục để hoa không bị nồng gắt).",
+      "Đậy kín nắp trong 5–7 phút để trà ngả sang màu đỏ hồng lộng lẫy và tỏa hương thơm nồng. Có thể cho thêm một chút đường phèn hoặc mật ong để cân bằng vị chua thanh tự nhiên, dùng nóng hay thêm đá đều rất tuyệt vời."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ015",
+    "slug": "set-qua-tang-tra-hoa-sen-xanh",
+    "name": "Set Quà Tặng Trà Hoa Sen Xanh",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Xanh ngọc sen",
+    "weightGram": 400,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 480000,
+    "oldPrice": 580000,
+    "discount": 17,
+    "isSale": true,
+    "minPrice": 480000,
+    "stock": 25,
+    "status": "Còn hàng",
+    "sold": 250,
+    "benefits": [],
+    "tags": [
+      "Quà tặng tri ân",
+      "Thanh tao",
+      "Hương sen tự nhiên"
+    ],
+    "thumbnail": "121.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Set Quà Tặng Trà Hoa Sen Xanh mang thiết kế vỏ hộp màu xanh ngọc thanh nhã, in nổi họa tiết hoa sen tinh tế. Bên trong là sự kết hợp giữa các dòng trà hoa cao cấp và phụ kiện thưởng trà tinh xảo, là món quà tri ân vô cùng ý nghĩa và thanh lịch dành tặng người thân, đối tác.",
+    "story": "Set Quà Tặng Trà Hoa Sen Xanh là hiện thân của sự tôn kính, lòng tri ân sâu sắc và nét văn hóa thưởng trà thanh lịch của người Việt. Lấy cảm hứng từ những đóa sen xanh biểu trưng cho sự tịnh tâm, trí tuệ và sự cao quý, set quà được khoác lên mình lớp áo màu xanh ngọc bích sang trọng kết hợp cùng họa tiết dập nổi tinh xảo. Bên trong không chỉ đơn thuần là những búp trà mộc đượm hương sen hồ Tây ngan ngát, mà còn là lời chúc bình an, vạn sự hanh thông được gửi gắm một cách tinh tế. Đây là cầu nối hoàn mỹ để thắt chặt tình thâm giao, là món quà thượng hạng xứng tầm để gửi gắm đến những người trân quý, đối tác hay cấp trên trong các dịp đại lễ.",
+    "usage": [
+      "Làm quà biếu tặng các dịp lễ Tết, ngày kỷ niệm",
+      "Thưởng trà và thư giãn tinh thần hàng ngày",
+      "Trang trí không gian phòng khách thêm phần sang trọng"
+    ],
+    "instructions": [
+      "Mở hộp quà, dùng dụng cụ gắp trà lấy một lượng trà hoa sen vừa đủ (khoảng 5g) cho vào ấm trà tinh xảo đi kèm.",
+      "Rót một ít nước sôi ở nhiệt độ 85–90°C vào tráng nhanh qua trà rồi đổ nước này đi để đánh thức hương sen.",
+      "Tiếp tục rót khoảng 200ml - 250ml nước nóng vào ấm, đậy nắp hãm từ 3–5 phút. Rót trà ra chén tống rồi chia đều ra các chén quân, chậm rãi thưởng thức hương sen thanh tao lan tỏa và vị chát dịu, ngọt hậu đặc trưng."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ016",
+    "slug": "set-qua-tang-lien-hoa-thanh",
+    "name": "Set Quà Tặng Liên Hoa Thanh",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Xanh ngọc bích",
+    "weightGram": 450,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 650000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 650000,
+    "stock": 18,
+    "status": "Còn hàng",
+    "sold": 48,
+    "benefits": [],
+    "tags": [
+      "Sang trọng",
+      "Trà sen thượng hạng",
+      "Đẳng cấp"
+    ],
+    "thumbnail": "123.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Set Quà Tặng Liên Hoa Thanh đại diện cho sự thanh cao, thuần khiết với hộp đựng cứng cáp bọc vải gấm ép nhũ vàng quý phái. Set quà gồm trà sen thượng hạng được ủ thủ công kết hợp cùng hũ đường phèn tinh khiết, mang lại trải nghiệm thưởng trà đẳng cấp hoàng gia.",
+    "story": "Set Quà Tặng Liên Hoa Thanh mở ra một không gian thưởng trà mang đậm cốt cách hoàng gia, vương giả. Từng chi tiết nhỏ của set quà đều được chăm chút tỉ mỉ, với lớp vỏ hộp cứng cáp bọc vải gấm nhung cao cấp và kỹ thuật ép nhũ vàng rực rỡ, tượng trưng cho lời chúc thịnh vượng và trường tồn. Tâm điểm của tuyệt phẩm này chính là dòng trà sen thượng hạng, kết tinh từ những búp trà cổ thụ kén chọn, trải qua chu kỳ 7 lần ủ và sấy nghiêm ngặt cùng những bông sen bách diệp hồ Tây lúc rạng đông. Đi kèm hũ đường phèn thanh khiết như ngọc, Liên Hoa Thanh không đơn thuần là một món quà, mà là một tác phẩm nghệ thuật đại diện cho phong thái sống thượng lưu, lịch lãm, thay bạn gửi gắm trọn vẹn tấm chân tình và sự ngưỡng mộ sâu sắc đến những bậc kính trọng.",
+    "usage": [
+      "Quà tặng cao cấp biếu tặng đối tác, cấp trên",
+      "Sử dụng trong các buổi lễ nghi, tiếp đón khách quý",
+      "Món quà chăm sóc sức khỏe thượng lưu"
+    ],
+    "instructions": [
+      "Mở hộp quà, dùng thìa gỗ lấy khoảng 5g Trà Sen Thượng Hạng cho vào ấm chén tiêu chuẩn.",
+      "Rót nước sôi ở nhiệt độ khoảng 85–90°C vào ấm, tráng nhanh qua lớp trà đầu để lá trà bung nở rồi đổ bỏ nước tráng.",
+      "Tiếp tục châm khoảng 200ml - 250ml nước nóng vào, thả thêm 1–2 viên đường phèn tinh khiết đi kèm trong set quà vào nếu muốn vị trà ngọt dịu hơn. Đậy nắp hãm từ 3–5 phút, rót ra chén và từ từ thưởng lãm hương sen ngào ngạt quý phái cùng sắc nước vàng óng thanh tao."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ017",
+    "slug": "set-qua-tang-tra-hoa-mong",
+    "name": "Set Quà Tặng Trà Hoa Mộng",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Tím mộng mơ",
+    "weightGram": 500,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 850000,
+    "oldPrice": 1020000,
+    "discount": 17,
+    "isSale": true,
+    "minPrice": 850000,
+    "stock": 14,
+    "status": "Còn hàng",
+    "sold": 112,
+    "benefits": [],
+    "tags": [
+      "Lãng mạn",
+      "Trà hoa tổng hợp"
+    ],
+    "thumbnail": "125.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Set Quà Tặng Trà Hoa Mộng mang đến một không gian trà đầy thơ mộng và lãng mạn với tông tím pastel ngọt ngào. Tuyển tập 6 loại trà hoa dưỡng nhan quý phái đựng trong ống nghiệm thủy tinh sang trọng, giúp phái đẹp lưu giữ nét thanh xuân rạng ngời.",
+    "story": "Set Quà Tặng Trà Hoa Mộng mở ra một khu vườn ngập tràn hương sắc, nơi những giấc mơ dịu dàng nhất của phái đẹp được nuôi dưỡng. Lấy cảm hứng từ sắc tím pastel mộng mơ, lãng mạn và đầy chất thơ, set quà được thiết kế như một tác phẩm nghệ thuật tinh tế dành riêng để tôn vinh và nuông chiều làn da, sắc vóc của người phụ nữ. Bên trong là sự hội tụ đỉnh cao của 6 dòng trà hoa dưỡng nhan quý phái, xếp gọn gàng trong các ống nghiệm thủy tinh sang trọng, trong suốt. Từng ống trà như một phong thư lưu giữ bí mật của thanh xuân, mang vị ngọt ngào thanh khiết của hoa cỏ, thay bạn gửi gắm lời chúc nhan sắc rạng ngời, tinh thần an yên và một cuộc sống ngập tràn niềm vui tựa như những đóa hoa đang độ nở rộ.",
+    "usage": [
+      "Quà tặng ý nghĩa cho ngày 8/3, 20/10 hoặc sinh nhật",
+      "Liệu trình dưỡng nhan, thanh tâm toàn diện cho phụ nữ",
+      "Thư giãn giải tỏa căng thẳng sau ngày làm việc mệt mỏi"
+    ],
+    "instructions": [
+      "Lựa chọn 1 trong 6 ống nghiệm trà hoa tùy theo sở thích và nhu cầu thưởng thức trong ngày.",
+      "Lấy một lượng trà vừa đủ (khoảng 3–5g) cho vào ấm thủy tinh, rót từ 200ml - 250ml nước nóng ở nhiệt độ 85–90°C vào.",
+      "Đậy nắp hãm trà trong 5–7 phút để các cánh hoa thảo mộc bung nở trọn vẹn, giải phóng hương thơm thanh khiết mộc mạc. Có thể dùng kèm một chút mật ong hoặc đường phèn để tách trà hoa thêm phần ngọt ngào, đậm vị."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ018",
+    "slug": "set-qua-tang-tra-hoa-lam",
+    "name": "Set Quà Tặng Trà Hoa Lam",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Xanh lam biển",
+    "weightGram": 380,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 520000,
+    "oldPrice": 620000,
+    "discount": 16,
+    "isSale": true,
+    "minPrice": 520000,
+    "stock": 22,
+    "status": "Còn hàng",
+    "sold": 39,
+    "benefits": [],
+    "tags": [
+      "Thanh lịch",
+      "Hoa đậu biếc",
+      "Độc đáo"
+    ],
+    "thumbnail": "127.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Lấy cảm hứng từ sắc xanh huyền bí của dòng Lam Hoa Trà, hộp quà mang phong cách đại dương thanh lịch và độc đáo. Sự kết hợp ấn tượng giữa hoa đậu biếc sấy lạnh và trà oải hương dịu nhẹ, tạo nên những tách trà đổi màu kỳ diệu và đầy lôi cuốn.",
+    "story": "Set Quà Tặng Trà Hoa Lam là lời ngợi ca dành cho sự kỳ diệu và chiều sâu tĩnh lặng của đại dương bao la. Giữa sắc xanh lam biển dịu mát và thanh lịch của thiết kế hộp quà, một câu chuyện thị giác đầy lôi cuốn được mở ra qua sự kết hợp độc nhất vô nhị của hai loài hoa mang sắc tím xanh huyền bí: hoa Đậu Biếc sấy lạnh nguyên bông giữ trọn dưỡng chất và hoa Oải Hương (Lavender) ngào ngạt hương thơm nước Pháp. Không chỉ dừng lại ở một thức uống dưỡng nhan, chống lão hóa thông thường, Trà Hoa Lam biến mỗi buổi thưởng trà thành một màn trình diễn ảo thuật của thiên nhiên với khả năng chuyển đổi màu sắc kỳ diệu từ xanh lam sẫm sang tím hồng quyến rũ khi tương tác cùng chanh tươi, mang lại những xúc cảm tươi mới, bất ngờ cho người nhận.",
+    "usage": [
+      "Quà biếu đồng nghiệp, bạn bè chúc sức khỏe",
+      "Pha chế các thức uống sáng tạo, cocktail đổi màu",
+      "Chăm sóc mắt và hỗ trợ chống lão hóa da"
+    ],
+    "instructions": [
+      "Cho từ 3–5 bông hoa đậu biếc cùng một nhúm nhỏ hoa oải hương vào ấm thủy tinh trong suốt.",
+      "Rót khoảng 250ml nước nóng ở nhiệt độ 85–90°C vào và hãm trong vòng 5–7 phút để cánh hoa giải phóng sắc xanh lam đậm đà cùng hương thơm thư thái.",
+      "Khuấy nhẹ và thưởng thức vị mộc thanh nhẹ. Để trải nghiệm màn đổi màu độc đáo, hãy vắt thêm vài giọt nước cốt chanh tươi, nước trà sẽ ngay lập tức chuyển sang màu tím hồng mộng mơ đầy lôi cuốn."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ019",
+    "slug": "set-qua-tang-tra-hoa-tim",
+    "name": "Set Quà Tặng Trà Hoa Tím",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Tím thạch anh",
+    "weightGram": 400,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 490000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 490000,
+    "stock": 30,
+    "status": "Còn hàng",
+    "sold": 53,
+    "benefits": [],
+    "tags": [
+      "Thư giãn sâu",
+      "Trà oải hương",
+      "Quà tặng tinh tế"
+    ],
+    "thumbnail": "129.png",
+    "images": [],
+    "ratingAverage": 4,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 1,
+      "5": 0
+    },
+    "reviewCount": 1,
+    "description": "Set Quà Tặng Trà Hoa Tím tập trung vào trải nghiệm trị liệu tinh thần với sắc tím thạch anh quý phái. Hộp quà sở hữu dòng trà oải hương Pháp nhập khẩu thượng hạng cùng trà bách cúc an thần, mang lại liều thuốc thư giãn hoàn hảo cho giấc ngủ ngon.",
+    "story": "Được khơi nguồn cảm hứng từ những cánh đồng oải hương trải dài dưới ánh hoàng hôn vùng Provence nước Pháp, Set Hoa Tím ra đời như một cái ôm vỗ về cho những tâm hồn mỏi mệt sau ngày dài bận rộn. Chúng tôi tin rằng, sắc tím bình yên và hương thơm sâu lắng chính là liệu pháp xoa dịu tâm trí tốt nhất.",
+    "usage": [
+      "Dành tặng người có áp lực công việc cao cần thư giãn",
+      "Liệu trình hỗ trợ điều trị chứng mất ngủ, ngủ không sâu",
+      "Thưởng thức không gian trà ấm cúng buổi tối"
+    ],
+    "instructions": [
+      "Trích 3-5g trà oải hương hoặc bách cúc vào ấm.",
+      "Rót 200ml nước sôi ở nhiệt độ khoảng 85-90 độ C.",
+      "Hãm trà trong 5-7 phút để hoa tỏa hương trọn vẹn.",
+      "Thưởng thức nóng hoặc thêm chút đường phèn/mật ong tùy khẩu vị."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ020",
+    "slug": "set-qua-tang-tra-hoa-hong",
+    "name": "Set Quà Tặng Trà Hoa Hồng",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Hồng phấn lãng mạn",
+    "weightGram": 420,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 630000,
+    "oldPrice": 750000,
+    "discount": 16,
+    "isSale": true,
+    "minPrice": 630000,
+    "stock": 19,
+    "status": "Còn hàng",
+    "sold": 245,
+    "benefits": [
+      "thanh-tam"
+    ],
+    "tags": [
+      "Thanh tâm",
+      "Nụ hoa hồng mộc",
+      "Ngọt ngào"
+    ],
+    "thumbnail": "131.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Set Quà Tặng Trà Hoa Hồng thu hút mọi ánh nhìn bằng tông hồng pastel ngọt ngào và lãng mạn vô bờ bến. Trọn bộ tặng phẩm gồm nụ hoa hồng Tây Tạng quý hiếm, mật ong hoa rừng nguyên chất và thìa gỗ, gửi gắm thông điệp yêu thương và chăm sóc sắc đẹp trọn vẹn.",
+    "story": "Hoa hồng luôn là biểu tượng của tình yêu và nét kiêu sa của phái đẹp. Floralia Tea đã lặn lội đến những thung lũng cao nguyên đầy nắng để thu hoạch những nụ hồng Tây Tạng ngậm sương sớm. Set quà mang sắc hồng lãng mạn này gửi gắm mong muốn mỗi người phụ nữ đều được trân trọng và tỏa hương như một đóa hồng.",
+    "usage": [
+      "Món quà lãng mạn hoàn hảo cho người yêu, vợ",
+      "Dưỡng da, cân bằng nội tiết tố phái nữ",
+      "Thưởng thức trà chiều ngọt ngào cùng mật ong"
+    ],
+    "instructions": [
+      "Cho 5-8 nụ hoa hồng mộc vào tách hoặc ấm trà.",
+      "Rót khoảng 250ml nước sôi ở nhiệt độ 90 độ C vào ấm.",
+      "Đậy nắp hãm trà từ 5-8 phút để dưỡng chất tiết ra hết.",
+      "Để trà nguội bớt một chút, thêm 1 thìa mật ong hoa rừng kèm sẵn và thưởng thức."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ021",
+    "slug": "set-qua-tang-tra-hoa-tuyet",
+    "name": "Set Quà Tặng Trà Hoa Tuyết",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Trắng tuyết tinh khôi",
+    "weightGram": 400,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 580000,
+    "oldPrice": 690000,
+    "discount": 16,
+    "isSale": true,
+    "minPrice": 580000,
+    "stock": 16,
+    "status": "Còn hàng",
+    "sold": 190,
+    "benefits": [],
+    "tags": [
+      "Bạch cúc & tuyết liên",
+      "Thanh mát",
+      "Giải độc"
+    ],
+    "thumbnail": "133.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Set Quà Tặng Trà Hoa Tuyết là sự phối hợp tinh tế giữa Bạch Cúc An Trà thanh khiết và Tuyết Liên Trà quý hiếm từ đỉnh Himalaya lạnh giá. Vỏ hộp màu trắng tuyết dập nổi vân nổi mang lại cảm giác sang trọng, thanh sạch và tràn đầy năng lượng tích cực.",
+    "story": "Lấy cảm hứng từ sự kiên cường và thanh khiết của những bông tuyết liên nở rộ trên đỉnh núi quanh năm băng giá, Set Hoa Tuyết biểu trưng cho sự tái sinh, thanh lọc và một tâm trí tự do, không vướng bận bụi trần.",
+    "usage": [
+      "Dùng làm quà biếu giải nhiệt mùa hè cực tốt",
+      "Thanh lọc độc tố cơ thể, hỗ trợ hạ hỏa, giảm mụn",
+      "Thích hợp làm quà tặng dịp tết trung thu, lễ vu lan"
+    ],
+    "instructions": [
+      "Cho 1 nhúm nhỏ trà tuyết liên phối cùng vài bông bạch cúc vào ấm.",
+      "Tráng nhanh qua một lượt nước sôi để đánh thức vị trà.",
+      "Châm tiếp 300ml nước sôi (khoảng 95 độ C), hãm trong 5 phút.",
+      "Uống lạnh rất ngon: Có thể để nguội, thêm đá và vài lát chanh tươi."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ022",
+    "slug": "set-qua-tang-tra-hoa-co-dien",
+    "name": "Set Quà Tặng Trà Hoa Cổ Điển",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Nâu trầm gỗ cổ",
+    "weightGram": 480,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 720000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 720000,
+    "stock": 12,
+    "status": "Còn hàng",
+    "sold": 78,
+    "benefits": [],
+    "tags": [
+      "Vintage / Retro",
+      "Trà cổ truyền",
+      "Chiều sâu"
+    ],
+    "thumbnail": "135.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Dành cho những tâm hồn yêu nét đẹp hoài cổ, hộp quà mang màu nâu trầm của gỗ cổ điển với những họa tiết hội họa Đông Dương mộc mạc. Sự kết hợp sâu lắng giữa trà hoa cúc vàng tiến vua, trà gạo lứt ngũ hoa rang tay truyền thống đầy ấm áp và hoài niệm.",
+    "story": "Floralia mượn chất liệu hội họa Đông Dương và sắc nâu trầm của những nếp nhà gỗ xưa để gói gọn ký ức thời gian. Set quà như một chiếc vé tàu đưa người thưởng trà tìm lại những khoảng lặng bình yên, những buổi chiều đàm đạo bên hiên nhà cùng người trân quý.",
+    "usage": [
+      "Tặng ông bà, cha mẹ hoặc những người thích trà đạo",
+      "Quà biếu mang phong cách mộc mạc, truyền thống cổ xưa",
+      "Thưởng thức trà đàm đạo, hàn huyên tâm sự"
+    ],
+    "instructions": [
+      "Cho khoảng 10g trà gạo lứt ngũ hoa hoặc cúc tiến vua vào ấm đất nung/ấm gốm.",
+      "Rót nước sôi 100 độ C ngập mặt trà và gạn bỏ nước đầu.",
+      "Châm nước đầy ấm, đậy kín nắp và ủ trong 8-10 phút để gạo lứt bung nở.",
+      "Rót ra chén tống rồi chia đều ra các chén quân để thưởng thức vị đậm đà."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "HQ023",
+    "slug": "set-qua-tang-lien-hoa-tra",
+    "name": "Set Quà Tặng Liên Hoa Trà",
+    "category": "Set quà tặng",
+    "categorySlug": "set-qua-tang",
+    "subCategory": "Hộp quà",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Đỏ nhung hoàng gia",
+    "weightGram": 600,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 1500000,
+    "oldPrice": 1800000,
+    "discount": 17,
+    "isSale": true,
+    "minPrice": 1500000,
+    "stock": 0,
+    "status": "Hết hàng",
+    "sold": 32,
+    "benefits": [],
+    "tags": [
+      "Trà sen tiến vua",
+      "Tuyệt tác quà tặng",
+      "VVIP"
+    ],
+    "thumbnail": "137.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Set Quà Tặng Liên Hoa Trà là tuyệt tác hộp quà thượng hạng bậc nhất của Floralia Tea. Sử dụng loại trà sen tiến vua quý hiếm, từng búp trà được ủ kỹ trong lòng bông sen sống tươi để hút trọn vẹn hương sương sớm, đựng trong thiết kế hộp da đỏ nhung vương giả.",
+    "story": "Lấy cảm hứng từ nghệ thuật thưởng trà cung đình Huế xưa, Liên Hoa Trà là sự giao thoa tối cao của đất trời và đôi bàn tay nghệ nhân. Từng bông sen được chọn lọc lúc nửa đêm và tách sương sớm, tạo nên chất vị hoàng gia đẳng cấp độc bản mà không một loại hương liệu nhân tạo nào sánh bằng.",
+    "usage": [
+      "Làm quà biếu Tết VVIP, đối tác chiến lược quan trọng",
+      "Sử dụng cho những buổi thưởng trà tiếp khách đỉnh cao",
+      "Bộ quà sưu tầm đẳng cấp cho giới sành trà đạo"
+    ],
+    "instructions": [
+      "Tách nhẹ nhàng cánh hoa sen bên ngoài, lấy phần cốt trà búp và gạo sen bên trong.",
+      "Dùng nước khoáng đun sôi đạt 90-92 độ C để pha trà.",
+      "Ủ trà trong ấm khoảng 3-4 phút (không nên ủ quá lâu gây nồng).",
+      "Rót nhẹ nhàng và thưởng thức hương sen thanh khiết lan tỏa khắp vòm họng."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "AT021",
+    "slug": "am-gom-ca-chep-ma-vang-phu-quy-du-nien",
+    "name": "Ấm Gốm Cá Chép Mạ Vàng – Phú Quý Dư Niên",
+    "category": "Ấm trà",
+    "categorySlug": "am-tra",
+    "subCategory": "Ấm gốm",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Vàng hoàng kim",
+    "weightGram": 600,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 450000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 450000,
+    "stock": 15,
+    "status": "Còn hàng",
+    "sold": 42,
+    "benefits": [],
+    "tags": [
+      "Sang trọng",
+      "Gốm cao cấp",
+      "Quà tặng"
+    ],
+    "thumbnail": "94.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Ấm trà gốm cao cấp với họa tiết cá chép nổi tinh xảo, phủ sắc vàng sang trọng. \"Cá\" đồng âm với \"dư\", mang ý nghĩa phú quý dư niên. Ấm giữ nhiệt tốt, lưu trọn hương vị trà, đồng thời là vật phẩm trang trí đẳng cấp cho phòng khách hoặc món quà ý nghĩa.",
+    "story": "Cá chép là biểu tượng của sự vượt khó và thịnh vượng trong văn hóa Á Đông. Chiếc ấm gốm này tái hiện hình ảnh cá chép uốn mình giữa lớp men mạ vàng hoàng kim, gửi gắm lời chúc tiền tài dư dả, năm tháng viên mãn, mang năng lượng quyền quý vào không gian sống của bạn.",
+    "usage": [
+      "Pha các loại trà thảo mộc, trà mạn",
+      "Trang trí không gian trà đạo sang trọng",
+      "Làm quà tặng tân gia, đối tác"
+    ],
+    "instructions": [
+      "Tráng ấm bằng nước sôi trước khi pha để làm ấm đều lòng gốm.",
+      "Cho trà vào ấm và tiến hành pha theo định lượng từng loại trà.",
+      "Rửa sạch bằng nước ấm ngay sau khi sử dụng, không dùng chất tẩy rửa mạnh.",
+      "Dùng khăn mềm lau khô bề mặt mạ vàng để giữ độ bóng loáng lâu dài."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "AT022",
+    "slug": "am-su-hoa-sen-ve-tay-tinh-tam-huong",
+    "name": "Ấm Sứ Hoa Sen Vẽ Tay – Tịnh Tâm Hương",
+    "category": "Ấm trà",
+    "categorySlug": "am-tra",
+    "subCategory": "Ấm sứ",
+    "isMix": false,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Trắng xanh ngọc",
+    "weightGram": 550,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 380000,
+    "oldPrice": 450000,
+    "discount": 16,
+    "isSale": true,
+    "minPrice": 380000,
+    "stock": 22,
+    "status": "Còn hàng",
+    "sold": 68,
+    "benefits": [],
+    "tags": [
+      "Thanh nhã",
+      "Sứ cao cấp",
+      "Truyền thống"
+    ],
+    "thumbnail": "97.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Ấm Trà Sứ Hoa Sen mang vẻ đẹp thanh tao, thuần khiết với họa tiết hoa sen được vẽ tay mềm mại trên nền sứ trắng mịn cao cấp. Lớp men ngọc phủ ngoài giúp ấm dễ dàng lau chùi, không bám ố trà và chịu nhiệt cực tốt.",
+    "story": "Lấy hình ảnh 'gần bùn mà chẳng hôi tanh mùi bùn' của đóa hoa sen nước Nam, chiếc ấm sứ này mang đậm tâm hồn Việt. Nét cọ vẽ tay mộc mạc nhưng thanh tao, biến mỗi buổi trà chiều thành một khoảng lặng thiền định đích thực.",
+    "usage": [
+      "Pha các loại trà hoa, trà thảo mộc",
+      "Sử dụng trong các buổi trà chiều thanh tịnh",
+      "Trưng bày tủ kính nghệ thuật"
+    ],
+    "instructions": [
+      "Phù hợp nhất để pha các loại trà hoa, trà dưỡng nhan nhờ lớp men sứ cách mùi tốt.",
+      "Sau khi dùng, chỉ cần tráng qua nước ấm và lau bằng khăn vải sợi microfiber.",
+      "Tránh va đập mạnh làm tổn thương lớp men ngọc cao cấp."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "AT023",
+    "slug": "am-tu-sa-hoa-dao-dao-hoa-co-nguyet",
+    "name": "Ấm Tử Sa Hoa Đào – Đào Hoa Cổ Nguyệt",
+    "category": "Ấm trà",
+    "categorySlug": "am-tra",
+    "subCategory": "Ấm tử sa",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Nâu đất đượm",
+    "weightGram": 500,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 620000,
+    "oldPrice": 750000,
+    "discount": 17,
+    "isSale": true,
+    "minPrice": 620000,
+    "stock": 10,
+    "status": "Còn hàng",
+    "sold": 35,
+    "benefits": [],
+    "tags": [
+      "Trà đạo",
+      "Đất tử sa",
+      "Giữ hương vị"
+    ],
+    "thumbnail": "100.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Ấm Tử Sa Hoa Đào được làm từ đất sét tử sa nguyên khoáng nổi tiếng với các lỗ khí khổng nhỏ li ti giúp hấp thụ hương trà. Họa tiết cành hoa đào đắp nổi tinh tế mang lại nét nghệ thuật cổ điển, càng dùng lâu ấm càng bóng đẹp và pha trà càng ngon.",
+    "story": "Ấm tử sa là báu vật mà bất cứ người sành trà nào cũng khao khát. Được nhào nặn từ đất khoáng sâu trong lòng đất Nghi Hưng, chiếc ấm này có khả năng 'nuôi trà' kỳ diệu - lưu hương cốt qua năm tháng để mỗi lần pha sau, vị trà lại càng thêm đậm đà, lưu luyến.",
+    "usage": [
+      "Chuyên dùng pha trà mạn, trà ô long, trà cổ thụ",
+      "Thưởng trà theo phong cách trà đạo chuyên nghiệp",
+      "Sưu tầm dụng cụ trà cụ"
+    ],
+    "instructions": [
+      "Khi mới mua về, cần 'khai ấm' bằng cách đun sôi ấm trong nước trà loãng khoảng 30 phút.",
+      "Chỉ dùng một loại trà duy nhất cho một chiếc ấm tử sa để tránh lẫn mùi vị.",
+      "TUYỆT ĐỐI không dùng nước rửa chén, chỉ dùng nước sôi sạch để vệ sinh ấm.",
+      "Sau khi rửa, để ấm khô tự nhiên nơi thoáng mát."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "AT024",
+    "slug": "am-su-chim-hac-hac-vu-truong-xuan",
+    "name": "Ấm Sứ Chim Hạc – Hạc Vũ Trường Xuân",
+    "category": "Ấm trà",
+    "categorySlug": "am-tra",
+    "subCategory": "Ấm sứ",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Trắng họa tiết cổ điển",
+    "weightGram": 580,
+    "hasVariants": false,
+    "variantLabel": "Quy cách",
+    "variants": [],
+    "price": 410000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 410000,
+    "stock": 18,
+    "status": "Còn hàng",
+    "sold": 55,
+    "benefits": [],
+    "tags": [
+      "Trường thọ",
+      "Họa tiết cổ điển",
+      "Tinh tế"
+    ],
+    "thumbnail": "103.png",
+    "images": [],
+    "ratingAverage": 4,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 1,
+      "5": 0
+    },
+    "reviewCount": 1,
+    "description": "Ấm Trà Sứ Chim Hạc nổi bật với hình ảnh chim hạc và mây ngàn – biểu tượng của sự trường thọ và an lành trong văn hóa Á Đông. Chất sứ dày dặn, giữ nhiệt lý tưởng và quai cầm được thiết kế công thái học giúp thao tác rót trà nhẹ nhàng, không lo bị bỏng.",
+    "story": "Chim hạc là loài chim tiên mang thông điệp của sự cát tường và bách niên giai lão. Họa tiết chim hạc sải cánh giữa mây ngàn vẽ trên chất sứ trắng tinh khôi như một lời chúc sức khỏe vững bền gửi tới đấng sinh thành và những người tôn kính.",
+    "usage": [
+      "Pha trà tiếp khách gia đình, văn phòng",
+      "Quà biếu tặng chúc thọ ông bà, cha mẹ",
+      "Phục vụ tại các không gian quán trà cổ điển"
+    ],
+    "instructions": [
+      "Pha nước sôi thoải mái nhờ chất sứ chịu nhiệt sốc nhiệt cực tốt.",
+      "Thiết kế quai công thái học, khi rót giữ nhẹ ngón tay vào núm nắp ấm để tránh rơi.",
+      "Vệ sinh định kỳ bằng kem đánh răng hoặc chanh nếu thấy có vệt ố trà bám lâu ngày."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "DK030",
+    "slug": "duong-nau-co-truyen-vien",
+    "name": "Đường Nâu Cổ Truyền Viên",
+    "category": "Đồ uống kèm trà",
+    "categorySlug": "do-uong-kem-tra",
+    "subCategory": "Đường viên",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Nâu đen sẫm",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "DK030-300G",
+        "label": "Túi 300g",
+        "type": "weight",
+        "weightGram": 300,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 85000,
+        "oldPrice": 0,
+        "stock": 40,
+        "isDefault": true
+      },
+      {
+        "sku": "DK030-500G",
+        "label": "Túi 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 142000,
+        "oldPrice": 0,
+        "stock": 20,
+        "isDefault": false
+      },
+      {
+        "sku": "DK030-1000G",
+        "label": "Túi 1kg",
+        "type": "weight",
+        "weightGram": 1000,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 261000,
+        "oldPrice": 0,
+        "stock": 20,
+        "isDefault": false
+      }
+    ],
+    "price": 85000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 85000,
+    "stock": 80,
+    "status": "Còn hàng",
+    "sold": 120,
+    "benefits": [],
+    "tags": [
+      "Bổ huyết",
+      "Vị ngọt đượm",
+      "Tự nhiên"
+    ],
+    "thumbnail": "190.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Đường Nâu Cổ Truyền Viên được làm bằng phương pháp thủ công truyền thống, giữ lại trọn vẹn mật mía tự nhiên và các vi chất dinh dưỡng. Đường có vị ngọt đậm đà, hương thơm mật mía nồng nàn, cực kỳ thích hợp để pha cùng các loại trà dưỡng nhan, bổ máu như táo đỏ, kỷ tử.",
+    "story": "Kế thừa công thức nấu mật mía cô đặc trăm năm của các làng nghề truyền thống, những viên đường nâu được cắt vuông vức chứa đựng tinh túy nồng đượm của đất trời. Không tẩy màu, không hóa chất, giữ nguyên vị ấm nồng nguyên bản.",
+    "usage": [
+      "Pha cùng trà dưỡng nhan, trà thảo mộc vị đậm",
+      "Dùng làm gia vị cho các món chè dưỡng nhan",
+      "Ngậm trực tiếp để làm ấm bụng, giảm đau bụng kinh"
+    ],
+    "instructions": [
+      "Thả 1-2 viên đường nâu vào tách trà nóng (khoảng 150ml - 200ml).",
+      "Khuấy nhẹ trong 30 giây để đường tan đều.",
+      "Cực kỳ lý tưởng khi kết hợp với trà gừng, trà táo đỏ, kỷ tử."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "DK031",
+    "slug": "duong-phen-trang-tinh-khiet",
+    "name": "Đường Phèn Trắng Tinh Khiết",
+    "category": "Đồ uống kèm trà",
+    "categorySlug": "do-uong-kem-tra",
+    "subCategory": "Đường phèn",
+    "isMix": false,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Trắng trong suốt",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "DK031-200G",
+        "label": "Túi 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 20000,
+        "oldPrice": 25000,
+        "stock": 30,
+        "isDefault": false
+      },
+      {
+        "sku": "DK031-500G",
+        "label": "Túi 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 45000,
+        "oldPrice": 55000,
+        "stock": 60,
+        "isDefault": true
+      },
+      {
+        "sku": "DK031-1000G",
+        "label": "Túi 1kg",
+        "type": "weight",
+        "weightGram": 1000,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 83000,
+        "oldPrice": 101000,
+        "stock": 30,
+        "isDefault": false
+      }
+    ],
+    "price": 45000,
+    "oldPrice": 55000,
+    "discount": 18,
+    "isSale": true,
+    "minPrice": 20000,
+    "stock": 120,
+    "status": "Còn hàng",
+    "sold": 200,
+    "benefits": [],
+    "tags": [
+      "Ngọt thanh",
+      "Dịu mát",
+      "Tinh khiết"
+    ],
+    "thumbnail": "195.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Đường Phèn Trắng Tinh Khiết được kết tinh từ nguồn đường mía chọn lọc, mang lại vị ngọt thanh mát, dịu nhẹ mà không bị gắt cổ. Đây là chất tạo ngọt lý tưởng giúp tôn lên hương thơm tự nhiên của các loại trà hoa như hoa cúc, hoa lài mà không làm biến đổi vị trà.",
+    "story": "Sạch trong và tinh khiết như những giọt sương mai. Qua quá trình kết tinh chậm hoàn toàn tự nhiên, đường phèn lọc bỏ mọi tạp chất để giữ lại vị ngọt thanh khiết thuần túy nhất, nâng niu từng tầng hương ẩn giấu của danh trà.",
+    "usage": [
+      "Pha các loại trà hoa, trà thảo mộc giảm stress",
+      "Chưng yến sào, chưng tắc (quất) trị ho",
+      "Nấu các món chè giải nhiệt mùa hè"
+    ],
+    "instructions": [
+      "Cho đường phèn vào tùy theo khẩu vị ngọt mong muốn.",
+      "Đường phèn viên nhỏ dễ tan trong nước nóng trên 80 độ C.",
+      "Nên cho vào cùng lúc hãm trà hoa để vị ngọt ngấm đều vào nước cốt."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "DK032",
+    "slug": "duong-an-kieng-thao-moc-stevia",
+    "name": "Đường Ăn Kiêng Thảo Mộc Stevia",
+    "category": "Đồ uống kèm trà",
+    "categorySlug": "do-uong-kem-tra",
+    "subCategory": "Đường ăn kiêng",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Trắng tuyết",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "DK032-200G",
+        "label": "Túi 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 120000,
+        "oldPrice": 145000,
+        "stock": 23,
+        "isDefault": true
+      },
+      {
+        "sku": "DK032-500G",
+        "label": "Túi 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 276000,
+        "oldPrice": 334000,
+        "stock": 11,
+        "isDefault": false
+      },
+      {
+        "sku": "DK032-1000G",
+        "label": "Túi 1kg",
+        "type": "weight",
+        "weightGram": 1000,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 528000,
+        "oldPrice": 638000,
+        "stock": 11,
+        "isDefault": false
+      }
+    ],
+    "price": 120000,
+    "oldPrice": 145000,
+    "discount": 17,
+    "isSale": true,
+    "minPrice": 120000,
+    "stock": 45,
+    "status": "Còn hàng",
+    "sold": 90,
+    "benefits": [],
+    "tags": [
+      "Keto / Clean",
+      "Không calo",
+      "Cỏ ngọt tự nhiên"
+    ],
+    "thumbnail": "198.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Đường Ăn Kiêng Thảo Mộc Stevia chiết xuất hoàn toàn từ lá cây cỏ ngọt tự nhiên, không chứa calo và không làm tăng chỉ số đường huyết. Sản phẩm là giải pháp tuyệt vời cho những ai yêu thích vị ngọt nhưng đang trong chế độ giảm cân, ăn kiêng hoặc người bị tiểu đường.",
+    "story": "Chúng tôi tin rằng việc ăn kiêng lành mạnh không có nghĩa là phải từ bỏ vị ngọt ngào của cuộc sống. Chiết xuất hoàn toàn từ lá cỏ ngọt Stevia tự nhiên, sản phẩm mang lại vị ngọt sảng khoái mà hoàn toàn giải phóng cơ thể khỏi nỗi lo calo và đường huyết.",
+    "usage": [
+      "Tạo ngọt cho mọi loại trà hoa, trà detox giữ dáng",
+      "Sử dụng pha chế đồ uống healthy sinh tố, nước ép",
+      "Dùng thay thế đường kính trong nấu ăn hàng ngày"
+    ],
+    "instructions": [
+      "Do vị ngọt của Stevia đậm hơn đường thường, chỉ nên dùng 1/3 muỗng cà phê cho một ấm trà 300ml.",
+      "Khuấy đều, đường tan rất nhanh kể cả trong nước ấm hoặc nước lạnh."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "DK033",
+    "slug": "duong-dua-huu-co-ket-tinh",
+    "name": "Đường Dừa Hữu Cơ Kết Tinh",
+    "category": "Đồ uống kèm trà",
+    "categorySlug": "do-uong-kem-tra",
+    "subCategory": "Đường dừa",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Nâu vàng hạt mịn",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "DK033-350G",
+        "label": "Túi 350g",
+        "type": "weight",
+        "weightGram": 350,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 95000,
+        "oldPrice": 0,
+        "stock": 29,
+        "isDefault": true
+      },
+      {
+        "sku": "DK033-500G",
+        "label": "Túi 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 136000,
+        "oldPrice": 0,
+        "stock": 13,
+        "isDefault": false
+      },
+      {
+        "sku": "DK033-1000G",
+        "label": "Túi 1kg",
+        "type": "weight",
+        "weightGram": 1000,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 250000,
+        "oldPrice": 0,
+        "stock": 13,
+        "isDefault": false
+      }
+    ],
+    "price": 95000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 95000,
+    "stock": 55,
+    "status": "Còn hàng",
+    "sold": 75,
+    "benefits": [],
+    "tags": [
+      "Chỉ số GI thấp",
+      "Hương thơm dừa",
+      "Organic"
+    ],
+    "thumbnail": "43.png",
+    "images": [],
+    "ratingAverage": 4,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 1,
+      "5": 0
+    },
+    "reviewCount": 1,
+    "description": "Đường Dừa Hữu Cơ Kết Tinh được chế biến từ mật hoa dừa organic, sở hữu chỉ số đường huyết (GI) thấp và giàu khoáng chất tự nhiên. Đường có dạng hạt mịn, mang vị ngọt thanh nhẹ quyện cùng hương thơm béo ngậy đặc trưng của dừa, mang đến trải nghiệm thưởng trà mới lạ.",
+    "story": "Sinh ra từ vùng đất dừa bạt ngàn, từng giọt mật hoa dừa organic được người nông dân thâu lượm thủ công rồi cô đặc tỉ mỉ. Đường dừa kết tinh mang hương vị béo bùi dịu nhẹ đặc trưng của miền sông nước, mang lại trải nghiệm 'Go Green' trọn vẹn.",
+    "usage": [
+      "Pha cùng trà đen, trà sữa thảo mộc để tăng độ thơm ngậy",
+      "Làm bánh, làm gia vị tạo màu tự nhiên cho món ăn",
+      "Sử dụng cho người cần kiểm soát lượng đường huyết nhẹ"
+    ],
+    "instructions": [
+      "Múc 1-2 muỗng cà phê đường dừa hạt mịn cho vào tách trà.",
+      "Khuấy nhẹ cho hạt đường tan hết.",
+      "Rất thích hợp khi phối trộn cùng trà đen, trà ngũ cốc hoặc các dòng trà đậm vị bùi béo."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "DK034",
+    "slug": "duong-phen-vang-mat-mia-vien",
+    "name": "Đường Phèn Vàng Mật Mía Viên",
+    "category": "Đồ uống kèm trà",
+    "categorySlug": "do-uong-kem-tra",
+    "subCategory": "Đường phèn",
+    "isMix": false,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": null,
+    "flavorNote": null,
+    "color": "Vàng hổ phách",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "DK034-200G",
+        "label": "Túi 200g",
+        "type": "weight",
+        "weightGram": 200,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 25000,
+        "oldPrice": 29000,
+        "stock": 22,
+        "isDefault": false
+      },
+      {
+        "sku": "DK034-500G",
+        "label": "Túi 500g",
+        "type": "weight",
+        "weightGram": 500,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 55000,
+        "oldPrice": 65000,
+        "stock": 46,
+        "isDefault": true
+      },
+      {
+        "sku": "DK034-1000G",
+        "label": "Túi 1kg",
+        "type": "weight",
+        "weightGram": 1000,
+        "packCount": null,
+        "flavorCount": 1,
+        "price": 101000,
+        "oldPrice": 120000,
+        "stock": 22,
+        "isDefault": false
+      }
+    ],
+    "price": 55000,
+    "oldPrice": 65000,
+    "discount": 15,
+    "isSale": true,
+    "minPrice": 25000,
+    "stock": 90,
+    "status": "Còn hàng",
+    "sold": 232,
+    "benefits": [],
+    "tags": [
+      "Ngọt đậm đà",
+      "Nguyên chất",
+      "Thanh mát"
+    ],
+    "thumbnail": "207.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Đường Phèn Vàng Mật Mía được kết tinh từ nước cốt mía nguyên chất không qua tẩy màu, giữ lại sắc vàng hổ phách và vị ngọt đượm nồng nàn. Sản phẩm vừa mang tính mát giải nhiệt của đường phèn, vừa mang dưỡng chất ấm áp từ mật mía, hoàn hảo khi kết hợp cùng trà ấm ngày lạnh.",
+    "story": "Sở hữu sắc vàng hổ phách lấp lánh, loại đường này là sự giao thoa tuyệt vời giữa tính mát của đường phèn tinh thể và dưỡng chất nồng ấm của mật mía nguyên bản. Đây là bí quyết giữ lửa và sưởi ấm cơ thể trong những ngày đông se lạnh.",
+    "usage": [
+      "Pha trà thảo mộc nóng, trà gừng, trà ô long",
+      "Chưng tắc, mật ong bổ phế, mát họng",
+      "Nấu các loại chè cần màu vàng óng tự nhiên"
+    ],
+    "instructions": [
+      "Thả 1 viên đường phèn vàng vào ấm trà nóng.",
+      "Chờ khoảng 1-2 phút cho viên tinh thể tan dần từ từ hoặc dùng muỗng khuấy nhẹ.",
+      "Thích hợp pha các loại trà mạn, trà ô long hoặc chưng quất trị ho."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM020",
+    "slug": "ngoc-nu-thanh-tra-tra-thanh-loc-co-the",
+    "name": "Ngọc Nữ Thanh Trà – Trà Thanh Lọc Cơ Thể",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 18,
+    "flavorNote": "Tươi mát cam, ấm sả, thanh cúc",
+    "color": "Vàng mật ong",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM020-G10V3",
+        "label": "Hộp 10 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 3,
+        "price": 116000,
+        "oldPrice": 143000,
+        "stock": 10,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM020-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 127000,
+        "oldPrice": 157000,
+        "stock": 10,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM020-G20V3",
+        "label": "Hộp 20 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 3,
+        "price": 210000,
+        "oldPrice": 260000,
+        "stock": 20,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM020-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 231000,
+        "oldPrice": 286000,
+        "stock": 10,
+        "isDefault": false
+      }
+    ],
+    "price": 210000,
+    "oldPrice": 260000,
+    "discount": 19,
+    "isSale": true,
+    "minPrice": 116000,
+    "stock": 50,
+    "status": "Còn hàng",
+    "sold": 145,
+    "benefits": [
+      "thanh-loc"
+    ],
+    "tags": [
+      "Detox",
+      "Giảm cân",
+      "Đề kháng"
+    ],
+    "thumbnail": "13.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Trà Detox Cam Sả Hoa Cúc mang lại hương vị tươi mát của cam lát sấy, chút ấm nồng của sả hòa quyện cùng vị thanh khiết của hoa cúc tiến vua. Trà có hai mức vị: bản 3 vị gồm cam sấy, sả và hoa cúc; bản 5 vị thêm gừng sấy và trần bì cho hương ấm, hỗ trợ tiêu hóa tốt hơn. Sản phẩm lý tưởng cho liệu trình thanh lọc cơ thể và tăng cường sức đề kháng.",
+    "story": "Năng lượng rực rỡ từ lát cam sấy lạnh hòa quyện với vị sả làm ấm chiếc bụng rỗng vào mỗi buổi sáng. Bài trà detox mang cảm hứng từ những tia nắng ban mai ấm áp, đánh thức mọi giác quan và xua tan đi các độc tố tích tụ. Bản 3 vị nhẹ nhàng cho buổi sáng, bản 5 vị ấm bụng hơn cho những ngày cần thanh lọc.",
+    "usage": [
+      "Thanh lọc cơ thể, hỗ trợ đào thải độc tố",
+      "Tăng cường hệ miễn dịch và đề kháng",
+      "Hỗ trợ hệ tiêu hóa hoạt động tốt hơn",
+      "Giúp thư giãn tinh thần"
+    ],
+    "instructions": [
+      "Lấy 1 gói hoặc khoảng 5-7g trà (gồm cam, sả, hoa cúc) cho vào bình.",
+      "Đổ 300ml nước nóng từ 85-90 độ C.",
+      "Hãm trà trong vòng 5 phút để các loại thảo mộc tiết ra hương vị.",
+      "Nên uống vào buổi sáng hoặc trước khi ăn 30 phút để đạt hiệu quả detox tốt nhất."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM021",
+    "slug": "dan-chau-tra-tra-duong-nhan-co-truyen",
+    "name": "Đan Châu Trà – Trà Dưỡng Nhan Cổ Truyền",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 18,
+    "flavorNote": "Ngọt đượm táo đỏ, long nhãn",
+    "color": "Vàng đỏ hổ phách",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM021-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 130,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 114000,
+        "oldPrice": 0,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM021-G10V7",
+        "label": "Hộp 10 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 130,
+        "packCount": 10,
+        "flavorCount": 7,
+        "price": 127000,
+        "oldPrice": 0,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM021-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 260,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 207000,
+        "oldPrice": 0,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM021-G20V7",
+        "label": "Hộp 20 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 260,
+        "packCount": 20,
+        "flavorCount": 7,
+        "price": 230000,
+        "oldPrice": 0,
+        "stock": 13,
+        "isDefault": true
+      }
+    ],
+    "price": 230000,
+    "oldPrice": 0,
+    "discount": 0,
+    "isSale": false,
+    "minPrice": 114000,
+    "stock": 28,
+    "status": "Còn hàng",
+    "sold": 285,
+    "benefits": [
+      "duong-nhan",
+      "bo-khi-huyet",
+      "giam-stress"
+    ],
+    "tags": [
+      "Dưỡng nhan",
+      "Bổ máu",
+      "An thần"
+    ],
+    "thumbnail": "79.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Trà Dưỡng Nhan Cổ Truyền kết hợp các vị thảo mộc quý trong bài trà truyền thống giúp bổ huyết, cải thiện giấc ngủ, mang lại sắc diện hồng hào và làn da tươi trẻ. Trà có hai mức vị: bản 5 vị gồm kỷ tử, táo đỏ, long nhãn, nụ cúc và hoa hồng; bản 7 vị thêm hạt sen và bách hợp để dịu thần kinh, ngủ sâu hơn.",
+    "story": "Chắt lọc từ những phương thuốc bí truyền chốn cung đình xưa, nơi các bậc vương phi dùng thảo mộc đông y để gìn giữ nét thanh xuân không tuổi. Mỗi hớp trà ngọt lịm từ long nhãn và đỏ thắm của táo đỏ là một sự nâng niu tuyệt đối cho cơ thể từ sâu bên trong. Bản 5 vị là bài trà nền cung đình; bản 7 vị thêm hạt sen và bách hợp như một chén an thần trước giờ đi ngủ.",
+    "usage": [
+      "Bổ huyết, cải thiện tình trạng thiếu máu nhẹ",
+      "Giúp ngủ ngon và sâu giấc hơn",
+      "Chống lão hóa, làm thanh tâm từ bên trong",
+      "Giảm mệt mỏi, suy nhược cơ thể"
+    ],
+    "instructions": [
+      "Cắt nhỏ táo đỏ để dưỡng chất dễ hòa tan.",
+      "Cho tất cả các nguyên liệu (táo đỏ, kỷ tử, long nhãn, nụ cúc, hoa hồng, và hạt sen, bách hợp ở bản 7 vị) vào ấm.",
+      "Rót 250ml nước sôi 95 độ C, hãm trà từ 7-10 phút.",
+      "Ăn được cả phần cái (táo đỏ, long nhãn) sau khi uống hết nước."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM022",
+    "slug": "bach-hoa-tra-tra-ngu-hoa-giam-mun-an-moc",
+    "name": "Bách Hoa Trà – Trà Ngũ Hoa Giảm Mụn An Mộc",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 18,
+    "flavorNote": "Thơm đa tầng năm loại hoa",
+    "color": "Vàng nhạt",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM022-G10V3",
+        "label": "Hộp 10 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 3,
+        "price": 111000,
+        "oldPrice": 134000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM022-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 124000,
+        "oldPrice": 149000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM022-G10V7",
+        "label": "Hộp 10 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 7,
+        "price": 136000,
+        "oldPrice": 163000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM022-G20V3",
+        "label": "Hộp 20 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 3,
+        "price": 203000,
+        "oldPrice": 243000,
+        "stock": 5,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM022-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 225000,
+        "oldPrice": 270000,
+        "stock": 17,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM022-G20V7",
+        "label": "Hộp 20 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 7,
+        "price": 248000,
+        "oldPrice": 297000,
+        "stock": 5,
+        "isDefault": false
+      }
+    ],
+    "price": 225000,
+    "oldPrice": 270000,
+    "discount": 17,
+    "isSale": true,
+    "minPrice": 111000,
+    "stock": 42,
+    "status": "Còn hàng",
+    "sold": 88,
+    "benefits": [
+      "thanh-loc",
+      "duong-nhan"
+    ],
+    "tags": [
+      "Mát gan",
+      "Trị mụn",
+      "Sáng da"
+    ],
+    "thumbnail": "82.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Bách Hoa Trà là sự kết tinh của các loại hoa thảo mộc thượng hạng, mang đến hương thơm đa tầng, mát gan, giải độc và hỗ trợ làm giảm mụn nội tiết. Trà có ba mức vị: bản 3 vị gồm hoa cúc, hoa hồng và hoa lài; bản 5 vị đủ \"ngũ hoa\" khi thêm hoa bách hợp và hoa đào; bản 7 vị thêm kim ngân hoa và bồ công anh để tăng cảm giác thanh nhiệt, giải độc.",
+    "story": "Hãy tưởng tượng bạn đang dạo bước trong một khu vườn hoàng gia ngập tràn hoa nở lúc lập xuân. Chúng tôi gom những sắc hoa rực rỡ tinh khôi nhất hội tụ vào một thức trà: bản 3 vị có ba sắc hoa, bản 5 vị đủ năm sắc, bản 7 vị thêm kim ngân hoa và bồ công anh, cùng kiến tạo nên hương thơm đa tầng diệu kỳ xoa dịu làn da, mát gan và thanh lọc cơ thể.",
+    "usage": [
+      "Giảm stress, mát gan, giảm mụn nhọt",
+      "Làm mờ vết thâm, nuôi dưỡng da sáng mịn",
+      "Tạo hương thơm tự nhiên cho cơ thể",
+      "Thư giãn thần kinh, giảm áp lực"
+    ],
+    "instructions": [
+      "Sử dụng 5g trà ngũ hoa cho vào ấm hoặc cốc có bộ lọc.",
+      "Tráng trà nhanh bằng một chút nước sôi rồi gạn bỏ.",
+      "Hãm trà với 200ml nước sôi 90 độ C trong 5 phút.",
+      "Uống đều đặn hàng ngày thay nước lọc để thấy rõ hiệu quả sáng da."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM023",
+    "slug": "phuc-coc-tra-tra-ngu-coc-thanh-loc-giu-dang",
+    "name": "Phúc Cốc Trà – Trà Ngũ Cốc Thanh Lọc Giữ Dáng",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": true,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 12,
+    "flavorNote": "Thơm bùi ngũ cốc, ngọt nhẹ",
+    "color": "Nâu nhạt",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM023-G10V3",
+        "label": "Hộp 10 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 3,
+        "price": 82000,
+        "oldPrice": 99000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM023-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 91000,
+        "oldPrice": 110000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM023-G10V7",
+        "label": "Hộp 10 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 7,
+        "price": 100000,
+        "oldPrice": 121000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM023-G20V3",
+        "label": "Hộp 20 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 3,
+        "price": 149000,
+        "oldPrice": 180000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM023-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 165000,
+        "oldPrice": 200000,
+        "stock": 30,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM023-G20V7",
+        "label": "Hộp 20 gói · 7 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 7,
+        "price": 182000,
+        "oldPrice": 220000,
+        "stock": 7,
+        "isDefault": false
+      }
+    ],
+    "price": 165000,
+    "oldPrice": 200000,
+    "discount": 18,
+    "isSale": true,
+    "minPrice": 82000,
+    "stock": 65,
+    "status": "Còn hàng",
+    "sold": 205,
+    "benefits": [
+      "thanh-loc"
+    ],
+    "tags": [
+      "Giữ dáng",
+      "Thanh lọc",
+      "Tốt cho tim mạch"
+    ],
+    "thumbnail": "88.png",
+    "images": [],
+    "ratingAverage": 4,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 1,
+      "5": 0
+    },
+    "reviewCount": 1,
+    "description": "Phúc Cốc Trà kết hợp các loại hạt ngũ cốc rang thơm cùng hoa cúc và cỏ ngọt. Trà có vị ngọt thanh dễ uống và ba mức vị: bản 3 vị gồm gạo lứt huyết rồng, đậu đen xanh lòng và đậu đỏ; bản 5 vị thêm hoa cúc và cỏ ngọt; bản 7 vị thêm hạt kiều mạch và ý dĩ cho vị bùi, đậm hơn. Trà giúp giữ dáng, thanh lọc cơ thể và hỗ trợ sức khỏe tim mạch.",
+    "story": "Sự mộc mạc và an lành từ cánh đồng lúa chín và các loại hạt quê hương. Những hạt ngũ cốc được sàng sảy, rang tay đều lửa tỏa hương thơm phức, kết hợp cùng ngọn cỏ ngọt tự nhiên đem lại thức uống thanh lọc mỡ thừa, bảo bọc hệ tim mạch khỏe mạnh. Từ bản 3 vị mộc mạc đến bản 7 vị đủ đầy, mỗi hạt ngũ cốc thêm vào là một tầng hương bùi ấm cho ngày mới.",
+    "usage": [
+      "Hỗ trợ giảm cân, giữ dáng an toàn",
+      "Thanh lọc cơ thể, giải độc gan và thận",
+      "Ổn định đường huyết và tốt cho tim mạch",
+      "Cung cấp chất xơ và vitamin nhóm B"
+    ],
+    "instructions": [
+      "Cho 2-3 muỗng canh trà ngũ cốc (khoảng 20g) vào bình giữ nhiệt.",
+      "Rót 500ml nước sôi già 100 độ C vào bình.",
+      "Đậy kín nắp ủ trong khoảng 15-20 phút cho hạt ngũ cốc tiết ra hết dưỡng chất và mùi thơm.",
+      "Uống thay nước lọc hàng ngày (có thể uống nóng hoặc lạnh)."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  },
+  {
+    "sku": "TTM024",
+    "slug": "luc-diep-tra-tra-cam-chanh-bac-ha-giai-nhiet",
+    "name": "Lục Diệp Trà – Trà Cam Chanh Bạc Hà Giải Nhiệt",
+    "category": "Trà thảo mộc mix",
+    "categorySlug": "tra-thao-moc-mix",
+    "subCategory": "Hỗn hợp",
+    "isMix": true,
+    "featured": false,
+    "brand": "Floralia Tea",
+    "shelfLifeMonths": 12,
+    "flavorNote": "Chua ngọt cam chanh, mát bạc hà",
+    "color": "Vàng sáng",
+    "hasVariants": true,
+    "variantLabel": "Quy cách",
+    "variants": [
+      {
+        "sku": "TTM024-G10V3",
+        "label": "Hộp 10 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 3,
+        "price": 102000,
+        "oldPrice": 121000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM024-G10V5",
+        "label": "Hộp 10 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 100,
+        "packCount": 10,
+        "flavorCount": 5,
+        "price": 112000,
+        "oldPrice": 133000,
+        "stock": 7,
+        "isDefault": false
+      },
+      {
+        "sku": "TTM024-G20V3",
+        "label": "Hộp 20 gói · 3 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 3,
+        "price": 185000,
+        "oldPrice": 220000,
+        "stock": 17,
+        "isDefault": true
+      },
+      {
+        "sku": "TTM024-G20V5",
+        "label": "Hộp 20 gói · 5 vị",
+        "type": "sachet",
+        "weightGram": 200,
+        "packCount": 20,
+        "flavorCount": 5,
+        "price": 204000,
+        "oldPrice": 242000,
+        "stock": 7,
+        "isDefault": false
+      }
+    ],
+    "price": 185000,
+    "oldPrice": 220000,
+    "discount": 16,
+    "isSale": true,
+    "minPrice": 102000,
+    "stock": 38,
+    "status": "Còn hàng",
+    "sold": 115,
+    "benefits": [
+      "thanh-loc"
+    ],
+    "tags": [
+      "Vitamin C",
+      "Giải nhiệt",
+      "Tiêu hóa"
+    ],
+    "thumbnail": "85.png",
+    "images": [],
+    "ratingAverage": 5,
+    "ratingCount": 1,
+    "ratingBreakdown": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1
+    },
+    "reviewCount": 1,
+    "description": "Lục Diệp Trà bao gồm các lát cam vàng, chanh vàng thái mỏng sấy lạnh giữ nguyên dưỡng chất, kết hợp với lá bạc hà. Trà có hai mức vị: bản 3 vị gồm cam, chanh và bạc hà; bản 5 vị thêm cỏ ngọt và hoa cúc cho vị dịu và thơm hơn. Thức uống bổ sung Vitamin C dồi dào, mang lại cảm giác sảng khoái và hỗ trợ tiêu hóa.",
+    "story": "Một nguồn năng lượng tươi mát, tràn trề sức sống cho những ngày hè oi ả hoặc những lúc làm việc căng thẳng đầu óc. Những lát citrus căng mọng được sấy lạnh ở nhiệt độ âm để khóa chặt lượng Vitamin C tinh khiết, mang lại cảm giác refresh tức thì. Bản 3 vị tươi chua sảng khoái; bản 5 vị dịu ngọt hơn nhờ cỏ ngọt và hoa cúc.",
+    "usage": [
+      "Bổ sung Vitamin C, tăng cường sức đề kháng",
+      "Giải nhiệt cơ thể tức thì, đặc biệt khi uống lạnh",
+      "Hỗ trợ đốt cháy mỡ thừa và kích thích tiêu hóa",
+      "Làm sạch vòm họng, thơm miệng"
+    ],
+    "instructions": [
+      "Thả 1-2 lát cam, chanh cùng lá bạc hà khô vào bình.",
+      "Rót khoảng 300ml nước ấm (khoảng 70-80 độ C để tránh làm đắng tinh dầu vỏ cam chanh).",
+      "Hãm trà trong 3-5 phút.",
+      "Ngon nhất khi uống lạnh: Thêm đá viên và một chút mật ong để giải khát mùa hè."
+    ],
+    "isActive": true,
+    "createdAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-24T14:57:06.853Z"
+    }
+  }
+]

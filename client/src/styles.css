@@ -1,0 +1,22 @@
+/* You can add global styles to this file, and also import other style files */
+:root {
+  --green-900: #143d29;
+  --green-700: #1d5338;
+  --green-500: #3d7b39;
+  --lime: #8cbc4f;
+  --cream: #faf7f0;
+  --sage-50: #f1f6ec;
+  --ink: #2f3a33;
+  --muted: #6b7a70;
+  --radius: 22px;
+  --shadow-soft: 0 12px 35px rgba(29, 83, 56, .10);
+  --shadow-hover: 0 20px 45px rgba(29, 83, 56, .18);
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  color: var(--ink);
+  background: #fff;
+  overflow-x: hidden;
+}
+h1, h2, h3 { font-family: 'Playfair Display', serif; }
+a { text-decoration: none; }

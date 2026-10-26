@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <rect width="640" height="640" fill="#f4f1eb"/>
+  <path d="M184 424h272l-80-104-56 72-40-48z" fill="#c9c2b5"/>
+  <circle cx="400" cy="232" r="32" fill="#c9c2b5"/>
+  <text x="320" y="500" fill="#756f64" font-family="sans-serif" font-size="28" text-anchor="middle">Không có hình ảnh</text>
+</svg>
