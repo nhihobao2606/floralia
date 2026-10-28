@@ -1,0 +1,201 @@
+<!-- Banner -->
+<section class="banner">
+  <img src="assets/images/thanhloc.jpg" alt="Banner Floralia Tea" loading="lazy">
+</section>
+
+<main class="shop-section">
+  <div class="container">
+    <div class="shop-wrapper" [class.collapsed]="isSidebarCollapsed" id="shopWrapper">
+      
+      <!-- Nút Thu gọn / Bật Sidebar -->
+      <button
+        type="button"
+        (click)="toggleSidebar()"
+        id="toggleSidebar"
+        class="toggle-sidebar"
+        [attr.aria-label]="isSidebarCollapsed ? 'Mở bộ lọc' : 'Đóng bộ lọc'"
+        [attr.aria-expanded]="!isSidebarCollapsed">
+        <i class="bi" [class.bi-chevron-left]="!isSidebarCollapsed" [class.bi-chevron-right]="isSidebarCollapsed"></i>
+      </button>
+
+      <!-- Sidebar Bộ Lọc -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <button type="button" id="filterBtn" class="filter-btn" (click)="toggleSidebar()">
+            <span>Lọc</span>
+            <i class="bi bi-sliders2" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="sidebar-content">
+          <!-- 1. Danh mục -->
+          <div class="filter-group">
+            <h5 class="filter-title">Danh mục</h5>
+            <div class="filter-list">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="catAll" name="category" 
+                       [checked]="selectedCategory === 'all'" (change)="onSelectCategory('all')">
+                <label class="form-check-label" for="catAll">Tất cả sản phẩm</label>
+              </div>
+              <div class="form-check" *ngFor="let cat of categories; let i = index">
+                <input class="form-check-input" type="radio" [id]="'cat' + i" name="category" 
+                       [checked]="selectedCategory === cat.slug" (change)="onSelectCategory(cat.slug)">
+                <label class="form-check-label" [for]="'cat' + i">{{ cat.name }}</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Lọc theo giá -->
+          <div class="filter-group">
+            <h5 class="filter-title">Lọc theo giá</h5>
+            <div class="filter-list">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="priceAll" name="price" 
+                       [checked]="selectedPriceRange === 'all'" (change)="onSelectPrice('all')">
+                <label class="form-check-label" for="priceAll">Tất cả mức giá</label>
+              </div>
+              <div class="form-check" *ngFor="let p of priceRanges; let j = index">
+                <input class="form-check-input" type="radio" [id]="'price' + j" name="price" 
+                       [checked]="selectedPriceRange === p.value" (change)="onSelectPrice(p.value)">
+                <label class="form-check-label" [for]="'price' + j">{{ p.label }}</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Công dụng (Tags) -->
+          <div class="filter-group">
+            <h5 class="filter-title">Công dụng</h5>
+            <div class="tag-group">
+              <button
+                type="button"
+                class="tag"
+                *ngFor="let benefit of benefitsList"
+                [class.active]="selectedTag === benefit.label"
+                [attr.aria-pressed]="selectedTag === benefit.label"
+                (click)="onSelectTag(benefit.label)">
+                {{ benefit.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Banner Khuyến mãi Sidebar -->
+          <div class="promo-banner">
+            <img src="assets/images/thanhloc.jpg" alt="Khuyến mãi" loading="lazy">
+          </div>
+
+          <!-- 5. Sản phẩm khuyến mãi Sidebar -->
+          <div class="sale-box">
+            <h5 class="filter-title">Sản phẩm khuyến mãi</h5>
+            <ng-container *ngFor="let p of promotionProducts">
+              <div class="sale-item">
+                <img [src]="getProductImage(p)" [alt]="p.name" loading="lazy">
+                <div>
+                  <h6><a [routerLink]="['/product', p.slug]">{{ p.name }}</a></h6>
+                  <p>
+                    {{ p.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+                    <del *ngIf="p.oldPrice">{{ p.oldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</del>
+                  </p>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- Section Danh sách sản phẩm -->
+      <section class="product-section">
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-success" role="status"></div>
+          <p class="mt-2">Đang tải danh sách trà...</p>
+        </div>
+
+        <div *ngIf="!loading && filteredProducts.length === 0" class="alert alert-info text-center mt-4">
+          Không có sản phẩm nào phù hợp với lựa chọn của bạn.
+        </div>
+
+        <div id="product-list" class="product-grid" *ngIf="!loading">
+          <div class="product-card" *ngFor="let item of paginatedProducts">
+            <div class="product-img">
+             <span class="sale-badge" *ngIf="item.isSale || item.discount > 0">-{{ item.discount }}%</span>
+             <a [routerLink]="['/product', item.slug]">
+               <img [src]="getProductImage(item)" [alt]="item.name">
+             </a>
+             <button
+               type="button"
+               class="sale-heart"
+               [class.on]="isWished(item)"
+               [attr.aria-pressed]="isWished(item)"
+               [attr.aria-label]="isWished(item) ? 'Bỏ yêu thích ' + item.name : 'Thêm ' + item.name + ' vào yêu thích'"
+               (click)="toggleWish(item)">
+               <i class="bi" [ngClass]="isWished(item) ? 'bi-heart-fill' : 'bi-heart'"></i>
+             </button>
+            </div>
+
+            <div class="product-info">
+             <a [routerLink]="['/product', item.slug]" class="sale-name">{{ item.name }}</a>
+
+             <div class="sale-rating" [attr.aria-label]="'Đánh giá ' + (item.ratingAverage || 5) + ' trên 5 sao'">
+               <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi"
+                  [ngClass]="star <= (item.ratingAverage || 5) ? 'bi-star-fill' : 'bi-star'"></i>
+               <small>({{ item.ratingCount || 0 }})</small>
+             </div>
+
+             <div class="sale-price">
+               <span class="sale-current">{{ item.price | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+               <span class="sale-old" *ngIf="item.oldPrice">{{ item.oldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+             </div>
+
+             <a class="sale-cart" [routerLink]="['/product', item.slug]">
+               Thêm vào giỏ hàng
+             </a>
+            </div>
+          </div>
+        </div>
+
+        <nav
+          *ngIf="!loading && filteredProducts.length > 0"
+          class="pagination"
+          aria-label="Phân trang sản phẩm">
+          <span class="pagination-summary">
+            Trang {{ currentPage }} / {{ totalPages }}
+          </span>
+          <div class="pagination-controls">
+            <button
+              type="button"
+              class="pagination-arrow"
+              aria-label="Trang trước"
+              [disabled]="currentPage === 1"
+              (click)="goToPage(currentPage - 1)">
+              &lsaquo;
+            </button>
+            <ng-container *ngFor="let page of pageItems">
+              <button
+                *ngIf="page !== 'ellipsis'; else ellipsis"
+                type="button"
+                class="pagination-page"
+                [class.active]="currentPage === page"
+                [attr.aria-current]="currentPage === page ? 'page' : null"
+                [attr.aria-label]="'Trang ' + page"
+                (click)="goToPage(page)">
+                {{ page }}
+              </button>
+              <ng-template #ellipsis>
+                <span class="pagination-ellipsis" aria-hidden="true">…</span>
+              </ng-template>
+            </ng-container>
+            <button
+              type="button"
+              class="pagination-arrow"
+              aria-label="Trang sau"
+              [disabled]="currentPage === totalPages"
+              (click)="goToPage(currentPage + 1)">
+              &rsaquo;
+            </button>
+          </div>
+        </nav>
+      </section>
+
+    </div>
+  </div>
+</main>

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = 3002;
@@ -18,8 +19,6 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 const { MongoClient, ObjectId } = require("mongodb");
 
-const client = new MongoClient("mongodb://127.0.0.1:27017");
-
 let productsCollection;
 let productAssetsCollection;
 let usersCollection;
@@ -35,8 +34,26 @@ app.get("/products", async (req, res) => {
             .find({})
             .toArray();
 
+        const thumbnails = [
+            ...new Set(
+                products
+                    .map(product => product.thumbnail)
+                    .filter(Boolean)
+                    .map(String)
+            )
+        ];
+        const thumbnailIds = thumbnails
+            .filter(ObjectId.isValid)
+            .map(thumbnail => new ObjectId(thumbnail));
         const assets = await productAssetsCollection
-            .find({})
+            .find({
+                $or: [
+                    { _id: { $in: thumbnailIds } },
+                    { assetId: { $in: thumbnails } },
+                    { originalFileName: { $in: thumbnails } }
+                ]
+            })
+            .project({ assetId: 1, originalFileName: 1, mimeType: 1, data: 1 })
             .toArray();
 
         const result = products.map(product => {
@@ -48,16 +65,10 @@ app.get("/products", async (req, res) => {
                 String(item.originalFileName) === String(thumbnail)
             );
 
-            let imageData = null;
-
-            if (asset && asset.data) {
-                imageData = asset.data;
-            }
-
             return {
                 ...product,
-                imageData: imageData,
-                imageMimeType: asset ? asset.mimeType : null
+                imageData: asset?.data ?? null,
+                imageMimeType: asset?.mimeType ?? null
             };
         });
 
@@ -129,11 +140,18 @@ app.get("/products/:id", async (req, res) => {
 // Khởi động server và kết nối MongoDB
 async function startServer() {
     try {
+        const mongoUri = process.env.MONGODB_URI;
+
+        if (!mongoUri) {
+            throw new Error("Thiếu MONGODB_URI. Hãy cấu hình URI MongoDB Atlas trong file .env.");
+        }
+
+        const client = new MongoClient(mongoUri);
         await client.connect();
 
         const db = client.db("FloraliaTea");
 
-        productsCollection = db.collection("Products");
+        productsCollection = db.collection("Product");
         productAssetsCollection = db.collection("ProductAssets");
         usersCollection = db.collection("Users");
 

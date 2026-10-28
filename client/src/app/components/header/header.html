@@ -37,47 +37,42 @@
                         <a class="nav-link" routerLink="/about">GIỚI THIỆU</a>
                     </li>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="Trangsanpham.html">
-                            SẢN PHẨM
+                                        <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" routerLink="/products">
+                        SẢN PHẨM
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                        <a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc' }">
+                            Trà thảo mộc
                         </a>
+                        </li>
 
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item"
-                                href="Trangsanpham.html?danhmuc=tra-thao-moc">
-                                    Trà thảo mộc
-                                </a>
-                            </li>
+                        <li>
+                        <a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc-mix' }">
+                            Trà thảo mộc mix
+                        </a>
+                        </li>
 
-                            <li>
-                                <a class="dropdown-item"
-                                href="Trangsanpham.html?danhmuc=tra-thao-moc-mix">
-                                    Trà thảo mộc mix
-                                </a>
-                            </li>
+                        <li>
+                        <a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'do-uong-kem-tra' }">
+                            Đồ uống kèm trà
+                        </a>
+                        </li>
 
-                            <li>
-                                <a class="dropdown-item"
-                                href="Trangsanpham.html?danhmuc=do-uong-kem-tra">
-                                    Đồ uống kèm trà
-                                </a>
-                            </li>
+                        <li>
+                        <a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'am-tra' }">
+                            Ấm trà
+                        </a>
+                        </li>
 
-                            <li>
-                                <a class="dropdown-item"
-                                href="Trangsanpham.html?danhmuc=am-tra">
-                                    Ấm trà
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item"
-                                href="Trangsanpham.html?danhmuc=set-qua-tang">
-                                    Set quà tặng
-                                </a>
-                            </li>
-                        </ul>
+                        <li>
+                        <a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'set-qua-tang' }">
+                            Set quà tặng
+                        </a>
+                        </li>
+                    </ul>
                     </li>
 
                     <li class="nav-item">
