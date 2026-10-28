@@ -1,0 +1,135 @@
+const { ObjectId } = require('mongodb');
+const Product = require('../models/product');
+
+// GET /products
+async function getProducts(req, res) {
+    try {
+        const products = await Product.getAll();
+
+        // Không tải dữ liệu ảnh ở API danh sách
+        const result = products.map(product => {
+            const thumbnail = product.thumbnail;
+            let imageId = thumbnail;
+
+            return {
+                ...product,
+                imageId: imageId ? String(imageId) : null,
+                imageUrl: imageId
+                    ? `/products/image/${encodeURIComponent(String(imageId))}`
+                    : null
+            };
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('Lỗi lấy danh sách sản phẩm:', error);
+
+        res.status(500).json({
+            message: 'Không thể lấy danh sách sản phẩm'
+        });
+    }
+}
+
+// GET /products/image/:id
+async function getProductImage(req, res) {
+    try {
+        const id = req.params.id;
+        let asset = null;
+
+        // Tìm theo _id nếu thumbnail là ObjectId
+        if (ObjectId.isValid(id)) {
+            asset = await Product.getAssetById(id);
+        }
+
+        // Nếu không tìm thấy, thử tìm theo assetId
+        if (!asset) {
+            asset = await Product.getByAssetId(id);
+        }
+
+        // Nếu không tìm thấy, thử tìm theo tên file
+        if (!asset) {
+            asset = await Product.getByFileName(id);
+        }
+
+        if (!asset || !asset.data) {
+            return res.status(404).end();
+        }
+
+        const mimeType = asset.mimeType || 'image/jpeg';
+
+        // Hỗ trợ dữ liệu ảnh lưu dạng Buffer hoặc Base64
+        const imageBuffer = Buffer.isBuffer(asset.data)
+            ? asset.data
+            : Buffer.from(String(asset.data), 'base64');
+
+        res.set('Content-Type', mimeType);
+        res.set('Cache-Control', 'public, max-age=86400');
+        res.send(imageBuffer);
+    } catch (error) {
+        console.error('Lỗi lấy ảnh sản phẩm:', error);
+
+        res.status(500).json({
+            message: 'Không thể lấy ảnh sản phẩm'
+        });
+    }
+}
+
+// GET /products/:id
+async function getProductById(req, res) {
+    try {
+        const id = req.params.id;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: 'ID sản phẩm không hợp lệ'
+            });
+        }
+
+        const product = await Product.getById(id);
+
+        if (!product) {
+            return res.status(404).json({
+                message: 'Không tìm thấy sản phẩm'
+            });
+        }
+
+        const thumbnail = product.thumbnail;
+        let asset = null;
+
+        if (thumbnail !== undefined && thumbnail !== null) {
+            const thumbnailString = String(thumbnail);
+
+            if (ObjectId.isValid(thumbnailString)) {
+                asset = await Product.getAssetById(thumbnailString);
+            }
+
+            if (!asset) {
+                asset = await Product.getByAssetId(thumbnailString);
+            }
+
+            if (!asset) {
+                asset = await Product.getByFileName(thumbnailString);
+            }
+        }
+
+        // Không trả dữ liệu ảnh Base64 trong response chi tiết
+        res.json({
+            ...product,
+            imageUrl: thumbnail
+                ? `/products/image/${encodeURIComponent(String(thumbnail))}`
+                : null
+        });
+    } catch (error) {
+        console.error('Lỗi lấy chi tiết sản phẩm:', error);
+
+        res.status(500).json({
+            message: 'Không thể lấy chi tiết sản phẩm'
+        });
+    }
+}
+
+module.exports = {
+    getProducts,
+    getProductById,
+    getProductImage
+};

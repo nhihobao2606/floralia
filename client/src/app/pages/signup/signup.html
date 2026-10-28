@@ -1,0 +1,152 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-form-container">
+
+      <div class="form-heading">
+        <h2>Đăng ký</h2>
+        <p class="form-description">Tạo tài khoản để bắt đầu hành trình trà thảo mộc cùng Floralia.</p>
+      </div>
+
+      <form (ngSubmit)="signup(signupForm)" #signupForm="ngForm" novalidate>
+
+        <!-- Họ tên -->
+        <div class="form-field">
+          <label for="fullName">Họ và tên <span class="req">*</span></label>
+          <div class="input-wrapper"
+               [class.is-invalid]="nameCtrl.invalid && (nameCtrl.touched || signupForm.submitted)"
+               [class.is-valid]="nameCtrl.valid && nameCtrl.touched">
+            <i class="bi bi-person"></i>
+            <input type="text" id="fullName" name="fullName" [(ngModel)]="fullName" #nameCtrl="ngModel"
+                   required minlength="2" maxlength="60" [pattern]="namePattern"
+                   placeholder="Nhập họ và tên" autocomplete="name">
+            <i class="bi bi-check-circle-fill state-icon ok" *ngIf="nameCtrl.valid && nameCtrl.touched"></i>
+          </div>
+          <div class="field-error" *ngIf="nameCtrl.invalid && (nameCtrl.touched || signupForm.submitted)">
+            <i class="bi bi-exclamation-circle"></i>
+            <span *ngIf="nameCtrl.errors?.['required']">Vui lòng nhập họ và tên.</span>
+            <span *ngIf="!nameCtrl.errors?.['required'] && nameCtrl.errors?.['minlength']">Họ và tên phải có ít nhất 2 ký tự.</span>
+            <span *ngIf="!nameCtrl.errors?.['required'] && !nameCtrl.errors?.['minlength'] && nameCtrl.errors?.['pattern']">
+              Họ và tên không được chứa số hoặc ký tự đặc biệt.
+            </span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-field">
+          <label for="signupEmail">Email <span class="req">*</span></label>
+          <div class="input-wrapper"
+               [class.is-invalid]="(emailCtrl.invalid && (emailCtrl.touched || signupForm.submitted)) || emailTaken"
+               [class.is-valid]="emailCtrl.valid && emailCtrl.touched && !emailTaken">
+            <i class="bi bi-envelope"></i>
+            <input type="email" id="signupEmail" name="email" [(ngModel)]="email" #emailCtrl="ngModel"
+                   (ngModelChange)="emailTaken = false"
+                   required [pattern]="emailPattern"
+                   placeholder="Nhập địa chỉ email" autocomplete="email">
+            <i class="bi bi-check-circle-fill state-icon ok" *ngIf="emailCtrl.valid && emailCtrl.touched && !emailTaken"></i>
+          </div>
+          <div class="field-error" *ngIf="emailCtrl.invalid && (emailCtrl.touched || signupForm.submitted)">
+            <i class="bi bi-exclamation-circle"></i>
+            <span *ngIf="emailCtrl.errors?.['required']">Vui lòng nhập email.</span>
+            <span *ngIf="!emailCtrl.errors?.['required'] && emailCtrl.errors?.['pattern']">Email chưa đúng định dạng (ví dụ: ten@gmail.com).</span>
+          </div>
+          <div class="field-error" *ngIf="emailTaken && emailCtrl.valid">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>Email này đã được đăng ký. Hãy dùng email khác hoặc đăng nhập.</span>
+          </div>
+        </div>
+
+        <!-- Số điện thoại -->
+        <div class="form-field">
+          <label for="phone">Số điện thoại <span class="req">*</span></label>
+          <div class="input-wrapper"
+               [class.is-invalid]="phoneCtrl.invalid && (phoneCtrl.touched || signupForm.submitted)"
+               [class.is-valid]="phoneCtrl.valid && phoneCtrl.touched">
+            <i class="bi bi-telephone"></i>
+            <input type="tel" id="phone" name="phone" [(ngModel)]="phone" #phoneCtrl="ngModel"
+                   required [pattern]="phonePattern" maxlength="12"
+                   placeholder="Nhập số điện thoại" autocomplete="tel">
+            <i class="bi bi-check-circle-fill state-icon ok" *ngIf="phoneCtrl.valid && phoneCtrl.touched"></i>
+          </div>
+          <div class="field-error" *ngIf="phoneCtrl.invalid && (phoneCtrl.touched || signupForm.submitted)">
+            <i class="bi bi-exclamation-circle"></i>
+            <span *ngIf="phoneCtrl.errors?.['required']">Vui lòng nhập số điện thoại.</span>
+            <span *ngIf="!phoneCtrl.errors?.['required'] && phoneCtrl.errors?.['pattern']">Số điện thoại chưa hợp lệ (ví dụ: 0912345678).</span>
+          </div>
+        </div>
+
+        <!-- Mật khẩu -->
+        <div class="form-field">
+          <label for="signupPassword">Mật khẩu <span class="req">*</span></label>
+          <div class="input-wrapper"
+               [class.is-invalid]="passCtrl.invalid && (passCtrl.touched || signupForm.submitted)"
+               [class.is-valid]="passCtrl.valid && passCtrl.touched">
+            <i class="bi bi-lock"></i>
+            <input [type]="showPassword ? 'text' : 'password'" id="signupPassword" name="password"
+                   [(ngModel)]="password" #passCtrl="ngModel"
+                   required [pattern]="passwordPattern"
+                   placeholder="Tối thiểu 8 ký tự, gồm chữ và số" autocomplete="new-password">
+            <button type="button" class="toggle-password" (click)="showPassword = !showPassword"
+                    [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+          <div class="field-error" *ngIf="passCtrl.invalid && (passCtrl.touched || signupForm.submitted)">
+            <i class="bi bi-exclamation-circle"></i>
+            <span *ngIf="passCtrl.errors?.['required']">Vui lòng nhập mật khẩu.</span>
+            <span *ngIf="!passCtrl.errors?.['required'] && passCtrl.errors?.['pattern']">Mật khẩu tối thiểu 8 ký tự, gồm cả chữ và số.</span>
+          </div>
+        </div>
+
+        <!-- Xác nhận mật khẩu -->
+        <div class="form-field">
+          <label for="confirmPassword">Xác nhận mật khẩu <span class="req">*</span></label>
+          <div class="input-wrapper"
+               [class.is-invalid]="confirmInvalid(confirmCtrl, signupForm)"
+               [class.is-valid]="!confirmInvalid(confirmCtrl, signupForm) && confirmCtrl.touched && confirmPassword">
+            <i class="bi bi-shield-lock"></i>
+            <input [type]="showConfirm ? 'text' : 'password'" id="confirmPassword" name="confirmPassword"
+                   [(ngModel)]="confirmPassword" #confirmCtrl="ngModel" required
+                   placeholder="Nhập lại mật khẩu" autocomplete="new-password">
+            <button type="button" class="toggle-password" (click)="showConfirm = !showConfirm"
+                    [attr.aria-label]="showConfirm ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+              <i class="bi" [ngClass]="showConfirm ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+          <div class="field-error" *ngIf="confirmInvalid(confirmCtrl, signupForm)">
+            <i class="bi bi-exclamation-circle"></i>
+            <span *ngIf="!confirmPassword">Vui lòng xác nhận mật khẩu.</span>
+            <span *ngIf="confirmPassword && mismatch">Mật khẩu xác nhận không khớp.</span>
+          </div>
+        </div>
+        <div class="notice-message" *ngIf="notice" role="status">
+          <i class="bi bi-info-circle"></i>
+          <span>{{ notice }}</span>
+        </div>
+
+        <button type="submit" class="btn-login" >Đăng ký</button>
+      </form>
+      <div class="form-divider"><span>hoặc tiếp tục với</span></div>
+
+      <div class="social-login">
+        <button type="button" class="btn-social" (click)="socialLogin('facebook')">
+          <i class="bi bi-facebook" style="color:#1877f2"></i>
+          <span>Facebook</span>
+        </button>
+        <button type="button" class="btn-social" (click)="socialLogin('google')">
+          <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/>
+            <path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/>
+            <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
+          </svg>
+          <span>Google</span>
+        </button>
+      </div>
+
+      <div class="signup-text">
+        Bạn đã có tài khoản?
+        <button type="button" (click)="goToLogin()">Đăng nhập</button>
+      </div>
+    </div>
+  </div>
+</div>

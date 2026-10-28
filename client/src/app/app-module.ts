@@ -7,10 +7,12 @@ import { Footer } from './components/footer/footer';
 import { Homepage } from './pages/homepage/homepage';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Login } from './login/login';
+import { Login } from './pages/login/login';
+import { Signup } from './pages/signup/signup';
+import { Profile } from './profile/profile';
 
 @NgModule({
-  declarations: [App, Header, Footer, Homepage, Login],
+  declarations: [App, Header, Footer, Homepage, Login, Signup, Profile],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
