@@ -166,36 +166,33 @@ export class Homepage implements OnInit {
   }
 
   getProductImage(product: Products): string {
-    const p: any = product;
-    const thumbnail = p.thumbnail;
+  const p: any = product;
+  const thumbnail = p.thumbnail;
 
-    if (typeof thumbnail === 'string') {
-      if (
-        thumbnail.startsWith('http://') ||
-        thumbnail.startsWith('https://') ||
-        thumbnail.startsWith('data:image/')
-      ) {
-        return thumbnail;
-      }
-
-      if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)) {
-        return thumbnail.startsWith('/assets/')
-          ? thumbnail
-          : thumbnail.startsWith('assets/')
-            ? `/${thumbnail}`
-            : `/assets/images/${thumbnail}`;
-      }
+  if (typeof thumbnail === 'string') {
+    if (
+      thumbnail.startsWith('http://') ||
+      thumbnail.startsWith('https://') ||
+      thumbnail.startsWith('data:image/')
+    ) {
+      return thumbnail;
     }
 
-    if (p.imageData) {
-      if (p.imageData.startsWith('data:image/')) return p.imageData;
-      const mimeType = p.imageMimeType || 'image/webp';
-      return `data:${mimeType};base64,${p.imageData}`;
+    if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)) {
+      return thumbnail.startsWith('/assets/')
+        ? thumbnail
+        : thumbnail.startsWith('assets/')
+          ? `/${thumbnail}`
+          : `/assets/images/${thumbnail}`;
+    }
+  }
+
+    if (p.imageUrl) {
+      return `http://localhost:3002${p.imageUrl}`;
     }
 
     return '/assets/images/no-image.svg';
   }
-
   getProductId(product: Products): string {
     const p: any = product;
     return p._id || p.id || p.productId || p.slug || '';

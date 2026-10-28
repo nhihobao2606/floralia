@@ -72,7 +72,7 @@ a:focus-visible, button:focus-visible {
 .banner-dots .active { width: 28px !important; border-radius: 10px; background: #fff; }
 
 /* ============ ABOUT ============ */
-.about { padding: 80px 0 60px; }
+.about { padding: 60px 0 60px; }
 .text { font-size: 18px; color: var(--muted); line-height: 1.9; margin-bottom: 32px; max-width: 640px; }
 
 .about-btn {

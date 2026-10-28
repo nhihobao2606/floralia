@@ -1,22 +1,38 @@
+<<<<<<< HEAD
 require("dotenv").config();
 const express = require("express");
+=======
+require('dotenv').config();
+
+const express = require('express');
+const morgan = require('morgan');
+const path = require('path');
+const cors = require('cors');
+const { MongoClient } = require('mongodb');
+
+const User = require('./models/user');
+const Product = require('./models/product');
+
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
+
+>>>>>>> 14d2353e806f0b4845fab4993fc1ca6a9e2f66ac
 const app = express();
 const port = 3002;
 
-const morgan = require("morgan");
-app.use(morgan("combined"));
+const client = new MongoClient(process.env.MONGODB_URI);
 
-const path = require("path");
-const fs = require("fs");
-app.use(express.static(path.join(__dirname, "public")));
-
-const cors = require("cors");
+app.use(morgan('combined'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
-const bodyParser = require("body-parser");
-app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({
+    limit: '50mb',
+    extended: true
+}));
 
+<<<<<<< HEAD
 const { MongoClient, ObjectId } = require("mongodb");
 
 let productsCollection;
@@ -25,15 +41,16 @@ let usersCollection;
 
 app.get("/", (req, res) => {
     res.send("Floralia Web Server is running");
+=======
+app.get('/', (req, res) => {
+    res.send('Floralia Web Server is running');
+>>>>>>> 14d2353e806f0b4845fab4993fc1ca6a9e2f66ac
 });
 
-// API lấy danh sách sản phẩm và hình ảnh
-app.get("/products", async (req, res) => {
-    try {
-        const products = await productsCollection
-            .find({})
-            .toArray();
+// API đăng ký, đăng nhập
+app.use('/api/auth', authRoutes);
 
+<<<<<<< HEAD
         const thumbnails = [
             ...new Set(
                 products
@@ -138,6 +155,11 @@ app.get("/products/:id", async (req, res) => {
 });
 
 // Khởi động server và kết nối MongoDB
+=======
+// API sản phẩm
+app.use('/products', productRoutes);
+
+>>>>>>> 14d2353e806f0b4845fab4993fc1ca6a9e2f66ac
 async function startServer() {
     try {
         const mongoUri = process.env.MONGODB_URI;
@@ -149,21 +171,36 @@ async function startServer() {
         const client = new MongoClient(mongoUri);
         await client.connect();
 
-        const db = client.db("FloraliaTea");
+        const db = client.db('FloraliaTea');
 
+<<<<<<< HEAD
         productsCollection = db.collection("Product");
         productAssetsCollection = db.collection("ProductAssets");
         usersCollection = db.collection("Users");
+=======
+        User.setCollection(db.collection('Users'));
+
+        // Hai collection được quản lý trong models/product.js
+        Product.setCollections(
+            db.collection('Product'),
+            db.collection('ProductAssets')
+        );
+
+        await db.collection('Users').createIndex(
+            { email: 1 },
+            { unique: true }
+        );
+>>>>>>> 14d2353e806f0b4845fab4993fc1ca6a9e2f66ac
 
         await db.command({ ping: 1 });
 
-        console.log("Đã kết nối MongoDB: FloraliaTea");
+        console.log('Đã kết nối MongoDB: FloraliaTea');
 
         app.listen(port, () => {
             console.log(`Floralia Server listening on port ${port}`);
         });
     } catch (error) {
-        console.error("Không thể kết nối MongoDB:", error);
+        console.error('Không thể khởi động server:', error);
         process.exit(1);
     }
 }
