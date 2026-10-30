@@ -1,0 +1,196 @@
+<div class="orders-page">
+  <div class="container">
+
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+      <p class="eyebrow">Tài khoản của tôi</p>
+      <h1>ĐƠN HÀNG</h1>
+    </div>
+
+    <div class="orders-layout">
+
+      <!-- ============ SIDEBAR ============ -->
+      <aside class="side-card">
+        <div class="side-user">
+          <div class="avatar sm">
+            <img *ngIf="avatar" [src]="avatar" alt="Ảnh đại diện">
+            <span *ngIf="!avatar">{{ initial }}</span>
+          </div>
+          <div class="side-user-info">
+            <strong>{{ user?.fullName || 'Hồ Bảo Nhi' }}</strong>
+            <small>{{ user?.email || 'hobaonhi400@gmail.com' }}</small>
+          </div>
+        </div>
+
+        <nav class="side-nav">
+          <a *ngFor="let m of menu" class="side-link" [routerLink]="m.link" routerLinkActive="active"
+             [routerLinkActiveOptions]="{ exact: true }">
+            <i class="bi" [ngClass]="m.icon"></i> {{ m.label }}
+          </a>
+          <a href="#" class="side-link logout" (click)="logout($event)">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+          </a>
+        </nav>
+      </aside>
+
+      <!-- ============ NỘI DUNG ĐƠN HÀNG ============ -->
+      <main class="orders-content">
+
+        <!-- FILTER TABS -->
+        <div class="tabs-bar">
+          <button
+            type="button"
+            *ngFor="let tab of tabs"
+            class="tab-btn"
+            [class.active]="activeTab === tab.id"
+            (click)="setTab(tab.id)"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="search-box-wrap">
+          <i class="bi bi-search search-icon"></i>
+          <input
+            type="text"
+            class="search-input"
+            [value]="searchQuery"
+            (input)="onSearch($any($event.target).value)"
+            placeholder="Bạn có thể tìm kiếm theo tên sản phẩm hoặc mã đơn hàng"
+          />
+        </div>
+
+        <!-- ORDERS LIST -->
+        <div class="orders-list" *ngIf="filteredOrders.length > 0">
+          <div class="order-card" *ngFor="let order of filteredOrders">
+
+            <!-- Card Header -->
+            <div class="card-header-bar">
+              <div class="header-left">
+                <span class="order-code">Đơn hàng {{ order.code }}</span>
+                <span class="header-sep">|</span>
+                <span class="order-time">{{ order.time }} {{ order.date }}</span>
+              </div>
+              <div class="header-right">
+                <span class="shipping-hint" *ngIf="order.status === 'completed' || order.status === 'delivered'">
+                  <i class="bi bi-truck"></i> Giao hàng thành công
+                </span>
+                <span class="shipping-hint in-transit" *ngIf="order.status === 'shipping'">
+                  <i class="bi bi-truck"></i> Đơn hàng đang trên đường giao
+                </span>
+                <span
+                  class="status-badge"
+                  [ngClass]="'status-' + order.status"
+                >
+                  {{ order.statusLabel }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Items -->
+            <div class="order-items-list" (click)="viewDetail(order)">
+              <div class="order-item-row" *ngFor="let it of order.items">
+                <div class="item-thumb-box">
+                  <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'">
+                </div>
+                <div class="item-meta">
+                  <div class="item-name">{{ it.name }}</div>
+                  <div class="item-variant" *ngIf="it.variant">{{ it.variant }}</div>
+                  <div class="item-qty">x{{ it.quantity }}</div>
+                </div>
+                <div class="item-price-box">
+                  <span class="old-price" *ngIf="it.oldPrice">{{ formatPrice(it.oldPrice) }}</span>
+                  <span class="curr-price">{{ formatPrice(it.price) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notice bar if any (e.g. delivered date) -->
+            <div class="order-notice-bar" *ngIf="order.notice">
+              <i class="bi bi-check-circle-fill"></i> {{ order.notice }}
+            </div>
+
+            <!-- Card Footer: Total & Actions -->
+            <div class="card-footer-bar">
+              <div class="total-line">
+                <span class="total-label">
+                  {{ order.status === 'refunded' ? 'Số tiền hoàn:' : 'Thành tiền:' }}
+                </span>
+                <strong class="total-amount">
+                  {{ formatPrice(order.refundAmount || order.total) }}
+                </strong>
+              </div>
+
+              <div class="action-buttons-group">
+                <!-- Status specific buttons -->
+                <ng-container [ngSwitch]="order.status">
+                  <!-- Delivered -->
+                  <ng-container *ngSwitchCase="'delivered'">
+                    <button type="button" class="btn-action-outline">Trả hàng/Hoàn tiền</button>
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Đã nhận được hàng</button>
+                  </ng-container>
+
+                  <!-- Pending -->
+                  <ng-container *ngSwitchCase="'pending'">
+                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline">Hủy đơn hàng</button>
+                  </ng-container>
+
+                  <!-- Processing -->
+                  <ng-container *ngSwitchCase="'processing'">
+                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-primary" (click)="viewDetail(order)">Theo dõi đơn hàng</button>
+                  </ng-container>
+
+                  <!-- Shipping -->
+                  <ng-container *ngSwitchCase="'shipping'">
+                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Theo dõi đơn hàng</button>
+                  </ng-container>
+
+                  <!-- Completed -->
+                  <ng-container *ngSwitchCase="'completed'">
+                    <button type="button" class="btn-action-primary">Đánh giá</button>
+                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" routerLink="/products">Mua lại</button>
+                  </ng-container>
+
+                  <!-- Cancelled -->
+                  <ng-container *ngSwitchCase="'cancelled'">
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Xem chi tiết đơn hủy</button>
+                    <button type="button" class="btn-action-outline" routerLink="/products">Mua lại</button>
+                  </ng-container>
+
+                  <!-- Refunded -->
+                  <ng-container *ngSwitchCase="'refunded'">
+                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Xem chi tiết</button>
+                  </ng-container>
+
+                  <!-- Default -->
+                  <ng-container *ngSwitchDefault>
+                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-primary" (click)="viewDetail(order)">Xem chi tiết</button>
+                  </ng-container>
+                </ng-container>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="filteredOrders.length === 0 && !loading">
+          <i class="bi bi-box2"></i>
+          <h3>Chưa có đơn hàng nào</h3>
+          <p>Không tìm thấy đơn hàng nào phù hợp với bộ lọc hiện tại.</p>
+          <a routerLink="/products" class="btn-shop-now">Mua sắm ngay</a>
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+</div>

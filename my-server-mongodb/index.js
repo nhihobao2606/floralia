@@ -1,4 +1,6 @@
 require('dotenv').config();
+const dns = require('dns');
+try { dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']); } catch (e) {}
 
 const express = require('express');
 const morgan = require('morgan');
@@ -8,11 +10,13 @@ const { MongoClient } = require('mongodb');
 
 const User = require('./models/user');
 const Product = require('./models/product');
+const Order = require('./models/order');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const addressRoutes = require('./routes/addressRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 const port = 3002;
@@ -44,6 +48,7 @@ app.use('/products', productRoutes);
 
 // API địa chỉ
 app.use('/api/addresses', addressRoutes);
+app.use('/api/orders', orderRoutes);
 
 async function startServer() {
     try {
@@ -58,6 +63,14 @@ async function startServer() {
             db.collection('Product'),
             db.collection('ProductAssets')
         );
+
+        Order.setCollection(db.collection('Orders'));
+        const orderCount = await Order.count();
+        if (orderCount === 0) {
+            const { initialOrders } = require('./controllers/orderController');
+            await Order.insertMany(initialOrders);
+            console.log('Đã nạp dữ liệu đơn hàng mẫu vào MongoDB: FloraliaTea.Orders');
+        }
 
         await db.collection('Users').createIndex(
             { email: 1 },

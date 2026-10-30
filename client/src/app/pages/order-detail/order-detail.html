@@ -1,0 +1,178 @@
+<div class="order-detail-page" *ngIf="order">
+
+  <!-- TOP TEA BANNER -->
+  <div class="top-banner-wrap">
+    <img src="/assets/images/banner2.png" alt="Floralia Herbal Tea" class="banner-img">
+  </div>
+
+  <div class="container detail-container">
+
+    <!-- PAGE TITLE -->
+    <h1 class="page-title">
+      Chi tiết đơn hàng · {{ order.date }} · {{ order.items.length }} Sản Phẩm
+    </h1>
+
+    <!-- 3-COLUMNS INFO CARDS -->
+    <div class="info-grid">
+
+      <!-- Box 1: Địa chỉ gửi -->
+      <div class="info-box">
+        <h3 class="box-title">ĐỊA CHỈ GỬI</h3>
+        <div class="box-content">
+          <p class="person-name">{{ order.sender?.name || 'Hà Anh' }}</p>
+          <p class="address-text">{{ order.sender?.address || '11A Bế Văn Đàn, Dĩ An, Bình Dương' }}</p>
+          <div class="contact-meta">
+            <span class="meta-label">EMAIL</span>
+            <span class="meta-val">{{ order.sender?.email || 'Haanh.BD@gmail.com' }}</span>
+          </div>
+          <div class="contact-meta">
+            <span class="meta-label">PHONE</span>
+            <span class="meta-val">{{ order.sender?.phone || '(671) 555-0110' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 2: Địa chỉ nhận -->
+      <div class="info-box">
+        <h3 class="box-title">ĐỊA CHỈ NHẬN</h3>
+        <div class="box-content">
+          <p class="person-name">{{ order.receiver?.name || 'Minh Trần' }}</p>
+          <p class="address-text">{{ order.receiver?.address || '12C, Võ Thị Sáu, Hà Tĩnh' }}</p>
+          <div class="contact-meta">
+            <span class="meta-label">EMAIL</span>
+            <span class="meta-val">{{ order.receiver?.email || 'MinhTran.thuu@gmail.com' }}</span>
+          </div>
+          <div class="contact-meta">
+            <span class="meta-label">PHONE</span>
+            <span class="meta-val">{{ order.receiver?.phone || '(671) 555-0110' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 3: Thông tin thanh toán & Tổng -->
+      <div class="info-box summary-box">
+        <div class="summary-top">
+          <div class="sum-row">
+            <span class="sum-label-dim">MÃ ĐƠN HÀNG</span>
+            <strong class="sum-code">{{ order.code }}</strong>
+          </div>
+          <div class="sum-row">
+            <span class="sum-label-dim">PHƯƠNG THỨC THANH TOÁN</span>
+            <strong class="sum-val">{{ order.paymentMethod }}</strong>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="summary-middle">
+          <div class="sum-row">
+            <span class="sum-label">Tổng đơn hàng</span>
+            <span class="sum-price">{{ formatPrice(order.subtotal) }}</span>
+          </div>
+          <div class="sum-row">
+            <span class="sum-label">Giảm giá</span>
+            <span class="sum-price">{{ (order.discount || 0).toLocaleString('vi-VN') }}</span>
+          </div>
+          <div class="sum-row">
+            <span class="sum-label">Phí vận chuyển</span>
+            <span class="sum-price">{{ order.shippingFee === 0 ? 'Free' : formatPrice(order.shippingFee) }}</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="summary-bottom">
+          <span class="total-label">Tổng</span>
+          <strong class="total-value">{{ formatPrice(order.total) }}</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PROGRESS STEPPER -->
+    <div class="stepper-section">
+      <div class="stepper-wrap">
+
+        <!-- Step 1 -->
+        <div class="step-item" [class.completed]="order.step >= 1" [class.active]="order.step === 1">
+          <div class="step-circle">
+            <i class="bi bi-check-lg" *ngIf="order.step >= 1"></i>
+            <span *ngIf="order.step < 1">01</span>
+          </div>
+          <span class="step-label">Nhận đơn</span>
+        </div>
+
+        <div class="step-line" [class.filled]="order.step >= 2"></div>
+
+        <!-- Step 2 -->
+        <div class="step-item" [class.completed]="order.step > 2" [class.active]="order.step >= 2">
+          <div class="step-circle">
+            <i class="bi bi-check-lg" *ngIf="order.step > 2"></i>
+            <span *ngIf="order.step <= 2">02</span>
+          </div>
+          <span class="step-label">Đang xử lý</span>
+        </div>
+
+        <div class="step-line" [class.filled]="order.step >= 3"></div>
+
+        <!-- Step 3 -->
+        <div class="step-item" [class.completed]="order.step > 3" [class.active]="order.step === 3">
+          <div class="step-circle">
+            <i class="bi bi-check-lg" *ngIf="order.step > 3"></i>
+            <span *ngIf="order.step <= 3">03</span>
+          </div>
+          <span class="step-label">Đang trên đường giao</span>
+        </div>
+
+        <div class="step-line" [class.filled]="order.step >= 4"></div>
+
+        <!-- Step 4 -->
+        <div class="step-item" [class.completed]="order.step >= 4" [class.active]="order.step === 4">
+          <div class="step-circle">
+            <span>04</span>
+          </div>
+          <span class="step-label">Đã giao</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PRODUCTS TABLE -->
+    <div class="products-table-card">
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th class="th-product">SẢN PHẨM</th>
+            <th class="th-price">GIÁ</th>
+            <th class="th-qty">SỐ LƯỢNG</th>
+            <th class="th-total">TỔNG</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let it of order.items">
+            <td class="td-product">
+              <div class="prod-cell">
+                <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'">
+                <div class="prod-desc">
+                  <strong>{{ it.name }}</strong>
+                  <span class="prod-variant" *ngIf="it.variant">{{ it.variant }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="td-price">{{ (it.price).toLocaleString('vi-VN') }}đ</td>
+            <td class="td-qty">x{{ it.quantity }}</td>
+            <td class="td-total">{{ (it.total || it.price * it.quantity).toLocaleString('vi-VN') }}đ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- BACK BUTTON -->
+    <div class="bottom-actions">
+      <button type="button" class="btn-back" (click)="goBack()">
+        <i class="bi bi-chevron-double-left"></i> Quay lại
+      </button>
+    </div>
+
+  </div>
+</div>

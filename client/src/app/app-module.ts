@@ -12,6 +12,9 @@ import { Login } from './pages/login/login';
 import { Signup } from './pages/signup/signup';
 import { Profile } from './pages/profile/profile';
 import { Addresses } from './pages/addresses/addresses';
+import { Orders } from './pages/orders/orders';
+import { OrderDetail } from './pages/order-detail/order-detail';
+import { OrderSuccess } from './pages/order-success/order-success';
 
 @NgModule({
   declarations: [
@@ -24,6 +27,9 @@ import { Addresses } from './pages/addresses/addresses';
     Signup,
     Profile,
     Addresses,
+    Orders,
+    OrderDetail,
+    OrderSuccess,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners()],
