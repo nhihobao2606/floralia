@@ -29,7 +29,7 @@
           Floralia mang đến những dòng trà thảo mộc được tuyển chọn kỹ lưỡng,
           giúp bạn tận hưởng những phút giây thư giãn và cân bằng giữa nhịp sống hiện đại.
         </p>
-        <a routerLink="/products" class="about-btn">
+        <a routerLink="/sales" class="about-btn">
           Khám phá ngay <i class="bi bi-arrow-right"></i>
         </a>
       </div>
@@ -49,7 +49,7 @@
     <div class="need-list">
       <a *ngFor="let n of needs; let i = index"
          class="need-card" [ngClass]="'tone-' + (i % 5)"
-         routerLink="/products" [queryParams]="{ congdung: n.slug }">
+         routerLink="/sales" [queryParams]="{ congdung: n.slug }">
         <div class="need-img"><img [src]="n.img" [alt]="n.title" /></div>
         <h5>{{ n.title }}</h5>
         <span>{{ n.desc }}</span>
@@ -93,7 +93,7 @@
     </div>
 
     <div class="view-more">
-      <a routerLink="/products" class="more-btn">Xem Thêm</a>
+      <a routerLink="/sales" class="more-btn">Xem Thêm</a>
     </div>
   </div>
 </section>
@@ -133,7 +133,7 @@
     <h2 class="heading text-center">Cảm hứng từ trà thảo mộc</h2>
 
     <div class="row g-4 justify-content-center">
-      <div class="col-md-6 col-lg-4" *ngFor="let b of blogs">
+      <div class="col-md-6 col-lg-4" *ngFor="let b of blogs()">
         <article class="blog-card">
           <a [routerLink]="b.link" class="blog-image"><img [src]="b.img" [alt]="b.title" /></a>
           <div class="blog-content">
@@ -146,7 +146,7 @@
       </div>
     </div>
     <div class="view-more">
-      <a routerLink="/blogs" class="more-btn">
+      <a routerLink="/blog" class="more-btn">
           Khám phá tất cả bài viết <i class="bi bi-arrow-right"></i>
       </a>
     </div>
@@ -159,7 +159,7 @@
     <div class="product-img">
       <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
       <span class="sale-badge" *ngIf="hasDiscount(p)">-{{ getDiscount(p) }}%</span>
-      <a [routerLink]="['/products', getProductId(p)]">
+      <a [routerLink]="['/sales']">
         <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
       </a>
       <button class="sale-heart" type="button" aria-label="Yêu thích"
@@ -169,7 +169,7 @@
     </div>
 
     <div class="product-info">
-      <a [routerLink]="['/products', getProductId(p)]" class="sale-name">{{ getProductName(p) }}</a>
+      <a [routerLink]="['/sales']" class="sale-name">{{ getProductName(p) }}</a>
 
       <div class="sale-rating">
         <i *ngFor="let s of stars" class="bi"
@@ -182,7 +182,7 @@
         <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
       </div>
 
-      <a class="sale-cart" [routerLink]="['/products', getProductId(p)]">
+      <a class="sale-cart" [routerLink]="['/sales']">
         Thêm vào giỏ hàng
       </a>
     </div>

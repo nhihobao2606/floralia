@@ -56,6 +56,9 @@ export class Login {
           // Lưu thông tin người dùng sau khi đăng nhập
           const storage = this.rememberMe ? localStorage : sessionStorage;
           storage.setItem('currentUser', JSON.stringify(user));
+          if (result.token) {
+            storage.setItem('token', result.token);
+          }
 
           // Gộp giỏ hàng khách với giỏ hàng của người dùng
           const guestCart = JSON.parse(localStorage.getItem('cart_guest') || '[]');

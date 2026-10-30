@@ -1,70 +1,74 @@
-require('dotenv').config();
 
-const express = require('express');
-const morgan = require('morgan');
-const path = require('path');
-const cors = require('cors');
-const { MongoClient } = require('mongodb');
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
-const User = require('./models/user');
-const Product = require('./models/product');
-
-const authRoutes = require('./routes/authRoutes');
-const productRoutes = require('./routes/productRoutes');
-
+const express = require("express");
 const app = express();
 const port = 3002;
 
-const client = new MongoClient(process.env.MONGODB_URI);
+const morgan = require("morgan");
+const cors = require("cors");
+const { MongoClient } = require("mongodb");
+const User = require("./models/user");
+const Product = require("./models/product");
+const Blog = require("./models/blog");
 
-app.use(morgan('combined'));
-app.use(express.static(path.join(__dirname, 'public')));
+const authRoutes = require("./routes/authRoutes");
+const productRoutes = require("./routes/productRoutes");
+const blogRoutes = require("./routes/blogRoutes");
+
+app.use(morgan("combined"));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({
-    limit: '50mb',
+    limit: "50mb",
     extended: true
 }));
 
-app.get('/', (req, res) => {
-    res.send('Floralia Web Server is running');
+app.get("/", (req, res) => {
+    res.send("Floralia Web Server is running");
 });
 
-// API đăng ký, đăng nhập
-app.use('/api/auth', authRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/products", productRoutes);
+app.use("/blogs", blogRoutes);
 
-// API sản phẩm
-app.use('/products', productRoutes);
+if (!process.env.MONGODB_URI) {
+    console.error("Thiếu MONGODB_URI trong file .env");
+    process.exit(1);
+}
+
+const client = new MongoClient(process.env.MONGODB_URI);
 
 async function startServer() {
     try {
         await client.connect();
 
-        const db = client.db('FloraliaTea');
+        const db = client.db(process.env.DB_NAME || "FloraliaTea");
 
-        User.setCollection(db.collection('Users'));
-
-        // Hai collection được quản lý trong models/product.js
+        User.setCollection(db.collection("Users"));
         Product.setCollections(
-            db.collection('Product'),
-            db.collection('ProductAssets')
+            db.collection("Product"),
+            db.collection("ProductAssets")
         );
+        Blog.setCollection(db.collection("Blogs"));
 
-        await db.collection('Users').createIndex(
+        await db.collection("Users").createIndex(
             { email: 1 },
             { unique: true }
         );
 
         await db.command({ ping: 1 });
 
-        console.log('Đã kết nối MongoDB: FloraliaTea');
+        console.log("Đã kết nối MongoDB:", db.databaseName);
 
         app.listen(port, () => {
             console.log(`Floralia Server listening on port ${port}`);
         });
     } catch (error) {
-        console.error('Không thể khởi động server:', error);
+        console.error("Không thể khởi động server:", error);
         process.exit(1);
     }
 }

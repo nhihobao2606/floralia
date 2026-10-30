@@ -9,10 +9,13 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Login } from './pages/login/login';
 import { Signup } from './pages/signup/signup';
+import { BlogComponent } from './pages/blog/blog';
+import { BlogDetailComponent } from './pages/blog-detail/blog-detail';
+import { PromotionsComponent } from './pages/promotions/promotions';
 import { Profile } from './profile/profile';
 
 @NgModule({
-  declarations: [App, Header, Footer, Homepage, Login, Signup, Profile],
+  declarations: [App, Header, Footer, Homepage, Login, Signup, BlogComponent, BlogDetailComponent, PromotionsComponent, Profile],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],

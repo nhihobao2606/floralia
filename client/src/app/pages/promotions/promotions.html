@@ -1,0 +1,232 @@
+<!-- ================= SĂN VOUCHER ĐẶC QUYỀN (HERO BANNER NỀN XANH SANG TRỌNG) ================= -->
+<section class="voucher-highlight-section">
+  <div class="container">
+    <div class="section-title-wrap text-center">
+      <p class="sub-title">Đặc quyền mùa trà</p>
+      <h1 class="section-heading">SĂN NGAY VOUCHER</h1>
+      <p class="section-sub">Lưu ngay mã ưu đãi để áp dụng khi thanh toán đơn hàng hôm nay</p>
+    </div>
+
+    <!-- 3 Big Voucher Cards (25% ở giữa là Hot Deal) -->
+    <div class="voucher-cards-row">
+      <!-- Voucher 1: Free Ship (Trái) -->
+      <div class="voucher-card" (click)="saveCoupon('FREESHIP199')">
+        <div class="voucher-notch top-notch"></div>
+        <div class="voucher-card-top">
+          <span class="v-tag"><i class="bi bi-truck me-1"></i>MIỄN PHÍ SHIP</span>
+          <h4>FREE SHIP</h4>
+        </div>
+        <div class="voucher-card-bottom">
+          <p>Đơn hàng từ 199.000đ</p>
+          <div class="voucher-code-pill">
+            <code>FREESHIP199</code>
+            <span class="btn-copy-code" [class.copied]="isCouponSaved('FREESHIP199')">
+              <i class="bi" [ngClass]="isCouponSaved('FREESHIP199') ? 'bi-check2' : 'bi-copy'"></i>
+              {{ isCouponSaved('FREESHIP199') ? 'Đã lưu' : 'Lưu mã' }}
+            </span>
+          </div>
+        </div>
+        <div class="voucher-notch bottom-notch"></div>
+      </div>
+
+      <!-- Voucher 2: Giảm 25% (Ở GIỮA - HOT DEAL) -->
+      <div class="voucher-card highlight hot-center" (click)="saveCoupon('SALE25')">
+        <div class="voucher-notch top-notch"></div>
+        <span class="ribbon-hot">HOT DEAL</span>
+        <div class="voucher-card-top">
+          <span class="v-tag hot-tag"><i class="bi bi-fire me-1"></i>SIÊU ƯU ĐÃI</span>
+          <h4>GIẢM 25%</h4>
+        </div>
+        <div class="voucher-card-bottom">
+          <p>Đơn hàng từ 299.000đ</p>
+          <div class="voucher-code-pill">
+            <code>SALE25</code>
+            <span class="btn-copy-code btn-hot" [class.copied]="isCouponSaved('SALE25')">
+              <i class="bi" [ngClass]="isCouponSaved('SALE25') ? 'bi-check2' : 'bi-copy'"></i>
+              {{ isCouponSaved('SALE25') ? 'Đã lưu' : 'Lưu mã' }}
+            </span>
+          </div>
+        </div>
+        <div class="voucher-notch bottom-notch"></div>
+      </div>
+
+      <!-- Voucher 3: Giảm 15% (Phải) -->
+      <div class="voucher-card" (click)="saveCoupon('SALE15')">
+        <div class="voucher-notch top-notch"></div>
+        <div class="voucher-card-top">
+          <span class="v-tag"><i class="bi bi-tag-fill me-1"></i>GIẢM TRỰC TIẾP</span>
+          <h4>GIẢM 15%</h4>
+        </div>
+        <div class="voucher-card-bottom">
+          <p>Đơn hàng từ 249.000đ</p>
+          <div class="voucher-code-pill">
+            <code>SALE15</code>
+            <span class="btn-copy-code" [class.copied]="isCouponSaved('SALE15')">
+              <i class="bi" [ngClass]="isCouponSaved('SALE15') ? 'bi-check2' : 'bi-copy'"></i>
+              {{ isCouponSaved('SALE15') ? 'Đã lưu' : 'Lưu mã' }}
+            </span>
+          </div>
+        </div>
+        <div class="voucher-notch bottom-notch"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COUNTDOWN FLASH DEAL HEADER ================= -->
+<section class="flash-deal-header-section text-center">
+  <div class="container">
+    <h3 class="flash-deal-sub">Giá rẻ deal duy nhất hôm nay</h3>
+    <div class="countdown-wrap">
+      <span class="countdown-label">Kết thúc sau:</span>
+      <div class="countdown-boxes">
+        <div class="timer-box">
+          <span class="timer-num">{{ countdown().days }}</span>
+          <span class="timer-unit">Ngày</span>
+        </div>
+        <div class="timer-box">
+          <span class="timer-num">{{ countdown().hours }}</span>
+          <span class="timer-unit">Giờ</span>
+        </div>
+        <div class="timer-box">
+          <span class="timer-num">{{ countdown().minutes }}</span>
+          <span class="timer-unit">Phút</span>
+        </div>
+        <div class="timer-box">
+          <span class="timer-num">{{ countdown().seconds }}</span>
+          <span class="timer-unit">Giây</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SECTION 1: KHUYẾN MÃI ĐẶC BIỆT ================= -->
+<section class="special-promo-section">
+  <div class="container">
+    <h2 class="section-heading text-center">KHUYẾN MÃI ĐẶC BIỆT</h2>
+
+    <!-- Product Grid dùng template thẻ chuẩn từ Homepage -->
+    <div class="product-list" *ngIf="!loading(); else skeleton">
+      <ng-container *ngFor="let p of specialPromos()">
+        <ng-container *ngTemplateOutlet="card; context: { $implicit: p }"></ng-container>
+      </ng-container>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SECTION 2: COUPON RIÊNG DÀNH CHO BẠN MỚI ================= -->
+<section class="coupons-section">
+  <div class="container">
+    <h2 class="section-heading text-center">COUPON RIÊNG DÀNH CHO BẠN MỚI</h2>
+
+    <!-- Coupons Grid (2 columns) -->
+    <div class="coupon-grid">
+      <div class="coupon-ticket" *ngFor="let cp of coupons">
+        <!-- Left Red Badge -->
+        <div class="ticket-left">
+          <div class="notch top-notch"></div>
+          <div class="ticket-badge-text">{{ cp.discountBadge }}</div>
+          <div class="ticket-sub">Đơn từ {{ cp.minOrder }}</div>
+          <div class="notch bottom-notch"></div>
+        </div>
+
+        <!-- Right Ticket Body -->
+        <div class="ticket-right">
+          <div class="ticket-info">
+            <span class="expiry-text">Hạn sử dụng: <strong>{{ cp.expiryDate }}</strong></span>
+            <p class="ticket-desc">{{ cp.desc }}</p>
+          </div>
+
+          <div class="ticket-action">
+            <button
+              type="button"
+              class="btn-save-coupon"
+              [class.saved]="isCouponSaved(cp.code)"
+              (click)="saveCoupon(cp.code)">
+              <i class="bi" [ngClass]="isCouponSaved(cp.code) ? 'bi-check2' : 'bi-bookmark-plus'"></i>
+              {{ isCouponSaved(cp.code) ? 'Đã lưu mã' : 'Lưu mã' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Copied alert banner -->
+    <div class="copy-toast" *ngIf="copiedCode()">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      Đã sao chép mã ưu đãi <strong>{{ copiedCode() }}</strong> vào bộ nhớ tạm!
+    </div>
+  </div>
+</section>
+
+<!-- ================= SECTION 3: NHỮNG ƯU ĐÃI LỚN ================= -->
+<section class="flash-deals-section">
+  <div class="container">
+    <h2 class="section-heading text-center">NHỮNG ƯU ĐÃI LỚN</h2>
+    <p class="section-sub text-center">
+      Các sản phẩm trà thảo mộc thượng hạng với mức ưu đãi giảm giá sâu từ 20% trở lên
+    </p>
+
+    <!-- Product Grid hiển thị sản phẩm giảm >= 20% từ MongoDB -->
+    <div class="product-list" *ngIf="!loading(); else skeleton">
+      <ng-container *ngFor="let p of bigDeals()">
+        <ng-container *ngTemplateOutlet="card; context: { $implicit: p }"></ng-container>
+      </ng-container>
+    </div>
+
+    <!-- Center View More Button -->
+    <div class="view-more-wrap text-center">
+      <a routerLink="/sales" class="btn-view-more">
+        XEM THÊM
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TEMPLATE THẺ SẢN PHẨM ================= -->
+<ng-template #card let-p let-rank="rank">
+  <div class="product-card">
+    <div class="product-img">
+      <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
+      <span class="sale-badge" *ngIf="hasDiscount(p)">-{{ getDiscount(p) }}%</span>
+      <a [routerLink]="['/sales']">
+        <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
+      </a>
+      <button class="sale-heart" type="button" aria-label="Yêu thích"
+              [class.on]="isWished(p)" (click)="toggleWish(p)">
+        <i class="bi" [ngClass]="isWished(p) ? 'bi-heart-fill' : 'bi-heart'"></i>
+      </button>
+    </div>
+
+    <div class="product-info">
+      <a [routerLink]="['/sales']" class="sale-name">{{ getProductName(p) }}</a>
+
+      <div class="sale-rating">
+        <i *ngFor="let s of stars" class="bi"
+           [ngClass]="s <= getRating(p) ? 'bi-star-fill' : 'bi-star'"></i>
+        <small>({{ getRatingCount(p) }})</small>
+      </div>
+
+      <div class="sale-price">
+        <span class="sale-current">{{ formatPrice(getProductPrice(p)) }}</span>
+        <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
+      </div>
+
+      <a class="sale-cart" [routerLink]="['/sales']">
+        Thêm vào giỏ hàng
+      </a>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ================= TEMPLATE SKELETON ================= -->
+<ng-template #skeleton>
+  <div class="product-list">
+    <div class="product-card sk" *ngFor="let s of [1, 2, 3, 4]">
+      <div class="sk-img"></div>
+      <div class="sk-line"></div>
+      <div class="sk-line short"></div>
+    </div>
+  </div>
+</ng-template>

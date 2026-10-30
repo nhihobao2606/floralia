@@ -1,6 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ProductService } from '../../services/product-service';
+import { BlogService } from '../../services/blog-service';
 import { Products } from '../../classes/Products';
+import { Blog } from '../../classes/Blog';
 
 @Component({
   selector: 'app-homepage',
@@ -61,11 +63,11 @@ export class Homepage implements OnInit {
     },
   ];
 
-  blogs = [
+  blogs = signal<any[]>([
     {
       img: '/assets/images/bl1.jpg',
       date: '29 Tháng 5, 2026',
-      link: '/blog/pha-tra-thao-moc',
+      link: '/blog',
       title: 'Pha Trà Thảo Mộc Chuẩn Floralia',
       desc: 'Khám phá cách pha trà thảo mộc để tận hưởng hương thơm và vị trà trọn vẹn.',
     },
@@ -83,9 +85,12 @@ export class Homepage implements OnInit {
       title: 'Trà Hoa Cúc Cho Khoảng Thời Gian Thư Giãn',
       desc: 'Tìm hiểu hương vị thanh nhẹ của trà hoa cúc và cách thưởng thức tại nhà.',
     },
-  ];
+  ]);
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private blogService: BlogService
+  ) {}
 
   ngOnInit(): void {
     this.productService.getAll().subscribe({
@@ -96,6 +101,7 @@ export class Homepage implements OnInit {
         else if (Array.isArray(res?.data)) list = res.data;
         else if (Array.isArray(res?.products)) list = res.products;
 
+        this.products.set(list);
 
         // Sản phẩm nổi bật (nếu chưa đánh dấu thì lấy các sản phẩm đầu).
         const featuredList = list.filter((p: any) => p.featured === true);
@@ -117,6 +123,34 @@ export class Homepage implements OnInit {
         this.loading.set(false);
       },
     });
+
+    // Tải bài viết blog nổi bật từ máy chủ
+    this.blogService.getAll({ limit: 3 }).subscribe({
+      next: (res) => {
+        if (res?.data && res.data.length > 0) {
+          const mapped = res.data.map((b: Blog) => ({
+            img: this.getBlogImg(b),
+            date: b.date || 'Gần đây',
+            link: `/blog/${b.slug}`,
+            title: b.title,
+            desc: b.excerpt || '',
+          }));
+          this.blogs.set(mapped);
+        }
+      },
+      error: (err) => {
+        console.warn('Không tải được blog từ API, dùng dữ liệu mặc định:', err);
+      },
+    });
+  }
+
+  private getBlogImg(blog: Blog): string {
+    if (blog.imageData) {
+      if (blog.imageData.startsWith('data:image/')) return blog.imageData;
+      const mime = blog.imageMimeType || 'image/jpeg';
+      return `data:${mime};base64,${blog.imageData}`;
+    }
+    return blog.image || '/assets/images/bl1.jpg';
   }
 
   getProductName(product: Products): string {
@@ -166,33 +200,42 @@ export class Homepage implements OnInit {
   }
 
   getProductImage(product: Products): string {
-  const p: any = product;
-  const thumbnail = p.thumbnail;
+    const p: any = product;
+    const thumbnail = p.thumbnail;
 
-  if (typeof thumbnail === 'string') {
-    if (
-      thumbnail.startsWith('http://') ||
-      thumbnail.startsWith('https://') ||
-      thumbnail.startsWith('data:image/')
-    ) {
-      return thumbnail;
+    if (typeof thumbnail === 'string') {
+      if (
+        thumbnail.startsWith('http://') ||
+        thumbnail.startsWith('https://') ||
+        thumbnail.startsWith('data:image/')
+      ) {
+        return thumbnail;
+      }
+
+      if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)) {
+        return thumbnail.startsWith('/assets/')
+          ? thumbnail
+          : thumbnail.startsWith('assets/')
+            ? `/${thumbnail}`
+            : `/assets/images/${thumbnail}`;
+      }
     }
 
-    if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)) {
-      return thumbnail.startsWith('/assets/')
-        ? thumbnail
-        : thumbnail.startsWith('assets/')
-          ? `/${thumbnail}`
-          : `/assets/images/${thumbnail}`;
+    if (p.imageData) {
+      if (p.imageData.startsWith('data:image/')) return p.imageData;
+      const mimeType = p.imageMimeType || 'image/webp';
+      return `data:${mimeType};base64,${p.imageData}`;
     }
-  }
 
     if (p.imageUrl) {
-      return `http://localhost:3002${p.imageUrl}`;
+      return p.imageUrl.startsWith('http://') || p.imageUrl.startsWith('https://')
+        ? p.imageUrl
+        : `http://localhost:3002${p.imageUrl}`;
     }
 
     return '/assets/images/no-image.svg';
   }
+
   getProductId(product: Products): string {
     const p: any = product;
     return p._id || p.id || p.productId || p.slug || '';
