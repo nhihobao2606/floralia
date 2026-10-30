@@ -1,5 +1,6 @@
 const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
+const User = require('../models/user');
 
 // GET /products
 async function getProducts(req, res) {
@@ -74,6 +75,73 @@ async function getProductImage(req, res) {
     }
 }
 
+// GET /products/reviews/:sku
+async function getProductReviews(req, res) {
+    try {
+        const reviews = await Product.getApprovedReviewsBySku(req.params.sku);
+        res.json(reviews);
+    } catch (error) {
+        console.error('Lỗi lấy đánh giá sản phẩm:', error);
+        res.status(500).json({
+            message: 'Không thể lấy đánh giá sản phẩm'
+        });
+    }
+}
+
+// POST /products/reviews
+async function createProductReview(req, res) {
+    const { productSku, rating, comment } = req.body || {};
+    const normalizedSku = typeof productSku === 'string' ? productSku.trim() : '';
+    const normalizedComment = typeof comment === 'string' ? comment.trim() : '';
+
+    if (
+        !normalizedSku ||
+        !Number.isInteger(rating) ||
+        rating < 1 ||
+        rating > 5 ||
+        !normalizedComment ||
+        normalizedComment.length > 2000
+    ) {
+        return res.status(400).json({
+            message: 'Vui lòng chọn đánh giá từ 1 đến 5 sao và nhập bình luận tối đa 2000 ký tự.'
+        });
+    }
+
+    try {
+        const user = await User.getById(req.userId);
+        const normalizedName = typeof user?.fullName === 'string' ? user.fullName.trim() : '';
+        if (!normalizedName) {
+            return res.status(401).json({
+                message: 'Không thể xác thực tài khoản. Vui lòng đăng nhập lại.'
+            });
+        }
+
+        const product = await Product.getBySku(normalizedSku);
+        if (!product) {
+            return res.status(404).json({
+                message: 'Không tìm thấy sản phẩm để lưu đánh giá.'
+            });
+        }
+
+        const review = await Product.createReview({
+            productSku: normalizedSku,
+            userName: normalizedName,
+            userAvatar: user.avatar || null,
+            rating,
+            comment: normalizedComment,
+            createdAt: new Date(),
+            isApproved: true
+        });
+
+        return res.status(201).json(review);
+    } catch (error) {
+        console.error('Lỗi lưu đánh giá sản phẩm:', error);
+        return res.status(500).json({
+            message: 'Không thể lưu đánh giá sản phẩm'
+        });
+    }
+}
+
 // GET /products/:id
 async function getProductById(req, res) {
     try {
@@ -131,5 +199,7 @@ async function getProductById(req, res) {
 module.exports = {
     getProducts,
     getProductById,
-    getProductImage
+    getProductImage,
+    getProductReviews,
+    createProductReview
 };

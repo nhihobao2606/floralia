@@ -13,8 +13,7 @@ describe('Header2', () => {
       imports: [HttpClientTestingModule, RouterTestingModule],
       declarations: [Header2],
       schemas: [NO_ERRORS_SCHEMA]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Header2);
     component = fixture.componentInstance;

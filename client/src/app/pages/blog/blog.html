@@ -1,0 +1,223 @@
+<!-- ================= BREADCRUMB ================= -->
+<div class="blog-breadcrumb">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a routerLink="/home"><i class="bi bi-house-door-fill me-1"></i>Trang chủ</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Tin tức</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- ================= MAIN BLOG SECTION ================= -->
+<section class="blog-page-section">
+  <!-- Decorative floating leaves -->
+  <div class="floating-decor leaf-1" aria-hidden="true">🍃</div>
+  <div class="floating-decor leaf-2" aria-hidden="true">🌿</div>
+  <div class="floating-decor leaf-3" aria-hidden="true">🌸</div>
+
+  <div class="container">
+    <!-- SECTION HEADER -->
+    <div class="section-header text-center">
+      <p class="sub-title">Được chia sẻ từ Floralia Herbal Tea</p>
+      <h1 class="main-heading">TIN TỨC</h1>
+     
+
+      <!-- CATEGORY TABS (Styled like Homepage Image 2) -->
+      <div class="category-tabs-wrapper">
+        <div class="category-tabs">
+          <button
+            *ngFor="let cat of categories"
+            type="button"
+            class="cat-tab"
+            [class.active]="selectedCategory() === cat.slug"
+            (click)="setCategory(cat.slug)">
+            {{ cat.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN TWO-COLUMN LAYOUT (Image 1 Structure + Image 2 Styling) -->
+    <div class="row g-4 blog-layout-row">
+
+      <!-- LEFT COLUMN: BLOG POSTS GRID (col-lg-8) -->
+      <div class="col-lg-8">
+
+        <!-- Search Bar on Mobile or Quick Filter -->
+        <div class="search-box-mobile d-lg-none mb-3">
+          <div class="search-input-wrap">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              placeholder="Tìm kiếm bài viết..."
+              [value]="searchQuery()"
+              (input)="onSearchChange($any($event.target).value)" />
+          </div>
+        </div>
+
+        <!-- SKELETON LOADING -->
+        <div class="blog-grid skeleton-grid" *ngIf="loading()">
+          <div class="blog-card-sk" *ngFor="let sk of [1, 2, 3, 4, 5, 6]">
+            <div class="sk-img"></div>
+            <div class="sk-content">
+              <div class="sk-line sk-title"></div>
+              <div class="sk-line sk-desc"></div>
+              <div class="sk-line sk-meta"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state text-center" *ngIf="!loading() && blogs().length === 0">
+          <div class="empty-icon"><i class="bi bi-journal-x"></i></div>
+          <h3>Không tìm thấy bài viết nào</h3>
+          <p>Hãy thử tìm kiếm với từ khóa khác hoặc chuyển sang danh mục khác nhé.</p>
+          <button type="button" class="btn-reset-filter" (click)="setCategory('all'); onSearchChange('')">
+            Xem tất cả bài viết
+          </button>
+        </div>
+
+        <!-- BLOG CARDS GRID (Đồng bộ với Trang chủ như ảnh 1) -->
+        <div class="blog-grid" *ngIf="!loading() && blogs().length > 0">
+          <article
+            class="blog-card"
+            *ngFor="let blog of blogs(); let i = index"
+            [style.--i]="i">
+
+            <!-- Card Image (flush with top edges like Homepage) -->
+            <a [routerLink]="['/blog', blog.slug]" class="blog-image">
+              <img
+                [src]="getBlogImage(blog)"
+                [alt]="blog.title"
+                loading="lazy" />
+            </a>
+
+            <!-- Card Content (exact layout from Homepage) -->
+            <div class="blog-content">
+              <span class="blog-date">
+                <i class="bi bi-calendar3"></i> {{ blog.date }}
+              </span>
+
+              <a [routerLink]="['/blog', blog.slug]">
+                <h3>{{ blog.title }}</h3>
+              </a>
+
+              <p>{{ blog.excerpt }}</p>
+
+              <a [routerLink]="['/blog', blog.slug]" class="blog-btn">
+                Xem thêm
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <!-- PAGINATION (Matching Image 1: < 1 2 3 >) -->
+        <div class="pagination-wrapper" *ngIf="!loading() && totalPages() > 1">
+          <nav aria-label="Phân trang blog">
+            <ul class="pagination-list">
+              <!-- Prev Button -->
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button
+                  type="button"
+                  class="page-btn nav-btn"
+                  (click)="prevPage()"
+                  aria-label="Trang trước"
+                  [disabled]="currentPage() === 1">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+
+              <!-- Page Numbers -->
+              <li class="page-item" *ngFor="let p of pages()">
+                <button
+                  type="button"
+                  class="page-btn number-btn"
+                  [class.active]="currentPage() === p"
+                  (click)="changePage(p)">
+                  {{ p }}
+                </button>
+              </li>
+
+              <!-- Next Button -->
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button
+                  type="button"
+                  class="page-btn nav-btn"
+                  (click)="nextPage()"
+                  aria-label="Trang sau"
+                  [disabled]="currentPage() === totalPages()">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: SIDEBAR (TIN TỨC NỔI BẬT matching Image 1) -->
+      <aside class="col-lg-4">
+        <div class="sidebar-sticky-wrap">
+
+          <!-- SEARCH WIDGET -->
+          <div class="sidebar-card search-widget">
+            <h4 class="sidebar-title">
+              <i class="bi bi-search me-2"></i>Tìm kiếm bài viết
+            </h4>
+            <div class="search-input-group">
+              <input
+                type="text"
+                class="sidebar-search-input"
+                placeholder="Nhập tên bài viết, trà..."
+                [value]="searchQuery()"
+                (input)="onSearchChange($any($event.target).value)" />
+              <button type="button" class="sidebar-search-btn" aria-label="Tìm kiếm">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- TIN TỨC NỔI BẬT (FEATURED POSTS ACCORDION) -->
+          <div class="sidebar-card featured-widget">
+            <div class="sidebar-header" (click)="toggleSidebar()">
+              <h3 class="sidebar-title mb-0">
+                <i></i>TIN TỨC NỔI BẬT
+              </h3>
+              <button type="button" class="accordion-toggle-btn" aria-label="Thu gọn/mở rộng">
+                <i class="bi" [ngClass]="sidebarOpen() ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+              </button>
+            </div>
+
+            <!-- Featured Posts List -->
+            <div class="featured-list" [class.collapsed]="!sidebarOpen()">
+              <div
+                class="featured-item"
+                *ngFor="let item of featuredBlogs()"
+                [routerLink]="['/blog', item.slug]">
+                <!-- Thumbnail -->
+                <div class="featured-thumb">
+                  <img [src]="getBlogImage(item)" [alt]="item.title" loading="lazy" />
+                </div>
+                <!-- Info -->
+                <div class="featured-info">
+                  <h4 class="featured-title">{{ item.title }}</h4>
+                  <div class="featured-meta">
+                    <span class="meta-author">{{ item.author }}</span>
+                    <span class="meta-dash">-</span>
+                    <span class="meta-date">{{ item.date }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>

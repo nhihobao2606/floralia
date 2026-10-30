@@ -59,6 +59,7 @@ export class Login {
 
           // Lưu thông tin người dùng và token đăng nhập.
           storage.setItem('currentUser', JSON.stringify(user));
+          
           storage.setItem('token', result.token);
 
           // Gộp giỏ hàng khách với giỏ hàng của người dùng.

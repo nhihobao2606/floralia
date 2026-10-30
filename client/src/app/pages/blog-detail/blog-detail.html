@@ -1,0 +1,201 @@
+<!-- ================= BREADCRUMB ================= -->
+<div class="blog-breadcrumb">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a routerLink="/home"><i class="bi bi-house-door-fill me-1"></i>Trang chủ</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a routerLink="/blog">Tin tức</a>
+        </li>
+        <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 400px;">
+          {{ blog()?.title || 'Chi tiết bài viết' }}
+        </li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<section class="blog-detail-section">
+  <!-- Decorative floating leaves -->
+  <div class="floating-decor leaf-1" aria-hidden="true">🍃</div>
+  <div class="floating-decor leaf-2" aria-hidden="true">🌿</div>
+
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- MAIN ARTICLE COLUMN (col-lg-8) -->
+      <main class="col-lg-8">
+
+        <!-- LOADING SKELETON -->
+        <div class="article-skeleton" *ngIf="loading()">
+          <div class="sk-line sk-title mb-3"></div>
+          <div class="sk-line sk-meta mb-4"></div>
+          <div class="sk-img mb-4"></div>
+          <div class="sk-line mb-2"></div>
+          <div class="sk-line mb-2"></div>
+          <div class="sk-line mb-2"></div>
+          <div class="sk-line short"></div>
+        </div>
+
+        <!-- NOT FOUND STATE -->
+        <div class="empty-state text-center" *ngIf="!loading() && !blog()">
+          <div class="empty-icon"><i class="bi bi-file-earmark-x"></i></div>
+          <h3>Không tìm thấy bài viết</h3>
+          <p>Bài viết bạn đang tìm kiếm có thể đã được thay đổi hoặc không tồn tại.</p>
+          <a routerLink="/blog" class="btn-return-list">
+            <i class="bi bi-arrow-left me-2"></i> Quay lại danh sách tin tức
+          </a>
+        </div>
+
+        <!-- ARTICLE CARD -->
+        <article class="article-card" *ngIf="!loading() && blog()">
+
+          <!-- Top Navigation Bar -->
+          <div class="article-top-bar">
+            <a routerLink="/blog" class="btn-back-link">
+              <i class="bi bi-arrow-left"></i> Quay lại danh sách tin tức
+            </a>
+            <span class="category-badge">{{ blog()?.category }}</span>
+          </div>
+
+          <!-- Title -->
+          <h1 class="article-title">{{ blog()?.title }}</h1>
+
+          <!-- Meta Information -->
+          <div class="article-meta">
+            <span class="meta-item">
+              <i class="bi bi-person-circle"></i>
+              Bởi: <strong>{{ blog()?.author }}</strong>
+            </span>
+            <span class="meta-dot">•</span>
+            <span class="meta-item">
+              <i class="bi bi-calendar3"></i>
+              {{ blog()?.date }}
+            </span>
+            <span class="meta-dot">•</span>
+            <span class="meta-item">
+              <i class="bi bi-clock"></i>
+              {{ blog()?.readTime || '4 phút đọc' }}
+            </span>
+            <span class="meta-dot">•</span>
+            <span class="meta-item">
+              <i class="bi bi-eye"></i>
+              {{ blog()?.views || 1000 }} lượt xem
+            </span>
+          </div>
+
+          <!-- Featured Image -->
+          <div class="article-featured-image">
+            <img [src]="getBlogImage(blog())" [alt]="blog()?.title" class="featured-img" />
+          </div>
+
+          <!-- Article Content Body -->
+          <div class="article-body" [innerHTML]="blog()?.content"></div>
+
+          <!-- Tags & Social Share -->
+          <div class="article-bottom-bar">
+            <div class="tags-group" *ngIf="blog()?.tags?.length">
+              <span class="tags-title"><i class="bi bi-tags-fill me-1"></i> Chủ đề:</span>
+              <span *ngFor="let tag of blog()?.tags" class="tag-badge">{{ tag }}</span>
+            </div>
+
+            <div class="share-group">
+              <span class="share-title">Chia sẻ:</span>
+              <a href="https://facebook.com" target="_blank" class="share-icon" title="Chia sẻ qua Facebook">
+                <i class="bi bi-facebook"></i>
+              </a>
+              <a href="https://twitter.com" target="_blank" class="share-icon" title="Chia sẻ qua Twitter / X">
+                <i class="bi bi-twitter-x"></i>
+              </a>
+              <button type="button" class="share-icon btn-copy" (click)="copyLink()" title="Sao chép đường dẫn">
+                <i class="bi" [ngClass]="copied() ? 'bi-check2' : 'bi-link-45deg'"></i>
+              </button>
+              <span class="copy-alert" *ngIf="copied()">Đã sao chép!</span>
+            </div>
+          </div>
+
+          
+
+          <!-- Return to Blog button -->
+          <div class="article-actions text-center">
+            <a routerLink="/blog" class="btn-return-list">
+              <i class="bi bi-arrow-left me-2"></i> Trở về danh sách bài viết
+            </a>
+          </div>
+
+        </article>
+
+        <!-- RELATED POSTS SECTION (Đồng bộ kiểu thẻ như ảnh 1) -->
+        <section class="related-section" *ngIf="!loading() && relatedBlogs().length > 0">
+          <div class="related-header">
+            <p class="sub-title">Khám phá thêm</p>
+            <h3 class="related-heading">Bài viết cùng chủ đề</h3>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-6" *ngFor="let rel of relatedBlogs()">
+              <article class="blog-card">
+                <a [routerLink]="['/blog', rel.slug]" class="blog-image">
+                  <img [src]="getBlogImage(rel)" [alt]="rel.title" />
+                </a>
+                <div class="blog-content">
+                  <span class="blog-date"><i class="bi bi-calendar3"></i> {{ rel.date }}</span>
+                  <a [routerLink]="['/blog', rel.slug]">
+                    <h3>{{ rel.title }}</h3>
+                  </a>
+                  <p>{{ rel.excerpt }}</p>
+                  <a [routerLink]="['/blog', rel.slug]" class="blog-btn">Xem thêm</a>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- RIGHT SIDEBAR (TIN TỨC NỔI BẬT) -->
+      <aside class="col-lg-4">
+        <div class="sidebar-sticky-wrap">
+
+          <!-- TIN TỨC NỔI BẬT -->
+          <div class="sidebar-card featured-widget">
+            <div class="sidebar-header" (click)="toggleSidebar()">
+              <h3 class="sidebar-title mb-0">
+                <i></i>TIN TỨC NỔI BẬT
+              </h3>
+              <button type="button" class="accordion-toggle-btn" aria-label="Thu gọn/mở rộng">
+                <i class="bi" [ngClass]="sidebarOpen() ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+              </button>
+            </div>
+
+            <!-- Featured Posts List -->
+            <div class="featured-list" [class.collapsed]="!sidebarOpen()">
+              <div
+                class="featured-item"
+                *ngFor="let item of featuredBlogs()"
+                [routerLink]="['/blog', item.slug]">
+                <!-- Thumbnail -->
+                <div class="featured-thumb">
+                  <img [src]="getBlogImage(item)" [alt]="item.title" loading="lazy" />
+                </div>
+                <!-- Info -->
+                <div class="featured-info">
+                  <h4 class="featured-title">{{ item.title }}</h4>
+                  <div class="featured-meta">
+                    <span class="meta-author">{{ item.author }}</span>
+                    <span class="meta-dash">-</span>
+                    <span class="meta-date">{{ item.date }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>

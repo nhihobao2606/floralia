@@ -1,5 +1,4 @@
 <header class="site-header">
-  <!-- TOP BAR -->
   <div class="top-bar">
     <i class="bi bi-flower1"></i>
     Khám phá ngay sản phẩm trà thảo mộc thiên nhiên của Floralia Herbal Tea!
@@ -9,7 +8,6 @@
   <!-- NAVBAR (CUSTOMER HEADER) -->
   <nav class="navbar navbar-expand-lg" [class.scrolled]="scrolled">
     <div class="container">
-
       <a class="navbar-brand" routerLink="/home">
         <img src="/assets/images/logo.png" class="logo" alt="Floralia Herbal Tea">
       </a>
@@ -23,21 +21,18 @@
         <ul class="navbar-nav mx-auto">
           <li class="nav-item"><a class="nav-link" routerLink="/home" routerLinkActive="active">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" routerLink="/about" routerLinkActive="active">Giới thiệu</a></li>
-
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" routerLink="/products" routerLinkActive="active">Sản phẩm</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'tra-thao-moc' }">Trà thảo mộc</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'tra-thao-moc-mix' }">Trà thảo mộc mix</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'do-uong-kem-tra' }">Đồ uống kèm trà</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'am-tra' }">Ấm trà</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'set-qua-tang' }">Set quà tặng</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc' }">Trà thảo mộc</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc-mix' }">Trà thảo mộc mix</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'do-uong-kem-tra' }">Đồ uống kèm trà</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'am-tra' }">Ấm trà</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'set-qua-tang' }">Set quà tặng</a></li>
             </ul>
           </li>
-
           <li class="nav-item"><a class="nav-link" routerLink="/blog" routerLinkActive="active">Blog</a></li>
           <li class="nav-item"><a class="nav-link" routerLink="/sales" routerLinkActive="active">Khuyến mãi</a></li>
-
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" routerLink="/return-policy">Hỗ trợ</a>
             <ul class="dropdown-menu">
@@ -49,14 +44,10 @@
               <li><a class="dropdown-item" routerLink="/faq">Câu hỏi thường gặp</a></li>
             </ul>
           </li>
-
           <li class="nav-item"><a class="nav-link" routerLink="/contact" routerLinkActive="active">Liên hệ</a></li>
         </ul>
 
-        <!-- ICON GROUP: Thứ tự: Tìm kiếm -> Giỏ hàng -> Avatar người dùng -->
         <div class="icon-group">
-
-          <!-- 1. Icon Tìm kiếm -->
           <div class="search-container-box">
             <button type="button" class="icon-btn" (click)="toggleSearch($event)" aria-label="Tìm kiếm">
               <i class="bi bi-search"></i>
@@ -65,7 +56,6 @@
             <div class="search-dropdown" [class.show]="searchOpen" (click)="$event.stopPropagation()">
               <div class="search-dropdown-arrow"></div>
               <h3><i class="bi bi-search-heart"></i> Tìm kiếm</h3>
-
               <form class="search-bar-box" (submit)="submitSearch($event)">
                 <input #searchBox type="text" [value]="keyword" (input)="onSearch($any($event.target).value)"
                        placeholder="Tìm trà, ấm trà, set quà tặng..." autocomplete="off">
@@ -73,13 +63,8 @@
               </form>
 
               <div class="search-results-list">
-                <a *ngFor="let p of results" class="search-item" [routerLink]="['/products', getId(p)]">
-                  <img
-                    [src]="getSearchProductImage(p)"
-                    [alt]="getName(p)"
-                    (error)="onImgError($event)"
-                  />
-                  
+                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p }">
+                  <img [src]="getSearchProductImage(p)" [alt]="getName(p)" (error)="onImgError($event)">
                   <div class="search-item-info">
                     <span class="search-item-name">{{ getName(p) }}</span>
                     <span class="search-item-price">{{ formatPrice(getPrice(p)) }}</span>
@@ -100,7 +85,6 @@
             </div>
           </div>
 
-          <!-- 2. Icon Giỏ hàng (đứng trước avatar) -->
           <button type="button" class="icon-btn" id="cart-btn" (click)="openCart($event)" aria-label="Giỏ hàng">
             <i class="bi bi-bag"></i>
             <span class="cart-badge" [class.bump]="cartCount > 0">{{ cartCount }}</span>
@@ -138,37 +122,31 @@
     </div>
   </nav>
 
-  <!-- CÁC NÚT CỐ ĐỊNH -->
   <div class="contact-buttons" [class.show]="showFloat">
     <button type="button" class="fab fab-top" (click)="scrollTop()" aria-label="Lên đầu trang">
       <span class="fab-label">Lên đầu trang</span>
       <i class="bi bi-arrow-up-short"></i>
     </button>
-
     <a routerLink="/mix-tra" class="fab fab-mix" [class.show-pop]="showInvite">
       <span class="mix-invite-text">Tự mix trà theo sở thích cá nhân!<br>Khám phá ngay 🍃</span>
       <i class="bi bi-cup-hot-fill"></i>
       <i class="bi bi-stars sparkle s1"></i>
       <i class="bi bi-stars sparkle s2"></i>
     </a>
-
     <a href="tel:0901234567" class="fab fab-phone" title="Gọi ngay">
       <span class="fab-label">Gọi ngay</span>
       <i class="bi bi-telephone-fill"></i>
     </a>
-
     <a href="https://zalo.me/your_id" target="_blank" rel="noopener" class="fab fab-zalo" title="Chat Zalo">
       <span class="fab-label">Chat Zalo</span>
       <b>Zalo</b>
     </a>
-
     <a href="https://m.me/your_page" target="_blank" rel="noopener" class="fab fab-messenger" title="Messenger">
       <span class="fab-label">Messenger</span>
       <i class="bi bi-messenger"></i>
     </a>
   </div>
 
-  <!-- GIỎ HÀNG -->
   <div class="cart-overlay" [class.active]="cartOpen" (click)="closeCart()"></div>
   <aside class="cart-sidebar" [class.active]="cartOpen" aria-label="Giỏ hàng">
     <div class="cart-header">
@@ -189,14 +167,27 @@
           <img [src]="cartImage(it)" [alt]="it.name" (error)="onImgError($event)">
           <div class="cart-info">
             <h5>{{ it.name || it.title }}</h5>
-            <div class="quantity">
-              <button type="button" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
-              <span>{{ it.quantity }}</span>
-              <button type="button" (click)="changeQty(it, 1)" aria-label="Tăng">+</button>
+            <div class="cart-controls">
+              <div class="quantity">
+                <button type="button" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
+                <span>{{ it.quantity }}</span>
+                <button type="button" (click)="changeQty(it, 1)" aria-label="Tăng">+</button>
+              </div>
+              <button
+                *ngIf="(it.variantCount ?? 2) > 1"
+                type="button"
+                class="change-variant-button"
+                [attr.aria-label]="'Đổi phân loại: ' + it.variantLabel"
+                (click)="openVariantPicker(it)">
+                <span>{{ it.variantLabel || 'Chọn phân loại' }}</span>
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+              </button>
             </div>
             <div class="cart-price">{{ formatPrice(+it.price * +it.quantity) }}</div>
           </div>
-          <button type="button" class="remove-item" (click)="removeItem(it)" aria-label="Xóa"><i class="bi bi-trash3"></i></button>
+          <button type="button" class="remove-item" (click)="removeItem(it)" aria-label="Xóa">
+            <i class="bi bi-trash3"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -210,4 +201,63 @@
       <a class="view-cart-btn" routerLink="/cart" (click)="closeCart()">Xem giỏ hàng</a>
     </div>
   </aside>
+
+  <div
+    class="variant-picker-overlay"
+    *ngIf="variantPickerItem"
+    (click)="closeVariantPicker()">
+    <section
+      class="variant-picker-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cartVariantTitle"
+      (click)="$event.stopPropagation()">
+      <button type="button" class="cart-add-close" aria-label="Đóng" (click)="closeVariantPicker()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+
+      <div class="cart-add-product">
+        <img [src]="cartImage(variantPickerItem)" [alt]="variantPickerItem?.name || 'Sản phẩm'">
+        <div>
+          <p class="cart-add-eyebrow">ĐỔI PHÂN LOẠI</p>
+          <h2 id="cartVariantTitle">{{ variantPickerItem?.name || variantPickerItem?.title }}</h2>
+          <strong>{{ formatPrice(variantPickerPrice) }}</strong>
+        </div>
+      </div>
+
+      <p *ngIf="variantPickerLoading" class="variant-picker-state">Đang tải phân loại...</p>
+      <div class="cart-add-variants" *ngIf="!variantPickerLoading && variantOptions.length">
+        <h3>Phân loại</h3>
+        <div class="cart-add-variant-options">
+          <button
+            *ngFor="let variant of variantOptions"
+            type="button"
+            class="cart-add-variant"
+            [class.selected]="selectedVariant?.sku === variant.sku"
+            [disabled]="(variant.stock ?? 0) < 1"
+            [attr.aria-pressed]="selectedVariant?.sku === variant.sku"
+            (click)="selectVariant(variant)">
+            {{ variant.label }}
+            <small *ngIf="(variant.stock ?? 0) < 1">Hết hàng</small>
+          </button>
+        </div>
+      </div>
+      <p class="variant-picker-error" *ngIf="variantPickerError">{{ variantPickerError }}</p>
+
+      <div class="cart-add-footer">
+        <div class="cart-add-quantity" aria-label="Số lượng">
+          <button type="button" aria-label="Giảm số lượng" [disabled]="variantPickerQuantity <= 1" (click)="changeVariantPickerQuantity(-1)">−</button>
+          <span aria-live="polite">{{ variantPickerQuantity }}</span>
+          <button type="button" aria-label="Tăng số lượng" [disabled]="variantPickerQuantity >= (selectedVariant?.stock ?? 0)" (click)="changeVariantPickerQuantity(1)">+</button>
+        </div>
+        <button
+          type="button"
+          class="cart-add-confirm"
+          [disabled]="variantPickerLoading || !selectedVariant || (selectedVariant.stock ?? 0) < 1"
+          (click)="confirmVariantChange()">
+          Xác nhận
+        </button>
+      </div>
+    </section>
+  </div>
 </header>

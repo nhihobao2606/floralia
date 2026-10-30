@@ -1,4 +1,6 @@
-import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeVi from '@angular/common/locales/vi';
+import { LOCALE_ID, NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -12,9 +14,16 @@ import { Login } from './pages/login/login';
 import { Signup } from './pages/signup/signup';
 import { Profile } from './pages/profile/profile';
 import { Addresses } from './pages/addresses/addresses';
+import { ProductListComponent } from './product-list/product-list';
+import { ProductDetail } from './product-detail/product-detail';
+import { BlogComponent } from './pages/blog/blog';
+import { BlogDetailComponent } from './pages/blog-detail/blog-detail';
+import { PromotionsComponent } from './pages/promotions/promotions';
 import { Orders } from './pages/orders/orders';
 import { OrderDetail } from './pages/order-detail/order-detail';
 import { OrderSuccess } from './pages/order-success/order-success';
+
+registerLocaleData(localeVi);
 
 @NgModule({
   declarations: [
@@ -27,12 +36,17 @@ import { OrderSuccess } from './pages/order-success/order-success';
     Signup,
     Profile,
     Addresses,
+    ProductListComponent,
+    ProductDetail,
+    BlogComponent,
+    BlogDetailComponent,
+    PromotionsComponent,
     Orders,
     OrderDetail,
     OrderSuccess,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
-  providers: [provideBrowserGlobalErrorListeners()],
+  providers: [provideBrowserGlobalErrorListeners(), { provide: LOCALE_ID, useValue: 'vi' }],
   bootstrap: [App],
 })
 export class AppModule {}

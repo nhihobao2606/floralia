@@ -1,0 +1,397 @@
+<main class="product-detail-page">
+  <nav class="detail-breadcrumb" aria-label="Điều hướng">
+    <a href="/home">Trang chủ</a>
+    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+    <a href="/products">Sản phẩm</a>
+    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+    <span>{{ product?.name || 'Chi tiết sản phẩm' }}</span>
+  </nav>
+
+  <div class="detail-container">
+    <section *ngIf="!loading && errorMessage" class="page-state error-state">
+      <i class="bi bi-emoji-frown" aria-hidden="true"></i>
+      <p>{{ errorMessage }}</p>
+      <button type="button" class="secondary-button" (click)="goToProducts()">Quay lại sản phẩm</button>
+    </section>
+
+    <ng-container *ngIf="product as item">
+      <section class="product-overview">
+        <div class="gallery">
+          <div class="main-image">
+            <img [src]="activeImage" [alt]="item.name || 'Ảnh sản phẩm'" (error)="onImageError($event)">
+            <button
+              *ngIf="galleryImages.length > 1"
+              type="button"
+              class="gallery-arrow gallery-arrow-previous"
+              aria-label="Xem ảnh trước"
+              (click)="moveGalleryImage(-1)">
+              <i class="bi bi-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button
+              *ngIf="galleryImages.length > 1"
+              type="button"
+              class="gallery-arrow gallery-arrow-next"
+              aria-label="Xem ảnh tiếp theo"
+              (click)="moveGalleryImage(1)">
+              <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="main-image-favorite"
+              [class.on]="favorite"
+              [attr.aria-pressed]="favorite"
+              [attr.aria-label]="favorite ? 'Bỏ yêu thích ' + item.name : 'Thêm ' + item.name + ' vào yêu thích'"
+              (click)="toggleFavorite()">
+              <i class="bi" [class.bi-heart-fill]="favorite" [class.bi-heart]="!favorite" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="thumbnail-list" *ngIf="galleryImages.length > 1" aria-label="Ảnh sản phẩm">
+            <button
+              *ngFor="let image of galleryImages; let i = index"
+              type="button"
+              class="thumbnail-button"
+              [class.selected]="activeImage === image"
+              [attr.aria-label]="'Xem ảnh sản phẩm ' + (i + 1)"
+              [attr.aria-pressed]="activeImage === image"
+              (click)="selectImage(image)">
+              <img [src]="image" [alt]="(item.name || 'Sản phẩm') + ' - ảnh ' + (i + 1)" (error)="onImageError($event)">
+            </button>
+          </div>
+        </div>
+
+        <div class="product-summary">
+          <p class="eyebrow">{{ item.brand || 'Floralia Tea' }}</p>
+          <h1 class="product-title">{{ item.name }}</h1>
+
+          <div class="rating-line">
+            <span class="stars" [attr.aria-label]="'Đánh giá ' + displayedRatingAverage + ' trên 5'">
+              <i
+                *ngFor="let star of [1, 2, 3, 4, 5]"
+                class="bi"
+                [class.bi-star-fill]="star <= displayedRoundedRating"
+                [class.bi-star]="star > displayedRoundedRating">
+              </i>
+            </span>
+            <span>{{ displayedRatingAverageLabel }} / 5</span>
+            <span class="rating-divider"></span>
+            <span>{{ displayedRatingCount }} đánh giá</span>
+            <span class="rating-divider"></span>
+            <span>SKU: {{ currentSku }}</span>
+          </div>
+
+          <div class="price-line">
+            <span class="current-price">{{ formatPrice(currentPrice) }}</span>
+            <span class="old-price" *ngIf="currentOldPrice > currentPrice">
+              {{ formatPrice(currentOldPrice) }}
+            </span>
+            <span class="saving-badge" *ngIf="discountPercent > 0">Tiết kiệm {{ discountPercent }}%</span>
+          </div>
+
+          <p class="product-description">{{ item.description || item.story }}</p>
+
+          <div class="variant-section" *ngIf="item.variants?.length">
+            <div class="section-label">
+              <span>Phân loại</span>
+              <span class="selected-variant">{{ selectedVariant?.label }}</span>
+            </div>
+            <div class="variant-options">
+              <button
+                *ngFor="let variant of item.variants"
+                type="button"
+                class="variant-option"
+                [class.selected]="selectedVariant?.sku === variant.sku"
+                [disabled]="variant.stock < 1"
+                [attr.aria-pressed]="selectedVariant?.sku === variant.sku"
+                (click)="selectVariant(variant)">
+                {{ variant.label }}
+                <small *ngIf="variant.stock < 1">Hết hàng</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="stock-line" [class.out-of-stock]="currentStock < 1">
+            <i class="bi" [class.bi-check-circle-fill]="currentStock > 0" [class.bi-x-circle-fill]="currentStock < 1"></i>
+            {{ currentStock > 0 ? 'Còn ' + currentStock + ' sản phẩm' : 'Tạm hết hàng' }}
+          </div>
+
+          <div class="purchase-row">
+            <div class="quantity-control" aria-label="Số lượng">
+              <button type="button" aria-label="Giảm số lượng" [disabled]="quantity <= 1" (click)="changeQuantity(-1)">−</button>
+              <span aria-live="polite">{{ quantity }}</span>
+              <button type="button" aria-label="Tăng số lượng" [disabled]="quantity >= currentStock" (click)="changeQuantity(1)">+</button>
+            </div>
+            <button type="button" class="add-cart-button" [disabled]="currentStock < 1" (click)="addToCart()">
+              <i class="bi bi-bag-plus" aria-hidden="true"></i>
+              Thêm vào giỏ hàng
+            </button>
+            <button type="button" class="buy-now-button" [disabled]="currentStock < 1">
+              <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+              Mua ngay
+            </button>
+          </div>
+          <div class="quick-details">
+            <p *ngIf="item.category"><i class="bi bi-tag"></i><strong>Danh mục:</strong> {{ item.category }}</p>
+            <p *ngIf="item.benefits?.length || item.tags?.length">
+              <i class="bi bi-flower1"></i><strong>Công dụng:</strong>
+              {{ (item.tags?.length ? item.tags : item.benefits)?.join(', ') }}
+            </p>
+            <p *ngIf="item.flavorNote"><i class="bi bi-cup-hot"></i><strong>Hương vị:</strong> {{ item.flavorNote }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="information-section">
+        <div class="tab-list" role="tablist" aria-label="Thông tin sản phẩm">
+          <button type="button" role="tab" [attr.aria-selected]="activeTab === 'info'" [class.active]="activeTab === 'info'" (click)="setTab('info')">
+            Mô tả sản phẩm
+          </button>
+          <button type="button" role="tab" [attr.aria-selected]="activeTab === 'detail'" [class.active]="activeTab === 'detail'" (click)="setTab('detail')">
+            Thông tin chi tiết
+          </button>
+          <button type="button" role="tab" [attr.aria-selected]="activeTab === 'review'" [class.active]="activeTab === 'review'" (click)="setTab('review')">
+            Đánh giá ({{ displayedRatingCount }})
+          </button>
+        </div>
+
+        <div class="tab-panel" role="tabpanel" *ngIf="activeTab === 'info'">
+          <section class="content-block" *ngIf="item.story">
+            <h2>Câu chuyện sản phẩm</h2>
+            <p>{{ item.story }}</p>
+          </section>
+          <section class="content-block" *ngIf="item.usage?.length">
+            <h2>Công dụng</h2>
+            <ul class="benefit-list">
+              <li *ngFor="let benefit of item.usage"><i class="bi bi-check-circle-fill"></i>{{ benefit }}</li>
+            </ul>
+          </section>
+          <section class="content-block" *ngIf="item.instructions?.length">
+            <h2>Hướng dẫn sử dụng</h2>
+            <ul class="benefit-list">
+              <li *ngFor="let instruction of item.instructions"><i class="bi bi-cup-hot-fill"></i>{{ instruction }}</li>
+            </ul>
+          </section>
+          <p class="empty-note" *ngIf="!item.story && !item.usage?.length && !item.instructions?.length">
+            Thông tin mô tả đang được cập nhật.
+          </p>
+        </div>
+
+        <div class="tab-panel" role="tabpanel" *ngIf="activeTab === 'detail'">
+          <dl class="detail-table">
+            <div class="detail-row"><dt>Mã sản phẩm</dt><dd>{{ currentSku || '—' }}</dd></div>
+            <div class="detail-row" *ngIf="item.category"><dt>Danh mục</dt><dd>{{ item.category }}</dd></div>
+            <div class="detail-row" *ngIf="item.subCategory"><dt>Phân loại</dt><dd>{{ item.subCategory }}</dd></div>
+            <div class="detail-row" *ngIf="item.isMix !== undefined"><dt>Sản phẩm mix</dt><dd>{{ item.isMix ? 'Có' : 'Không' }}</dd></div>
+            <div class="detail-row" *ngIf="selectedVariant?.type"><dt>Phân loại</dt><dd>{{ formatVariantType(selectedVariant?.type || '') }}</dd></div>
+            <div class="detail-row" *ngIf="selectedVariant?.weightGram || item.weightGram">
+              <dt>Khối lượng</dt><dd>{{ selectedVariant?.weightGram || item.weightGram }}g</dd>
+            </div>
+            <div class="detail-row" *ngIf="selectedVariant?.packCount"><dt>Số gói / túi</dt><dd>{{ selectedVariant?.packCount }}</dd></div>
+            <div class="detail-row" *ngIf="item.flavorNote"><dt>Hương vị</dt><dd>{{ item.flavorNote }}</dd></div>
+            <div class="detail-row" *ngIf="item.color"><dt>Màu sắc</dt><dd>{{ item.color }}</dd></div>
+            <div class="detail-row" *ngIf="item.brand"><dt>Thương hiệu</dt><dd>{{ item.brand }}</dd></div>
+            <div class="detail-row" *ngIf="item.shelfLifeMonths"><dt>Hạn sử dụng</dt><dd>{{ item.shelfLifeMonths }} tháng</dd></div>
+            <div class="detail-row"><dt>Tình trạng</dt><dd>{{ currentStock > 0 ? (item.status || 'Còn hàng') : 'Tạm hết hàng' }}</dd></div>
+            <div class="detail-row"><dt>Tồn kho phân loại đang chọn</dt><dd>{{ currentStock }}</dd></div>
+          </dl>
+        </div>
+
+        <div class="tab-panel review-panel" role="tabpanel" *ngIf="activeTab === 'review'">
+          <div class="review-summary">
+            <strong>{{ displayedRatingAverageLabel }}</strong>
+            <span class="stars" aria-hidden="true">
+              <i
+                *ngFor="let star of [1, 2, 3, 4, 5]"
+                class="bi"
+                [class.bi-star-fill]="star <= displayedRoundedRating"
+                [class.bi-star]="star > displayedRoundedRating">
+              </i>
+            </span>
+            <span>Dựa trên {{ displayedRatingCount }} đánh giá</span>
+          </div>
+          <p class="empty-note" *ngIf="reviewsLoading">Đang tải đánh giá...</p>
+          <p class="empty-note" *ngIf="reviewsError">{{ reviewsError }}</p>
+          <p class="empty-note" *ngIf="!reviewsLoading && !reviewsError && reviews.length === 0">Sản phẩm chưa có đánh giá.</p>
+          <article class="review-card" *ngFor="let review of reviews">
+            <div class="review-avatar">
+              <img *ngIf="review.userAvatar" [src]="review.userAvatar" [alt]="review.userName" (error)="onImageError($event)">
+              <i *ngIf="!review.userAvatar" class="bi bi-person-fill" aria-hidden="true"></i>
+            </div>
+            <div class="review-body">
+              <div class="review-heading">
+                <div>
+                  <h3>{{ review.userName }}</h3>
+                  <span class="stars" [attr.aria-label]="review.rating + ' trên 5 sao'">
+                    <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi"
+                       [class.bi-star-fill]="star <= review.rating"
+                       [class.bi-star]="star > review.rating"></i>
+                  </span>
+                </div>
+                <time *ngIf="review.createdAt">{{ formatReviewDate(review.createdAt) }}</time>
+              </div>
+              <p>{{ review.comment }}</p>
+            </div>
+          </article>
+          <p class="review-form-success" *ngIf="reviewSubmitMessage" role="status">{{ reviewSubmitMessage }}</p>
+          <div class="review-composer">
+            <div class="review-avatar review-composer-avatar">
+              <img *ngIf="canSubmitReview && reviewAvatar" [src]="reviewAvatar" [alt]="reviewAccount?.fullName" (error)="onImageError($event)">
+              <i *ngIf="!canSubmitReview || !reviewAvatar" class="bi bi-person-fill" aria-hidden="true"></i>
+            </div>
+            <button
+              type="button"
+              class="review-form-trigger"
+              [attr.aria-expanded]="reviewFormOpen"
+              (click)="toggleReviewForm()">
+              {{ canSubmitReview ? 'Bình luận dưới tên ' + reviewAccount?.fullName : 'Bình luận' }}
+            </button>
+          </div>
+          <form class="review-form" *ngIf="reviewFormOpen" (submit)="submitReview($event)">
+            <fieldset class="review-rating-field">
+              <legend>Đánh giá sao</legend>
+              <div class="review-rating-input">
+                <button
+                  *ngFor="let star of [1, 2, 3, 4, 5]"
+                  type="button"
+                  [attr.aria-label]="star + ' sao'"
+                  [attr.aria-pressed]="reviewRating === star"
+                  (click)="setReviewRating(star)">
+                  <i class="bi" [class.bi-star-fill]="star <= reviewRating" [class.bi-star]="star > reviewRating"></i>
+                </button>
+              </div>
+            </fieldset>
+            <textarea
+              id="review-comment"
+              name="reviewComment"
+              aria-label="Nội dung bình luận"
+              placeholder="Chia sẻ cảm nhận của bạn..."
+              rows="4"
+              maxlength="2000"
+              required
+              [value]="reviewComment"
+              (input)="reviewComment = $any($event.target).value; reviewSubmitError = ''; reviewSubmitMessage = ''"></textarea>
+            <p class="review-form-error" *ngIf="reviewSubmitError" role="alert">{{ reviewSubmitError }}</p>
+            <button type="submit" class="review-submit-button" [disabled]="reviewSubmitting">
+              Gửi đánh giá
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <section class="related-section">
+        <div class="section-heading">
+          <p class="eyebrow">Khám phá thêm</p>
+          <h2>Sản phẩm bạn có thể thích</h2>
+        </div>
+        <p class="related-empty" *ngIf="!relatedProductsLoading && !relatedProducts.length">
+          Hiện chưa có sản phẩm gợi ý.
+        </p>
+        <div class="related-grid" *ngIf="relatedProducts.length">
+          <article class="related-card" *ngFor="let related of relatedProducts">
+            <div class="related-visual">
+              <a
+                class="related-image"
+                [href]="productNavigation.detailUrl(related.slug)"
+                (click)="navigateToRelatedProduct($event, related)">
+                <img [src]="productImage(related)" [alt]="related.name || 'Sản phẩm'" (error)="onImageError($event)">
+                <span *ngIf="related.discount" class="related-discount">-{{ related.discount }}%</span>
+              </a>
+            </div>
+            <div class="related-info">
+              <a
+                class="related-name"
+                [href]="productNavigation.detailUrl(related.slug)"
+                (click)="navigateToRelatedProduct($event, related)">{{ related.name }}</a>
+              <div class="related-rating">
+                <i class="bi bi-star-fill"></i>
+                <span>{{ formatRatingAverage(related.ratingAverage) }} ({{ related.ratingCount || 0 }})</span>
+              </div>
+              <div class="related-action-row">
+                <strong>{{ formatPrice(related.minPrice || related.price || 0) }}</strong>
+                <button
+                  type="button"
+                  class="related-cart-link"
+                  [attr.aria-label]="'Chọn phân loại và thêm ' + related.name + ' vào giỏ hàng'"
+                  title="Thêm vào giỏ hàng"
+                  (click)="openQuickAdd(related)">
+                  <i class="bi bi-bag-plus" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </ng-container>
+  </div>
+
+  <div
+    class="quick-add-backdrop"
+    *ngIf="quickAdd as selection"
+    (click)="closeQuickAdd()"
+    (keydown.escape)="closeQuickAdd()">
+    <section
+      class="quick-add-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quick-add-title"
+      (click)="$event.stopPropagation()">
+      <button type="button" class="quick-add-close" aria-label="Đóng" (click)="closeQuickAdd()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+      <div class="quick-add-product">
+        <img [src]="productImage(selection.product)" [alt]="selection.product.name || 'Sản phẩm'" (error)="onImageError($event)">
+        <div>
+          <p class="eyebrow">Thêm vào giỏ hàng</p>
+          <h2 id="quick-add-title">{{ selection.product.name }}</h2>
+          <strong>{{ formatPrice(selection.variant?.price ?? selection.product.price ?? selection.product.minPrice ?? 0) }}</strong>
+        </div>
+      </div>
+
+      <div class="quick-add-variants" *ngIf="selection.product.variants?.length">
+        <h3>Phân loại</h3>
+        <div class="variant-options">
+          <button
+            *ngFor="let variant of selection.product.variants"
+            type="button"
+            class="variant-option"
+            [class.selected]="selection.variant?.sku === variant.sku"
+            [disabled]="variant.stock < 1"
+            [attr.aria-pressed]="selection.variant?.sku === variant.sku"
+            (click)="selectQuickAddVariant(variant)">
+            {{ variant.label }}
+            <small *ngIf="variant.stock < 1">Hết hàng</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="quick-add-footer">
+        <div class="quantity-control" aria-label="Số lượng">
+          <button type="button" aria-label="Giảm số lượng" [disabled]="selection.quantity <= 1" (click)="changeQuickAddQuantity(-1)">−</button>
+          <span aria-live="polite">{{ selection.quantity }}</span>
+          <button
+            type="button"
+            aria-label="Tăng số lượng"
+            [disabled]="selection.quantity >= (selection.variant?.stock ?? selection.product.stock ?? 0)"
+            (click)="changeQuickAddQuantity(1)">+</button>
+        </div>
+        <button
+          type="button"
+          class="add-cart-button"
+          [disabled]="(selection.variant?.stock ?? selection.product.stock ?? 0) < 1"
+          (click)="addQuickAddToCart()">
+          <i class="bi bi-bag-plus" aria-hidden="true"></i>
+          Thêm vào giỏ hàng
+        </button>
+      </div>
+      <p class="quick-add-error" role="alert" *ngIf="quickAddError">{{ quickAddError }}</p>
+    </section>
+  </div>
+</main>
+
+<div
+  *ngIf="cartService.cartMessage()"
+  class="cart-notification"
+  role="status"
+  aria-live="polite">
+  <i class="bi bi-bag-check" aria-hidden="true"></i>
+  <span>{{ cartService.cartMessage() }}</span>
+</div>

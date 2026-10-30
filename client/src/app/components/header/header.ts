@@ -2,6 +2,9 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } fro
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
+import { CartItem, CartVariant, CartService } from '../../services/cart-service';
+import { ProductNavigationService } from '../../services/product-navigation-service';
+import { Products } from '../../classes/Products';
 
 @Component({
   selector: 'app-header',
@@ -22,7 +25,14 @@ export class Header implements OnInit, OnDestroy {
 
   // Giỏ hàng, người dùng (Customer Header)
   cartOpen = false;
-  cart: any[] = [];
+  cart: CartItem[] = [];
+  variantPickerItem: CartItem | null = null;
+  variantOptions: CartVariant[] = [];
+  selectedVariant: CartVariant | null = null;
+  variantPickerQuantity = 1;
+  variantPickerLoading = false;
+  variantPickerError = '';
+  private variantPickerRequestId = 0;
   user: any = null;
   userOpen = false;
 
@@ -34,7 +44,12 @@ export class Header implements OnInit, OnDestroy {
   private subs = new Subscription();
   private timers: any[] = [];
 
-  constructor(private productService: ProductService, private router: Router) {}
+  constructor(
+    private productService: ProductService,
+    private router: Router,
+    private cartService: CartService,
+    readonly productNavigation: ProductNavigationService,
+  ) {}
 
   ngOnInit(): void {
     this.loadUser();
@@ -86,6 +101,7 @@ export class Header implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
+    this.closeVariantPicker();
     this.closePanels();
     this.closeCart();
   }
@@ -264,16 +280,8 @@ export class Header implements OnInit, OnDestroy {
   }
 
   /* ================= GIỎ HÀNG ================= */
-  private get cartKey(): string {
-    return this.user ? `cart_user_${this.user.email || this.user.id}` : 'cart_guest';
-  }
-
   private loadCart(): void {
-    try { this.cart = JSON.parse(localStorage.getItem(this.cartKey) || '[]'); } catch { this.cart = []; }
-  }
-
-  private saveCart(): void {
-    localStorage.setItem(this.cartKey, JSON.stringify(this.cart));
+    this.cart = this.cartService.getCart();
   }
 
   get cartCount(): number {
@@ -298,14 +306,121 @@ export class Header implements OnInit, OnDestroy {
   }
 
   changeQty(item: any, delta: number): void {
-    item.quantity = Number(item.quantity || 0) + delta;
-    if (item.quantity < 1) { this.removeItem(item); return; }
-    this.saveCart();
+    this.cartService.changeQuantity(item, delta);
   }
 
   removeItem(item: any): void {
-    this.cart = this.cart.filter((i) => i !== item);
-    this.saveCart();
+    this.cartService.removeItem(item);
+  }
+
+  openVariantPicker(item: CartItem): void {
+    const requestId = ++this.variantPickerRequestId;
+    this.variantPickerItem = item;
+    this.variantPickerQuantity = Math.max(1, Number(item.quantity || 1));
+    this.variantPickerError = '';
+    this.variantPickerLoading = false;
+
+    const cachedProduct = this.findCartProduct(item, this.productService.getCachedProducts() ?? []);
+    const immediateVariants = item.variants?.length ? item.variants : cachedProduct?.variants ?? [];
+    if (immediateVariants.length) {
+      this.applyVariantOptions(immediateVariants, item);
+      return;
+    }
+
+    this.variantOptions = [];
+    this.selectedVariant = null;
+    this.variantPickerLoading = true;
+
+    this.productService.getProducts().subscribe({
+      next: (products) => {
+        if (requestId !== this.variantPickerRequestId) return;
+
+        const product = this.findCartProduct(item, products);
+        this.applyVariantOptions(product?.variants ?? [], item);
+        this.variantPickerLoading = false;
+      },
+      error: (error: unknown) => {
+        if (requestId !== this.variantPickerRequestId) return;
+
+        console.error('Không thể tải phân loại sản phẩm:', error);
+        this.variantPickerError = 'Không thể tải phân loại. Vui lòng thử lại.';
+        this.variantPickerLoading = false;
+      },
+    });
+  }
+
+  private findCartProduct(item: CartItem, products: Products[]): Products | undefined {
+    return products.find((candidate) => {
+      const identifiers = candidate as Products & { _id?: string; id?: string };
+      return candidate.sku === item.productSku ||
+        candidate.slug === item.slug ||
+        candidate.sku === item.productId ||
+        identifiers._id === item.productId ||
+        identifiers.id === item.productId ||
+        candidate.variants.some((variant) => variant.sku === item.variantSku);
+    });
+  }
+
+  private applyVariantOptions(variants: CartVariant[], item: CartItem): void {
+    this.variantOptions = variants;
+    this.selectedVariant =
+      variants.find((variant) => variant.sku === item.variantSku) ??
+      variants.find((variant) => 'isDefault' in variant && variant.isDefault) ??
+      variants[0] ??
+      null;
+    if (this.selectedVariant) {
+      this.variantPickerQuantity = Math.min(
+        this.variantPickerQuantity,
+        Math.max(this.selectedVariant.stock ?? 0, 1),
+      );
+    }
+    if (variants.length < 2) {
+      this.variantPickerError = 'Sản phẩm không có phân loại khác để đổi.';
+    }
+  }
+
+  selectVariant(variant: CartVariant): void {
+    this.selectedVariant = variant;
+    this.variantPickerQuantity = Math.min(
+      this.variantPickerQuantity,
+      Math.max(variant.stock ?? 0, 1),
+    );
+    this.variantPickerError = '';
+  }
+
+  changeVariantPickerQuantity(delta: number): void {
+    const nextQuantity = this.variantPickerQuantity + delta;
+    if (nextQuantity >= 1 && nextQuantity <= (this.selectedVariant?.stock ?? 0)) {
+      this.variantPickerQuantity = nextQuantity;
+    }
+  }
+
+  get variantPickerPrice(): number {
+    return this.selectedVariant?.price ?? 0;
+  }
+
+  confirmVariantChange(): void {
+    if (!this.variantPickerItem || !this.selectedVariant) return;
+    if (this.cartService.changeVariant(
+      this.variantPickerItem,
+      this.selectedVariant,
+      this.variantPickerQuantity,
+    )) {
+      this.loadCart();
+      this.closeVariantPicker();
+    } else {
+      this.variantPickerError = this.cartService.cartMessage();
+    }
+  }
+
+  closeVariantPicker(): void {
+    this.variantPickerRequestId++;
+    this.variantPickerItem = null;
+    this.variantOptions = [];
+    this.selectedVariant = null;
+    this.variantPickerQuantity = 1;
+    this.variantPickerError = '';
+    this.variantPickerLoading = false;
   }
 
   cartImage(it: any): string {
@@ -313,7 +428,6 @@ export class Header implements OnInit, OnDestroy {
   }
 
   /* ================= HÀM HỖ TRỢ SẢN PHẨM ================= */
-  getId(p: any): string { return p._id || p.id || p.productId || p.slug || ''; }
   getName(p: any): string { return p.name || p.productName || p.product_name || p.title || ''; }
   getPrice(p: any): number { return Number(p.price ?? p.minPrice ?? p.productPrice ?? 0); }
   getImage(p: any): string {

@@ -11,7 +11,7 @@ describe('Footer', () => {
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule],
       declarations: [Footer],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Footer);

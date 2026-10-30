@@ -27,11 +27,11 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" routerLink="/products" routerLinkActive="active">Sản phẩm</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'tra-thao-moc' }">Trà thảo mộc</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'tra-thao-moc-mix' }">Trà thảo mộc mix</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'do-uong-kem-tra' }">Đồ uống kèm trà</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'am-tra' }">Ấm trà</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ danhmuc: 'set-qua-tang' }">Set quà tặng</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc' }">Trà thảo mộc</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc-mix' }">Trà thảo mộc mix</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'do-uong-kem-tra' }">Đồ uống kèm trà</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'am-tra' }">Ấm trà</a></li>
+              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'set-qua-tang' }">Set quà tặng</a></li>
             </ul>
           </li>
 
@@ -73,7 +73,7 @@
               </form>
 
               <div class="search-results-list">
-                <a *ngFor="let p of results" class="search-item" [routerLink]="['/products', getId(p)]">
+                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p }">
                   <img
                     [src]="getSearchProductImage(p)"
                     [alt]="getName(p)"
@@ -173,10 +173,21 @@
           <img [src]="cartImage(it)" [alt]="it.name" (error)="onImgError($event)">
           <div class="cart-info">
             <h5>{{ it.name || it.title }}</h5>
-            <div class="quantity">
-              <button type="button" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
-              <span>{{ it.quantity }}</span>
-              <button type="button" (click)="changeQty(it, 1)" aria-label="Tăng">+</button>
+            <div class="cart-controls">
+              <div class="quantity">
+                <button type="button" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
+                <span>{{ it.quantity }}</span>
+                <button type="button" (click)="changeQty(it, 1)" aria-label="Tăng">+</button>
+              </div>
+              <button
+                *ngIf="(it.variantCount ?? 2) > 1"
+                type="button"
+                class="change-variant-button"
+                [attr.aria-label]="'Đổi phân loại: ' + it.variantLabel"
+                (click)="openVariantPicker(it)">
+                <span>{{ it.variantLabel || 'Chọn phân loại' }}</span>
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+              </button>
             </div>
             <div class="cart-price">{{ formatPrice(+it.price * +it.quantity) }}</div>
           </div>
@@ -194,4 +205,63 @@
       <a class="view-cart-btn" routerLink="/cart" (click)="closeCart()">Xem giỏ hàng</a>
     </div>
   </aside>
+
+  <div
+    class="variant-picker-overlay"
+    *ngIf="variantPickerItem"
+    (click)="closeVariantPicker()">
+    <section
+      class="variant-picker-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cartVariantTitleGuest"
+      (click)="$event.stopPropagation()">
+      <button type="button" class="cart-add-close" aria-label="Đóng" (click)="closeVariantPicker()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+
+      <div class="cart-add-product">
+        <img [src]="cartImage(variantPickerItem)" [alt]="variantPickerItem?.name || 'Sản phẩm'">
+        <div>
+          <p class="cart-add-eyebrow">ĐỔI PHÂN LOẠI</p>
+          <h2 id="cartVariantTitleGuest">{{ variantPickerItem?.name || variantPickerItem?.title }}</h2>
+          <strong>{{ formatPrice(variantPickerPrice) }}</strong>
+        </div>
+      </div>
+
+      <p *ngIf="variantPickerLoading" class="variant-picker-state">Đang tải phân loại...</p>
+      <div class="cart-add-variants" *ngIf="!variantPickerLoading && variantOptions.length">
+        <h3>Phân loại</h3>
+        <div class="cart-add-variant-options">
+          <button
+            *ngFor="let variant of variantOptions"
+            type="button"
+            class="cart-add-variant"
+            [class.selected]="selectedVariant?.sku === variant.sku"
+            [disabled]="(variant.stock ?? 0) < 1"
+            [attr.aria-pressed]="selectedVariant?.sku === variant.sku"
+            (click)="selectVariant(variant)">
+            {{ variant.label }}
+            <small *ngIf="(variant.stock ?? 0) < 1">Hết hàng</small>
+          </button>
+        </div>
+      </div>
+      <p class="variant-picker-error" *ngIf="variantPickerError">{{ variantPickerError }}</p>
+
+      <div class="cart-add-footer">
+        <div class="cart-add-quantity" aria-label="Số lượng">
+          <button type="button" aria-label="Giảm số lượng" [disabled]="variantPickerQuantity <= 1" (click)="changeVariantPickerQuantity(-1)">−</button>
+          <span aria-live="polite">{{ variantPickerQuantity }}</span>
+          <button type="button" aria-label="Tăng số lượng" [disabled]="variantPickerQuantity >= (selectedVariant?.stock ?? 0)" (click)="changeVariantPickerQuantity(1)">+</button>
+        </div>
+        <button
+          type="button"
+          class="cart-add-confirm"
+          [disabled]="variantPickerLoading || !selectedVariant || (selectedVariant.stock ?? 0) < 1"
+          (click)="confirmVariantChange()">
+          Xác nhận
+        </button>
+      </div>
+    </section>
+  </div>
 </header>

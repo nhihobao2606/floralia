@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Profile } from './profile';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { FormsModule } from '@angular/forms';
+import { Profile } from './profile';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Router } from '@angular/router';
 
 describe('Profile', () => {
   let component: Profile;
@@ -11,9 +12,12 @@ describe('Profile', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule, HttpClientTestingModule, RouterTestingModule],
+      imports: [CommonModule, FormsModule, HttpClientTestingModule],
       declarations: [Profile],
-      schemas: [NO_ERRORS_SCHEMA]
+      providers: [
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Profile);
