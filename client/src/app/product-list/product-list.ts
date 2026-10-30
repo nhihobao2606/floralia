@@ -1,6 +1,8 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../services/product-service';
+import { CartService } from '../services/cart-service';
 import { Products } from '../classes/Products';
 
 @Component({
@@ -10,6 +12,8 @@ import { Products } from '../classes/Products';
   styleUrls: ['./product-list.css']
 })
 export class ProductListComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   products: Products[] = [];
   filteredProducts: Products[] = [];
   loading: boolean = true;
@@ -21,6 +25,10 @@ export class ProductListComponent implements OnInit {
   selectedTag: string = '';
   currentPage = 1;
   wishlist = new Set<string>();
+  buyNowProduct: Products | null = null;
+  cartPopupProduct: Products | null = null;
+  cartPopupVariant: Products['variants'][number] | null = null;
+  cartPopupQuantity = 1;
 
   categories = [
     { name: 'Trà thảo mộc', slug: 'tra-thao-moc' },
@@ -48,7 +56,9 @@ export class ProductListComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private route: ActivatedRoute,
-    private changeDetector: ChangeDetectorRef
+    private router: Router,
+    private changeDetector: ChangeDetectorRef,
+    readonly cartService: CartService,
   ) {}
 
   get pageSize(): number {
@@ -57,6 +67,12 @@ export class ProductListComponent implements OnInit {
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.filteredProducts.length / this.pageSize));
+  }
+
+  get hasActiveFilters(): boolean {
+    return this.selectedCategory !== 'all' ||
+      this.selectedPriceRange !== 'all' ||
+      this.selectedTag !== '';
   }
 
   get pageNumbers(): number[] {
@@ -72,6 +88,14 @@ export class ProductListComponent implements OnInit {
     return this.products
       .filter(product => product.isSale || product.discount > 0)
       .slice(0, 3);
+  }
+
+  formatRatingAverage(ratingAverage: number | null | undefined): string {
+    return Number(ratingAverage ?? 0).toFixed(1);
+  }
+
+  getRoundedRatingAverage(ratingAverage: number | null | undefined): number {
+    return Math.round(Number(ratingAverage ?? 0));
   }
 
   get pageItems(): Array<number | 'ellipsis'> {
@@ -91,6 +115,22 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.productService.ratingUpdates
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((update) => {
+        const product = this.products.find((item) => item.sku === update.productSku);
+        if (!product) return;
+
+        product.ratingAverage = update.ratingAverage;
+        product.ratingCount = update.ratingCount;
+        this.changeDetector.markForCheck();
+      });
+
+    this.route.queryParamMap.subscribe(params => {
+      this.selectedCategory = params.get('category') || 'all';
+      this.applyFilters();
+      this.changeDetector.markForCheck();
+    });
     this.fetchProducts();
   }
 
@@ -110,16 +150,7 @@ export class ProductListComponent implements OnInit {
           }
         });
 
-        // Lắng nghe category parameter từ URL header menu
-        this.route.queryParams.subscribe(params => {
-          if (params['category']) {
-            this.selectedCategory = params['category'];
-          } else {
-            this.selectedCategory = 'all';
-          }
-          this.applyFilters();
-        });
-
+        this.applyFilters();
         this.loading = false;
         this.changeDetector.markForCheck();
       },
@@ -139,6 +170,25 @@ export class ProductListComponent implements OnInit {
   onSelectCategory(slug: string): void {
     this.selectedCategory = slug;
     this.applyFilters();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category: slug === 'all' ? null : slug },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
+  clearFilters(): void {
+    this.selectedCategory = 'all';
+    this.selectedPriceRange = 'all';
+    this.selectedTag = '';
+    this.applyFilters();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { category: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   onSelectPrice(value: string): void {
@@ -152,13 +202,83 @@ export class ProductListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
       this.currentPage = page;
+      window.requestAnimationFrame(() => {
+        document.getElementById('product-list')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
     }
   }
 
   getProductId(product: Products): string {
     return product.slug || product.sku;
+  }
+
+  hasStock(product: Products): boolean {
+    return product.variants?.length
+      ? product.variants.some((variant) => variant.stock > 0)
+      : product.stock > 0;
+  }
+
+  addToCart(product: Products): void {
+    this.buyNowProduct = null;
+    this.cartPopupProduct = product;
+    this.cartPopupVariant =
+      product.variants?.find((option) => option.isDefault && option.stock > 0) ??
+      product.variants?.find((option) => option.stock > 0) ??
+      product.variants?.find((option) => option.isDefault) ??
+      product.variants?.[0] ??
+      null;
+    this.cartPopupQuantity = 1;
+  }
+
+  closeCartPopup(): void {
+    this.cartPopupProduct = null;
+    this.cartPopupVariant = null;
+    this.cartPopupQuantity = 1;
+  }
+
+  selectCartPopupVariant(variant: Products['variants'][number]): void {
+    this.cartPopupVariant = variant;
+    this.cartPopupQuantity = Math.min(this.cartPopupQuantity, Math.max(variant.stock, 1));
+  }
+
+  changeCartPopupQuantity(delta: number): void {
+    const quantity = this.cartPopupQuantity + delta;
+    if (quantity >= 1 && quantity <= this.cartPopupStock) {
+      this.cartPopupQuantity = quantity;
+    }
+  }
+
+  get cartPopupStock(): number {
+    return this.cartPopupVariant?.stock ?? this.cartPopupProduct?.stock ?? 0;
+  }
+
+  get cartPopupPrice(): number {
+    return this.cartPopupVariant?.price ?? this.cartPopupProduct?.price ?? 0;
+  }
+
+  confirmAddToCart(): void {
+    if (!this.cartPopupProduct || this.cartPopupStock < 1) return;
+    const added = this.cartService.addProduct(
+      this.cartPopupProduct,
+      this.cartPopupVariant,
+      this.cartPopupQuantity,
+      this.getProductImage(this.cartPopupProduct),
+    );
+    if (added) this.closeCartPopup();
+  }
+
+  openBuyNowPopup(product: Products): void {
+    this.closeCartPopup();
+    this.buyNowProduct = product;
+  }
+
+  closeBuyNowPopup(): void {
+    this.buyNowProduct = null;
   }
 
   isWished(product: Products): boolean {
@@ -174,7 +294,7 @@ export class ProductListComponent implements OnInit {
     }
   }
 
-  private normalizeBenefit(value: string): string {
+  private normalizeSlug(value: string): string {
     return value
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -185,7 +305,15 @@ export class ProductListComponent implements OnInit {
   }
 
   getProductImage(product: Products): string {
-    const thumbnail = product.thumbnail;
+    const imageUrl = product.imageUrl;
+
+    if (imageUrl) {
+      return imageUrl.startsWith('http://') || imageUrl.startsWith('https://')
+        ? imageUrl
+        : `http://localhost:3002${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    }
+
+    const thumbnail = product.thumbnail || '';
 
     if (
       thumbnail.startsWith('http://') ||
@@ -216,8 +344,9 @@ export class ProductListComponent implements OnInit {
 
     this.filteredProducts = this.products.filter(item => {
       // 1. Lọc theo Danh mục
-      const matchCat = this.selectedCategory === 'all' || 
-        (item.categorySlug && item.categorySlug.toLowerCase() === this.selectedCategory.toLowerCase());
+      const matchCat = this.selectedCategory === 'all' ||
+        [item.categorySlug, item.category]
+          .some(category => this.normalizeSlug(category ?? '') === this.selectedCategory.toLowerCase());
 
       // 2. Lọc theo Giá
       let matchPrice = true;
@@ -232,9 +361,9 @@ export class ProductListComponent implements OnInit {
       if (this.selectedTag) {
         const selectedBenefit = this.benefitsList.find(benefit => benefit.label === this.selectedTag);
         const searchableBenefits = [...(item.benefits ?? []), ...(item.tags ?? [])]
-          .map(value => this.normalizeBenefit(value));
+          .map(value => this.normalizeSlug(value));
         matchTag = selectedBenefit?.values.some(value =>
-          searchableBenefits.includes(this.normalizeBenefit(value))
+          searchableBenefits.includes(this.normalizeSlug(value))
         ) ?? false;
       }
 

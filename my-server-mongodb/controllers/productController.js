@@ -74,6 +74,68 @@ async function getProductImage(req, res) {
     }
 }
 
+// GET /products/reviews/:sku
+async function getProductReviews(req, res) {
+    try {
+        const reviews = await Product.getApprovedReviewsBySku(req.params.sku);
+        res.json(reviews);
+    } catch (error) {
+        console.error('Lỗi lấy đánh giá sản phẩm:', error);
+        res.status(500).json({
+            message: 'Không thể lấy đánh giá sản phẩm'
+        });
+    }
+}
+
+// POST /products/reviews
+async function createProductReview(req, res) {
+    const { productSku, userName, rating, comment } = req.body || {};
+    const normalizedSku = typeof productSku === 'string' ? productSku.trim() : '';
+    const normalizedName = typeof userName === 'string' ? userName.trim() : '';
+    const normalizedComment = typeof comment === 'string' ? comment.trim() : '';
+
+    if (
+        !normalizedSku ||
+        !normalizedName ||
+        normalizedName.length > 100 ||
+        !Number.isInteger(rating) ||
+        rating < 1 ||
+        rating > 5 ||
+        !normalizedComment ||
+        normalizedComment.length > 2000
+    ) {
+        return res.status(400).json({
+            message: 'Vui lòng nhập tên, đánh giá từ 1 đến 5 sao và bình luận tối đa 2000 ký tự.'
+        });
+    }
+
+    try {
+        const product = await Product.getBySku(normalizedSku);
+        if (!product) {
+            return res.status(404).json({
+                message: 'Không tìm thấy sản phẩm để lưu đánh giá.'
+            });
+        }
+
+        const review = await Product.createReview({
+            productSku: normalizedSku,
+            userName: normalizedName,
+            userAvatar: null,
+            rating,
+            comment: normalizedComment,
+            createdAt: new Date(),
+            isApproved: true
+        });
+
+        return res.status(201).json(review);
+    } catch (error) {
+        console.error('Lỗi lưu đánh giá sản phẩm:', error);
+        return res.status(500).json({
+            message: 'Không thể lưu đánh giá sản phẩm'
+        });
+    }
+}
+
 // GET /products/:id
 async function getProductById(req, res) {
     try {
@@ -131,5 +193,7 @@ async function getProductById(req, res) {
 module.exports = {
     getProducts,
     getProductById,
-    getProductImage
+    getProductImage,
+    getProductReviews,
+    createProductReview
 };

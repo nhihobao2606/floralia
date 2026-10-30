@@ -9,22 +9,26 @@ import { Footer } from './components/footer/footer';
 import { Homepage } from './pages/homepage/homepage';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-<<<<<<< HEAD
-import { Login } from './login/login';
+import { Login } from './pages/login/login';
+import { Signup } from './pages/signup/signup';
+import { Profile } from './profile/profile';
 import { ProductListComponent } from './product-list/product-list';
+import { ProductDetail } from './product-detail/product-detail';
 
 registerLocaleData(localeVi);
 
 @NgModule({
-  declarations: [App, Header, Footer, Homepage, Login, ProductListComponent],
-=======
-import { Login } from './pages/login/login';
-import { Signup } from './pages/signup/signup';
-import { Profile } from './profile/profile';
-
-@NgModule({
-  declarations: [App, Header, Footer, Homepage, Login, Signup, Profile],
->>>>>>> 14d2353e806f0b4845fab4993fc1ca6a9e2f66ac
+  declarations: [
+    App,
+    Header,
+    Footer,
+    Homepage,
+    Login,
+    Signup,
+    Profile,
+    ProductListComponent,
+    ProductDetail,
+  ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners(), { provide: LOCALE_ID, useValue: 'vi' }],
   bootstrap: [App],

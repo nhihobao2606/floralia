@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } fro
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
+import { CartItem, CartService } from '../../services/cart-service';
 
 @Component({
   selector: 'app-header',
@@ -22,7 +23,7 @@ export class Header implements OnInit, OnDestroy {
 
   // Giỏ hàng, người dùng
   cartOpen = false;
-  cart: any[] = [];
+  cart: CartItem[] = [];
   user: any = null;
   userOpen = false;
 
@@ -34,7 +35,11 @@ export class Header implements OnInit, OnDestroy {
   private subs = new Subscription();
   private timers: any[] = [];
 
-  constructor(private productService: ProductService, private router: Router) {}
+  constructor(
+    private productService: ProductService,
+    private router: Router,
+    private cartService: CartService,
+  ) {}
 
   ngOnInit(): void {
     this.loadUser();
@@ -262,16 +267,8 @@ export class Header implements OnInit, OnDestroy {
   }
 
   /* ================= GIỎ HÀNG ================= */
-  private get cartKey(): string {
-    return this.user ? `cart_user_${this.user.email || this.user.id}` : 'cart_guest';
-  }
-
   private loadCart(): void {
-    try { this.cart = JSON.parse(localStorage.getItem(this.cartKey) || '[]'); } catch { this.cart = []; }
-  }
-
-  private saveCart(): void {
-    localStorage.setItem(this.cartKey, JSON.stringify(this.cart));
+    this.cart = this.cartService.getCart();
   }
 
   get cartCount(): number {
@@ -296,14 +293,11 @@ export class Header implements OnInit, OnDestroy {
   }
 
   changeQty(item: any, delta: number): void {
-    item.quantity = Number(item.quantity || 0) + delta;
-    if (item.quantity < 1) { this.removeItem(item); return; }
-    this.saveCart();
+    this.cartService.changeQuantity(item, delta);
   }
 
   removeItem(item: any): void {
-    this.cart = this.cart.filter((i) => i !== item);
-    this.saveCart();
+    this.cartService.removeItem(item);
   }
 
   cartImage(it: any): string {
