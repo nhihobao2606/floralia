@@ -1,30 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, catchError, finalize, of, shareReplay, tap, throwError } from 'rxjs';
+import { Observable, catchError, finalize, of, shareReplay, tap, throwError } from 'rxjs';
 import { Products } from '../classes/Products';
-
-export interface ProductReview {
-  productSku?: string;
-  userName: string;
-  userAvatar?: string | null;
-  rating: number;
-  comment: string;
-  createdAt?: string | Date;
-  isApproved?: boolean;
-}
-
-export interface NewProductReview {
-  productSku: string;
-  userName: string;
-  rating: number;
-  comment: string;
-}
-
-export interface ProductRatingUpdate {
-  productSku: string;
-  ratingAverage: number;
-  ratingCount: number;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +11,6 @@ export class ProductService {
   private productsCache: Products[] | null = null;
   private productsCacheExpiresAt = 0;
   private productsRequest: Observable<Products[]> | null = null;
-  readonly ratingUpdates = new Subject<ProductRatingUpdate>();
 
   constructor(private http: HttpClient) {}
 
@@ -44,17 +20,6 @@ export class ProductService {
 
   getCachedProducts(): Products[] | null {
     return this.productsCache;
-  }
-
-  updateProductRating(productSku: string, ratingAverage: number, ratingCount: number): void {
-    const update = { productSku, ratingAverage, ratingCount };
-    for (const product of this.productsCache ?? []) {
-      if (product.sku === productSku) {
-        product.ratingAverage = ratingAverage;
-        product.ratingCount = ratingCount;
-      }
-    }
-    this.ratingUpdates.next(update);
   }
 
   // Lấy danh sách sản phẩm
@@ -87,15 +52,5 @@ export class ProductService {
   // Lấy chi tiết 1 sản phẩm theo Slug
   getProductBySlug(slug: string): Observable<Products> {
     return this.http.get<Products>(`${this.apiUrl}/slug/${slug}`);
-  }
-
-  getReviews(sku: string): Observable<ProductReview[]> {
-    return this.http.get<ProductReview[]>(
-      `${this.apiUrl}/reviews/${encodeURIComponent(sku)}`,
-    );
-  }
-
-  createReview(review: NewProductReview): Observable<ProductReview> {
-    return this.http.post<ProductReview>(`${this.apiUrl}/reviews`, review);
   }
 }

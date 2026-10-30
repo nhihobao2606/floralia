@@ -2,6 +2,8 @@ import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../services/product-service';
+import { ReviewService } from '../services/review-service';
+import { ProductNavigationService } from '../services/product-navigation-service';
 import { CartService } from '../services/cart-service';
 import { Products } from '../classes/Products';
 
@@ -55,6 +57,8 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    private reviewService: ReviewService,
+    readonly productNavigation: ProductNavigationService,
     private route: ActivatedRoute,
     private router: Router,
     private changeDetector: ChangeDetectorRef,
@@ -115,7 +119,7 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.productService.ratingUpdates
+    this.reviewService.ratingUpdates
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((update) => {
         const product = this.products.find((item) => item.sku === update.productSku);

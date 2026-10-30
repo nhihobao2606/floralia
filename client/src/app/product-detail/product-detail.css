@@ -722,58 +722,52 @@
 
 .review-form {
   display: grid;
-  max-width: 720px;
+  width: min(664px, calc(100% - 56px));
   gap: 10px;
-  margin: 24px 0 30px;
+  margin: 10px 0 30px 56px;
   padding: 22px;
   border: 1px solid #e8eee7;
   border-radius: 18px;
   background: #fbfcfa;
 }
 
-.review-form-trigger {
+.review-composer {
   display: flex;
   width: 100%;
   max-width: 720px;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   margin-top: 24px;
-  padding: 18px 20px;
-  border: 1px solid #e1e9df;
-  border-radius: 16px;
-  background: #fbfcfa;
-  color: var(--detail-green);
+}
+
+.review-composer-avatar {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  border: 1px solid #e0e4e6;
+  background: #f0f2f4;
+  color: #647078;
+}
+
+.review-form-trigger {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  flex: 1;
+  align-items: center;
+  padding: 0 14px;
+  border: 1px solid #eef0f2;
+  border-radius: 12px;
+  background: #f0f2f4;
+  color: #70777d;
   text-align: left;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .review-form-trigger:hover {
-  border-color: var(--detail-green);
-  background: #f3f7f1;
-}
-
-.review-form-trigger > i:first-child {
-  font-size: 24px;
-}
-
-.review-form-trigger > span {
-  display: grid;
-  flex: 1;
-  gap: 4px;
-}
-
-.review-form-trigger strong {
-  font-size: 14px;
-}
-
-.review-form-trigger small {
-  color: var(--detail-muted);
-  font-size: 12px;
-}
-
-.review-form-trigger > i:last-child {
-  font-size: 14px;
+  border-color: #d7dcdf;
+  background: #e9edef;
 }
 
 .review-form h2 {
@@ -1257,6 +1251,22 @@
 
   .tab-panel {
     padding: 24px 20px 29px;
+  }
+
+  .review-composer {
+    gap: 8px;
+  }
+
+  .review-composer-avatar {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .review-form {
+    width: calc(100% - 44px);
+    margin-left: 44px;
+    padding: 16px;
   }
 }
 

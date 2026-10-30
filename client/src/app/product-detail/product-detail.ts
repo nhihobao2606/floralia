@@ -1,8 +1,10 @@
-import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NewProductReview, ProductReview, ProductService } from '../services/product-service';
+import { ProductService } from '../services/product-service';
+import { NewProductReview, ProductReview, ReviewService } from '../services/review-service';
 import { CartService } from '../services/cart-service';
+import { ProductNavigationService } from '../services/product-navigation-service';
 import { Products } from '../classes/Products';
 
 interface ProductVariant {
@@ -46,6 +48,11 @@ interface QuickAddSelection {
   quantity: number;
 }
 
+interface ReviewAccount {
+  fullName: string;
+  avatar?: string;
+}
+
 @Component({
   selector: 'app-product-detail',
   standalone: false,
@@ -68,9 +75,9 @@ export class ProductDetail implements OnInit {
   reviewsLoaded = false;
   reviewsLoading = false;
   reviewsError = '';
-  reviewName = '';
   reviewComment = '';
   reviewRating = 0;
+  reviewAccount: ReviewAccount | null = null;
   reviewFormOpen = false;
   reviewSubmitting = false;
   reviewSubmitError = '';
@@ -88,10 +95,13 @@ export class ProductDetail implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly productService: ProductService,
+    private readonly reviewService: ReviewService,
+    readonly productNavigation: ProductNavigationService,
     readonly cartService: CartService,
   ) {}
 
   ngOnInit(): void {
+    this.syncReviewAccount();
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -101,6 +111,37 @@ export class ProductDetail implements OnInit {
           this.loadProduct(slug);
         }
       });
+  }
+
+  @HostListener('window:auth-changed')
+  @HostListener('window:storage')
+  syncReviewAccount(): void {
+    const rawUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!rawUser || !token) {
+      this.reviewAccount = null;
+      this.reviewFormOpen = false;
+      return;
+    }
+
+    try {
+      const user = JSON.parse(rawUser) as Partial<ReviewAccount>;
+      this.reviewAccount = typeof user.fullName === 'string' && user.fullName.trim()
+        ? { fullName: user.fullName.trim(), avatar: user.avatar || '' }
+        : null;
+    } catch (error) {
+      console.error('Không đọc được thông tin tài khoản để đánh giá:', error);
+      this.reviewAccount = null;
+      this.reviewFormOpen = false;
+    }
+  }
+
+  get canSubmitReview(): boolean {
+    return Boolean(this.reviewAccount);
+  }
+
+  get reviewAvatar(): string {
+    return this.reviewAccount?.avatar || '';
   }
 
   private loadProduct(slug: string): void {
@@ -175,7 +216,6 @@ export class ProductDetail implements OnInit {
     this.favorite = this.isProductFavorite(product);
     if (!sameProduct) {
       this.reviewSubmitRequestId++;
-      this.reviewName = '';
       this.reviewComment = '';
       this.reviewRating = 0;
       this.reviewFormOpen = false;
@@ -213,7 +253,7 @@ export class ProductDetail implements OnInit {
 
     this.reviewsLoading = true;
     this.reviewsError = '';
-    this.productService.getReviews(sku).subscribe({
+    this.reviewService.getReviews(sku).subscribe({
       next: (reviews) => {
         if (requestId !== this.reviewLoadRequestId) return;
 
@@ -321,7 +361,7 @@ export class ProductDetail implements OnInit {
     product.ratingAverage = ratingAverage;
     product.ratingCount = ratingCount;
     product.reviewCount = ratingCount;
-    this.productService.updateProductRating(productSku, ratingAverage, ratingCount);
+    this.reviewService.updateProductRating(productSku, ratingAverage, ratingCount);
   }
 
   get currentPrice(): number {
@@ -388,9 +428,7 @@ export class ProductDetail implements OnInit {
     if (product.slug === this.product?.slug) return;
 
     this.setProduct(product);
-    this.router.navigate(['/product', product.slug], {
-      state: { product, products: this.allProducts },
-    });
+    void this.productNavigation.navigateToProduct(product, this.allProducts);
   }
 
   closeQuickAdd(): void {
@@ -445,27 +483,32 @@ export class ProductDetail implements OnInit {
 
   submitReview(event: Event): void {
     event.preventDefault();
+    if (!this.canSubmitReview) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     const productSku = this.product?.sku?.trim();
-    const userName = this.reviewName.trim();
+    const userName = this.reviewAccount?.fullName.trim() || '';
     const comment = this.reviewComment.trim();
 
     if (this.reviewSubmitting) return;
     if (!productSku || !userName || !comment || this.reviewRating < 1 || this.reviewRating > 5) {
-      this.reviewSubmitError = 'Vui lòng nhập tên, chọn số sao và viết bình luận.';
+      this.reviewSubmitError = 'Vui lòng chọn số sao và viết bình luận.';
       return;
     }
 
     const rating = this.reviewRating;
     const review: NewProductReview = {
       productSku,
-      userName,
       rating,
       comment
     };
     const requestId = ++this.reviewSubmitRequestId;
     const optimisticReview: ProductReview = {
       ...review,
-      userAvatar: null,
+      userName,
+      userAvatar: this.reviewAvatar || null,
       createdAt: new Date(),
       isApproved: true,
     };
@@ -478,12 +521,11 @@ export class ProductDetail implements OnInit {
     this.reviewSubmitMessage = '';
     this.reviewFormOpen = false;
 
-    this.productService.createReview(review).subscribe({
+    this.reviewService.createReview(review).subscribe({
       next: (savedReview) => {
         if (requestId !== this.reviewSubmitRequestId || savedReview.productSku !== this.product?.sku) return;
         this.reviews = this.reviews.map((item) => item === optimisticReview ? savedReview : item);
         this.updateDisplayedProductRating();
-        this.reviewName = '';
         this.reviewComment = '';
         this.reviewRating = 0;
         this.reviewSubmitMessage = 'Cảm ơn bạn đã gửi đánh giá!';
@@ -505,6 +547,11 @@ export class ProductDetail implements OnInit {
   }
 
   toggleReviewForm(): void {
+    if (!this.canSubmitReview) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.reviewFormOpen = !this.reviewFormOpen;
     if (this.reviewFormOpen) {
       this.reviewSubmitError = '';

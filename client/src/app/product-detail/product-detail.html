@@ -232,30 +232,20 @@
             </div>
           </article>
           <p class="review-form-success" *ngIf="reviewSubmitMessage" role="status">{{ reviewSubmitMessage }}</p>
-          <button
-            type="button"
-            class="review-form-trigger"
-            [attr.aria-expanded]="reviewFormOpen"
-            (click)="toggleReviewForm()">
-            <i class="bi bi-pencil-square" aria-hidden="true"></i>
-            <span>
-              <strong>Bạn muốn đánh giá sản phẩm này?</strong>
-              <small>Chia sẻ cảm nhận của bạn với mọi người</small>
-            </span>
-            <i class="bi" [class.bi-chevron-down]="!reviewFormOpen" [class.bi-chevron-up]="reviewFormOpen" aria-hidden="true"></i>
-          </button>
+          <div class="review-composer">
+            <div class="review-avatar review-composer-avatar">
+              <img *ngIf="canSubmitReview && reviewAvatar" [src]="reviewAvatar" [alt]="reviewAccount?.fullName" (error)="onImageError($event)">
+              <i *ngIf="!canSubmitReview || !reviewAvatar" class="bi bi-person-fill" aria-hidden="true"></i>
+            </div>
+            <button
+              type="button"
+              class="review-form-trigger"
+              [attr.aria-expanded]="reviewFormOpen"
+              (click)="toggleReviewForm()">
+              {{ canSubmitReview ? 'Bình luận dưới tên ' + reviewAccount?.fullName : 'Bình luận' }}
+            </button>
+          </div>
           <form class="review-form" *ngIf="reviewFormOpen" (submit)="submitReview($event)">
-            <h2>Viết đánh giá của bạn</h2>
-            <label for="review-name">Tên của bạn</label>
-            <input
-              id="review-name"
-              type="text"
-              name="reviewName"
-              maxlength="100"
-              autocomplete="name"
-              required
-              [value]="reviewName"
-              (input)="reviewName = $any($event.target).value; reviewSubmitError = ''; reviewSubmitMessage = ''">
             <fieldset class="review-rating-field">
               <legend>Đánh giá sao</legend>
               <div class="review-rating-input">
@@ -269,10 +259,11 @@
                 </button>
               </div>
             </fieldset>
-            <label for="review-comment">Bình luận</label>
             <textarea
               id="review-comment"
               name="reviewComment"
+              aria-label="Nội dung bình luận"
+              placeholder="Chia sẻ cảm nhận của bạn..."
               rows="4"
               maxlength="2000"
               required
@@ -299,7 +290,7 @@
             <div class="related-visual">
               <a
                 class="related-image"
-                [href]="'/product/' + related.slug"
+                [href]="productNavigation.detailUrl(related.slug)"
                 (click)="navigateToRelatedProduct($event, related)">
                 <img [src]="productImage(related)" [alt]="related.name || 'Sản phẩm'" (error)="onImageError($event)">
                 <span *ngIf="related.discount" class="related-discount">-{{ related.discount }}%</span>
@@ -308,7 +299,7 @@
             <div class="related-info">
               <a
                 class="related-name"
-                [href]="'/product/' + related.slug"
+                [href]="productNavigation.detailUrl(related.slug)"
                 (click)="navigateToRelatedProduct($event, related)">{{ related.name }}</a>
               <div class="related-rating">
                 <i class="bi bi-star-fill"></i>

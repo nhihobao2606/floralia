@@ -1,5 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../services/product-service';
+import { ReviewService } from '../../services/review-service';
+import { ProductNavigationService } from '../../services/product-navigation-service';
 import { Products } from '../../classes/Products';
 
 @Component({
@@ -9,6 +12,8 @@ import { Products } from '../../classes/Products';
   styleUrl: './homepage.css',
 })
 export class Homepage implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+
   products = signal<Products[]>([]);
   featured = signal<Products[]>([]);
   bestSelling = signal<Products[]>([]);
@@ -85,9 +90,26 @@ export class Homepage implements OnInit {
     },
   ];
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private reviewService: ReviewService,
+    readonly productNavigation: ProductNavigationService,
+  ) {}
 
   ngOnInit(): void {
+    this.reviewService.ratingUpdates
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((update) => {
+        const applyRating = (products: Products[]) =>
+          products.map((product) => product.sku === update.productSku
+            ? { ...product, ratingAverage: update.ratingAverage, ratingCount: update.ratingCount }
+            : product);
+
+        this.products.update(applyRating);
+        this.featured.update(applyRating);
+        this.bestSelling.update(applyRating);
+      });
+
     this.productService.getAll().subscribe({
       next: (res: any) => {
         let list: Products[] = [];
@@ -96,6 +118,7 @@ export class Homepage implements OnInit {
         else if (Array.isArray(res?.data)) list = res.data;
         else if (Array.isArray(res?.products)) list = res.products;
 
+        this.products.set(list);
 
         // Sản phẩm nổi bật (nếu chưa đánh dấu thì lấy các sản phẩm đầu).
         const featuredList = list.filter((p: any) => p.featured === true);

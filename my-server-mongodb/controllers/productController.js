@@ -1,5 +1,6 @@
 const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
+const User = require('../models/user');
 
 // GET /products
 async function getProducts(req, res) {
@@ -89,15 +90,12 @@ async function getProductReviews(req, res) {
 
 // POST /products/reviews
 async function createProductReview(req, res) {
-    const { productSku, userName, rating, comment } = req.body || {};
+    const { productSku, rating, comment } = req.body || {};
     const normalizedSku = typeof productSku === 'string' ? productSku.trim() : '';
-    const normalizedName = typeof userName === 'string' ? userName.trim() : '';
     const normalizedComment = typeof comment === 'string' ? comment.trim() : '';
 
     if (
         !normalizedSku ||
-        !normalizedName ||
-        normalizedName.length > 100 ||
         !Number.isInteger(rating) ||
         rating < 1 ||
         rating > 5 ||
@@ -105,11 +103,19 @@ async function createProductReview(req, res) {
         normalizedComment.length > 2000
     ) {
         return res.status(400).json({
-            message: 'Vui lòng nhập tên, đánh giá từ 1 đến 5 sao và bình luận tối đa 2000 ký tự.'
+            message: 'Vui lòng chọn đánh giá từ 1 đến 5 sao và nhập bình luận tối đa 2000 ký tự.'
         });
     }
 
     try {
+        const user = await User.getById(req.userId);
+        const normalizedName = typeof user?.fullName === 'string' ? user.fullName.trim() : '';
+        if (!normalizedName) {
+            return res.status(401).json({
+                message: 'Không thể xác thực tài khoản. Vui lòng đăng nhập lại.'
+            });
+        }
+
         const product = await Product.getBySku(normalizedSku);
         if (!product) {
             return res.status(404).json({
@@ -120,7 +126,7 @@ async function createProductReview(req, res) {
         const review = await Product.createReview({
             productSku: normalizedSku,
             userName: normalizedName,
-            userAvatar: null,
+            userAvatar: user.avatar || null,
             rating,
             comment: normalizedComment,
             createdAt: new Date(),

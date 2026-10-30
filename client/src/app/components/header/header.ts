@@ -2,7 +2,9 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } fro
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
-import { CartItem, CartService } from '../../services/cart-service';
+import { CartItem, CartVariant, CartService } from '../../services/cart-service';
+import { ProductNavigationService } from '../../services/product-navigation-service';
+import { Products } from '../../classes/Products';
 
 @Component({
   selector: 'app-header',
@@ -21,9 +23,16 @@ export class Header implements OnInit, OnDestroy {
   private allProducts: any[] = [];
   private loaded = false;
 
-  // Giỏ hàng, người dùng
+  // Giỏ hàng, người dùng (Customer Header)
   cartOpen = false;
   cart: CartItem[] = [];
+  variantPickerItem: CartItem | null = null;
+  variantOptions: CartVariant[] = [];
+  selectedVariant: CartVariant | null = null;
+  variantPickerQuantity = 1;
+  variantPickerLoading = false;
+  variantPickerError = '';
+  private variantPickerRequestId = 0;
   user: any = null;
   userOpen = false;
 
@@ -39,6 +48,7 @@ export class Header implements OnInit, OnDestroy {
     private productService: ProductService,
     private router: Router,
     private cartService: CartService,
+    readonly productNavigation: ProductNavigationService,
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +56,6 @@ export class Header implements OnInit, OnDestroy {
     this.loadCart();
     this.onScroll();
 
-    // Mỗi lần chuyển trang: đóng các khung, cập nhật user và giỏ hàng (vd. vừa đăng nhập xong).
     this.subs.add(
       this.router.events.subscribe((e) => {
         if (e instanceof NavigationEnd) {
@@ -59,7 +68,6 @@ export class Header implements OnInit, OnDestroy {
       })
     );
 
-    // Bong bóng mời "mix trà" tự hiện định kỳ.
     this.timers.push(
       setTimeout(() => this.popInvite(), 6000),
       setInterval(() => this.popInvite(), 25000)
@@ -93,13 +101,14 @@ export class Header implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEsc(): void {
+    this.closeVariantPicker();
     this.closePanels();
     this.closeCart();
   }
 
-  // Giỏ hàng/đăng nhập thay đổi ở tab khác hoặc do code khác phát sự kiện 'cart-updated'.
   @HostListener('window:storage')
   @HostListener('window:cart-updated')
+  @HostListener('window:auth-changed')
   onStorageChange(): void {
     this.loadUser();
     this.loadCart();
@@ -159,7 +168,6 @@ export class Header implements OnInit, OnDestroy {
     this.filter();
   }
 
-  // Tìm kiếm không phân biệt hoa thường và dấu tiếng Việt
   private filter(): void {
     const q = this.normalize(this.keyword.trim());
 
@@ -182,11 +190,9 @@ export class Header implements OnInit, OnDestroy {
       .toLowerCase();
   }
 
-  // Lấy URL ảnh tương thích với API mới và dữ liệu cũ
   getSearchProductImage(product: any): string {
     const thumbnail = product.thumbnail;
 
-    // Đường dẫn ảnh từ API mới
     if (product.imageUrl) {
       if (
         product.imageUrl.startsWith('http://') ||
@@ -198,33 +204,30 @@ export class Header implements OnInit, OnDestroy {
       return `http://localhost:3002${product.imageUrl}`;
     }
 
-  // URL ảnh đầy đủ hoặc ảnh Base64
-  if (
-    typeof thumbnail === 'string' &&
-    (
-      thumbnail.startsWith('http://') ||
-      thumbnail.startsWith('https://') ||
-      thumbnail.startsWith('data:image/')
-    )
-  ) {
-    return thumbnail;
-  }
-
-  // Ảnh lưu trong thư mục assets
-  if (
-    typeof thumbnail === 'string' &&
-    /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)
-  ) {
-    if (thumbnail.startsWith('/assets/')) return thumbnail;
-
-    if (thumbnail.startsWith('assets/')) {
-      return `/${thumbnail}`;
+    if (
+      typeof thumbnail === 'string' &&
+      (
+        thumbnail.startsWith('http://') ||
+        thumbnail.startsWith('https://') ||
+        thumbnail.startsWith('data:image/')
+      )
+    ) {
+      return thumbnail;
     }
 
-    return `/assets/images/${thumbnail}`;
-  }
+    if (
+      typeof thumbnail === 'string' &&
+      /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)
+    ) {
+      if (thumbnail.startsWith('/assets/')) return thumbnail;
 
-  // Dữ liệu Base64 từ API cũ
+      if (thumbnail.startsWith('assets/')) {
+        return `/${thumbnail}`;
+      }
+
+      return `/assets/images/${thumbnail}`;
+    }
+
     if (product.imageData) {
       if (product.imageData.startsWith('data:image/')) {
         return product.imageData;
@@ -235,6 +238,7 @@ export class Header implements OnInit, OnDestroy {
 
     return '/assets/images/no-image.svg';
   }
+
   submitSearch(e: Event): void {
     e.preventDefault();
     const q = this.keyword.trim();
@@ -242,10 +246,17 @@ export class Header implements OnInit, OnDestroy {
     this.router.navigate(['/products'], { queryParams: q ? { q } : {} });
   }
 
-  /* ================= TÀI KHOẢN ================= */
+  /* ================= TÀI KHOẢN (CUSTOMER) ================= */
   private loadUser(): void {
     const raw = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
     try { this.user = raw ? JSON.parse(raw) : null; } catch { this.user = null; }
+  }
+
+  get userInitial(): string {
+    const name = (this.user?.fullName || this.user?.name || '').trim();
+    if (!name) return '';
+    const parts = name.split(/\s+/);
+    return parts[parts.length - 1].charAt(0).toUpperCase();
   }
 
   toggleUser(e: Event): void {
@@ -263,6 +274,8 @@ export class Header implements OnInit, OnDestroy {
     this.user = null;
     this.userOpen = false;
     this.loadCart();
+    window.dispatchEvent(new Event('auth-changed'));
+    window.dispatchEvent(new Event('cart-updated'));
     this.router.navigate(['/login']);
   }
 
@@ -300,12 +313,121 @@ export class Header implements OnInit, OnDestroy {
     this.cartService.removeItem(item);
   }
 
+  openVariantPicker(item: CartItem): void {
+    const requestId = ++this.variantPickerRequestId;
+    this.variantPickerItem = item;
+    this.variantPickerQuantity = Math.max(1, Number(item.quantity || 1));
+    this.variantPickerError = '';
+    this.variantPickerLoading = false;
+
+    const cachedProduct = this.findCartProduct(item, this.productService.getCachedProducts() ?? []);
+    const immediateVariants = item.variants?.length ? item.variants : cachedProduct?.variants ?? [];
+    if (immediateVariants.length) {
+      this.applyVariantOptions(immediateVariants, item);
+      return;
+    }
+
+    this.variantOptions = [];
+    this.selectedVariant = null;
+    this.variantPickerLoading = true;
+
+    this.productService.getProducts().subscribe({
+      next: (products) => {
+        if (requestId !== this.variantPickerRequestId) return;
+
+        const product = this.findCartProduct(item, products);
+        this.applyVariantOptions(product?.variants ?? [], item);
+        this.variantPickerLoading = false;
+      },
+      error: (error: unknown) => {
+        if (requestId !== this.variantPickerRequestId) return;
+
+        console.error('Không thể tải phân loại sản phẩm:', error);
+        this.variantPickerError = 'Không thể tải phân loại. Vui lòng thử lại.';
+        this.variantPickerLoading = false;
+      },
+    });
+  }
+
+  private findCartProduct(item: CartItem, products: Products[]): Products | undefined {
+    return products.find((candidate) => {
+      const identifiers = candidate as Products & { _id?: string; id?: string };
+      return candidate.sku === item.productSku ||
+        candidate.slug === item.slug ||
+        candidate.sku === item.productId ||
+        identifiers._id === item.productId ||
+        identifiers.id === item.productId ||
+        candidate.variants.some((variant) => variant.sku === item.variantSku);
+    });
+  }
+
+  private applyVariantOptions(variants: CartVariant[], item: CartItem): void {
+    this.variantOptions = variants;
+    this.selectedVariant =
+      variants.find((variant) => variant.sku === item.variantSku) ??
+      variants.find((variant) => 'isDefault' in variant && variant.isDefault) ??
+      variants[0] ??
+      null;
+    if (this.selectedVariant) {
+      this.variantPickerQuantity = Math.min(
+        this.variantPickerQuantity,
+        Math.max(this.selectedVariant.stock ?? 0, 1),
+      );
+    }
+    if (variants.length < 2) {
+      this.variantPickerError = 'Sản phẩm không có phân loại khác để đổi.';
+    }
+  }
+
+  selectVariant(variant: CartVariant): void {
+    this.selectedVariant = variant;
+    this.variantPickerQuantity = Math.min(
+      this.variantPickerQuantity,
+      Math.max(variant.stock ?? 0, 1),
+    );
+    this.variantPickerError = '';
+  }
+
+  changeVariantPickerQuantity(delta: number): void {
+    const nextQuantity = this.variantPickerQuantity + delta;
+    if (nextQuantity >= 1 && nextQuantity <= (this.selectedVariant?.stock ?? 0)) {
+      this.variantPickerQuantity = nextQuantity;
+    }
+  }
+
+  get variantPickerPrice(): number {
+    return this.selectedVariant?.price ?? 0;
+  }
+
+  confirmVariantChange(): void {
+    if (!this.variantPickerItem || !this.selectedVariant) return;
+    if (this.cartService.changeVariant(
+      this.variantPickerItem,
+      this.selectedVariant,
+      this.variantPickerQuantity,
+    )) {
+      this.loadCart();
+      this.closeVariantPicker();
+    } else {
+      this.variantPickerError = this.cartService.cartMessage();
+    }
+  }
+
+  closeVariantPicker(): void {
+    this.variantPickerRequestId++;
+    this.variantPickerItem = null;
+    this.variantOptions = [];
+    this.selectedVariant = null;
+    this.variantPickerQuantity = 1;
+    this.variantPickerError = '';
+    this.variantPickerLoading = false;
+  }
+
   cartImage(it: any): string {
     return this.resolveImage(it.image || it.thumbnail || it.img);
   }
 
   /* ================= HÀM HỖ TRỢ SẢN PHẨM ================= */
-  getId(p: any): string { return p._id || p.id || p.productId || p.slug || ''; }
   getName(p: any): string { return p.name || p.productName || p.product_name || p.title || ''; }
   getPrice(p: any): number { return Number(p.price ?? p.minPrice ?? p.productPrice ?? 0); }
   getImage(p: any): string {

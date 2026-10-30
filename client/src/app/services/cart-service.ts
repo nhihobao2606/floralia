@@ -11,6 +11,7 @@ export interface CartProduct {
   minPrice?: number;
   oldPrice?: number;
   stock?: number;
+  variants?: CartVariant[];
 }
 
 export interface CartVariant {
@@ -19,6 +20,7 @@ export interface CartVariant {
   price?: number;
   oldPrice?: number;
   stock?: number;
+  isDefault?: boolean;
 }
 
 export interface CartItem {
@@ -35,6 +37,9 @@ export interface CartItem {
   image?: string;
   thumbnail?: string;
   variantLabel?: string;
+  variantCount?: number;
+  productSku?: string;
+  variants?: CartVariant[];
   [key: string]: unknown;
 }
 
@@ -92,12 +97,15 @@ export class CartService {
         Number(existing.quantity || 0) + quantityToAdd,
         stock,
       );
+      existing.variants = product.variants?.map((option) => ({ ...option }));
+      existing.variantCount = product.variants?.length ?? existing.variantCount ?? 0;
     } else {
       const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
       const oldPrice = Number(variant?.oldPrice ?? product.oldPrice ?? 0);
       cart.push({
         id: variantSku || productId,
         productId,
+        productSku: product.sku,
         variantSku,
         sku: variant?.sku || product.sku,
         name: product.name,
@@ -109,6 +117,8 @@ export class CartService {
         image,
         thumbnail: image,
         variantLabel: variant?.label || '',
+        variantCount: product.variants?.length ?? 0,
+        variants: product.variants?.map((option) => ({ ...option })),
       });
     }
 
@@ -132,6 +142,55 @@ export class CartService {
     this.saveCart(cart);
   }
 
+  changeVariant(item: CartItem, variant: CartVariant, quantity = item.quantity): boolean {
+    const cart = this.getCart();
+    const target = cart.find((candidate) => this.matches(candidate, item));
+    const variantSku = variant.sku || '';
+    const stock = Number(variant.stock || 0);
+
+    if (!target || !variantSku) {
+      this.showCartMessage('Không thể đổi phân loại sản phẩm.');
+      return false;
+    }
+
+    if (stock < 1) {
+      this.showCartMessage('Phân loại này đang hết hàng.');
+      return false;
+    }
+
+    const quantityToSet = Math.min(Math.max(1, Math.floor(Number(quantity) || 1)), stock);
+    if ((target.variantSku || '') === variantSku) {
+      target.quantity = quantityToSet;
+      this.saveCart(cart);
+      return true;
+    }
+
+    const productId = target.productId || target.productSku || target.slug || target.id || '';
+    const existing = cart.find((candidate) =>
+      candidate !== target &&
+      (candidate.productId || candidate.productSku || candidate.slug || candidate.id) === productId &&
+      (candidate.variantSku || '') === variantSku
+    );
+    if (existing) {
+      existing.quantity = Math.min(Number(existing.quantity || 0) + quantityToSet, stock);
+      this.saveCart(cart.filter((candidate) => candidate !== target));
+      this.showCartMessage('Đã đổi phân loại trong giỏ hàng.');
+      return true;
+    }
+
+    target.productId = productId;
+    target.variantSku = variantSku;
+    target.sku = variantSku;
+    target.id = variantSku;
+    target.variantLabel = variant.label || '';
+    target.price = Number(variant.price || 0);
+    target.oldPrice = Number(variant.oldPrice || 0);
+    target.quantity = quantityToSet;
+    this.saveCart(cart);
+    this.showCartMessage('Đã đổi phân loại trong giỏ hàng.');
+    return true;
+  }
+
   removeItem(item: CartItem): void {
     const cart = this.getCart();
     const updatedCart = cart.filter((candidate) => !this.matches(candidate, item));
@@ -152,8 +211,10 @@ export class CartService {
   }
 
   private matches(left: CartItem, right: CartItem): boolean {
-    return Boolean(right.productId) &&
-      left.productId === right.productId &&
+    const leftProductId = left.productId || left.productSku || left.slug || left.id;
+    const rightProductId = right.productId || right.productSku || right.slug || right.id;
+    return Boolean(rightProductId) &&
+      leftProductId === rightProductId &&
       (left.variantSku || '') === (right.variantSku || '');
   }
 

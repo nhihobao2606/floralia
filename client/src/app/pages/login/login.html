@@ -65,22 +65,12 @@
           <button type="button" class="forgot-password" (click)="forgotPassword()">Quên mật khẩu?</button>
         </div>
 
-        <!-- Lỗi từ máy chủ / thông báo -->
-        <div class="error-message" *ngIf="errorMessage" role="alert">
-          <i class="bi bi-exclamation-circle"></i>
-          <span>{{ errorMessage }}</span>
-        </div>
         <div class="notice-message" *ngIf="notice" role="status">
           <i class="bi bi-info-circle"></i>
           <span>{{ notice }}</span>
         </div>
 
-        <button type="submit" class="btn-login" [disabled]="loading">
-          <span *ngIf="!loading">Đăng nhập</span>
-          <span *ngIf="loading">
-            <span class="spinner-border spinner-border-sm me-2"></span>Đang đăng nhập...
-          </span>
-        </button>
+        <button type="submit" class="btn-login" >Đăng nhập</button>
       </form>
       
       <div class="form-divider"><span>hoặc tiếp tục với</span></div>

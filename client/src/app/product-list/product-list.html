@@ -99,7 +99,7 @@
               <div class="sale-item">
                 <img [src]="getProductImage(p)" [alt]="p.name" loading="lazy">
                 <div>
-                  <h6><a [routerLink]="['/product', p.slug]" [state]="{ product: p, products: products }">{{ p.name }}</a></h6>
+                  <h6><a [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p, products: products }">{{ p.name }}</a></h6>
                   <p>
                     {{ p.price | currency:'VND':'symbol':'1.0-0':'vi' }}
                     <del *ngIf="p.oldPrice">{{ p.oldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</del>
@@ -127,7 +127,7 @@
           <div class="product-card" *ngFor="let item of paginatedProducts">
             <div class="product-img">
              <span class="sale-badge" *ngIf="item.isSale || item.discount > 0">-{{ item.discount }}%</span>
-             <a [routerLink]="['/product', item.slug]" [state]="{ product: item, products: products }">
+             <a [routerLink]="productNavigation.detailRoute(item.slug)" [state]="{ product: item, products: products }">
                <img [src]="getProductImage(item)" [alt]="item.name">
              </a>
              <button
@@ -142,7 +142,7 @@
             </div>
 
             <div class="product-info">
-             <a [routerLink]="['/product', item.slug]" [state]="{ product: item, products: products }" class="sale-name">{{ item.name }}</a>
+             <a [routerLink]="productNavigation.detailRoute(item.slug)" [state]="{ product: item, products: products }" class="sale-name">{{ item.name }}</a>
 
              <div class="sale-rating" [attr.aria-label]="'Đánh giá ' + formatRatingAverage(item.ratingAverage) + ' trên 5 sao'">
                <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi"

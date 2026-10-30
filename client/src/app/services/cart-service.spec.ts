@@ -100,4 +100,111 @@ describe('CartService', () => {
     service.removeItem(item);
     expect(service.getCart()).toEqual([]);
   });
+
+  it('changes a cart item variant and updates its price and quantity cap', () => {
+    service.addProduct(
+      {
+        _id: 'product-1',
+        sku: 'TEA-1',
+        slug: 'test-tea',
+        name: 'Trà thử nghiệm',
+        variants: [
+          { sku: 'TEA-1-100G', label: '100g', price: 100000, stock: 5 },
+          { sku: 'TEA-1-200G', label: '200g', price: 180000, stock: 2 },
+        ],
+      },
+      { sku: 'TEA-1-100G', label: '100g', price: 100000, stock: 5 },
+      4,
+      '/assets/tea.jpg',
+    );
+    const item = service.getCart()[0];
+
+    expect(service.changeVariant(item, {
+      sku: 'TEA-1-200G',
+      label: '200g',
+      price: 180000,
+      oldPrice: 200000,
+      stock: 2,
+    })).toBe(true);
+
+    expect(service.getCart()).toEqual([expect.objectContaining({
+      productId: 'product-1',
+      variantSku: 'TEA-1-200G',
+      sku: 'TEA-1-200G',
+      variantLabel: '200g',
+      price: 180000,
+      oldPrice: 200000,
+      quantity: 2,
+    })]);
+  });
+
+  it('stores product variants in the cart so the picker can open without a request', () => {
+    service.addProduct(
+      {
+        _id: 'product-1',
+        sku: 'TEA-1',
+        name: 'Trà thử nghiệm',
+        variants: [
+          { sku: 'TEA-1-100G', label: '100g', price: 100000, stock: 5 },
+          { sku: 'TEA-1-200G', label: '200g', price: 180000, stock: 2 },
+        ],
+      },
+      { sku: 'TEA-1-100G', label: '100g', price: 100000, stock: 5 },
+      1,
+      '/assets/tea.jpg',
+    );
+
+    expect(service.getCart()[0].variants).toEqual([
+      { sku: 'TEA-1-100G', label: '100g', price: 100000, stock: 5 },
+      { sku: 'TEA-1-200G', label: '200g', price: 180000, stock: 2 },
+    ]);
+  });
+
+  it('merges into an existing target variant when changing cart variant', () => {
+    service.addProduct(
+      { _id: 'product-1', sku: 'TEA-1', name: 'Trà thử nghiệm' },
+      { sku: 'TEA-1-100G', price: 100000, stock: 5 },
+      2,
+      '/assets/tea.jpg',
+    );
+    service.addProduct(
+      { _id: 'product-1', sku: 'TEA-1', name: 'Trà thử nghiệm' },
+      { sku: 'TEA-1-200G', price: 180000, stock: 5 },
+      3,
+      '/assets/tea.jpg',
+    );
+    const [source] = service.getCart();
+
+    service.changeVariant(source, {
+      sku: 'TEA-1-200G',
+      label: '200g',
+      price: 180000,
+      stock: 4,
+    });
+
+    expect(service.getCart()).toHaveLength(1);
+    expect(service.getCart()[0]).toMatchObject({
+      variantSku: 'TEA-1-200G',
+      quantity: 4,
+    });
+  });
+
+  it('updates the quantity when confirming the currently selected variant', () => {
+    service.addProduct(
+      { _id: 'product-1', sku: 'TEA-1', name: 'Trà thử nghiệm' },
+      { sku: 'TEA-1-100G', price: 100000, stock: 5 },
+      2,
+      '/assets/tea.jpg',
+    );
+    const [item] = service.getCart();
+
+    expect(service.changeVariant(item, {
+      sku: 'TEA-1-100G',
+      label: '100g',
+      price: 100000,
+      stock: 5,
+    }, 4)).toBe(true);
+
+    expect(service.getCart()[0].quantity).toBe(4);
+  });
 });

@@ -5,12 +5,19 @@ import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ProductDetail } from './product-detail';
 import { ProductService } from '../services/product-service';
+import { ReviewService } from '../services/review-service';
 import { CartService } from '../services/cart-service';
 
 describe('ProductDetail', () => {
   let component: ProductDetail;
   let fixture: ComponentFixture<ProductDetail>;
   let scrollToSpy: ReturnType<typeof vi.fn>;
+  let reviewServiceMock: {
+    ratingUpdates: Subject<any>;
+    getReviews: ReturnType<typeof vi.fn>;
+    updateProductRating: ReturnType<typeof vi.fn>;
+    createReview: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     scrollToSpy = vi.fn();
@@ -59,6 +66,23 @@ describe('ProductDetail', () => {
         variants: [],
       },
     ];
+    reviewServiceMock = {
+      ratingUpdates: new Subject(),
+      getReviews: vi.fn(() => of([{
+        productSku: 'TEA-1',
+        userName: 'Người mua',
+        rating: 5,
+        comment: 'Trà thơm, đóng gói cẩn thận.',
+      }])),
+      updateProductRating: vi.fn(),
+      createReview: vi.fn((review) => of({
+        ...review,
+        userName: 'Thương Trương',
+        userAvatar: 'data:image/png;base64,avatar',
+        createdAt: new Date(),
+        isApproved: true,
+      })),
+    };
     await TestBed.configureTestingModule({
       declarations: [ProductDetail],
       imports: [CommonModule, RouterModule.forRoot([])],
@@ -72,21 +96,9 @@ describe('ProductDetail', () => {
           useValue: {
             getAll: () => of(products),
             getCachedProducts: () => products,
-            getReviews: () => of([{
-              productSku: 'TEA-1',
-              userName: 'Người mua',
-              rating: 5,
-              comment: 'Trà thơm, đóng gói cẩn thận.',
-            }]),
-            updateProductRating: vi.fn(),
-            createReview: vi.fn((review) => of({
-              ...review,
-              userAvatar: null,
-              createdAt: new Date(),
-              isApproved: true,
-            })),
           },
         },
+        { provide: ReviewService, useValue: reviewServiceMock },
       ],
     }).compileComponents();
 
@@ -95,6 +107,16 @@ describe('ProductDetail', () => {
     fixture.detectChanges();
     await fixture.whenStable();
   });
+
+  function signInForReviewTests(): void {
+    localStorage.setItem('currentUser', JSON.stringify({
+      id: 'user-1',
+      fullName: 'Thương Trương',
+      avatar: 'data:image/png;base64,avatar',
+    }));
+    localStorage.setItem('token', 'valid-test-token');
+    component.syncReviewAccount();
+  }
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -150,7 +172,7 @@ describe('ProductDetail', () => {
     expect(component.displayedRatingCount).toBe(1);
     expect(component.product?.ratingAverage).toBe(5);
     expect(component.product?.ratingCount).toBe(1);
-    expect(TestBed.inject(ProductService).updateProductRating).toHaveBeenCalledWith('TEA-1', 5, 1);
+    expect(reviewServiceMock.updateProductRating).toHaveBeenCalledWith('TEA-1', 5, 1);
   });
 
   it('rounds average ratings to one decimal place', () => {
@@ -175,7 +197,7 @@ describe('ProductDetail', () => {
   });
 
   it('saves and immediately displays a new review', () => {
-    component.reviewName = 'Khách hàng';
+    signInForReviewTests();
     component.reviewRating = 4;
     component.reviewComment = 'Trà thơm và dễ uống.';
     const event = new Event('submit', { cancelable: true });
@@ -186,24 +208,24 @@ describe('ProductDetail', () => {
     expect(component.reviews).toHaveLength(2);
     expect(component.reviews[0]).toMatchObject({
       productSku: 'TEA-1',
-      userName: 'Khách hàng',
+      userName: 'Thương Trương',
+      userAvatar: 'data:image/png;base64,avatar',
       rating: 4,
       comment: 'Trà thơm và dễ uống.',
       isApproved: true,
     });
     expect(component.reviewSubmitMessage).toBe('Cảm ơn bạn đã gửi đánh giá!');
-    expect(component.reviewName).toBe('');
     expect(component.reviewComment).toBe('');
     expect(component.reviewRating).toBe(0);
     expect(component.displayedRatingAverage).toBe(4.5);
     expect(component.displayedRatingCount).toBe(2);
-    expect(TestBed.inject(ProductService).updateProductRating).toHaveBeenLastCalledWith('TEA-1', 4.5, 2);
+    expect(reviewServiceMock.updateProductRating).toHaveBeenLastCalledWith('TEA-1', 4.5, 2);
   });
 
   it('shows the review before the API responds and keeps the form collapsed', () => {
+    signInForReviewTests();
     const pendingSave = new Subject<any>();
-    vi.spyOn(TestBed.inject(ProductService), 'createReview').mockReturnValue(pendingSave);
-    component.reviewName = 'Khách hàng mới';
+    reviewServiceMock.createReview.mockReturnValue(pendingSave);
     component.reviewRating = 5;
     component.reviewComment = 'Rất thơm.';
     const event = new Event('submit', { cancelable: true });
@@ -212,7 +234,7 @@ describe('ProductDetail', () => {
     fixture.detectChanges();
 
     expect(component.reviews[0]).toMatchObject({
-      userName: 'Khách hàng mới',
+      userName: 'Thương Trương',
       rating: 5,
       comment: 'Rất thơm.',
     });
@@ -222,10 +244,10 @@ describe('ProductDetail', () => {
 
     pendingSave.next({
       productSku: 'TEA-1',
-      userName: 'Khách hàng mới',
+      userName: 'Thương Trương',
       rating: 5,
       comment: 'Rất thơm.',
-      userAvatar: null,
+      userAvatar: 'data:image/png;base64,avatar',
       createdAt: new Date(),
       isApproved: true,
     });
@@ -233,6 +255,7 @@ describe('ProductDetail', () => {
   });
 
   it('opens the review form only after activating the review prompt', () => {
+    signInForReviewTests();
     const tabs = fixture.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLButtonElement>;
     const reviewTab = tabs[2];
     reviewTab.click();
@@ -243,14 +266,39 @@ describe('ProductDetail', () => {
     reviewPrompt.click();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.review-form')).not.toBeNull();
+    const form = fixture.nativeElement.querySelector('.review-form') as HTMLFormElement;
+    expect(form).not.toBeNull();
+    expect(form.querySelector('input')).toBeNull();
+    expect(form.querySelector('textarea')).not.toBeNull();
+    expect(reviewPrompt.textContent).toContain('Bình luận dưới tên Thương Trương');
+  });
+
+  it('redirects guests to login instead of opening the review form', () => {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
+    component.syncReviewAccount();
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    fixture.detectChanges();
+
+    const tabs = fixture.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLButtonElement>;
+    tabs[2].click();
+    fixture.detectChanges();
+    const reviewPrompt = fixture.nativeElement.querySelector('.review-form-trigger') as HTMLButtonElement;
+    expect(reviewPrompt.textContent?.trim()).toBe('Bình luận');
+
+    reviewPrompt.click();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+    expect(component.reviewFormOpen).toBe(false);
+    expect(fixture.nativeElement.querySelector('.review-form')).toBeNull();
   });
 
   it('removes an optimistic review and reopens the form if saving fails', () => {
-    vi.spyOn(TestBed.inject(ProductService), 'createReview').mockReturnValue(
+    signInForReviewTests();
+    reviewServiceMock.createReview.mockReturnValue(
       throwError(() => new Error('network error')),
     );
-    component.reviewName = 'Khách hàng';
     component.reviewRating = 4;
     component.reviewComment = 'Đánh giá thử.';
 
@@ -259,10 +307,10 @@ describe('ProductDetail', () => {
     expect(component.reviews).toHaveLength(1);
     expect(component.displayedRatingAverage).toBe(5);
     expect(component.displayedRatingCount).toBe(1);
-    expect(TestBed.inject(ProductService).updateProductRating).toHaveBeenLastCalledWith('TEA-1', 5, 1);
+    expect(reviewServiceMock.updateProductRating).toHaveBeenLastCalledWith('TEA-1', 5, 1);
     expect(component.reviewFormOpen).toBe(true);
     expect(component.reviewSubmitError).toBe('Chưa gửi được đánh giá. Vui lòng thử lại.');
-    expect(component.reviewName).toBe('Khách hàng');
+    expect(component.reviews).toHaveLength(1);
   });
 
   it('adds the selected variant to the shared guest cart', () => {
