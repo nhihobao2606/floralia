@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { ProductService } from '../../services/product-service';
+import { CartService } from '../../services/cart-service';
+import { ProductNavigationService } from '../../services/product-navigation-service';
 import { Products } from '../../classes/Products';
 import { CouponItem, DEFAULT_COUPONS } from '../../classes/Coupon';
 
@@ -14,6 +16,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   specialPromos = signal<Products[]>([]);
   bigDeals = signal<Products[]>([]);
   loading = signal(true);
+  buyNowProduct: Products | null = null;
 
   // Yêu thích
   wishlist = signal<Set<string>>(new Set());
@@ -36,7 +39,11 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   private timerInterval: any;
   private targetTime = Date.now() + (5 * 24 * 3600 + 13 * 3600 + 51 * 60 + 5) * 1000;
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    readonly cartService: CartService,
+    readonly productNavigation: ProductNavigationService,
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -112,7 +119,8 @@ export class PromotionsComponent implements OnInit, OnDestroy {
 
   getProductPrice(product: Products): number {
     const p: any = product;
-    return Number(p.price ?? p.minPrice ?? p.productPrice ?? 0);
+    const defaultVariant = p.variants?.find((variant: any) => variant.isDefault) ?? p.variants?.[0];
+    return Number(defaultVariant?.price ?? p.price ?? p.minPrice ?? p.productPrice ?? 0);
   }
 
   formatPrice(price: number): string {
@@ -126,7 +134,8 @@ export class PromotionsComponent implements OnInit, OnDestroy {
 
   getOldPrice(product: Products): number {
     const p: any = product;
-    return Number(p.oldPrice || 0);
+    const defaultVariant = p.variants?.find((variant: any) => variant.isDefault) ?? p.variants?.[0];
+    return Number(defaultVariant?.oldPrice ?? p.oldPrice ?? 0);
   }
 
   getDiscount(product: Products): number {
@@ -143,12 +152,17 @@ export class PromotionsComponent implements OnInit, OnDestroy {
 
   getRating(product: Products): number {
     const p: any = product;
-    return Math.round(Number(p.ratingAverage || 5));
+    return Math.round(Number(p.ratingAverage || 0));
   }
 
   getRatingCount(product: Products): number {
     const p: any = product;
-    return Number(p.ratingCount || 1);
+    return Number(p.ratingCount || 0);
+  }
+
+  formatRatingAverage(product: Products): string {
+    const p: any = product;
+    return Number(p.ratingAverage || 0).toFixed(1);
   }
 
   getProductImage(product: Products): string {
@@ -191,6 +205,34 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   getProductId(product: Products): string {
     const p: any = product;
     return p._id || p.id || p.productId || p.slug || '';
+  }
+
+  hasStock(product: Products): boolean {
+    return product.variants?.length
+      ? product.variants.some((variant) => variant.stock > 0)
+      : product.stock > 0;
+  }
+
+  addToCart(product: Products): void {
+    const variant =
+      product.variants?.find((option) => option.isDefault && option.stock > 0) ??
+      product.variants?.find((option) => option.stock > 0) ??
+      null;
+
+    this.cartService.addProduct(
+      product,
+      variant,
+      1,
+      this.getProductImage(product),
+    );
+  }
+
+  openBuyNowPopup(product: Products): void {
+    this.buyNowProduct = product;
+  }
+
+  closeBuyNowPopup(): void {
+    this.buyNowProduct = null;
   }
 
   isWished(product: Products): boolean {

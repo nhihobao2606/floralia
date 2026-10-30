@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Router } from '@angular/router';
 import { Addresses } from '../addresses/addresses';
 
 describe('Addresses', () => {
@@ -7,7 +10,12 @@ describe('Addresses', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [Addresses],
+      providers: [
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Addresses);

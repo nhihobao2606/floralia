@@ -10,7 +10,6 @@ import { ProductDetail } from './product-detail/product-detail';
 import { BlogComponent } from './pages/blog/blog';
 import { BlogDetailComponent } from './pages/blog-detail/blog-detail';
 import { PromotionsComponent } from './pages/promotions/promotions';
-import { Profile } from './profile/profile';
 
 const routes: Routes = [
   {path: '', component: Homepage, pathMatch: 'full'},
@@ -21,7 +20,6 @@ const routes: Routes = [
   {path: 'addresses', component: Addresses},
   {path: 'products', component: ProductListComponent},
   {path: 'product/:slug', component: ProductDetail},
-  { path: '', component: Homepage, pathMatch: 'full' },
   { path: 'blog', component: BlogComponent },
   { path: 'blog/:slug', component: BlogDetailComponent },
   { path: 'sales', component: PromotionsComponent },

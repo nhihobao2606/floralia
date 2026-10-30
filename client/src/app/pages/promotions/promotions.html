@@ -177,7 +177,7 @@
 
     <!-- Center View More Button -->
     <div class="view-more-wrap text-center">
-      <a routerLink="/sales" class="btn-view-more">
+      <a routerLink="/products" class="btn-view-more">
         XEM THÊM
       </a>
     </div>
@@ -189,8 +189,10 @@
   <div class="product-card">
     <div class="product-img">
       <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
-      <span class="sale-badge" *ngIf="hasDiscount(p)">-{{ getDiscount(p) }}%</span>
-      <a [routerLink]="['/sales']">
+      <span class="sale-badge" *ngIf="getDiscount(p) > 0">-{{ getDiscount(p) }}%</span>
+      <a
+        [routerLink]="productNavigation.detailRoute(p.slug)"
+        [state]="{ product: p, products: products() }">
         <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
       </a>
       <button class="sale-heart" type="button" aria-label="Yêu thích"
@@ -200,12 +202,15 @@
     </div>
 
     <div class="product-info">
-      <a [routerLink]="['/sales']" class="sale-name">{{ getProductName(p) }}</a>
+      <a
+        [routerLink]="productNavigation.detailRoute(p.slug)"
+        [state]="{ product: p, products: products() }"
+        class="sale-name">{{ getProductName(p) }}</a>
 
       <div class="sale-rating">
         <i *ngFor="let s of stars" class="bi"
            [ngClass]="s <= getRating(p) ? 'bi-star-fill' : 'bi-star'"></i>
-        <small>({{ getRatingCount(p) }})</small>
+        <small>{{ formatRatingAverage(p) }} ({{ getRatingCount(p) }})</small>
       </div>
 
       <div class="sale-price">
@@ -213,9 +218,25 @@
         <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
       </div>
 
-      <a class="sale-cart" [routerLink]="['/sales']">
-        Thêm vào giỏ hàng
-      </a>
+      <div class="product-actions">
+        <button
+          type="button"
+          class="sale-cart-icon"
+          [disabled]="!hasStock(p)"
+          [attr.aria-label]="'Thêm ' + getProductName(p) + ' vào giỏ hàng'"
+          title="Thêm vào giỏ hàng"
+          (click)="addToCart(p)">
+          <i class="bi bi-bag-plus" aria-hidden="true"></i>
+        </button>
+        <button
+          type="button"
+          class="sale-buy-now"
+          [disabled]="!hasStock(p)"
+          (click)="openBuyNowPopup(p)">
+          <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+          Mua ngay
+        </button>
+      </div>
     </div>
   </div>
 </ng-template>
@@ -230,3 +251,37 @@
     </div>
   </div>
 </ng-template>
+
+<div
+  *ngIf="cartService.cartMessage()"
+  class="cart-notification"
+  role="status"
+  aria-live="polite">
+  <i class="bi bi-bag-check" aria-hidden="true"></i>
+  <span>{{ cartService.cartMessage() }}</span>
+</div>
+
+<div
+  *ngIf="buyNowProduct as product"
+  class="buy-now-backdrop"
+  (click)="closeBuyNowPopup()">
+  <section
+    class="buy-now-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="promo-buy-now-title"
+    (click)="$event.stopPropagation()">
+    <button
+      type="button"
+      class="buy-now-close"
+      aria-label="Đóng"
+      (click)="closeBuyNowPopup()">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+    <i class="bi bi-lightning-charge buy-now-dialog-icon" aria-hidden="true"></i>
+    <h2 id="promo-buy-now-title">Mua ngay</h2>
+    <p><strong>{{ getProductName(product) }}</strong></p>
+    <p>Tính năng thanh toán đang được hoàn thiện. Nút này hiện chưa thêm sản phẩm vào giỏ hàng.</p>
+    <button type="button" class="buy-now-dialog-confirm" (click)="closeBuyNowPopup()">Đã hiểu</button>
+  </section>
+</div>

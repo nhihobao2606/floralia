@@ -21,7 +21,6 @@ registerLocaleData(localeVi);
 import { BlogComponent } from './pages/blog/blog';
 import { BlogDetailComponent } from './pages/blog-detail/blog-detail';
 import { PromotionsComponent } from './pages/promotions/promotions';
-import { Profile } from './profile/profile';
 
 @NgModule({
   declarations: [App, Header, Header2, Footer, Homepage, Login, Signup, Profile, Addresses, ProductListComponent, ProductDetail, BlogComponent, BlogDetailComponent, PromotionsComponent],
