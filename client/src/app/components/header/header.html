@@ -6,7 +6,7 @@
     <i class="bi bi-flower1"></i>
   </div>
 
-  <!-- NAVBAR -->
+  <!-- NAVBAR (CUSTOMER HEADER) -->
   <nav class="navbar navbar-expand-lg" [class.scrolled]="scrolled">
     <div class="container">
 
@@ -14,12 +14,12 @@
         <img src="/assets/images/logo.png" class="logo" alt="Floralia Herbal Tea">
       </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu"
-              aria-controls="menu" aria-expanded="false" aria-label="Mở menu">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuCustomer"
+              aria-controls="menuCustomer" aria-expanded="false" aria-label="Mở menu">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse" id="menu">
+      <div class="collapse navbar-collapse" id="menuCustomer">
         <ul class="navbar-nav mx-auto">
           <li class="nav-item"><a class="nav-link" routerLink="/home" routerLinkActive="active">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" routerLink="/about" routerLinkActive="active">Giới thiệu</a></li>
@@ -51,10 +51,10 @@
           <li class="nav-item"><a class="nav-link" routerLink="/contact" routerLinkActive="active">Liên hệ</a></li>
         </ul>
 
-        <!-- ICON GROUP -->
+        <!-- ICON GROUP: Thứ tự: Tìm kiếm -> Giỏ hàng -> Avatar người dùng -->
         <div class="icon-group">
 
-          <!-- Tìm kiếm -->
+          <!-- 1. Icon Tìm kiếm -->
           <div class="search-container-box">
             <button type="button" class="icon-btn" (click)="toggleSearch($event)" aria-label="Tìm kiếm">
               <i class="bi bi-search"></i>
@@ -88,9 +88,6 @@
                 <div class="search-state" *ngIf="!searchLoading && keyword.trim() && results.length === 0">
                   <i class="bi bi-emoji-neutral"></i> Chưa tìm thấy sản phẩm "{{ keyword }}"
                 </div>
-                <div class="search-state hint" *ngIf="!searchLoading && !keyword.trim()">
-                  Gợi ý: hoa cúc, hồng nhãn, ấm trà...
-                </div>
               </div>
 
               <div class="search-more-footer">
@@ -101,29 +98,39 @@
             </div>
           </div>
 
-          <!-- Tài khoản -->
-          <div class="user-menu" id="userMenuDropdown">
-            <a class="icon-btn" *ngIf="!user" routerLink="/login" aria-label="Đăng nhập"><i class="bi bi-person"></i></a>
-
-            <button type="button" class="icon-btn" *ngIf="user" (click)="toggleUser($event)" aria-label="Tài khoản">
-              <i class="bi bi-person-check"></i>
-            </button>
-
-            <ul class="user-dropdown" [class.show]="userOpen && user" (click)="$event.stopPropagation()">
-              <li class="user-hello">Xin chào, <strong>{{ user?.fullName || user?.name || 'bạn' }}</strong></li>
-              <li><a class="dropdown-item" routerLink="/account"><i class="bi bi-person-circle"></i> Tài khoản của tôi</a></li>
-              <li><a class="dropdown-item" routerLink="/orders"><i class="bi bi-box-seam"></i> Đơn hàng của tôi</a></li>
-              <li><a class="dropdown-item" routerLink="/wishlist"><i class="bi bi-heart"></i> Sản phẩm yêu thích</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item logout" href="#" (click)="logout($event)"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
-            </ul>
-          </div>
-
-          <!-- Giỏ hàng -->
+          <!-- 2. Icon Giỏ hàng (đứng trước avatar) -->
           <button type="button" class="icon-btn" id="cart-btn" (click)="openCart($event)" aria-label="Giỏ hàng">
             <i class="bi bi-bag"></i>
             <span class="cart-badge" [class.bump]="cartCount > 0">{{ cartCount }}</span>
           </button>
+
+          <!-- 3. Avatar Người dùng (đứng sau giỏ hàng): Rê chuột mở ngay dropdown có dấu nhọn -->
+          <div class="user-menu" id="userMenuDropdown">
+            <button type="button" class="user-avatar-btn" (click)="toggleUser($event)" aria-label="Tài khoản của tôi">
+              <!-- Có ảnh đại diện -->
+              <img *ngIf="user?.avatar" [src]="user.avatar" class="header-avatar" alt="Avatar">
+              <!-- Chưa có ảnh đại diện: Hiện chữ cái đầu họ tên -->
+              <span *ngIf="!user?.avatar && userInitial" class="header-initial">{{ userInitial }}</span>
+              <!-- Dự phòng nếu chưa có tên -->
+              <i *ngIf="!user?.avatar && !userInitial" class="bi bi-person-fill"></i>
+            </button>
+
+            <!-- Dropdown Menu: Có dấu nhọn chỉa lên icon, tự động hiện khi hover chuột -->
+            <div class="user-dropdown" [class.show]="userOpen" (click)="$event.stopPropagation()">
+              <div class="user-dropdown-arrow"></div>
+              <div class="user-hello">
+                <strong>Xin chào, {{ user?.fullName || user?.name || 'Khách hàng' }}</strong>
+              </div>
+              <ul class="user-dropdown-nav">
+                <li><a class="dropdown-item" routerLink="/account"><i class="bi bi-person-circle"></i> Thông tin tài khoản</a></li>
+                <li><a class="dropdown-item" routerLink="/orders"><i class="bi bi-box-seam"></i> Đơn hàng của tôi</a></li>
+                <li><a class="dropdown-item" routerLink="/wishlist"><i class="bi bi-heart"></i> Sản phẩm yêu thích</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item logout" href="#" (click)="logout($event)"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+              </ul>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

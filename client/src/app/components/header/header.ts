@@ -20,7 +20,7 @@ export class Header implements OnInit, OnDestroy {
   private allProducts: any[] = [];
   private loaded = false;
 
-  // Giỏ hàng, người dùng
+  // Giỏ hàng, người dùng (Customer Header)
   cartOpen = false;
   cart: any[] = [];
   user: any = null;
@@ -41,7 +41,6 @@ export class Header implements OnInit, OnDestroy {
     this.loadCart();
     this.onScroll();
 
-    // Mỗi lần chuyển trang: đóng các khung, cập nhật user và giỏ hàng (vd. vừa đăng nhập xong).
     this.subs.add(
       this.router.events.subscribe((e) => {
         if (e instanceof NavigationEnd) {
@@ -54,7 +53,6 @@ export class Header implements OnInit, OnDestroy {
       })
     );
 
-    // Bong bóng mời "mix trà" tự hiện định kỳ.
     this.timers.push(
       setTimeout(() => this.popInvite(), 6000),
       setInterval(() => this.popInvite(), 25000)
@@ -92,9 +90,9 @@ export class Header implements OnInit, OnDestroy {
     this.closeCart();
   }
 
-  // Giỏ hàng/đăng nhập thay đổi ở tab khác hoặc do code khác phát sự kiện 'cart-updated'.
   @HostListener('window:storage')
   @HostListener('window:cart-updated')
+  @HostListener('window:auth-changed')
   onStorageChange(): void {
     this.loadUser();
     this.loadCart();
@@ -154,7 +152,6 @@ export class Header implements OnInit, OnDestroy {
     this.filter();
   }
 
-  // Tìm kiếm không phân biệt hoa thường và dấu tiếng Việt
   private filter(): void {
     const q = this.normalize(this.keyword.trim());
 
@@ -177,11 +174,9 @@ export class Header implements OnInit, OnDestroy {
       .toLowerCase();
   }
 
-  // Lấy URL ảnh tương thích với API mới và dữ liệu cũ
   getSearchProductImage(product: any): string {
     const thumbnail = product.thumbnail;
 
-    // Đường dẫn ảnh từ API mới
     if (product.imageUrl) {
       if (
         product.imageUrl.startsWith('http://') ||
@@ -193,33 +188,30 @@ export class Header implements OnInit, OnDestroy {
       return `http://localhost:3002${product.imageUrl}`;
     }
 
-  // URL ảnh đầy đủ hoặc ảnh Base64
-  if (
-    typeof thumbnail === 'string' &&
-    (
-      thumbnail.startsWith('http://') ||
-      thumbnail.startsWith('https://') ||
-      thumbnail.startsWith('data:image/')
-    )
-  ) {
-    return thumbnail;
-  }
-
-  // Ảnh lưu trong thư mục assets
-  if (
-    typeof thumbnail === 'string' &&
-    /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)
-  ) {
-    if (thumbnail.startsWith('/assets/')) return thumbnail;
-
-    if (thumbnail.startsWith('assets/')) {
-      return `/${thumbnail}`;
+    if (
+      typeof thumbnail === 'string' &&
+      (
+        thumbnail.startsWith('http://') ||
+        thumbnail.startsWith('https://') ||
+        thumbnail.startsWith('data:image/')
+      )
+    ) {
+      return thumbnail;
     }
 
-    return `/assets/images/${thumbnail}`;
-  }
+    if (
+      typeof thumbnail === 'string' &&
+      /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)
+    ) {
+      if (thumbnail.startsWith('/assets/')) return thumbnail;
 
-  // Dữ liệu Base64 từ API cũ
+      if (thumbnail.startsWith('assets/')) {
+        return `/${thumbnail}`;
+      }
+
+      return `/assets/images/${thumbnail}`;
+    }
+
     if (product.imageData) {
       if (product.imageData.startsWith('data:image/')) {
         return product.imageData;
@@ -230,6 +222,7 @@ export class Header implements OnInit, OnDestroy {
 
     return '/assets/images/no-image.svg';
   }
+
   submitSearch(e: Event): void {
     e.preventDefault();
     const q = this.keyword.trim();
@@ -237,10 +230,17 @@ export class Header implements OnInit, OnDestroy {
     this.router.navigate(['/products'], { queryParams: q ? { q } : {} });
   }
 
-  /* ================= TÀI KHOẢN ================= */
+  /* ================= TÀI KHOẢN (CUSTOMER) ================= */
   private loadUser(): void {
     const raw = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
     try { this.user = raw ? JSON.parse(raw) : null; } catch { this.user = null; }
+  }
+
+  get userInitial(): string {
+    const name = (this.user?.fullName || this.user?.name || '').trim();
+    if (!name) return '';
+    const parts = name.split(/\s+/);
+    return parts[parts.length - 1].charAt(0).toUpperCase();
   }
 
   toggleUser(e: Event): void {
@@ -258,6 +258,8 @@ export class Header implements OnInit, OnDestroy {
     this.user = null;
     this.userOpen = false;
     this.loadCart();
+    window.dispatchEvent(new Event('auth-changed'));
+    window.dispatchEvent(new Event('cart-updated'));
     this.router.navigate(['/login']);
   }
 

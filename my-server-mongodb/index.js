@@ -10,7 +10,9 @@ const User = require('./models/user');
 const Product = require('./models/product');
 
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
+const addressRoutes = require('./routes/addressRoutes');
 
 const app = express();
 const port = 3002;
@@ -34,8 +36,14 @@ app.get('/', (req, res) => {
 // API đăng ký, đăng nhập
 app.use('/api/auth', authRoutes);
 
+// API người dùng (profile, đổi mật khẩu)
+app.use('/api/users', userRoutes);
+
 // API sản phẩm
 app.use('/products', productRoutes);
+
+// API địa chỉ
+app.use('/api/addresses', addressRoutes);
 
 async function startServer() {
     try {

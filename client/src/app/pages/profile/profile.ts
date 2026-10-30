@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { NgControl, NgForm } from '@angular/forms';
@@ -12,7 +12,7 @@ import { NgControl, NgForm } from '@angular/forms';
 export class Profile implements OnInit {
   private readonly API = 'http://localhost:3002/api/users';
 
-  // Menu bên trái: thêm mục mới chỉ cần thêm một dòng vào mảng này.
+  // Menu bên trái
   menu = [
     { label: 'Tổng quan', icon: 'bi-grid', link: '/account' },
     { label: 'Đơn hàng', icon: 'bi-box-seam', link: '/orders' },
@@ -28,7 +28,6 @@ export class Profile implements OnInit {
   phone = '';
   avatar = '';
   avatarError = '';
-  savingProfile = false;
   profileMsg: { type: 'ok' | 'err'; text: string } = { type: 'ok', text: '' };
 
   // Đổi mật khẩu
@@ -37,17 +36,21 @@ export class Profile implements OnInit {
   confirmPassword = '';
   show = { cur: false, new: false, cf: false };
   wrongCurrent = false;
-  savingPass = false;
   passMsg: { type: 'ok' | 'err'; text: string } = { type: 'ok', text: '' };
 
   readonly namePattern = '^(?=.*\\S)[^\\d!@#$%^&*()_+=\\[\\]{};:"\\\\|<>?/~]+$';
   readonly phonePattern = '^(0|\\+84)(3|5|7|8|9)\\d{8}$';
   readonly passwordPattern = '^(?=.*[A-Za-z])(?=.*\\d).{8,}$';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
+  ) {}
 
   ngOnInit(): void {
-    // 1) Hiện ngay thông tin đã lưu lúc đăng nhập/đăng ký.
+    // 1) Hiện ngay thông tin đã lưu lúc đăng nhập
     const raw = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
     if (!raw || !this.token) {
       this.router.navigate(['/login']);
@@ -55,7 +58,7 @@ export class Profile implements OnInit {
     }
     try { this.fill(JSON.parse(raw)); } catch { this.router.navigate(['/login']); return; }
 
-    // 2) Lấy bản mới nhất từ MongoDB.
+    // 2) Lấy bản mới nhất từ MongoDB
     this.http.get<any>(`${this.API}/me`, { headers: this.headers }).subscribe({
       next: (res) => { if (res.success) { this.fill(res.user); this.syncStorage(res.user); } },
       error: (err) => this.handleAuthError(err),
@@ -77,13 +80,15 @@ export class Profile implements OnInit {
     this.email = u.email || '';
     this.phone = u.phone || '';
     this.avatar = u.avatar || '';
+    this.cdr.detectChanges();
   }
 
-  // Cập nhật lại thông tin trong bộ nhớ trình duyệt để header hiện đúng tên.
+  // Cập nhật lại thông tin trong bộ nhớ trình duyệt để header và các component hiện đúng tức thì
   private syncStorage(u: any): void {
     const store = localStorage.getItem('currentUser') ? localStorage : sessionStorage;
     store.setItem('currentUser', JSON.stringify(u));
     window.dispatchEvent(new Event('cart-updated'));
+    window.dispatchEvent(new Event('auth-changed'));
   }
 
   private handleAuthError(err: any): void {
@@ -95,77 +100,126 @@ export class Profile implements OnInit {
     return parts[parts.length - 1].charAt(0).toUpperCase();
   }
 
-  get profileChanged(): boolean {
-    return !!this.user && (
-      this.fullName.trim() !== (this.user.fullName || '') ||
-      this.phone.trim() !== (this.user.phone || '') ||
-      this.avatar !== (this.user.avatar || '')
-    );
-  }
-
   /* ================= ẢNH ĐẠI DIỆN ================= */
   onFileSelected(e: Event): void {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0];
-    input.value = '';
     this.avatarError = '';
     if (!file) return;
 
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+    if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
       this.avatarError = 'Vui lòng chọn ảnh JPG, PNG hoặc WEBP.';
+      input.value = '';
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       this.avatarError = 'Ảnh quá lớn (tối đa 5MB).';
+      input.value = '';
       return;
     }
 
-    // Cắt vuông và thu nhỏ về 256px để lưu gọn vào MongoDB.
     const reader = new FileReader();
     reader.onload = () => {
+      const dataUrl = reader.result as string;
+
+      // 1. Hiển thị ảnh xem trước ngay lập tức trên giao diện không cần chờ click thêm lần nào
+      this.ngZone.run(() => {
+        this.avatar = dataUrl;
+        this.cdr.detectChanges();
+      });
+
+      // 2. Tối ưu ảnh vuông kích thước 256px
       const img = new Image();
       img.onload = () => {
         const size = 256;
         const side = Math.min(img.width, img.height);
         const canvas = document.createElement('canvas');
         canvas.width = canvas.height = size;
-        canvas.getContext('2d')!.drawImage(
-          img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size
-        );
-        this.avatar = canvas.toDataURL('image/jpeg', 0.85);
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(
+            img,
+            (img.width - side) / 2,
+            (img.height - side) / 2,
+            side,
+            side,
+            0,
+            0,
+            size,
+            size
+          );
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+          this.ngZone.run(() => {
+            this.avatar = compressed;
+            this.cdr.detectChanges();
+          });
+        }
       };
-      img.src = reader.result as string;
+      img.src = dataUrl;
+      input.value = '';
     };
     reader.readAsDataURL(file);
   }
 
   removeAvatar(): void {
     this.avatar = '';
+    if (this.user) {
+      this.user.avatar = '';
+      this.syncStorage(this.user);
+    }
+    this.cdr.detectChanges();
+
+    // Xóa ảnh trực tiếp trong cơ sở dữ liệu MongoDB
+    this.http.put<any>(`${this.API}/me`, {
+      fullName: this.fullName.trim(),
+      phone: this.phone.trim(),
+      avatar: ''
+    }, { headers: this.headers }).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.fill(res.user);
+          this.syncStorage(res.user);
+        }
+      }
+    });
+
+    this.flash('profileMsg', 'ok', 'Đã xóa ảnh đại diện thành công!');
   }
 
   /* ================= CẬP NHẬT THÔNG TIN ================= */
   updateProfile(form: NgForm): void {
     this.profileMsg.text = '';
-    if (form.invalid) { form.form.markAllAsTouched(); return; }
+    if (form.invalid) {
+      form.form.markAllAsTouched();
+      return;
+    }
 
-    this.savingProfile = true;
+    // Cập nhật ngay lập tức giao diện người dùng
+    const updated = {
+      ...this.user,
+      fullName: this.fullName.trim().replace(/\s+/g, ' '),
+      phone: this.phone.trim(),
+      avatar: this.avatar,
+    };
+    this.fill(updated);
+    this.syncStorage(updated);
+    this.flash('profileMsg', 'ok', 'Cập nhật thông tin thành công!');
+
+    // Gửi cập nhật lên server
     this.http.put<any>(`${this.API}/me`, {
       fullName: this.fullName.trim().replace(/\s+/g, ' '),
       phone: this.phone.trim(),
       avatar: this.avatar,
     }, { headers: this.headers }).subscribe({
       next: (res) => {
-        this.savingProfile = false;
         if (res.success) {
           this.fill(res.user);
           this.syncStorage(res.user);
-          this.flash('profileMsg', 'ok', res.message || 'Cập nhật thông tin thành công!');
         }
       },
       error: (err) => {
-        this.savingProfile = false;
         this.handleAuthError(err);
-        this.flash('profileMsg', 'err', err.error?.message || 'Không thể cập nhật. Vui lòng thử lại.');
+        this.flash('profileMsg', 'err', err.error?.message || 'Không thể lưu lên máy chủ. Vui lòng thử lại.');
       },
     });
   }
@@ -180,31 +234,47 @@ export class Profile implements OnInit {
 
   changePassword(form: NgForm): void {
     this.passMsg.text = '';
-    if (form.invalid || this.mismatch || this.samePassword) { form.form.markAllAsTouched(); return; }
+    if (form.invalid || this.mismatch || this.samePassword) {
+      form.form.markAllAsTouched();
+      return;
+    }
 
-    this.savingPass = true;
     this.http.put<any>(`${this.API}/me/password`, {
       currentPassword: this.currentPassword,
       newPassword: this.newPassword,
     }, { headers: this.headers }).subscribe({
       next: (res) => {
-        this.savingPass = false;
+        this.currentPassword = '';
+        this.newPassword = '';
+        this.confirmPassword = '';
         form.resetForm();
         this.show = { cur: false, new: false, cf: false };
-        this.flash('passMsg', 'ok', res.message || 'Đổi mật khẩu thành công!');
+        this.wrongCurrent = false;
+        this.flash('passMsg', 'ok', res.message || 'Cập nhật mật khẩu thành công!');
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.savingPass = false;
         this.handleAuthError(err);
-        if (err.status === 400 && err.error?.field === 'currentPassword') this.wrongCurrent = true;
-        else this.flash('passMsg', 'err', err.error?.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.');
+        if (err.status === 400 && err.error?.field === 'currentPassword') {
+          this.wrongCurrent = true;
+          this.flash('passMsg', 'err', 'Mật khẩu hiện tại không chính xác.');
+        } else {
+          this.flash('passMsg', 'err', err.error?.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.');
+        }
+        this.cdr.detectChanges();
       },
     });
   }
 
   private flash(target: 'profileMsg' | 'passMsg', type: 'ok' | 'err', text: string): void {
     this[target] = { type, text };
-    if (type === 'ok') setTimeout(() => (this[target] = { type: 'ok', text: '' }), 4000);
+    this.cdr.detectChanges();
+    if (type === 'ok') {
+      setTimeout(() => {
+        this[target] = { type: 'ok', text: '' };
+        this.cdr.detectChanges();
+      }, 5000);
+    }
   }
 
   /* ================= ĐĂNG XUẤT ================= */
@@ -212,6 +282,7 @@ export class Profile implements OnInit {
     e?.preventDefault();
     ['currentUser', 'token'].forEach((k) => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
     window.dispatchEvent(new Event('cart-updated'));
+    window.dispatchEvent(new Event('auth-changed'));
     this.router.navigate(['/login']);
   }
 }
