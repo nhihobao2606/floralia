@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Footer } from './footer';
+import { RouterTestingModule } from '@angular/router/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('Footer', () => {
   let component: Footer;
@@ -9,7 +11,9 @@ describe('Footer', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
       declarations: [Footer],
+      schemas: [NO_ERRORS_SCHEMA]
       imports: [CommonModule, RouterModule.forRoot([])],
     }).compileComponents();
 

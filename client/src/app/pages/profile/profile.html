@@ -102,14 +102,15 @@
               </div>
             </div>
 
+            <!-- Thông báo trạng thái cập nhật -->
             <div class="alert-msg" [ngClass]="profileMsg.type" *ngIf="profileMsg.text" role="status">
               <i class="bi" [ngClass]="profileMsg.type === 'ok' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
               <span>{{ profileMsg.text }}</span>
             </div>
 
-            <button type="submit" class="btn-main" [disabled]="savingProfile || !profileChanged">
-              <span *ngIf="!savingProfile">Cập nhật</span>
-              <span *ngIf="savingProfile"><span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...</span>
+            <!-- Nút cập nhật luôn hiện, không bị disable, bấm 1 phát lưu liền -->
+            <button type="submit" class="btn-main">
+              <span>Cập nhật</span>
             </button>
           </form>
         </section>
@@ -180,14 +181,15 @@
               </div>
             </div>
 
+            <!-- Thông báo kết quả đổi mật khẩu -->
             <div class="alert-msg" [ngClass]="passMsg.type" *ngIf="passMsg.text" role="status">
               <i class="bi" [ngClass]="passMsg.type === 'ok' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
               <span>{{ passMsg.text }}</span>
             </div>
 
-            <button type="submit" class="btn-main" [disabled]="savingPass">
-              <span *ngIf="!savingPass">Cập nhật</span>
-              <span *ngIf="savingPass"><span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...</span>
+            <!-- Nút cập nhật luôn hiện, không bị disable, bấm 1 phát lưu liền -->
+            <button type="submit" class="btn-main">
+              <span>Cập nhật</span>
             </button>
           </form>
         </section>

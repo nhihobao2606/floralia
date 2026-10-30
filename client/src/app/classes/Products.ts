@@ -13,6 +13,10 @@ export interface Products {
   stock: number;
   sold: number;
   thumbnail: string;
+  imageUrl?: string | null;
+  imageId?: string | null;
+  imageData?: string | null;
+  imageMimeType?: string | null;
   images: string[];
   ratingAverage: number;
   ratingCount: number;

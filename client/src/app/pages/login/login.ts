@@ -15,11 +15,10 @@ export class Login {
 
   showPassword = false;
   rememberMe = false;
-  loading = false;
   errorMessage = '';
   notice = '';
 
-  // Email hợp lệ: có phần tên, ký tự @, tên miền và đuôi tối thiểu 2 ký tự (vd: ten@gmail.com).
+  // Email hợp lệ: có phần tên, ký tự @, tên miền và đuôi tối thiểu 2 ký tự.
   readonly emailPattern = '^\\s*[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}\\s*$';
 
   constructor(
@@ -35,32 +34,35 @@ export class Login {
     this.errorMessage = '';
     this.notice = '';
 
-    // Chỉ đăng nhập khi cả hai ô đều hợp lệ; ngược lại hiện lỗi inline ở từng ô.
+    // Chỉ đăng nhập khi cả hai ô đều hợp lệ.
     if (form.invalid) {
       form.form.markAllAsTouched();
       return;
     }
-
-    this.loading = true;
 
     this.http.post<any>('http://localhost:3002/api/auth/login', {
       email: this.email.trim(),
       password: this.password
     }).subscribe({
       next: (result) => {
-        this.loading = false;
-
         if (result.success) {
           const user = result.user;
 
-          // Lưu thông tin người dùng sau khi đăng nhập
+          // Lưu thông tin người dùng sau khi đăng nhập.
           const storage = this.rememberMe ? localStorage : sessionStorage;
-          storage.setItem('currentUser', JSON.stringify(user));
-          if (result.token) {
-            storage.setItem('token', result.token);
-          }
 
-          // Gộp giỏ hàng khách với giỏ hàng của người dùng
+          // Xóa dữ liệu đăng nhập cũ ở cả hai nơi.
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('currentUser');
+          sessionStorage.removeItem('token');
+
+          // Lưu thông tin người dùng và token đăng nhập.
+          storage.setItem('currentUser', JSON.stringify(user));
+          
+          storage.setItem('token', result.token);
+
+          // Gộp giỏ hàng khách với giỏ hàng của người dùng.
           const guestCart = JSON.parse(localStorage.getItem('cart_guest') || '[]');
 
           if (guestCart.length > 0) {
@@ -68,7 +70,9 @@ export class Login {
             const userCart = JSON.parse(localStorage.getItem(userKey) || '[]');
 
             guestCart.forEach((guestItem: any) => {
-              const existingItem = userCart.find((item: any) => item.id === guestItem.id);
+              const existingItem = userCart.find(
+                (item: any) => item.id === guestItem.id
+              );
 
               if (existingItem) {
                 existingItem.quantity += guestItem.quantity;
@@ -81,6 +85,10 @@ export class Login {
             localStorage.removeItem('cart_guest');
           }
 
+          // Báo hiệu cập nhật người dùng và giỏ hàng ngay lập tức trên giao diện
+          window.dispatchEvent(new Event('auth-changed'));
+          window.dispatchEvent(new Event('cart-updated'));
+
           alert('Đăng nhập thành công!');
           this.router.navigate(['/']);
         } else {
@@ -88,14 +96,12 @@ export class Login {
         }
       },
       error: (error) => {
-        this.loading = false;
-
         if (error.status === 0) {
           this.errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng thử lại.';
         } else {
           this.errorMessage = error.error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
         }
-
+        alert(this.errorMessage);
         console.error('Lỗi đăng nhập:', error);
       }
     });
