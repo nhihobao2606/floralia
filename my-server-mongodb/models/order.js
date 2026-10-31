@@ -42,11 +42,17 @@ function insertMany(orders) {
     return ordersCollection.insertMany(orders);
 }
 
+function findOneAndUpdate(filter, update, options = {}) {
+    if (!ordersCollection) return Promise.resolve(null);
+    return ordersCollection.findOneAndUpdate(filter, update, { returnDocument: 'after', ...options });
+}
+
 module.exports = {
     setCollection,
     getAll,
     getById,
     create,
     count,
-    insertMany
+    insertMany,
+    findOneAndUpdate
 };

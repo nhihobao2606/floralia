@@ -346,14 +346,15 @@ async function getOrderById(req, res) {
 // POST /api/orders
 async function createOrder(req, res) {
   try {
+    const id = req.body.id || String(Math.floor(1000 + Math.random() * 9000));
     const newOrder = {
-      id: String(Math.floor(1000 + Math.random() * 9000)),
-      code: '#' + Math.floor(1000 + Math.random() * 9000),
-      date: new Date().toLocaleDateString('vi-VN'),
-      time: new Date().toLocaleTimeString('vi-VN'),
-      status: 'pending',
-      statusLabel: 'CHỜ XÁC NHẬN',
-      step: 1,
+      id: id,
+      code: req.body.code || ('#' + id),
+      date: req.body.date || new Date().toLocaleDateString('vi-VN'),
+      time: req.body.time || new Date().toLocaleTimeString('vi-VN'),
+      status: req.body.status || 'processing',
+      statusLabel: req.body.statusLabel || 'ĐANG XỬ LÝ',
+      step: req.body.step || 2,
       ...req.body
     };
     await Order.create(newOrder);

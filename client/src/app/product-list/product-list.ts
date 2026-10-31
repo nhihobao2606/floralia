@@ -278,8 +278,28 @@ export class ProductListComponent implements OnInit {
 
   openBuyNowPopup(product: Products): void {
     this.closeCartPopup();
-    const variant = product.variants?.find(v => v.stock > 0) || product.variants?.[0] || null;
-    this.cartService.addProduct(product, variant, 1, this.getProductImage(product));
+    const variant = product.variants?.find(v => (v.stock ?? 0) > 0) || product.variants?.[0] || null;
+    const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
+    const image = this.getProductImage(product);
+
+    this.cartService.addProduct(product, variant, 1, image);
+
+    const checkoutItem = {
+      id: variant?.sku || product.sku || product._id || 'PROD',
+      productId: product._id || product.id || product.sku,
+      sku: variant?.sku || product.sku || 'PROD',
+      name: product.name,
+      title: product.name,
+      image: image,
+      thumbnail: image,
+      variant: variant?.label || '',
+      variantLabel: variant?.label || '',
+      price: price,
+      quantity: 1,
+      total: price
+    };
+    sessionStorage.setItem('checkout_items', JSON.stringify([checkoutItem]));
+
     this.router.navigate(['/checkout']);
   }
 

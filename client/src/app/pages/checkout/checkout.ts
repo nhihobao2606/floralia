@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { OrderService, Order } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
+import { ProductService } from '../../services/product-service';
 
 interface CheckoutItem {
   sku: string;
@@ -31,62 +32,74 @@ export class CheckoutComponent implements OnInit {
   isEditingAddress = false;
 
   couponCode = '';
-  discount = 155000;
   shippingFee = 0;
   paymentMethod = 'paypal';
 
-  items: CheckoutItem[] = [
-    {
-      sku: 'TTM004',
-      name: 'Lục Mễ Trà – Trà Xanh Gạo Lứt Rang',
-      image: '/assets/images/products/74.png',
-      price: 200000,
-      quantity: 1,
-      total: 200000
-    },
-    {
-      sku: 'TTM010',
-      name: 'Lam Diệp Trà – Trà Hắc Kỷ Tử',
-      image: '/assets/images/products/34.png',
-      price: 250000,
-      quantity: 1,
-      total: 250000
-    },
-    {
-      sku: 'TTM021',
-      name: 'Huyết Ngọc Trà – Trà Bổ Huyết Dưỡng Nhan',
-      image: '/assets/images/products/79.png',
-      price: 250000,
-      quantity: 1,
-      total: 250000
-    }
-  ];
+  items: CheckoutItem[] = [];
 
   constructor(
     private readonly orderService: OrderService,
     private readonly cartService: CartService,
+    private readonly productService: ProductService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    let itemsToLoad: any[] = [];
+
+    // 1. Kiểm tra sản phẩm được chọn từ giỏ hàng hoặc nút "Mua ngay"
     const rawSaved = sessionStorage.getItem('checkout_items');
     if (rawSaved) {
       try {
         const parsed = JSON.parse(rawSaved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          this.items = parsed.map((p: any) => ({
-            sku: p.sku || p.productId || 'TTM001',
-            name: p.name || p.title || 'Trà thảo mộc Floralia',
-            image: p.image || p.thumbnail || '/assets/images/products/74.png',
-            variant: p.variantLabel || '',
-            price: Number(p.price || 0),
-            quantity: Number(p.quantity || 1),
-            total: Number(p.price || 0) * Number(p.quantity || 1)
-          }));
+          itemsToLoad = parsed;
         }
-      } catch (e) {
-        // Giữ danh sách mẫu
+      } catch (e) {}
+    }
+
+    // 2. Nếu không có, đọc từ giỏ hàng của CartService
+    if (itemsToLoad.length === 0) {
+      const cartItems = this.cartService.getCart();
+      if (cartItems && cartItems.length > 0) {
+        itemsToLoad = cartItems;
       }
+    }
+
+    if (itemsToLoad.length > 0) {
+      this.items = itemsToLoad.map((p: any) => ({
+        sku: p.sku || p.productId || 'TTM001',
+        name: p.name || p.title || 'Trà thảo mộc Floralia',
+        image: p.image || p.thumbnail || '/assets/images/products/74.png',
+        variant: p.variantLabel || p.variant || '',
+        price: Number(p.price || 0),
+        quantity: Number(p.quantity || 1),
+        total: Number(p.price || 0) * Number(p.quantity || 1)
+      }));
+    } else {
+      // 3. Nếu vẫn trống, tải trực tiếp sản phẩm từ MongoDB Atlas backend
+      this.productService.getProducts().subscribe({
+        next: (prods) => {
+          if (prods && prods.length > 0) {
+            this.items = prods.slice(0, 3).map(p => {
+              const variant = p.variants?.find(v => (v.stock ?? 0) > 0) || p.variants?.[0];
+              const price = Number(variant?.price || p.price || 200000);
+              const img = p.imageUrl
+                ? (p.imageUrl.startsWith('http') ? p.imageUrl : `http://localhost:3002${p.imageUrl.startsWith('/') ? '' : '/'}${p.imageUrl}`)
+                : (p.thumbnail && /\.(jpg|png|webp|svg)$/i.test(p.thumbnail) ? p.thumbnail : '/assets/images/products/74.png');
+              return {
+                sku: variant?.sku || p.sku || 'TTM001',
+                name: p.name,
+                image: img,
+                variant: variant?.label || '',
+                price: price,
+                quantity: 1,
+                total: price
+              };
+            });
+          }
+        }
+      });
     }
   }
 
@@ -106,6 +119,17 @@ export class CheckoutComponent implements OnInit {
     return this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   }
 
+  get discount(): number {
+    if (this.subtotal <= 0) return 0;
+    if (this.couponCode.trim()) {
+      return Math.min(this.subtotal, 155000);
+    }
+    if (this.subtotal >= 500000) {
+      return 155000;
+    }
+    return Math.min(this.subtotal, Math.floor(this.subtotal * 0.1));
+  }
+
   get total(): number {
     const computed = this.subtotal - this.discount + this.shippingFee;
     return computed > 0 ? computed : 0;
@@ -116,9 +140,13 @@ export class CheckoutComponent implements OnInit {
   }
 
   placeOrder(): void {
-    const orderData: Partial<Order> = {
-      id: '4152',
-      code: '#4152',
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const orderId = String(randomNum);
+    const orderCode = '#' + orderId;
+
+    const orderData: Order = {
+      id: orderId,
+      code: orderCode,
       date: new Date().toLocaleDateString('vi-VN'),
       time: new Date().toLocaleTimeString('vi-VN'),
       status: 'processing',
@@ -126,10 +154,10 @@ export class CheckoutComponent implements OnInit {
       step: 2,
       paymentMethod: this.paymentMethod === 'paypal' ? 'Paypal' : (this.paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'VnPay'),
       sender: {
-        name: 'Hà Anh',
+        name: 'Floralia Herbal Tea',
         address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'Haanh.BD@gmail.com',
-        phone: '(671) 555-0110'
+        email: 'floralia@gmail.com',
+        phone: '0901 234 567'
       },
       receiver: {
         name: this.fullName || 'Minh Trần',
@@ -137,23 +165,36 @@ export class CheckoutComponent implements OnInit {
         email: this.email || 'MinhTran.thuu@gmail.com',
         phone: this.phone || '(671) 555-0110'
       },
-      items: this.items,
+      items: this.items.map(it => ({
+        sku: it.sku,
+        name: it.name,
+        image: it.image,
+        variant: it.variant || '',
+        price: it.price,
+        quantity: it.quantity,
+        total: it.total || (it.price * it.quantity)
+      })),
       subtotal: this.subtotal,
       discount: this.discount,
       shippingFee: this.shippingFee,
       total: this.total
     };
 
-    // Save synchronously first so order is immediately present
+    // 1. Lưu ngay vào OrderService và LocalStorage để hiển thị tức thì không độ trễ
     this.orderService.saveOrderLocal(orderData);
     sessionStorage.removeItem('checkout_items');
     this.cartService.clearCart();
 
-    // Navigate immediately to Order Success page
-    this.router.navigate(['/order-success', '4152']);
-
-    // Persist to backend asynchronously
-    this.orderService.createOrder(orderData).subscribe();
+    // 2. Gửi request tạo đơn hàng lên MongoDB Atlas backend (FloraliaTea.Orders)
+    this.orderService.createOrder(orderData).subscribe({
+      next: (res) => {
+        const targetId = res?.order?.id || orderId;
+        this.router.navigate(['/order-success', targetId]);
+      },
+      error: () => {
+        this.router.navigate(['/order-success', orderId]);
+      }
+    });
   }
 
   continueShopping(): void {

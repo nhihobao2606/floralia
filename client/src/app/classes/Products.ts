@@ -1,4 +1,6 @@
-export interface Products {
+﻿export interface Products {
+  _id?: string;
+  id?: string;
   sku: string;
   slug: string;
   name: string;

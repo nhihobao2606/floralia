@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../services/product-service';
@@ -577,8 +577,30 @@ export class ProductDetail implements OnInit {
   }
 
   buyNow(): void {
-    if (!this.product || this.currentStock < 1) return;
-    this.cartService.addProduct(this.product, this.selectedVariant, this.quantity, this.activeImage);
+    if (!this.product) return;
+    const variant = this.selectedVariant;
+    const price = Number(variant?.price ?? this.product.price ?? this.product.minPrice ?? 0);
+    const qty = Math.max(1, this.quantity || 1);
+    const image = this.activeImage || this.productImage(this.product);
+
+    this.cartService.addProduct(this.product, variant, qty, image);
+
+    const checkoutItem = {
+      id: variant?.sku || this.product.sku || this.product._id || 'PROD',
+      productId: this.product._id || this.product.id || this.product.sku,
+      sku: variant?.sku || this.product.sku || 'PROD',
+      name: this.product.name,
+      title: this.product.name,
+      image: image,
+      thumbnail: image,
+      variant: variant?.label || '',
+      variantLabel: variant?.label || '',
+      price: price,
+      quantity: qty,
+      total: price * qty
+    };
+    sessionStorage.setItem('checkout_items', JSON.stringify([checkoutItem]));
+
     this.router.navigate(['/checkout']);
   }
 

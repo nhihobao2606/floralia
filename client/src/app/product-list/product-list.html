@@ -1,4 +1,4 @@
-<!-- Banner -->
+﻿<!-- Banner -->
 <section class="banner">
   <img src="assets/images/thanhloc.jpg" alt="Banner Floralia Tea" loading="lazy">
 </section>
@@ -301,30 +301,5 @@
         Thêm vào giỏ hàng
       </button>
     </div>
-  </section>
-</div>
-
-<div
-  *ngIf="buyNowProduct as product"
-  class="buy-now-backdrop"
-  (click)="closeBuyNowPopup()">
-  <section
-    class="buy-now-dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="buy-now-title"
-    (click)="$event.stopPropagation()">
-    <button
-      type="button"
-      class="buy-now-close"
-      aria-label="Đóng"
-      (click)="closeBuyNowPopup()">
-      <i class="bi bi-x-lg" aria-hidden="true"></i>
-    </button>
-    <i class="bi bi-lightning-charge buy-now-dialog-icon" aria-hidden="true"></i>
-    <h2 id="buy-now-title">Mua ngay</h2>
-    <p><strong>{{ product.name }}</strong></p>
-    <p>Tính năng thanh toán đang được hoàn thiện. Nút này hiện chưa thêm sản phẩm vào giỏ hàng.</p>
-    <button type="button" class="buy-now-dialog-confirm" (click)="closeBuyNowPopup()">Đã hiểu</button>
   </section>
 </div>

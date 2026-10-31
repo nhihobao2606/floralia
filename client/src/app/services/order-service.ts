@@ -344,7 +344,22 @@ export class OrderService {
     }
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    try {
+      const stored = localStorage.getItem('floralia_orders');
+      if (stored) {
+        const parsed: Order[] = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          for (let i = parsed.length - 1; i >= 0; i--) {
+            const item = parsed[i];
+            if (!this.defaultOrders.some(d => d.id === item.id)) {
+              this.defaultOrders.unshift(item);
+            }
+          }
+        }
+      }
+    } catch (e) {}
+  }
 
   getOrders(status?: string, query?: string): Observable<Order[]> {
     return this.http.get<{ success: boolean; orders: Order[] }>(this.apiUrl, {
@@ -353,7 +368,19 @@ export class OrderService {
         ...(query ? { q: query } : {})
       }
     }).pipe(
-      map(res => res.orders),
+      map(res => {
+        if (res.orders && res.orders.length > 0) {
+          for (const ord of res.orders) {
+            const idx = this.defaultOrders.findIndex(d => d.id === ord.id);
+            if (idx >= 0) {
+              this.defaultOrders[idx] = ord;
+            } else {
+              this.defaultOrders.unshift(ord);
+            }
+          }
+        }
+        return res.orders;
+      }),
       catchError(() => {
         let list = [...this.defaultOrders];
         if (status && status !== 'all') {
@@ -376,12 +403,39 @@ export class OrderService {
   }
 
   getOrderByIdSync(id: string): Order {
-    const found = this.defaultOrders.find(o => o.id === id || o.code === ('#' + id) || o.id === '4152');
-    return found || this.defaultOrders[0];
+    if (!id) return this.defaultOrders[0];
+    const cleanId = id.startsWith('#') ? id.substring(1) : id;
+
+    const found = this.defaultOrders.find(o =>
+      o.id === cleanId ||
+      o.id === id ||
+      o.code === id ||
+      o.code === ('#' + cleanId)
+    );
+    if (found) return found;
+
+    try {
+      const stored = localStorage.getItem('floralia_orders');
+      if (stored) {
+        const parsed: Order[] = JSON.parse(stored);
+        const storedFound = parsed.find(o =>
+          o.id === cleanId ||
+          o.id === id ||
+          o.code === id ||
+          o.code === ('#' + cleanId)
+        );
+        if (storedFound) {
+          this.defaultOrders.unshift(storedFound);
+          return storedFound;
+        }
+      }
+    } catch (e) {}
+
+    return this.defaultOrders[0];
   }
 
   saveOrderLocal(orderData: Partial<Order>): Order {
-    const id = orderData.id || '4152';
+    const id = orderData.id || String(Math.floor(1000 + Math.random() * 9000));
     const newOrder: Order = {
       id,
       code: orderData.code || ('#' + id),
@@ -392,10 +446,10 @@ export class OrderService {
       step: orderData.step || 2,
       paymentMethod: orderData.paymentMethod || 'Paypal',
       sender: orderData.sender || {
-        name: 'Hà Anh',
+        name: 'Floralia Herbal Tea',
         address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'Haanh.BD@gmail.com',
-        phone: '(671) 555-0110'
+        email: 'floralia@gmail.com',
+        phone: '0901 234 567'
       },
       receiver: orderData.receiver || {
         name: 'Minh Trần',
@@ -404,10 +458,10 @@ export class OrderService {
         phone: '(671) 555-0110'
       },
       items: orderData.items || [],
-      subtotal: orderData.subtotal || 700000,
-      discount: orderData.discount || 155000,
-      shippingFee: orderData.shippingFee || 0,
-      total: orderData.total || 545000
+      subtotal: orderData.subtotal ?? 0,
+      discount: orderData.discount ?? 0,
+      shippingFee: orderData.shippingFee ?? 0,
+      total: orderData.total ?? 0
     };
 
     const idx = this.defaultOrders.findIndex(o => o.id === id || o.code === ('#' + id));
@@ -416,15 +470,26 @@ export class OrderService {
     } else {
       this.defaultOrders.unshift(newOrder);
     }
+
+    try {
+      localStorage.setItem('floralia_orders', JSON.stringify(this.defaultOrders));
+    } catch (e) {}
+
     return newOrder;
   }
 
   getOrderById(id: string): Observable<Order | null> {
-    return this.http.get<{ success: boolean; order: Order }>(`${this.apiUrl}/${id}`).pipe(
-      map(res => res.order),
+    const cleanId = id.startsWith('#') ? id.substring(1) : id;
+    return this.http.get<{ success: boolean; order: Order }>(`${this.apiUrl}/${cleanId}`).pipe(
+      map(res => {
+        if (res.order) {
+          this.saveOrderLocal(res.order);
+        }
+        return res.order;
+      }),
       catchError(() => {
-        const found = this.defaultOrders.find(o => o.id === id || o.code === `#${id}`);
-        return of(found || this.defaultOrders[0]);
+        const found = this.getOrderByIdSync(cleanId);
+        return of(found);
       })
     );
   }
@@ -437,41 +502,13 @@ export class OrderService {
     return this.http.post<{ success: boolean; order: Order }>(this.apiUrl, orderData).pipe(
       map(res => {
         if (res.order) {
-          this.defaultOrders.unshift(res.order);
+          this.saveOrderLocal(res.order);
         }
         return res;
       }),
       catchError(() => {
-        const id = orderData.id || String(Math.floor(1000 + Math.random() * 9000));
-        const newOrder: Order = {
-          id,
-          code: orderData.code || ('#' + id),
-          date: orderData.date || new Date().toLocaleDateString('vi-VN'),
-          time: orderData.time || new Date().toLocaleTimeString('vi-VN'),
-          status: orderData.status || 'processing',
-          statusLabel: orderData.statusLabel || 'ĐANG XỬ LÝ',
-          step: orderData.step || 2,
-          paymentMethod: orderData.paymentMethod || 'Paypal',
-          sender: orderData.sender || {
-            name: 'Hà Anh',
-            address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-            email: 'Haanh.BD@gmail.com',
-            phone: '(671) 555-0110'
-          },
-          receiver: orderData.receiver || {
-            name: 'Minh Trần',
-            address: '12C, Võ Thị Sáu, Hà Tĩnh',
-            email: 'MinhTran.thuu@gmail.com',
-            phone: '(671) 555-0110'
-          },
-          items: orderData.items || [],
-          subtotal: orderData.subtotal || 0,
-          discount: orderData.discount || 0,
-          shippingFee: orderData.shippingFee || 0,
-          total: orderData.total || 0
-        };
-        this.defaultOrders.unshift(newOrder);
-        return of({ success: true, order: newOrder });
+        const local = this.saveOrderLocal(orderData);
+        return of({ success: true, order: local });
       })
     );
   }
