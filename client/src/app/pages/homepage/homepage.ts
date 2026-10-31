@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+﻿import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../services/product-service';
 import { ReviewService } from '../../services/review-service';
@@ -6,6 +6,8 @@ import { ProductNavigationService } from '../../services/product-navigation-serv
 import { BlogService } from '../../services/blog-service';
 import { Products } from '../../classes/Products';
 import { Blog } from '../../classes/Blog';
+import { CartService } from '../../services/cart-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-homepage',
@@ -97,7 +99,22 @@ export class Homepage implements OnInit {
     private blogService: BlogService,
     private reviewService: ReviewService,
     readonly productNavigation: ProductNavigationService,
+    private cartService: CartService,
+    private router: Router
   ) {}
+
+  addToCart(product: Products, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const variant = product.variants?.find(v => (v.stock ?? 0) > 0) || product.variants?.[0] || null;
+    const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
+    const image = this.getProductImage(product);
+
+    this.cartService.addProduct(product, variant, 1, image);
+    this.router.navigate(['/cart']);
+  }
   
 
   ngOnInit(): void {

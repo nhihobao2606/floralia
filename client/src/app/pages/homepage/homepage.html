@@ -1,4 +1,4 @@
-<!-- ================= BANNER ================= -->
+﻿<!-- ================= BANNER ================= -->
 <div id="banner" class="carousel slide carousel-fade" data-bs-ride="carousel">
     <div class="carousel-indicators banner-dots">
       <button type="button" data-bs-target="#banner" data-bs-slide-to="0" class="active"></button>
@@ -182,9 +182,9 @@
         <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
       </div>
 
-      <a class="sale-cart" [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p, products: products() }">
+      <button type="button" class="sale-cart" (click)="addToCart(p, $event)">
         Thêm vào giỏ hàng
-      </a>
+      </button>
     </div>
   </div>
 </ng-template>
