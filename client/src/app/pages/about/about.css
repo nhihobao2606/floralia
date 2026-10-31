@@ -1,0 +1,2743 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Roboto:wght@300;400;500;700&display=swap');
+
+:host {
+  /* ================= DESIGN SYSTEM TOKENS ================= */
+  --deep-forest: #194B35;
+  --botanical-green: #507A4B;
+  --sage-green: #A9BDA3;
+  --sage-light: #E4ECE2;
+  --warm-ivory: #FAF8F1;
+  --cream-beige: #EDE5D6;
+  --charcoal: #30352F;
+  --charcoal-light: #525B51;
+  --charcoal-muted: #737E72;
+  --border-delicate: rgba(25, 75, 53, 0.10);
+  --shadow-editorial: 0 14px 38px rgba(25, 75, 53, 0.07);
+  --shadow-editorial-hover: 0 20px 48px rgba(25, 75, 53, 0.12);
+  --r-editorial: 16px;
+  --r-pill: 50px;
+  --ease: cubic-bezier(0.25, 1, 0.5, 1);
+
+  display: block;
+  font-family: 'Roboto', sans-serif;
+  color: var(--charcoal);
+  background-color: var(--warm-ivory);
+  overflow-x: hidden;
+  line-height: 1.8;
+}
+
+.editorial-about-page {
+  position: relative;
+  background-color: var(--warm-ivory);
+}
+
+/* ==========================================================================
+   GLOBAL EDITORIAL TYPOGRAPHY
+   ========================================================================== */
+.hero-title,
+.editorial-heading,
+.story-narrative .editorial-quote,
+.item-title,
+.col-title,
+.ticker-title,
+.moment-caption h4,
+.member-fullname {
+  font-family: 'Playfair Display', 'Lora', serif;
+}
+
+.section-tag {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--botanical-green);
+  margin-bottom: 12px;
+}
+
+.editorial-heading {
+  font-size: clamp(30px, 3.8vw, 42px);
+  font-weight: 600;
+  color: var(--deep-forest);
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+  margin-bottom: 16px;
+}
+
+.section-desc {
+  font-size: 16px;
+  color: var(--charcoal-muted);
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.section-header-editorial {
+  margin-bottom: 60px;
+}
+
+/* ==========================================================================
+   SECTION 1: BREADCRUMB
+   ========================================================================== */
+.editorial-breadcrumb {
+  padding: 24px 0 12px;
+  background-color: var(--warm-ivory);
+  border-bottom: 1px solid var(--border-delicate);
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.breadcrumb-nav a {
+  color: var(--charcoal-muted);
+  text-decoration: none;
+  transition: color 0.3s var(--ease);
+}
+
+.breadcrumb-nav a:hover {
+  color: var(--deep-forest);
+}
+
+.breadcrumb-nav .sep {
+  margin: 0 12px;
+  color: var(--sage-green);
+}
+
+.breadcrumb-nav .active {
+  color: var(--deep-forest);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   SECTION 2: HERO – CÂU CHUYỆN FLORALIA
+   ========================================================================== */
+.editorial-hero {
+  padding: 70px 0 90px;
+  background-color: var(--warm-ivory);
+  position: relative;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 70px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.editorial-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--botanical-green);
+  background-color: var(--cream-beige);
+  padding: 6px 16px;
+  border-radius: var(--r-pill);
+  margin-bottom: 24px;
+}
+
+.hero-title {
+  font-size: clamp(34px, 4.2vw, 48px);
+  font-weight: 600;
+  color: var(--deep-forest);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin-bottom: 22px;
+}
+
+.hero-sub {
+  font-size: 17.5px;
+  line-height: 1.85;
+  color: var(--charcoal-light);
+  max-width: 540px;
+  margin-bottom: 36px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.btn-primary-botanical {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--deep-forest);
+  color: var(--warm-ivory);
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 15px 34px;
+  border-radius: var(--r-pill);
+  box-shadow: 0 6px 20px rgba(25, 75, 53, 0.18);
+  transition: all 0.35s var(--ease);
+}
+
+.btn-primary-botanical:hover {
+  background-color: var(--botanical-green);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(25, 75, 53, 0.25);
+}
+
+.btn-primary-botanical i {
+  font-size: 18px;
+  transition: transform 0.3s var(--ease);
+}
+
+.btn-primary-botanical:hover i {
+  transform: translateY(3px);
+}
+
+.btn-outline-botanical {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--deep-forest);
+  border: 1.5px solid var(--deep-forest);
+  text-decoration: none;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 14px 30px;
+  border-radius: var(--r-pill);
+  transition: all 0.35s var(--ease);
+}
+
+.btn-outline-botanical:hover {
+  background-color: var(--deep-forest);
+  color: var(--warm-ivory);
+  transform: translateY(-2px);
+}
+
+.btn-outline-botanical i {
+  font-size: 18px;
+  transition: transform 0.3s var(--ease);
+}
+
+.btn-outline-botanical:hover i {
+  transform: translateX(4px);
+}
+
+.hero-footnote {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footnote-line {
+  width: 40px;
+  height: 1px;
+  background-color: var(--sage-green);
+}
+
+.footnote-text {
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--charcoal-muted);
+}
+
+/* Hero visual */
+.hero-visual {
+  position: relative;
+}
+
+.visual-frame {
+  position: relative;
+  border-radius: var(--r-editorial);
+  overflow: hidden;
+  background-color: var(--cream-beige);
+  border: 1px solid var(--border-delicate);
+  box-shadow: var(--shadow-editorial);
+}
+
+.hero-img {
+  width: 100%;
+  height: 480px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s var(--ease);
+}
+
+.visual-frame:hover .hero-img {
+  transform: scale(1.03);
+}
+
+.visual-caption {
+  padding: 14px 20px;
+  background-color: var(--warm-ivory);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--charcoal-muted);
+  border-top: 1px solid var(--border-delicate);
+  text-align: center;
+}
+
+/* ==========================================================================
+   SECTION 3: CÂU CHUYỆN THƯƠNG HIỆU
+   ========================================================================== */
+.brand-story-section {
+  padding: 100px 0;
+  background-color: var(--warm-ivory);
+  border-top: 1px solid var(--border-delicate);
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  align-items: center;
+  gap: 80px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.story-image-card {
+  position: relative;
+  border-radius: var(--r-editorial);
+  overflow: hidden;
+  box-shadow: var(--shadow-editorial);
+  border: 1px solid var(--border-delicate);
+  background-color: var(--cream-beige);
+}
+
+.story-img {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s var(--ease);
+}
+
+.story-image-card:hover .story-img {
+  transform: scale(1.03);
+}
+
+.story-image-note {
+  padding: 14px 22px;
+  background-color: var(--warm-ivory);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--charcoal-muted);
+  border-top: 1px solid var(--border-delicate);
+  text-align: center;
+}
+
+.story-text-col {
+  padding-left: 10px;
+}
+
+.story-narrative p {
+  font-size: 16.5px;
+  line-height: 1.9;
+  color: var(--charcoal-light);
+  margin-bottom: 24px;
+  text-align: justify;
+}
+
+.editorial-quote {
+  margin: 32px 0;
+  padding: 20px 28px;
+  border-left: 2.5px solid var(--botanical-green);
+  background-color: var(--cream-beige);
+  border-radius: 0 var(--r-editorial) var(--r-editorial) 0;
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--deep-forest);
+}
+
+/* ==========================================================================
+   SECTION 4: TRIẾT LÝ FLORALIA
+   ========================================================================== */
+.philosophy-section {
+  padding: 100px 0;
+  background-color: var(--cream-beige);
+}
+
+.philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px 50px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.philosophy-item {
+  position: relative;
+  padding: 32px 28px;
+  background-color: var(--warm-ivory);
+  border-radius: var(--r-editorial);
+  border: 1px solid rgba(25, 75, 53, 0.08);
+  box-shadow: 0 4px 18px rgba(25, 75, 53, 0.04);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.philosophy-item:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-editorial);
+}
+
+.item-meta {
+  margin-bottom: 14px;
+}
+
+.item-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--botanical-green);
+  letter-spacing: 1px;
+}
+
+.item-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--deep-forest);
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.item-desc {
+  font-size: 14.8px;
+  line-height: 1.75;
+  color: var(--charcoal-light);
+  margin: 0;
+}
+
+/* ==========================================================================
+   SECTION 5: NGUYÊN LIỆU & NGHỆ THUẬT THƯỞNG TRÀ
+   ========================================================================== */
+.botanical-art-section {
+  padding: 100px 0 90px;
+  background-color: var(--warm-ivory);
+}
+
+.art-media-showcase {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1180px;
+  margin: 0 auto 75px;
+}
+
+.photo-card,
+.video-card {
+  border-radius: var(--r-editorial);
+  overflow: hidden;
+  background-color: var(--cream-beige);
+  border: 1px solid var(--border-delicate);
+  box-shadow: var(--shadow-editorial);
+}
+
+.photo-img {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s var(--ease);
+}
+
+.photo-card:hover .photo-img {
+  transform: scale(1.03);
+}
+
+.photo-caption,
+.video-caption {
+  display: block;
+  padding: 14px 20px;
+  background-color: #ffffff;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--charcoal-muted);
+  border-top: 1px solid var(--border-delicate);
+  text-align: center;
+}
+
+.botanical-video {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  display: block;
+  background-color: #000000;
+}
+
+/* Running Product Ticker */
+.products-ticker-wrapper {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.ticker-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-delicate);
+}
+
+.ticker-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--deep-forest);
+  margin: 0;
+}
+
+.ticker-link {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--botanical-green);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.ticker-link:hover {
+  color: var(--deep-forest);
+}
+
+.ticker-link i {
+  transition: transform 0.3s ease;
+}
+
+.ticker-link:hover i {
+  transform: translateX(4px);
+}
+
+.product-ticker-viewport {
+  width: 100%;
+  overflow: hidden;
+  padding: 10px 0 20px;
+}
+
+.product-ticker-belt {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.product-ticker-unit {
+  display: flex;
+  gap: 24px;
+  padding-right: 24px;
+  animation: scroll-products 38s linear infinite;
+}
+
+.product-ticker-viewport:hover .product-ticker-unit {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-products {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+.botanical-product-card {
+  width: 220px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border: 1px solid var(--border-delicate);
+  border-radius: var(--r-editorial);
+  padding: 20px 16px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(25, 75, 53, 0.04);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.botanical-product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-editorial);
+  border-color: var(--sage-green);
+}
+
+.card-thumb {
+  width: 100%;
+  height: 135px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  background-color: var(--warm-ivory);
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.card-thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.5s var(--ease);
+}
+
+.botanical-product-card:hover .card-thumb img {
+  transform: scale(1.08);
+}
+
+.card-info {
+  width: 100%;
+}
+
+.card-benefit {
+  display: block;
+  font-size: 11.5px;
+  color: var(--charcoal-muted);
+  margin-bottom: 4px;
+}
+
+.card-name {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--deep-forest);
+  margin-bottom: 6px;
+  line-height: 1.35;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-price {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--botanical-green);
+}
+
+/* ==========================================================================
+   SECTION 6: TẦM NHÌN, SỨ MỆNH & GIÁ TRỊ CỐT LÕI
+   ========================================================================== */
+.vision-mission-section {
+  padding: 95px 0 105px;
+  background-color: var(--cream-beige);
+}
+
+.vision-three-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.vision-column {
+  background-color: var(--warm-ivory);
+  border-radius: var(--r-editorial);
+  padding: 38px 30px;
+  border: 1px solid rgba(25, 75, 53, 0.08);
+  box-shadow: 0 4px 18px rgba(25, 75, 53, 0.04);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.vision-column:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-editorial);
+}
+
+.col-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--botanical-green);
+  background-color: var(--cream-beige);
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  margin-bottom: 16px;
+}
+
+.col-title {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--deep-forest);
+  margin-bottom: 14px;
+  line-height: 1.35;
+}
+
+.col-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--charcoal-light);
+  margin: 0;
+}
+
+.col-values-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.col-values-list li {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--charcoal-light);
+  margin-bottom: 10px;
+  padding-left: 14px;
+  position: relative;
+}
+
+.col-values-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--botanical-green);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.col-values-list li strong {
+  color: var(--deep-forest);
+}
+
+/* ==========================================================================
+   SECTION 7: FLORALIA MOMENTS
+   ========================================================================== */
+.moments-editorial-section {
+  padding: 100px 0;
+  background-color: var(--warm-ivory);
+  border-top: 1px solid var(--border-delicate);
+}
+
+.moments-panorama-wrap {
+  max-width: 1180px;
+  margin: 0 auto 50px;
+  border-radius: var(--r-editorial);
+  overflow: hidden;
+  box-shadow: var(--shadow-editorial);
+  border: 1px solid var(--border-delicate);
+}
+
+.panorama-img {
+  width: 100%;
+  height: auto;
+  max-height: 520px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s var(--ease);
+}
+
+.moments-panorama-wrap:hover .panorama-img {
+  transform: scale(1.02);
+}
+
+.moments-editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.moment-figure {
+  margin: 0;
+  background-color: #ffffff;
+  border-radius: var(--r-editorial);
+  overflow: hidden;
+  border: 1px solid var(--border-delicate);
+  box-shadow: 0 4px 18px rgba(25, 75, 53, 0.04);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.moment-figure:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-editorial);
+}
+
+.moment-frame {
+  overflow: hidden;
+}
+
+.moment-frame img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s var(--ease);
+}
+
+.moment-figure:hover .moment-frame img {
+  transform: scale(1.04);
+}
+
+.moment-caption {
+  padding: 20px 22px;
+}
+
+.moment-caption h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--deep-forest);
+  margin-bottom: 6px;
+}
+
+.moment-caption p {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--charcoal-muted);
+  margin: 0;
+}
+
+/* ==========================================================================
+   SECTION 8: ĐỘI NGŨ FLORALIA
+   ========================================================================== */
+.team-editorial-section {
+  padding: 100px 0 120px;
+  background-color: var(--warm-ivory);
+  border-top: 1px solid var(--border-delicate);
+}
+
+.team-roster {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.team-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.team-row.row-three {
+  margin-bottom: 45px;
+}
+
+.team-member-card {
+  width: 280px;
+  background-color: #ffffff;
+  border-radius: var(--r-editorial);
+  overflow: hidden;
+  border: 1px solid var(--border-delicate);
+  box-shadow: 0 4px 18px rgba(25, 75, 53, 0.04);
+  text-align: center;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.team-member-card:hover {
+  transform: translateY(-7px);
+  box-shadow: var(--shadow-editorial);
+}
+
+.member-portrait-frame {
+  width: 100%;
+  height: 290px;
+  overflow: hidden;
+  background-color: var(--cream-beige);
+}
+
+.member-portrait-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s var(--ease);
+}
+
+.team-member-card:hover .member-portrait-frame img {
+  transform: scale(1.05);
+}
+
+.member-details {
+  padding: 22px 18px 24px;
+}
+
+.member-role-tag {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--botanical-green);
+  margin-bottom: 6px;
+}
+
+.member-fullname {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--deep-forest);
+  margin-bottom: 12px;
+}
+
+.member-social-links {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.member-social-links a {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--deep-forest);
+  background-color: var(--warm-ivory);
+  border: 1px solid var(--border-delicate);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s var(--ease);
+}
+
+.member-social-links a:hover {
+  background-color: var(--deep-forest);
+  color: var(--warm-ivory);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (TABLET & MOBILE)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+    text-align: center;
+  }
+
+  .hero-sub {
+    margin-inline: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-footnote {
+    justify-content: center;
+  }
+
+  .hero-img {
+    height: 380px;
+  }
+
+  .story-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+
+  .story-img {
+    height: 380px;
+  }
+
+  .story-text-col {
+    padding-left: 0;
+  }
+
+  .philosophy-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .art-media-showcase {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .photo-img,
+  .botanical-video {
+    height: 300px;
+  }
+
+  .vision-three-columns {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .moments-editorial-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .team-row {
+    gap: 24px;
+  }
+
+  .team-row.row-three {
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .editorial-hero {
+    padding: 40px 0 60px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary-botanical,
+  .btn-outline-botanical {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-img,
+  .story-img {
+    height: 280px;
+  }
+
+  .philosophy-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .philosophy-item {
+    padding: 24px 20px;
+  }
+
+  .editorial-quote {
+    font-size: 16px;
+    padding: 16px 20px;
+  }
+
+  .botanical-product-card {
+    width: 180px;
+    padding: 16px 12px;
+  }
+
+  .card-thumb {
+    height: 110px;
+  }
+
+  .card-name {
+    font-size: 14px;
+    min-height: 36px;
+  }
+
+  .team-member-card {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .member-portrait-frame {
+    height: 320px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Botanical editorial refinements */
+.brand-story-section {
+  padding-top: 58px;
+  border-top: 0;
+}
+
+.philosophy-section {
+  background: linear-gradient(145deg, #f2f1e6, #e8eee4 58%, #f7f3e8);
+}
+
+.philosophy-grid {
+  gap: 34px 38px;
+}
+
+.philosophy-item {
+  padding: 0 0 22px;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+.philosophy-item:hover {
+  transform: translateY(-4px);
+  box-shadow: none;
+}
+
+.item-image-wrap {
+  position: relative;
+  height: 205px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  background: #e1e5d6;
+  border-radius: 46% 46% 4px 4px / 34% 34% 4px 4px;
+}
+
+.item-image-wrap img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform .8s var(--ease);
+}
+
+.philosophy-item:hover .item-image-wrap img {
+  transform: scale(1.045);
+}
+
+.item-number {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 50%;
+  background: rgba(250,248,241,.9);
+  color: var(--deep-forest);
+  font-size: 14px;
+}
+
+.item-body {
+  padding: 0 5px;
+}
+
+.item-title {
+  margin-bottom: 9px;
+  font-size: 20px;
+}
+
+.botanical-art-section {
+  padding: 92px 0 100px;
+  background: #f8f5eb;
+}
+
+.garden-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: 555px;
+  max-width: 1120px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(68, 93, 63, .14);
+  border-radius: 48% 48% 18px 18px / 22% 22% 18px 18px;
+  background:
+    radial-gradient(ellipse at 50% 95%, rgba(115, 142, 98, .25), transparent 43%),
+    radial-gradient(ellipse at 10% 25%, rgba(226, 216, 180, .45), transparent 36%),
+    radial-gradient(ellipse at 92% 35%, rgba(209, 220, 195, .62), transparent 34%),
+    linear-gradient(155deg, #f6f0dd, #e8eddf 55%, #f4eddc);
+}
+
+.garden-stage::before,
+.garden-stage::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 270px;
+  height: 400px;
+  border: 1px solid rgba(76, 112, 70, .2);
+  border-radius: 100% 0 100% 0;
+  transform: rotate(31deg);
+  pointer-events: none;
+}
+
+.garden-stage::before {
+  top: -200px;
+  left: -58px;
+  box-shadow: 24px 33px 0 -1px rgba(0,0,0,0), 44px 62px 0 -1px rgba(0,0,0,0);
+}
+
+.garden-stage::after {
+  right: -120px;
+  bottom: -260px;
+  transform: rotate(210deg);
+}
+
+.garden-caption {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(25,75,53,.64);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  white-space: nowrap;
+}
+
+.garden-product {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--deep-forest);
+  text-decoration: none;
+  font-family: 'Playfair Display', 'Lora', serif;
+  font-size: 18px;
+  transition: transform .55s var(--ease), filter .55s var(--ease);
+  animation: garden-drift 8s ease-in-out infinite;
+}
+
+.garden-product:hover,
+.garden-product:focus-visible {
+  z-index: 3;
+  transform: translateY(-11px) rotate(0deg) scale(1.025);
+  filter: drop-shadow(0 15px 16px rgba(36, 59, 39, .16));
+}
+
+.garden-product img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 7px solid rgba(255, 252, 242, .88);
+  border-radius: 46% 46% 8px 8px / 35% 35% 8px 8px;
+  box-shadow: 0 18px 38px rgba(51, 69, 45, .15);
+}
+
+.garden-product span {
+  margin-top: 12px;
+  padding: 4px 14px;
+  background: rgba(248,245,235,.82);
+  border-radius: 30px;
+}
+
+.product-left {
+  top: 130px;
+  left: 8%;
+  width: 230px;
+  transform: rotate(-7deg);
+  animation-delay: -2s;
+}
+
+.product-center {
+  top: 97px;
+  left: 50%;
+  width: 300px;
+  transform: translateX(-50%) rotate(2deg);
+  animation-delay: -5s;
+}
+
+.product-center:hover,
+.product-center:focus-visible {
+  transform: translate(-50%, -11px) rotate(0) scale(1.025);
+}
+
+.product-right {
+  top: 145px;
+  right: 8%;
+  width: 225px;
+  transform: rotate(7deg);
+  animation-delay: -3.5s;
+}
+
+.garden-leaf {
+  position: absolute;
+  z-index: 0;
+  width: 100px;
+  height: 46px;
+  border: 1px solid rgba(72, 112, 67, .45);
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(135deg, rgba(164,190,145,.18), rgba(220,225,192,.2));
+  animation: leaf-drift 9s ease-in-out infinite;
+}
+
+.leaf-one { left: 25%; top: 75px; transform: rotate(-25deg); }
+.leaf-two { right: 21%; bottom: 86px; transform: rotate(150deg); animation-delay: -4s; }
+
+.garden-flower {
+  position: absolute;
+  z-index: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e8c56f;
+  box-shadow: 0 -11px #f8e8af, 0 11px #f8e8af, 11px 0 #f8e8af, -11px 0 #f8e8af, 8px 8px #f8e8af, -8px -8px #f8e8af, 8px -8px #f8e8af, -8px 8px #f8e8af;
+  animation: petal-float 7s ease-in-out infinite;
+}
+
+.flower-one { top: 175px; left: 29%; }
+.flower-two { right: 26%; bottom: 175px; transform: scale(.72); animation-delay: -3s; }
+
+.garden-cta {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(25,75,53,.45);
+  border-radius: 40px;
+  color: var(--deep-forest);
+  text-decoration: none;
+  background: rgba(250,248,241,.72);
+  transition: background .25s ease, color .25s ease;
+}
+
+.garden-cta:hover { background: var(--deep-forest); color: #fff; }
+
+@keyframes garden-drift {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+@keyframes leaf-drift {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  50% { translate: 5px -9px; rotate: 5deg; }
+}
+
+@keyframes petal-float {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  50% { translate: 4px -11px; rotate: 18deg; }
+}
+
+.moments-editorial-section {
+  padding: 90px 0;
+  background: #f1f1e8;
+}
+
+.moments-panorama-wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  border: 10px solid #fffdf5;
+  box-shadow: 0 18px 48px rgba(41, 58, 39, .13);
+  transform: rotate(-.5deg);
+}
+
+.moments-panorama-wrap .panorama-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 992px) {
+  .philosophy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .garden-stage { min-height: 470px; }
+  .product-left { left: 5%; width: 190px; }
+  .product-center { top: 110px; width: 255px; }
+  .product-right { right: 5%; width: 190px; }
+}
+
+@media (max-width: 600px) {
+  .brand-story-section { padding: 42px 0 62px; }
+  .philosophy-section, .botanical-art-section, .moments-editorial-section { padding: 62px 0; }
+  .philosophy-grid { grid-template-columns: 1fr; gap: 26px; }
+  .philosophy-item { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 16px; align-items: center; padding: 0; }
+  .item-image-wrap { height: 132px; margin: 0; border-radius: 48% 48% 4px 4px; }
+  .item-number { left: 8px; bottom: 8px; width: 30px; height: 30px; font-size: 12px; }
+  .item-title { font-size: 18px; }
+  .item-desc { font-size: 13.5px; line-height: 1.6; }
+  .garden-stage { min-height: 690px; border-radius: 36% 36% 14px 14px / 10% 10% 14px 14px; }
+  .garden-caption { top: 30px; font-size: 9px; letter-spacing: 2px; }
+  .garden-product { width: 155px; }
+  .product-center { top: 92px; left: 50%; width: 205px; }
+  .product-left { top: 365px; left: 5%; }
+  .product-right { top: 385px; right: 5%; }
+  .garden-product img { border-width: 5px; }
+  .garden-product span { margin-top: 7px; padding: 3px 10px; font-size: 15px; }
+  .garden-cta { bottom: 24px; width: max-content; max-width: calc(100% - 30px); font-size: 14px; }
+  .leaf-one { left: 10%; top: 305px; }
+  .leaf-two { right: 10%; bottom: 104px; }
+  .flower-one { top: 300px; left: 78%; }
+  .flower-two { right: 77%; bottom: 130px; }
+  .moments-panorama-wrap { border-width: 5px; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .garden-product, .garden-leaf, .garden-flower { animation: none !important; }
+}
+
+.story-image-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 440px;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.story-logo-img {
+  width: min(100%, 360px);
+  height: min(100vw, 360px);
+  flex: 0 0 min(100vw, 360px);
+  object-fit: cover;
+  border-radius: 50%;
+  clip-path: none;
+  filter: drop-shadow(0 18px 24px rgba(40, 62, 44, .15));
+  animation: logo-arrive .9s var(--ease) both, logo-float 7s 1s ease-in-out infinite;
+}
+
+@keyframes logo-arrive {
+  from { opacity: 0; transform: translateY(18px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes logo-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -7px; }
+}
+
+@media (max-width: 600px) {
+  .story-image-card { min-height: 310px; }
+  .story-logo-img { width: min(100%, 300px); height: min(100vw, 300px); flex-basis: min(100vw, 300px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-logo-img { animation: none !important; }
+}
+
+/* Cohesive modern botanical finish across the About page */
+:host {
+  --deep-forest: #173f32;
+  --botanical-green: #54775a;
+  --sage-green: #a7b99e;
+  --sage-light: #e8eee4;
+  --warm-ivory: #fbf9f2;
+  --cream-beige: #efe9da;
+  --charcoal: #2d3831;
+  --charcoal-light: #526057;
+  --charcoal-muted: #788078;
+  --border-delicate: rgba(32, 73, 52, .12);
+  --shadow-editorial: 0 18px 44px rgba(34, 62, 43, .09);
+  --shadow-editorial-hover: 0 24px 52px rgba(34, 62, 43, .14);
+}
+
+.editorial-about-page {
+  background: var(--warm-ivory);
+}
+
+.editorial-heading {
+  letter-spacing: -.7px;
+}
+
+.section-tag {
+  color: var(--botanical-green);
+  letter-spacing: 2.8px;
+}
+
+.section-header-editorial {
+  position: relative;
+  margin-bottom: clamp(38px, 5vw, 58px);
+}
+
+.section-header-editorial::after {
+  content: '';
+  display: block;
+  width: 54px;
+  height: 9px;
+  margin: 22px auto 0;
+  background:
+    radial-gradient(ellipse at 50% 50%, var(--botanical-green) 0 2px, transparent 2.5px),
+    linear-gradient(var(--sage-green), var(--sage-green)) center / 100% 1px no-repeat;
+  opacity: .72;
+}
+
+.brand-story-section {
+  background:
+    radial-gradient(ellipse at 7% 45%, rgba(189, 205, 176, .17), transparent 29%),
+    var(--warm-ivory);
+}
+
+.story-grid {
+  gap: clamp(38px, 6vw, 80px);
+}
+
+.story-narrative p {
+  text-align: left;
+}
+
+.editorial-quote {
+  background: linear-gradient(110deg, rgba(236, 235, 216, .9), rgba(242, 237, 222, .78));
+  border-left-width: 3px;
+  box-shadow: 0 12px 34px rgba(50, 70, 43, .055);
+}
+
+.philosophy-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 0% 20%, rgba(163, 187, 150, .19), transparent 31%),
+    radial-gradient(ellipse at 100% 78%, rgba(204, 193, 151, .2), transparent 30%),
+    linear-gradient(145deg, #f1f2e9, #e8eee5 58%, #f6f2e8);
+}
+
+.philosophy-section::before,
+.vision-mission-section::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 12%;
+  right: -54px;
+  width: 210px;
+  height: 260px;
+  border: 1px solid rgba(77, 112, 76, .11);
+  border-radius: 100% 0 100% 0;
+  transform: rotate(32deg);
+  pointer-events: none;
+}
+
+.philosophy-item {
+  transition: transform .45s var(--ease);
+}
+
+.item-image-wrap {
+  border-radius: 48% 48% 5px 5px / 36% 36% 5px 5px;
+  box-shadow: 0 14px 34px rgba(43, 62, 44, .1);
+}
+
+.item-title {
+  letter-spacing: -.25px;
+}
+
+.botanical-art-section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 96% 8%, rgba(195, 208, 178, .3), transparent 28%),
+    #faf8ef;
+}
+
+.garden-stage {
+  box-shadow: 0 24px 65px rgba(49, 68, 42, .09);
+}
+
+.vision-mission-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 5% 88%, rgba(176, 198, 164, .24), transparent 34%),
+    linear-gradient(135deg, #edf1e8, #f3f0e5);
+}
+
+.vision-mission-section::before {
+  top: auto;
+  right: auto;
+  bottom: -142px;
+  left: -68px;
+  transform: rotate(214deg);
+}
+
+.vision-column {
+  background: rgba(251, 249, 242, .78);
+  border: 1px solid rgba(58, 91, 64, .12);
+  border-radius: 22px 22px 6px 22px;
+  box-shadow: 0 12px 32px rgba(36, 62, 42, .055);
+  backdrop-filter: blur(8px);
+}
+
+.vision-column:nth-child(2) {
+  transform: translateY(18px);
+}
+
+.vision-column:nth-child(2):hover {
+  transform: translateY(10px);
+}
+
+.moments-editorial-section {
+  background:
+    radial-gradient(ellipse at 100% 12%, rgba(193, 207, 174, .22), transparent 32%),
+    #f7f5ec;
+}
+
+.moments-panorama-wrap {
+  border: 8px solid rgba(255, 254, 248, .92);
+  border-radius: 5px;
+  box-shadow: 0 24px 55px rgba(35, 55, 38, .15);
+}
+
+.team-editorial-section {
+  background:
+    radial-gradient(ellipse at 0% 20%, rgba(188, 205, 176, .2), transparent 28%),
+    linear-gradient(180deg, #f3f2e9, #fbf9f2 65%);
+}
+
+.team-member-card {
+  border: 1px solid rgba(49, 82, 57, .13);
+  border-radius: 150px 150px 20px 20px / 135px 135px 20px 20px;
+  background: rgba(255, 254, 248, .84);
+  box-shadow: 0 15px 38px rgba(38, 61, 41, .075);
+}
+
+.member-portrait-frame {
+  height: 300px;
+  background: #e5eadf;
+}
+
+.member-details {
+  padding-top: 20px;
+}
+
+.member-role-tag {
+  letter-spacing: 1.3px;
+}
+
+@media (max-width: 992px) {
+  .vision-column:nth-child(2),
+  .vision-column:nth-child(2):hover { transform: none; }
+}
+
+@media (max-width: 600px) {
+  .section-header-editorial { margin-bottom: 34px; }
+  .section-header-editorial::after { margin-top: 16px; }
+  .story-narrative p { text-align: left; }
+  .vision-column { padding: 28px 24px; }
+  .team-member-card { border-radius: 150px 150px 18px 18px / 130px 130px 18px 18px; }
+  .member-portrait-frame { height: 300px; }
+}
+
+.item-image-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border: 1px solid rgba(255, 252, 240, .6);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.item-image-wrap::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 18px;
+  right: 18px;
+  width: 21px;
+  height: 11px;
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 100% 0 100% 0;
+  transform: rotate(24deg) scale(.5);
+  opacity: 0;
+  transition: transform .55s var(--ease), opacity .4s ease;
+}
+
+.philosophy-item:hover .item-image-wrap::before {
+  transform: rotate(24deg) scale(1);
+  opacity: .9;
+}
+
+.garden-vine {
+  position: absolute;
+  z-index: 0;
+  width: clamp(142px, 20vw, 230px);
+  overflow: visible;
+  opacity: .68;
+  pointer-events: none;
+  transform-origin: 10% 90%;
+  animation: vine-sway 13s ease-in-out infinite;
+}
+
+.vine-left { top: 82px; left: -30px; }
+.vine-right { right: -26px; bottom: 38px; transform: rotate(180deg); animation-delay: -6s; }
+
+.vine-stem,
+.vine-leaf,
+.vine-vein {
+  fill: none;
+  stroke: #607f61;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.vine-stem { stroke-width: 1.7; }
+.vine-leaf { fill: rgba(142, 170, 127, .13); stroke-width: 1.25; }
+.vine-vein { stroke-width: .8; opacity: .75; }
+
+.garden-blossom {
+  position: absolute;
+  z-index: 0;
+  width: 42px;
+  height: 42px;
+  overflow: visible;
+  opacity: .85;
+  pointer-events: none;
+  animation: flower-turn 24s linear infinite;
+}
+
+.blossom-left { top: 155px; left: 23%; }
+.blossom-right { right: 23%; bottom: 130px; width: 31px; animation-duration: 30s; animation-direction: reverse; }
+.blossom-petals ellipse { fill: #f4e7b9; stroke: #ddc982; stroke-width: 1; }
+.blossom-center { fill: #d9af48; stroke: #c39c3d; stroke-width: 1; }
+
+.drifting-petal {
+  position: absolute;
+  z-index: 0;
+  width: 12px;
+  height: 19px;
+  border: 1px solid rgba(195, 155, 100, .38);
+  border-radius: 2px 90% 2px 90%;
+  background: linear-gradient(145deg, rgba(255,247,219,.9), rgba(221,185,128,.65));
+  opacity: 0;
+  pointer-events: none;
+  animation: petal-sail 11s ease-in-out infinite;
+}
+
+.petal-a { left: 36%; top: 20%; animation-delay: -1s; }
+.petal-b { left: 62%; top: 26%; animation-delay: -7s; animation-duration: 13s; }
+.petal-c { left: 71%; top: 60%; animation-delay: -4s; animation-duration: 12s; }
+.petal-d { left: 28%; top: 66%; animation-delay: -9s; animation-duration: 14s; }
+
+.garden-caption,
+.garden-cta { z-index: 2; }
+
+@keyframes vine-sway {
+  0%, 100% { rotate: -1deg; }
+  50% { rotate: 2deg; }
+}
+
+@keyframes flower-turn {
+  to { rotate: 360deg; }
+}
+
+@keyframes petal-sail {
+  0% { opacity: 0; translate: -3px -4px; rotate: -22deg; }
+  16% { opacity: .8; }
+  52% { translate: 17px 34px; rotate: 55deg; }
+  84% { opacity: .7; }
+  100% { opacity: 0; translate: 5px 82px; rotate: 125deg; }
+}
+
+@media (max-width: 600px) {
+  .garden-vine { width: 128px; opacity: .35; }
+  .vine-left { top: 75px; left: -34px; }
+  .vine-right { right: -43px; bottom: 25px; }
+  .garden-blossom { width: 29px; height: 29px; }
+  .blossom-left { top: 282px; left: 15%; }
+  .blossom-right { right: 13%; bottom: 122px; }
+  .drifting-petal { width: 9px; height: 14px; }
+  .petal-a { left: 23%; top: 46%; }
+  .petal-b { left: 76%; top: 40%; }
+  .petal-c, .petal-d { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .garden-vine,
+  .garden-blossom,
+  .drifting-petal { animation: none !important; }
+}
+
+/* Immersive Floralia product garden */
+.botanical-art-section {
+  padding: 104px 0 112px;
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(112, 140, 98, .18), transparent 32%),
+    linear-gradient(165deg, #173e32, #1d4938 54%, #15382f);
+}
+
+.botanical-art-section .section-tag {
+  color: #d6c68d;
+}
+
+.botanical-art-section .editorial-heading {
+  color: #fbf7e9;
+}
+
+.botanical-art-section .section-desc {
+  color: rgba(239, 239, 222, .76);
+}
+
+.botanical-art-section .section-header-editorial::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, #d6c68d 0 2px, transparent 2.5px),
+    linear-gradient(rgba(214,198,141,.62), rgba(214,198,141,.62)) center / 100% 1px no-repeat;
+}
+
+.garden-stage {
+  min-height: 590px;
+  border-color: rgba(231, 229, 198, .17);
+  border-radius: 48% 48% 22px 22px / 18% 18% 22px 22px;
+  background:
+    radial-gradient(ellipse at 50% 76%, rgba(163, 177, 119, .19), transparent 38%),
+    radial-gradient(ellipse at 49% 52%, rgba(227, 213, 161, .1), transparent 53%),
+    radial-gradient(ellipse at 2% 85%, rgba(100, 132, 89, .32), transparent 38%),
+    radial-gradient(ellipse at 100% 22%, rgba(116, 146, 99, .2), transparent 38%),
+    linear-gradient(135deg, #244c3a, #183d32 56%, #214734);
+  box-shadow: inset 0 0 100px rgba(8, 28, 21, .23), 0 30px 75px rgba(11, 34, 26, .28);
+}
+
+.garden-stage::before {
+  top: -212px;
+  left: -55px;
+  width: 330px;
+  height: 450px;
+  border-color: rgba(208, 218, 165, .13);
+}
+
+.garden-stage::after {
+  right: -108px;
+  bottom: -270px;
+  width: 350px;
+  height: 460px;
+  border-color: rgba(208, 218, 165, .15);
+}
+
+.garden-ghost-word {
+  position: absolute;
+  z-index: 0;
+  top: 47%;
+  left: 50%;
+  color: rgba(244, 239, 212, .052);
+  font: 500 clamp(88px, 17vw, 205px)/1 'Playfair Display', 'Lora', serif;
+  letter-spacing: .07em;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.garden-caption {
+  top: 34px;
+  color: rgba(233, 223, 184, .68);
+  letter-spacing: 4px;
+  font-size: 9px;
+}
+
+.garden-product {
+  width: auto;
+  color: #f6f2df;
+  font-size: 22px;
+  text-align: center;
+  animation-duration: 10s;
+}
+
+.garden-product::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 10%;
+  left: 50%;
+  width: 115%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(218, 215, 160, .22), rgba(159, 183, 137, .08) 47%, transparent 72%);
+  transform: translateX(-50%);
+  filter: blur(8px);
+  transition: opacity .5s ease, scale .7s var(--ease);
+}
+
+.garden-product:hover::before,
+.garden-product:focus-visible::before {
+  scale: 1.13;
+  opacity: 1.3;
+}
+
+.garden-product img {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  object-fit: contain;
+  filter: drop-shadow(0 22px 20px rgba(4, 22, 16, .28));
+  -webkit-mask-image: radial-gradient(ellipse 73% 73% at 50% 49%, #000 61%, rgba(0,0,0,.9) 76%, transparent 100%);
+  mask-image: radial-gradient(ellipse 73% 73% at 50% 49%, #000 61%, rgba(0,0,0,.9) 76%, transparent 100%);
+  transition: filter .5s ease, transform .7s var(--ease);
+}
+
+.garden-product:hover img,
+.garden-product:focus-visible img {
+  filter: drop-shadow(0 27px 28px rgba(4, 22, 16, .35));
+}
+
+.garden-product span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: 7px;
+  padding: 0;
+  color: #f5f0de;
+  background: transparent;
+  font-size: 21px;
+}
+
+.garden-product span small {
+  color: #d3c68e;
+  font: 600 8px/1.5 'Roboto', sans-serif;
+  letter-spacing: 2px;
+}
+
+.product-left { top: 126px; left: 8%; width: 250px; }
+.product-center { top: 80px; width: 360px; }
+.product-right { top: 143px; right: 8%; width: 240px; }
+
+.garden-leaf {
+  border-color: rgba(204, 219, 165, .42);
+  background: linear-gradient(135deg, rgba(182,203,147,.13), rgba(223,220,166,.09));
+}
+
+.garden-flower {
+  background: #c8a954;
+  box-shadow: 0 -11px #f0dfaa, 0 11px #f0dfaa, 11px 0 #f0dfaa, -11px 0 #f0dfaa, 8px 8px #f0dfaa, -8px -8px #f0dfaa, 8px -8px #f0dfaa, -8px 8px #f0dfaa;
+}
+
+.vine-stem,
+.vine-leaf,
+.vine-vein { stroke: #c3d1a0; }
+.vine-leaf { fill: rgba(186, 205, 151, .12); }
+.garden-vine { opacity: .56; }
+
+.garden-blossom { opacity: .92; }
+.blossom-petals ellipse { fill: #f1e3b7; stroke: #d4c17f; }
+.blossom-center { fill: #cba54b; stroke: #e1c876; }
+
+.drifting-petal {
+  border-color: rgba(241, 219, 167, .55);
+  background: linear-gradient(145deg, #f7edce, #c9a966);
+  box-shadow: 0 0 12px rgba(233, 211, 147, .32);
+}
+
+.garden-cta {
+  bottom: 30px;
+  border-color: rgba(222, 211, 165, .54);
+  color: #f3eed9;
+  background: rgba(19, 52, 42, .48);
+  backdrop-filter: blur(8px);
+}
+
+.garden-cta:hover { border-color: #e2d39d; background: #e2d39d; color: #183c30; }
+
+@media (max-width: 992px) {
+  .garden-stage { min-height: 515px; }
+  .product-left { left: 4%; width: 210px; }
+  .product-center { top: 88px; width: 300px; }
+  .product-right { right: 4%; width: 205px; }
+}
+
+@media (max-width: 600px) {
+  .botanical-art-section { padding: 72px 0 78px; }
+  .garden-stage { min-height: 710px; border-radius: 38% 38% 18px 18px / 10% 10% 18px 18px; }
+  .garden-ghost-word { top: 38%; font-size: 74px; letter-spacing: .025em; }
+  .garden-caption { top: 25px; font-size: 8px; letter-spacing: 2.4px; }
+  .product-center { top: 70px; width: 245px; }
+  .product-left { top: 360px; left: 2%; width: 162px; }
+  .product-right { top: 378px; right: 2%; width: 155px; }
+  .garden-product span { font-size: 17px; }
+  .garden-product span small { font-size: 7px; }
+  .garden-cta { bottom: 22px; }
+  .garden-vine { opacity: .28; }
+}
+
+.garden-growth {
+  position: absolute;
+  z-index: 0;
+  bottom: -5px;
+  left: -20px;
+  width: clamp(210px, 27vw, 310px);
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.growth-right {
+  right: -18px;
+  left: auto;
+  width: clamp(200px, 25vw, 290px);
+  transform: scaleX(-1) rotate(-3deg);
+}
+
+.growth-stem,
+.growth-vein,
+.growth-leaf {
+  stroke: #bed0a0;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.growth-stem {
+  fill: none;
+  stroke-width: 1.65;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.growth-leaf {
+  fill: rgba(174, 197, 140, .2);
+  stroke-width: 1.15;
+  transform-box: fill-box;
+  transform-origin: center;
+  scale: .08;
+  opacity: 0;
+}
+
+.growth-vein {
+  fill: none;
+  stroke-width: .7;
+  opacity: 0;
+}
+
+.growth-bloom {
+  transform-box: fill-box;
+  transform-origin: center;
+  scale: .1;
+  opacity: 0;
+}
+
+.bloom-petal { fill: #f3e6b6; stroke: #d9c582; stroke-width: .7; }
+.bloom-core { fill: #d0aa4f; }
+
+.garden-stage:not(.is-grown) .garden-product,
+.garden-stage:not(.is-grown) .garden-vine,
+.garden-stage:not(.is-grown) .garden-blossom,
+.garden-stage:not(.is-grown) .garden-flower,
+.garden-stage:not(.is-grown) .drifting-petal { animation-play-state: paused; }
+
+.garden-stage.is-grown .garden-growth .stem-one { animation: stem-rise 1.3s .08s var(--ease) forwards; }
+.garden-stage.is-grown .garden-growth .stem-two { animation: stem-rise 1.45s .28s var(--ease) forwards; }
+.garden-stage.is-grown .garden-growth .stem-three { animation: stem-rise 1.05s .2s var(--ease) forwards; }
+.garden-stage.is-grown .garden-growth .leaf-a { animation: leaf-unfurl .68s .58s var(--ease) forwards; }
+.garden-stage.is-grown .garden-growth .leaf-b { animation: leaf-unfurl .72s .8s var(--ease) forwards; }
+.garden-stage.is-grown .garden-growth .leaf-c { animation: leaf-unfurl .75s 1s var(--ease) forwards; }
+.garden-stage.is-grown .garden-growth .leaf-d { animation: leaf-unfurl .72s 1.15s var(--ease) forwards; }
+.garden-stage.is-grown .garden-growth .growth-vein { animation: vein-appear .55s 1.2s ease both; }
+.garden-stage.is-grown .garden-growth .bloom-a { animation: bloom-open .8s 1.42s var(--ease) forwards; }
+.garden-stage.is-grown .garden-product,
+.garden-stage.is-grown .garden-vine,
+.garden-stage.is-grown .garden-blossom,
+.garden-stage.is-grown .garden-flower,
+.garden-stage.is-grown .drifting-petal { animation-play-state: running; }
+
+@keyframes stem-rise { to { stroke-dashoffset: 0; } }
+@keyframes leaf-unfurl { 0% { scale: .08; opacity: 0; } 78% { scale: 1.08; opacity: .9; } 100% { scale: 1; opacity: .86; } }
+@keyframes vein-appear { from { opacity: 0; } to { opacity: .72; } }
+@keyframes bloom-open { 0% { scale: .1; opacity: 0; rotate: -28deg; } 75% { scale: 1.12; opacity: 1; rotate: 8deg; } 100% { scale: 1; opacity: 1; rotate: 0deg; } }
+
+@media (max-width: 600px) {
+  .garden-growth { left: -55px; bottom: 1px; width: 230px; }
+  .growth-right { right: -58px; left: auto; width: 215px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .garden-growth .growth-stem { stroke-dashoffset: 0 !important; animation: none !important; }
+  .garden-growth .growth-leaf { scale: 1 !important; opacity: .86 !important; animation: none !important; }
+  .garden-growth .growth-vein { opacity: .72 !important; animation: none !important; }
+  .garden-growth .growth-bloom { scale: 1 !important; opacity: 1 !important; animation: none !important; }
+}
+
+/* Light, contemporary palette for the botanical product garden */
+.botanical-art-section {
+  background:
+    radial-gradient(ellipse at 9% 2%, rgba(192, 208, 177, .34), transparent 34%),
+    radial-gradient(ellipse at 95% 82%, rgba(226, 216, 183, .25), transparent 34%),
+    linear-gradient(160deg, #fbfaf4 0%, #f3f5ed 54%, #f8f5eb 100%);
+}
+
+.botanical-art-section .section-tag { color: #77876d; }
+.botanical-art-section .editorial-heading { color: #214b3a; }
+.botanical-art-section .section-desc { color: #65756a; }
+.botanical-art-section .section-header-editorial::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, #a5b695 0 2px, transparent 2.5px),
+    linear-gradient(rgba(165, 182, 149, .65), rgba(165, 182, 149, .65)) center / 100% 1px no-repeat;
+}
+
+.garden-stage {
+  border-color: rgba(144, 164, 133, .28);
+  background:
+    radial-gradient(ellipse at 50% 78%, rgba(184, 203, 164, .34), transparent 40%),
+    radial-gradient(ellipse at 46% 43%, rgba(255, 255, 248, .8), transparent 55%),
+    radial-gradient(ellipse at 2% 88%, rgba(196, 211, 178, .42), transparent 40%),
+    radial-gradient(ellipse at 100% 20%, rgba(221, 226, 204, .56), transparent 40%),
+    linear-gradient(135deg, #f3f1df, #edf2e7 56%, #f4f0e2);
+  box-shadow: inset 0 0 90px rgba(255, 255, 255, .46), 0 24px 64px rgba(68, 87, 65, .10);
+}
+
+.garden-stage::before,
+.garden-stage::after { border-color: rgba(143, 164, 129, .22); }
+.garden-ghost-word { color: rgba(43, 78, 57, .065); }
+.garden-caption { color: #7c8d76; }
+.garden-product { color: #355a45; }
+.garden-product::before {
+  background: radial-gradient(circle, rgba(211, 224, 193, .58), rgba(240, 233, 204, .38) 48%, transparent 74%);
+}
+.garden-product img { filter: drop-shadow(0 20px 18px rgba(57, 74, 55, .18)); }
+.garden-product:hover img,
+.garden-product:focus-visible img { filter: drop-shadow(0 25px 23px rgba(57, 74, 55, .24)); }
+.garden-product span { color: #315741; }
+.garden-product span small { color: #89966e; }
+
+.garden-leaf {
+  border-color: rgba(119, 151, 111, .4);
+  background: linear-gradient(135deg, rgba(162, 190, 143, .2), rgba(221, 222, 183, .18));
+}
+.garden-flower {
+  background: #d6bb70;
+  box-shadow: 0 -11px #f5e8bd, 0 11px #f5e8bd, 11px 0 #f5e8bd, -11px 0 #f5e8bd, 8px 8px #f5e8bd, -8px -8px #f5e8bd, 8px -8px #f5e8bd, -8px 8px #f5e8bd;
+}
+.vine-stem, .vine-leaf, .vine-vein { stroke: #8fa987; }
+.vine-leaf { fill: rgba(153, 181, 136, .18); }
+.garden-vine { opacity: .7; }
+.blossom-petals ellipse { fill: #fff4d3; stroke: #d5c58e; }
+.blossom-center { fill: #d2b45f; stroke: #e5d49a; }
+.drifting-petal {
+  border-color: rgba(206, 190, 130, .52);
+  background: linear-gradient(145deg, #fff4d7, #d9c98f);
+  box-shadow: 0 0 12px rgba(175, 159, 103, .18);
+}
+.growth-stem, .growth-vein, .growth-leaf { stroke: #91aa88; }
+.growth-leaf { fill: rgba(164, 190, 144, .3); }
+.bloom-petal { fill: #fff1d1; stroke: #d8c78e; }
+.bloom-core { fill: #d6b458; }
+.garden-cta {
+  border-color: rgba(117, 145, 108, .48);
+  color: #315741;
+  background: rgba(255, 255, 249, .76);
+  box-shadow: 0 8px 24px rgba(57, 74, 55, .08);
+}
+.garden-cta:hover { border-color: #496e52; background: #496e52; color: #fffdf5; }
+
+/* Match the homepage's Lora + Roboto type system and fresh matcha palette */
+:host {
+  --deep-forest: #1d5338;
+  --botanical-green: #2f7b43;
+  --sage-green: #cfe3c8;
+  --sage-light: #e8f2e3;
+  --warm-ivory: #fbfdf8;
+  --cream-beige: #e8f2e3;
+  --charcoal: #2f4a3a;
+  --charcoal-light: #526b5d;
+  --charcoal-muted: #6b7f72;
+  font-family: 'Roboto', sans-serif;
+  color: #2f4a3a;
+  background-color: #fbfdf8;
+}
+
+.editorial-about-page { background-color: #fbfdf8; }
+
+.editorial-about-page .hero-title,
+.editorial-about-page .editorial-heading,
+.editorial-about-page .story-narrative .editorial-quote,
+.editorial-about-page .item-title,
+.editorial-about-page .col-title,
+.editorial-about-page .ticker-title,
+.editorial-about-page .moment-caption h4,
+.editorial-about-page .member-fullname {
+  font-family: 'Lora', serif;
+}
+
+.editorial-about-page .editorial-heading {
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: .5px;
+}
+
+.botanical-art-section {
+  background:
+    radial-gradient(ellipse at 9% 2%, rgba(207, 227, 200, .64), transparent 36%),
+    radial-gradient(ellipse at 95% 82%, rgba(251, 230, 234, .25), transparent 32%),
+    linear-gradient(160deg, #fbfdf8 0%, #f1f6ec 56%, #fbfdf8 100%);
+}
+
+.botanical-art-section .section-tag { color: #2f7b43; }
+.botanical-art-section .editorial-heading { color: #1d5338; }
+.botanical-art-section .section-desc { color: #6b7f72; }
+.garden-stage {
+  border-color: rgba(143, 169, 135, .32);
+  background:
+    radial-gradient(ellipse at 50% 78%, rgba(207, 227, 200, .68), transparent 40%),
+    radial-gradient(ellipse at 46% 43%, rgba(255, 255, 255, .82), transparent 55%),
+    radial-gradient(ellipse at 2% 88%, rgba(232, 242, 227, .82), transparent 40%),
+    radial-gradient(ellipse at 100% 20%, rgba(251, 230, 234, .30), transparent 40%),
+    linear-gradient(135deg, #f6f8ef, #e8f2e3 56%, #fbf7f0);
+}
+.garden-ghost-word { color: rgba(29, 83, 56, .07); }
+.garden-product, .garden-product span { color: #1d5338; }
+.garden-product span small, .garden-caption { color: #6b7f72; }
+.garden-cta { color: #1d5338; border-color: rgba(47, 123, 67, .42); }
+
+/* Tighter rhythm and calmer editorial treatment across the About page */
+.brand-story-section { padding: 46px 0 54px; }
+.story-grid { gap: clamp(34px, 4vw, 58px); }
+.story-img { height: 450px; }
+.story-narrative p { margin-bottom: 17px; line-height: 1.78; }
+.editorial-quote { margin: 22px 0; padding-block: 16px; }
+
+.philosophy-section,
+.botanical-art-section,
+.vision-mission-section,
+.moments-editorial-section,
+.team-editorial-section { padding-block: 62px; }
+.section-header-editorial { margin-bottom: 34px; }
+.section-header-editorial .section-desc { display: none; }
+.section-header-editorial::after { margin-top: 15px; }
+
+.philosophy-section { background: linear-gradient(145deg, #f4f3e9, #edf1e8 58%, #f7f5ed); }
+.philosophy-grid { gap: 24px 28px; max-width: 1080px; }
+.philosophy-item { padding: 0 0 12px; }
+.item-image-wrap {
+  height: 156px;
+  margin-bottom: 13px;
+  border-radius: 46% 46% 5px 5px / 35% 35% 5px 5px;
+  background: #e8ebdf;
+  box-shadow: 0 8px 22px rgba(43, 62, 44, .07);
+}
+.item-image-wrap img { filter: saturate(.72) contrast(.96); }
+.philosophy-item:hover .item-image-wrap img { filter: saturate(.86) contrast(1); }
+.item-image-wrap::after { inset: 7px; border-color: rgba(255, 252, 240, .52); }
+.item-number { left: 10px; bottom: 9px; width: 29px; height: 29px; font-size: 11px; background: rgba(250, 248, 241, .84); }
+.item-title { margin-bottom: 6px; font-size: 17px; line-height: 1.35; }
+.item-desc { margin: 0; color: #66776a; font-size: 13px; line-height: 1.65; }
+
+.vision-three-columns { align-items: stretch; gap: 22px; }
+.vision-column,
+.vision-column:nth-child(2),
+.vision-column:nth-child(2):hover {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 28px 25px;
+  transform: none;
+}
+.col-pill { align-self: flex-start; margin-bottom: 12px; }
+.col-title { min-height: 2.7em; margin-bottom: 12px; font-size: 19px; line-height: 1.4; }
+.col-text,
+.col-values-list li { font-size: 14px; line-height: 1.7; }
+.col-values-list li { margin-bottom: 7px; }
+
+@media (max-width: 992px) {
+  .philosophy-grid { gap: 22px; }
+  .vision-three-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vision-column:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .brand-story-section { padding: 32px 0 42px; }
+  .story-grid { gap: 24px; }
+  .story-img { height: 270px; }
+  .story-narrative p { font-size: 14px; }
+  .philosophy-section,
+  .botanical-art-section,
+  .vision-mission-section,
+  .moments-editorial-section,
+  .team-editorial-section { padding-block: 44px; }
+  .section-header-editorial { margin-bottom: 25px; }
+  .philosophy-grid { grid-template-columns: 1fr; gap: 16px; }
+  .philosophy-item { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: center; padding: 0 0 12px; border-bottom: 1px solid rgba(58, 91, 64, .1); }
+  .item-image-wrap { height: 100px; margin: 0; border-radius: 48% 48% 4px 4px; }
+  .item-image-wrap::after { inset: 5px; }
+  .item-number { left: 5px; bottom: 5px; width: 24px; height: 24px; font-size: 9px; }
+  .item-title { font-size: 15px; }
+  .item-desc { font-size: 12px; }
+  .vision-three-columns { grid-template-columns: 1fr; gap: 14px; }
+  .vision-column:last-child { grid-column: auto; }
+  .col-title { min-height: 0; }
+}
+
+/* Keep the brand mark perfectly circular after the shared story-image rules. */
+.story-image-card > img.story-logo-img {
+  width: min(100%, 420px);
+  height: min(100vw, 420px);
+  min-height: 0;
+  max-height: none;
+  flex: 0 0 min(100vw, 420px);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 50%;
+}
+@media (max-width: 600px) {
+  .story-image-card > img.story-logo-img {
+    width: min(100%, 300px);
+    height: min(100vw, 300px);
+    flex-basis: min(100vw, 300px);
+  }
+}
+
+/* Quiet botanical imagery for the six core values */
+.philosophy-grid { max-width: 1030px; gap: 24px 30px; }
+.philosophy-item { padding-bottom: 8px; }
+.item-image-wrap {
+  height: 122px;
+  margin-bottom: 11px;
+  border-radius: 42% 42% 5px 5px / 32% 32% 5px 5px;
+  background: #e7e9dc;
+  box-shadow: 0 6px 16px rgba(43, 62, 44, .055);
+}
+.item-image-wrap img {
+  object-position: center 30%;
+  filter: saturate(.46) sepia(.08) brightness(1.05) contrast(.9);
+}
+.philosophy-item:hover .item-image-wrap img { filter: saturate(.58) sepia(.06) brightness(1.04) contrast(.94); }
+.item-image-wrap::after { inset: 6px; border-color: rgba(255, 252, 240, .38); }
+.item-number { width: 26px; height: 26px; left: 9px; bottom: 8px; font-size: 10px; }
+
+@media (max-width: 600px) {
+  .item-image-wrap { height: 88px; }
+}
+
+/* Six quiet, bespoke botanical sketches replace the busy ingredient photos. */
+.philosophy-grid { gap: 22px 28px; }
+.philosophy-item { padding-bottom: 11px; }
+.item-art {
+  position: relative;
+  display: grid;
+  height: 112px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid rgba(87, 117, 87, .11);
+  border-radius: 44% 44% 5px 5px / 34% 34% 5px 5px;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(190, 203, 174, .2), transparent 55%),
+    linear-gradient(150deg, #f8f7ef, #f1f2e9);
+}
+.item-art::before,
+.item-art::after {
+  position: absolute;
+  width: 74px;
+  height: 120px;
+  border: 1px solid rgba(116, 143, 107, .12);
+  border-radius: 100% 0 100% 0;
+  content: '';
+  pointer-events: none;
+}
+.item-art::before { top: -74px; left: 10%; transform: rotate(-37deg); }
+.item-art::after { right: 9%; bottom: -94px; transform: rotate(142deg); }
+.item-art svg { position: relative; z-index: 1; display: block; width: min(100%, 300px); height: 100%; overflow: visible; }
+.item-art svg path { fill: none; stroke: #8ca18a; stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
+.item-art svg .sketch-leaf { fill: rgba(171, 190, 158, .12); stroke: #8ca18a; stroke-width: 1.1; }
+.item-art svg .sketch-vein { fill: none; stroke: rgba(120, 149, 119, .7); stroke-width: .8; }
+.item-art svg .sketch-flower { transform-origin: 159px 31px; }
+.item-art svg .sketch-petal { fill: #f8f6e9; stroke: #b4b28e; stroke-width: 1; }
+.item-art svg .sketch-center { fill: #c9b77d; stroke: #b5a66f; stroke-width: .7; }
+.item-art svg .sketch-ground { stroke: rgba(123, 148, 117, .48); stroke-width: .8; }
+.item-art svg .sketch-cup { stroke: #9aa58b; stroke-width: 1.1; }
+.item-art svg .sketch-gift { stroke: #a39478; stroke-width: 1.1; }
+.item-art svg .sketch-detail { stroke: #a3977d; stroke-width: 1.1; }
+.item-art svg .sketch-sprout { stroke: #819b80; stroke-width: 1.2; }
+.item-number { z-index: 2; left: 10px; bottom: 8px; width: 24px; height: 24px; border-color: rgba(111, 136, 105, .25); color: #58745c; background: rgba(250, 249, 241, .92); font-size: 9px; }
+.item-title { font-size: 16px; }
+.item-desc { font-size: 12.5px; line-height: 1.6; }
+
+@media (max-width: 600px) {
+  .philosophy-item { grid-template-columns: 88px minmax(0, 1fr); gap: 12px; }
+  .item-art { height: 82px; margin: 0; border-radius: 45% 45% 4px 4px / 35% 35% 4px 4px; }
+  .item-art svg { width: 110px; }
+  .item-number { left: 4px; bottom: 4px; width: 20px; height: 20px; }
+  .item-title { font-size: 14px; }
+  .item-desc { font-size: 11.5px; }
+}
+
+/* Give each value its own botanical still-life, palette and silhouette. */
+.item-art svg { width: 100%; }
+.item-art svg path { stroke: #718c70; stroke-width: 1.5; }
+.item-art svg .leaf { fill: rgba(137, 163, 126, .24); stroke: #718c70; }
+.item-art svg .vein { fill: none; stroke: #91a487; stroke-width: 1; }
+.item-art svg .ground { fill: none; stroke: rgba(109, 137, 105, .55); stroke-width: 1; }
+.item-art svg .seed { fill: #c9ad69; stroke: #ad9457; stroke-width: .8; }
+.item-art svg .bloom ellipse { fill: #f8f1d8; stroke: #c8ae6d; stroke-width: 1.1; }
+.item-art svg .bloom circle { fill: #c6a854; stroke: #ac9146; stroke-width: .8; }
+.item-art svg .bloom.blush ellipse { fill: #eadbd7; stroke: #bd9990; }
+.item-art svg .bloom.blush circle { fill: #bb8e79; stroke: #a57765; }
+.item-art.art-01 { border-radius: 5px 48% 5px 5px; background: linear-gradient(130deg, #eef0e4, #f7f4e9 70%); }
+.item-art.art-02 { border-radius: 48% 5px 5px 5px; background: linear-gradient(135deg, #f6efe8, #f2eee3 70%); }
+.item-art.art-03 { border-radius: 5px 5px 48% 5px; background: linear-gradient(145deg, #f4f0df, #eff1e7 72%); }
+.item-art.art-04 { border-radius: 5px 36% 5px 5px; background: linear-gradient(125deg, #e9eee6, #f5f2e8 74%); }
+.item-art.art-05 { border-radius: 36% 5px 5px 5px; background: linear-gradient(145deg, #f3ece7, #f7f2e7 75%); }
+.item-art.art-06 { border-radius: 5px 5px 5px 42%; background: linear-gradient(125deg, #e8eee3, #f3f1e4 74%); }
+.item-art.art-03 svg .cup { fill: rgba(255, 252, 239, .65); stroke: #637d68; stroke-width: 1.8; }
+.item-art.art-03 svg .tea { fill: rgba(197, 166, 94, .45); stroke: #b09255; stroke-width: 1; }
+.item-art.art-03 svg .steam { fill: none; stroke: #b6a982; stroke-width: 1.3; stroke-dasharray: 2 3; }
+.item-art.art-04 svg .jar { fill: rgba(251, 249, 237, .38); stroke: #758a70; stroke-width: 1.8; }
+.item-art.art-04 svg .tea { fill: rgba(193, 171, 119, .34); stroke: #aa9565; stroke-width: 1; }
+.item-art.art-05 svg .box { fill: rgba(255, 251, 236, .5); stroke: #9b806b; stroke-width: 1.7; }
+.item-art.art-05 svg .ribbon { fill: none; stroke: #b58e78; stroke-width: 1; }
+.item-art.art-05 svg .small-bloom circle { fill: #c9a85f; stroke: none; }
+.item-art.art-05 svg .small-bloom path { fill: none; stroke: #b69b64; stroke-width: 1.4; }
+.item-art.art-06 svg .leaf { fill: rgba(125, 159, 112, .3); stroke: #66845f; }
+.item-art.art-06 svg .vein { stroke: #7e9a70; }
+.item-art::before { opacity: .38; }
+.item-art::after { opacity: .55; }
+
+@media (max-width: 600px) {
+  .item-art svg { width: 145px; }
+}
+
+/* Restore breathing room and bring the botanical illustrations into focus. */
+.philosophy-grid { gap: 34px 30px; }
+.item-art {
+  height: 176px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(59, 86, 57, .18);
+  border-radius: 28px 5px 28px 5px;
+  box-shadow: 0 10px 24px rgba(45, 65, 43, .09);
+}
+.item-art::before,
+.item-art::after { display: none; }
+.item-art svg { width: 100%; height: 100%; overflow: visible; }
+.item-art svg path { stroke: #496e50; stroke-width: 1.7; }
+.item-art svg .leaf { fill: rgba(101, 145, 93, .42); stroke: #496e50; }
+.item-art svg .vein { stroke: #668963; stroke-width: 1.05; }
+.item-art svg .ground { stroke: rgba(78, 111, 72, .6); stroke-width: 1.1; }
+.item-art svg .seed { fill: #d4ac4f; stroke: #9b762c; }
+.item-art svg .bloom ellipse { fill: #f4d982; stroke: #b48d38; stroke-width: 1.25; }
+.item-art svg .bloom circle { fill: #d4a83e; stroke: #a27b2f; }
+.item-art svg .bloom.blush ellipse { fill: #e6b9ae; stroke: #a87570; }
+.item-art svg .bloom.blush circle { fill: #bd7c70; stroke: #965e56; }
+.item-art.art-01 { background: radial-gradient(ellipse at 50% 105%, #c6d9b8, transparent 68%), linear-gradient(135deg, #e5eddc, #f1e9cf); }
+.item-art.art-02 { background: radial-gradient(ellipse at 52% 100%, #e7c9bd, transparent 65%), linear-gradient(135deg, #f2e3d9, #efe7d1); }
+.item-art.art-03 { background: radial-gradient(ellipse at 48% 105%, #c5d8c5, transparent 66%), linear-gradient(135deg, #dce9dc, #f0e8d2); }
+.item-art.art-04 { background: radial-gradient(ellipse at 50% 110%, #c7d3b6, transparent 65%), linear-gradient(135deg, #e5e5d4, #f2e2c9); }
+.item-art.art-05 { background: radial-gradient(ellipse at 50% 105%, #e6c4b9, transparent 65%), linear-gradient(135deg, #f1e1dc, #f0e7d0); }
+.item-art.art-06 { background: radial-gradient(ellipse at 52% 105%, #b9d0a8, transparent 67%), linear-gradient(135deg, #d8e6d1, #ecedcf); }
+.item-art.art-03 svg .cup { fill: rgba(255, 250, 229, .84); stroke: #315d44; stroke-width: 2; }
+.item-art.art-03 svg .tea { fill: rgba(202, 157, 62, .7); stroke: #9d762e; stroke-width: 1.2; }
+.item-art.art-03 svg .steam { stroke: #9e8350; stroke-width: 1.5; stroke-dasharray: 2 2; }
+.item-art.art-04 svg .jar { fill: rgba(249, 246, 225, .65); stroke: #4f7052; stroke-width: 2; }
+.item-art.art-04 svg .tea { fill: rgba(171, 143, 82, .58); stroke: #987542; stroke-width: 1.2; }
+.item-art.art-05 svg .box { fill: rgba(250, 235, 213, .78); stroke: #8a6250; stroke-width: 2; }
+.item-art.art-05 svg .ribbon { stroke: #a46c5b; stroke-width: 1.3; }
+.item-art.art-05 svg .small-bloom circle { fill: #d2a941; }
+.item-art.art-05 svg .small-bloom path { stroke: #a9853e; stroke-width: 1.6; }
+.item-art.art-06 svg .leaf { fill: rgba(104, 151, 88, .47); stroke: #476e44; }
+.item-art.art-06 svg .vein { stroke: #5f8755; }
+.item-number { width: 29px; height: 29px; left: 12px; bottom: 11px; border-color: rgba(52, 83, 54, .4); color: #244f38; background: rgba(250, 248, 235, .96); font-size: 10px; }
+.item-title { margin-bottom: 8px; font-size: 17px; }
+.item-desc { color: #53695a; font-size: 13px; line-height: 1.7; }
+
+@media (max-width: 600px) {
+  .philosophy-grid { gap: 18px; }
+  .item-art { height: 112px; margin: 0; border-radius: 18px 4px 18px 4px; }
+  .item-art svg { width: 100%; height: 100%; }
+  .item-number { width: 22px; height: 22px; left: 4px; bottom: 4px; font-size: 8px; }
+}
+
+/* Bolder botanical palette: forest greens balanced with flower and tea tones. */
+.item-art {
+  border-radius: 20px 6px 20px 6px;
+  border-color: rgba(39, 70, 47, .28);
+  box-shadow: 0 12px 24px rgba(40, 62, 43, .14);
+}
+.item-art.art-01 { background: radial-gradient(ellipse at 52% 105%, #547d56, transparent 70%), linear-gradient(135deg, #244b39, #315c43); }
+.item-art.art-02 { background: radial-gradient(ellipse at 50% 105%, #d99872, transparent 68%), linear-gradient(135deg, #ebd0ad, #dfb99e); }
+.item-art.art-03 { background: radial-gradient(ellipse at 48% 105%, #779768, transparent 68%), linear-gradient(135deg, #456c51, #719065); }
+.item-art.art-04 { background: radial-gradient(ellipse at 50% 105%, #829752, transparent 68%), linear-gradient(135deg, #3e6548, #74844f); }
+.item-art.art-05 { background: radial-gradient(ellipse at 50% 105%, #cd8e78, transparent 68%), linear-gradient(135deg, #ddaaa0, #c98578); }
+.item-art.art-06 { background: radial-gradient(ellipse at 50% 105%, #a2bd65, transparent 68%), linear-gradient(135deg, #719354, #a0b666); }
+.item-art.art-01 svg path,
+.item-art.art-04 svg path { stroke: #f2e9c6; stroke-width: 1.75; }
+.item-art.art-01 svg .leaf,
+.item-art.art-04 svg .leaf { fill: rgba(180, 205, 139, .58); stroke: #d7e2b4; }
+.item-art.art-01 svg .vein,
+.item-art.art-04 svg .vein { stroke: #e3d08c; }
+.item-art.art-01 svg .ground,
+.item-art.art-04 svg .ground { stroke: rgba(239, 225, 180, .74); }
+.item-art.art-02 svg path,
+.item-art.art-05 svg path { stroke: #71503e; }
+.item-art.art-02 svg .leaf,
+.item-art.art-05 svg .leaf { fill: rgba(91, 123, 76, .68); stroke: #516b46; }
+.item-art.art-02 svg .bloom ellipse { fill: #f5cf61; stroke: #98682f; stroke-width: 1.5; }
+.item-art.art-02 svg .bloom circle { fill: #bd8133; stroke: #815226; }
+.item-art.art-02 svg .bloom.blush ellipse { fill: #df9a8d; stroke: #9e625b; }
+.item-art.art-02 svg .ground,
+.item-art.art-05 svg .ground { stroke: rgba(112, 75, 58, .75); }
+.item-art.art-03 svg path { stroke: #f2e6c2; }
+.item-art.art-03 svg .cup { fill: #fff5dc; stroke: #244b39; stroke-width: 2.2; }
+.item-art.art-03 svg .tea { fill: #d6a64c; stroke: #8b6128; }
+.item-art.art-03 svg .leaf { fill: rgba(202, 221, 160, .62); stroke: #e1e8bd; }
+.item-art.art-03 svg .steam { stroke: #f1d894; }
+.item-art.art-05 svg .box { fill: #f3dfc7; stroke: #744c3e; stroke-width: 2.2; }
+.item-art.art-05 svg .ribbon { stroke: #9a5d50; stroke-width: 1.7; }
+.item-art.art-05 svg .small-bloom path { stroke: #f1d071; }
+.item-art.art-06 svg path { stroke: #f4edcc; stroke-width: 1.75; }
+.item-art.art-06 svg .leaf { fill: rgba(214, 228, 159, .66); stroke: #365e3f; }
+.item-art.art-06 svg .vein { stroke: #54774a; }
+.item-art.art-06 svg .ground { stroke: rgba(247, 236, 188, .78); }
+.item-number { border-color: rgba(43, 67, 42, .35); color: #234b35; background: #f7f0d9; box-shadow: 0 2px 7px rgba(30, 40, 27, .16); }
+.item-title { color: #174a35; }
+.item-desc { color: #3f5948; }
+
+@media (max-width: 600px) {
+  .item-art { border-radius: 16px 5px 16px 5px; }
+}
+
+/* Editorial finish for the text-led core values section. */
+.philosophy-section {
+  position: relative;
+  isolation: isolate;
+  padding: 78px 0 86px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 4% 100%, rgba(114, 143, 91, .2), transparent 36%),
+    radial-gradient(ellipse at 100% 0%, rgba(194, 160, 91, .13), transparent 34%),
+    linear-gradient(125deg, #173f31, #1e4d39 58%, #244f3b);
+}
+.philosophy-section::before {
+  top: auto;
+  right: -90px;
+  bottom: -185px;
+  width: 310px;
+  height: 380px;
+  border-color: rgba(216, 194, 131, .17);
+}
+.philosophy-section .section-tag { color: #d8c17e; }
+.philosophy-section .editorial-heading { color: #fbf6e7; }
+.philosophy-section .section-header-editorial::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, #d5bd78 0 2px, transparent 2.5px),
+    linear-gradient(rgba(213, 189, 120, .6), rgba(213, 189, 120, .6)) center / 100% 1px no-repeat;
+}
+.philosophy-grid {
+  position: relative;
+  z-index: 1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 42px;
+  max-width: 1220px;
+}
+.philosophy-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 13px;
+  align-content: start;
+  min-height: 146px;
+  padding: 22px 10px 20px 0;
+  border: 0;
+  border-top: 1px solid rgba(223, 211, 170, .3);
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.philosophy-item:hover { transform: translateY(-3px); }
+.philosophy-index {
+  position: relative;
+  display: block;
+  padding-top: 1px;
+  color: #ddc77f;
+  font: 500 29px/.98 'Lora', serif;
+  letter-spacing: -1.5px;
+}
+.philosophy-index::after {
+  display: block;
+  width: 24px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(221, 199, 127, .78);
+  content: '';
+  transition: width .3s ease;
+}
+.philosophy-item:hover .philosophy-index::after { width: 40px; }
+.item-body { padding: 0; }
+.item-title { margin: 0 0 9px; color: #fff8e9; font-size: 18px; line-height: 1.35; }
+.item-desc { margin: 0; color: rgba(238, 239, 220, .78); font-size: 13px; line-height: 1.75; }
+
+@media (max-width: 992px) {
+  .philosophy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px; }
+  .philosophy-item { min-height: 132px; }
+}
+@media (max-width: 600px) {
+  .philosophy-section { padding: 52px 0 58px; }
+  .philosophy-grid { grid-template-columns: 1fr; gap: 8px; }
+  .philosophy-item { grid-template-columns: 42px minmax(0, 1fr); min-height: 0; padding: 17px 0; }
+  .philosophy-index { font-size: 25px; }
+  .item-title { font-size: 16px; }
+  .item-desc { font-size: 12px; }
+}
+
+/* The three-tea garden carries the same deeper, more confident botanical color. */
+.botanical-art-section {
+  padding-block: 76px 84px;
+  background:
+    radial-gradient(ellipse at 8% 10%, rgba(174, 195, 145, .24), transparent 34%),
+    radial-gradient(ellipse at 92% 90%, rgba(211, 173, 102, .15), transparent 32%),
+    linear-gradient(155deg, #f5f1e4, #edf1e7 52%, #f7f1e4);
+}
+.botanical-art-section .section-tag { color: #9a782e; }
+.botanical-art-section .editorial-heading { color: #174a35; }
+.botanical-art-section .section-header-editorial::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, #c5a34f 0 2px, transparent 2.5px),
+    linear-gradient(rgba(137, 159, 112, .72), rgba(137, 159, 112, .72)) center / 100% 1px no-repeat;
+}
+.garden-stage {
+  border: 1px solid rgba(63, 98, 62, .38);
+  background:
+    radial-gradient(ellipse at 48% 78%, rgba(183, 197, 126, .48), transparent 43%),
+    radial-gradient(ellipse at 48% 28%, rgba(255, 247, 218, .56), transparent 53%),
+    radial-gradient(ellipse at 4% 92%, rgba(139, 170, 111, .48), transparent 39%),
+    radial-gradient(ellipse at 100% 22%, rgba(192, 204, 151, .56), transparent 41%),
+    linear-gradient(135deg, #dce6cf, #cbdcc7 54%, #e9e2c5);
+  box-shadow: inset 0 0 90px rgba(255, 250, 227, .3), 0 24px 58px rgba(45, 67, 43, .16);
+}
+.garden-stage::before,
+.garden-stage::after { border-color: rgba(67, 102, 65, .24); }
+.garden-ghost-word { color: rgba(32, 74, 49, .09); }
+.garden-caption { color: #526d4e; }
+.garden-product { color: #214d36; }
+.garden-product::before {
+  background: radial-gradient(circle, rgba(243, 222, 155, .56), rgba(193, 207, 143, .3) 48%, transparent 74%);
+}
+.garden-product img { filter: drop-shadow(0 23px 21px rgba(36, 57, 37, .27)); }
+.garden-product:hover img,
+.garden-product:focus-visible img { filter: drop-shadow(0 28px 28px rgba(36, 57, 37, .34)); }
+.garden-product span {
+  margin-top: 9px;
+  padding: 7px 17px;
+  border: 1px solid rgba(73, 105, 67, .26);
+  border-radius: 28px;
+  color: #244d38;
+  background: rgba(250, 247, 230, .94);
+  box-shadow: 0 7px 18px rgba(44, 66, 42, .1);
+}
+.garden-product span small { color: #957637; }
+.garden-leaf {
+  border-color: rgba(65, 112, 62, .56);
+  background: linear-gradient(135deg, rgba(121, 159, 99, .42), rgba(220, 209, 145, .34));
+}
+.garden-flower { background: #c99937; box-shadow: 0 -11px #f6e3a5, 0 11px #f6e3a5, 11px 0 #f6e3a5, -11px 0 #f6e3a5, 8px 8px #f6e3a5, -8px -8px #f6e3a5, 8px -8px #f6e3a5, -8px 8px #f6e3a5; }
+.vine-stem, .vine-leaf, .vine-vein { stroke: #557c52; }
+.vine-leaf { fill: rgba(117, 157, 95, .27); }
+.garden-vine { opacity: .82; }
+.blossom-petals ellipse { fill: #fff0c4; stroke: #bb9949; }
+.blossom-center { fill: #d2a842; stroke: #a98432; }
+.growth-stem, .growth-vein, .growth-leaf { stroke: #52784e; }
+.growth-leaf { fill: rgba(113, 153, 91, .35); }
+.bloom-petal { fill: #fff0c4; stroke: #c19c49; }
+.bloom-core { fill: #d3a53e; }
+.garden-cta {
+  border-color: rgba(47, 87, 54, .52);
+  color: #244d38;
+  background: rgba(250, 247, 230, .96);
+  box-shadow: 0 10px 24px rgba(43, 66, 42, .15);
+}
+.garden-cta:hover { border-color: #315d42; background: #315d42; color: #fff8e6; }
+
+@media (max-width: 600px) {
+  .botanical-art-section { padding-block: 48px 58px; }
+  .garden-stage { min-height: 710px; }
+}
+
+/* Match the garden section to the deep forest core-values palette. */
+.botanical-art-section {
+  background:
+    radial-gradient(ellipse at 8% 8%, rgba(100, 139, 83, .2), transparent 34%),
+    radial-gradient(ellipse at 95% 88%, rgba(191, 153, 72, .12), transparent 32%),
+    linear-gradient(125deg, #173f31, #1e4d39 58%, #244f3b);
+}
+.botanical-art-section .section-tag { color: #d8c17e; }
+.botanical-art-section .editorial-heading { color: #fbf6e7; }
+.botanical-art-section .section-header-editorial::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, #d5bd78 0 2px, transparent 2.5px),
+    linear-gradient(rgba(213, 189, 120, .62), rgba(213, 189, 120, .62)) center / 100% 1px no-repeat;
+}
+.garden-stage {
+  border-color: rgba(222, 203, 144, .34);
+  background:
+    radial-gradient(ellipse at 49% 77%, rgba(119, 151, 83, .38), transparent 43%),
+    radial-gradient(ellipse at 50% 28%, rgba(205, 174, 93, .17), transparent 47%),
+    radial-gradient(ellipse at 1% 95%, rgba(65, 109, 65, .7), transparent 43%),
+    radial-gradient(ellipse at 100% 20%, rgba(96, 133, 77, .46), transparent 42%),
+    linear-gradient(135deg, #244c39, #193e31 55%, #294c37);
+  box-shadow: inset 0 0 100px rgba(8, 28, 21, .2), 0 30px 65px rgba(7, 27, 19, .28);
+}
+.garden-stage::before,
+.garden-stage::after { border-color: rgba(222, 211, 160, .2); }
+.garden-caption { color: rgba(235, 220, 166, .88); }
+.garden-ghost-word { color: rgba(247, 238, 205, .09); }
+.garden-product { color: #fff5d9; }
+.garden-product::before { background: radial-gradient(circle, rgba(229, 199, 113, .36), rgba(157, 184, 121, .2) 48%, transparent 74%); }
+.garden-product span {
+  border-color: rgba(231, 212, 162, .42);
+  color: #244b36;
+  background: rgba(249, 242, 218, .96);
+}
+.garden-product span small { color: #987634; }
+.garden-leaf {
+  border-color: rgba(197, 216, 156, .72);
+  background: linear-gradient(135deg, rgba(142, 177, 104, .48), rgba(215, 196, 124, .28));
+}
+.vine-stem, .vine-leaf, .vine-vein { stroke: #b3c98e; }
+.vine-leaf { fill: rgba(158, 188, 119, .26); }
+.garden-vine { opacity: .76; }
+.blossom-petals ellipse { fill: #f5e6b2; stroke: #c8aa5a; }
+.blossom-center { fill: #d1a743; stroke: #e1c66e; }
+.growth-stem, .growth-vein, .growth-leaf { stroke: #b3c98e; }
+.growth-leaf { fill: rgba(159, 188, 120, .28); }
+.bloom-petal { fill: #f4e4af; stroke: #cfb15d; }
+.bloom-core { fill: #d2aa48; }
+.garden-cta {
+  border-color: rgba(226, 208, 155, .56);
+  color: #244b36;
+  background: rgba(249, 242, 218, .96);
+}
+.garden-cta:hover { border-color: #e5cf8b; background: #e5cf8b; color: #193f30; }
+
+/* Soft, airy palette for the three-tea botanical garden. */
+.botanical-art-section {
+  background:
+    radial-gradient(ellipse at 10% 12%, rgba(208, 220, 192, .42), transparent 34%),
+    radial-gradient(ellipse at 92% 88%, rgba(239, 224, 198, .38), transparent 34%),
+    linear-gradient(135deg, #faf9f3, #f2f5ed 54%, #faf6ee);
+}
+.botanical-art-section .section-tag { color: #74896f; }
+.botanical-art-section .editorial-heading { color: #315b45; }
+.botanical-art-section .section-header-editorial::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, #c7b77f 0 2px, transparent 2.5px),
+    linear-gradient(rgba(151, 174, 141, .7), rgba(151, 174, 141, .7)) center / 100% 1px no-repeat;
+}
+.garden-stage {
+  border-color: rgba(150, 171, 139, .42);
+  background:
+    radial-gradient(ellipse at 48% 78%, rgba(209, 222, 190, .52), transparent 44%),
+    radial-gradient(ellipse at 52% 25%, rgba(255, 251, 233, .82), transparent 48%),
+    radial-gradient(ellipse at 4% 95%, rgba(221, 231, 207, .62), transparent 41%),
+    radial-gradient(ellipse at 100% 18%, rgba(234, 224, 201, .52), transparent 42%),
+    linear-gradient(135deg, #edf2e7, #e5ede2 54%, #f4eddf);
+  box-shadow: inset 0 0 82px rgba(255, 255, 248, .42), 0 22px 52px rgba(77, 100, 76, .1);
+}
+.garden-stage::before,
+.garden-stage::after { border-color: rgba(128, 157, 124, .22); }
+.garden-caption { color: #84947a; }
+.garden-ghost-word { color: rgba(57, 91, 67, .055); }
+.garden-product { color: #365e49; }
+.garden-product::before {
+  background: radial-gradient(circle, rgba(242, 228, 181, .54), rgba(214, 227, 197, .34) 48%, transparent 74%);
+}
+.garden-product img { filter: drop-shadow(0 20px 19px rgba(67, 83, 62, .18)); }
+.garden-product:hover img,
+.garden-product:focus-visible img { filter: drop-shadow(0 24px 24px rgba(67, 83, 62, .23)); }
+.garden-product span {
+  border-color: rgba(135, 160, 126, .34);
+  color: #365e49;
+  background: rgba(251, 249, 239, .96);
+  box-shadow: 0 7px 18px rgba(72, 91, 66, .09);
+}
+.garden-product span small { color: #9a8a5d; }
+.garden-leaf {
+  border-color: rgba(105, 143, 106, .54);
+  background: linear-gradient(135deg, rgba(159, 190, 145, .4), rgba(223, 218, 175, .28));
+}
+.vine-stem, .vine-leaf, .vine-vein,
+.growth-stem, .growth-vein, .growth-leaf { stroke: #829f7d; }
+.vine-leaf, .growth-leaf { fill: rgba(156, 184, 145, .28); }
+.garden-vine { opacity: .68; }
+.blossom-petals ellipse { fill: #fbf0d6; stroke: #c9b77d; }
+.blossom-center { fill: #d5bd78; stroke: #b6a368; }
+.bloom-petal { fill: #fbf0d6; stroke: #c9b77d; }
+.bloom-core { fill: #d5bd78; }
+.garden-cta {
+  border-color: rgba(108, 145, 111, .5);
+  color: #365e49;
+  background: rgba(250, 249, 240, .96);
+  box-shadow: 0 9px 22px rgba(72, 91, 66, .1);
+}
+.garden-cta:hover { border-color: #759778; background: #759778; color: #fffdf6; }
+
+/* Extend the garden frame so its bottom CTA clears the center tea label. */
+.garden-stage { min-height: 640px; }
+@media (max-width: 992px) and (min-width: 601px) {
+  .garden-stage { min-height: 565px; }
+}
+@media (max-width: 600px) {
+  .garden-stage { min-height: 710px; }
+}
+

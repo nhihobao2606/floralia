@@ -24,6 +24,11 @@ import { CheckoutComponent } from './pages/checkout/checkout';
 import { Orders } from './pages/orders/orders';
 import { OrderDetail } from './pages/order-detail/order-detail';
 import { OrderSuccess } from './pages/order-success/order-success';
+import { About } from './pages/about/about';
+import { SupportPage } from './pages/support/support-page';
+import { ContactPage } from './pages/contact/contact-page';
+import { MixTeaPage } from './pages/mix-tea/mix-tea-page';
+import { WishlistPage } from './pages/wishlist/wishlist-page';
 
 registerLocaleData(localeVi);
 
@@ -48,6 +53,11 @@ registerLocaleData(localeVi);
     Orders,
     OrderDetail,
     OrderSuccess,
+    About,
+    SupportPage,
+    ContactPage,
+    MixTeaPage,
+    WishlistPage,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners(), { provide: LOCALE_ID, useValue: 'vi' }],

@@ -8,6 +8,7 @@ import { Products } from '../../classes/Products';
 import { Blog } from '../../classes/Blog';
 import { CartService } from '../../services/cart-service';
 import { Router } from '@angular/router';
+import { WishlistService } from '../../services/wishlist-service';
 
 @Component({
   selector: 'app-homepage',
@@ -100,7 +101,8 @@ export class Homepage implements OnInit {
     private reviewService: ReviewService,
     readonly productNavigation: ProductNavigationService,
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+    private readonly wishlistService: WishlistService,
   ) {}
 
   addedSku = signal<string | null>(null);
@@ -299,14 +301,12 @@ export class Homepage implements OnInit {
 
   // Yêu thích sản phẩm.
   isWished(product: Products): boolean {
-    return this.wishlist().has(this.getProductId(product));
+    return this.wishlistService.isSaved(product);
   }
 
   toggleWish(product: Products): void {
-    const id = this.getProductId(product);
-    const next = new Set(this.wishlist());
-    next.has(id) ? next.delete(id) : next.add(id);
-    this.wishlist.set(next);
+    this.wishlistService.toggle(product);
+    this.wishlist.set(new Set(this.wishlistService.ids()));
   }
 
   onImageError(event: Event): void {

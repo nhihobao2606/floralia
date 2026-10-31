@@ -15,10 +15,28 @@ import { CheckoutComponent } from './pages/checkout/checkout';
 import { Orders } from './pages/orders/orders';
 import { OrderDetail } from './pages/order-detail/order-detail';
 import { OrderSuccess } from './pages/order-success/order-success';
+import { About } from './pages/about/about';
+import { SupportPage } from './pages/support/support-page';
+import { ContactPage } from './pages/contact/contact-page';
+import { MixTeaPage } from './pages/mix-tea/mix-tea-page';
+import { WishlistPage } from './pages/wishlist/wishlist-page';
 
 const routes: Routes = [
   { path: '', component: Homepage, pathMatch: 'full' },
   { path: 'home', component: Homepage },
+
+  // Giới thiệu & Hỗ trợ & Liên hệ
+  { path: 'about', component: About },
+  { path: 'gioi-thieu', component: About },
+  { path: 'return-policy', component: SupportPage, data: { supportPage: 'returns' } },
+  { path: 'privacy', component: SupportPage, data: { supportPage: 'privacy' } },
+  { path: 'terms', component: SupportPage, data: { supportPage: 'terms' } },
+  { path: 'faq', component: SupportPage, data: { supportPage: 'faq' } },
+  { path: 'contact', component: ContactPage },
+  { path: 'mix-tra', component: MixTeaPage },
+  { path: 'wishlist', component: WishlistPage },
+
+  // Tài khoản & Xác thực
   { path: 'login', component: Login },
   { path: 'signup', component: Signup },
   { path: 'account', component: Profile },

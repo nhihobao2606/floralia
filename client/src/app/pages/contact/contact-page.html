@@ -1,0 +1,71 @@
+<main class="contact-page">
+  <nav class="contact-breadcrumb" aria-label="Điều hướng">
+    <div class="container">
+      <a routerLink="/home">Trang chủ</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Liên hệ</span>
+    </div>
+  </nav>
+
+  <section class="contact-main">
+    <div class="container contact-grid">
+      <section class="contact-details" aria-labelledby="contact-title">
+        <span class="contact-eyebrow">FLORALIA CARE</span>
+        <h1 id="contact-title">Liên hệ</h1>
+        <span class="contact-title-rule" aria-hidden="true"></span>
+        <p class="contact-intro">Nếu bạn có gì thắc mắc, hãy liên hệ với chúng tôi qua địa chỉ bên dưới.</p>
+
+        <dl class="contact-info-list">
+          <div class="contact-info-row">
+            <dt><i class="bi bi-telephone" aria-hidden="true"></i> Điện thoại</dt>
+            <dd><a href="tel:0901234567">0901 234 567</a></dd>
+          </div>
+          <div class="contact-info-row">
+            <dt><i class="bi bi-geo-alt" aria-hidden="true"></i> Địa chỉ</dt>
+            <dd>11A Bế Văn Đàn, Dĩ An, Bình Dương</dd>
+          </div>
+          <div class="contact-info-row">
+            <dt><i class="bi bi-envelope" aria-hidden="true"></i> Email</dt>
+            <dd><a href="mailto:floralia@gmail.com">floralia@gmail.com</a></dd>
+          </div>
+          <div class="contact-info-row">
+            <dt><i class="bi bi-clock" aria-hidden="true"></i> Thời gian làm việc</dt>
+            <dd>Thứ 2 đến Thứ 6: 8h–22h<br>Thứ 7 và Chủ nhật: 8h–20h</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="contact-form-panel" aria-labelledby="form-title">
+        <span class="contact-eyebrow">CHÚNG TÔI LUÔN LẮNG NGHE</span>
+        <h2 id="form-title">Gửi thắc mắc cho chúng tôi</h2>
+        <p class="contact-form-intro">Để lại lời nhắn, Floralia sẽ phản hồi bạn sớm nhất có thể.</p>
+
+        <form #contactForm="ngForm" (ngSubmit)="sendMessage(contactForm)" novalidate>
+          <div class="form-row">
+            <label class="visually-hidden" for="contact-name">Tên của bạn</label>
+            <input id="contact-name" name="name" type="text" ngModel required autocomplete="name" placeholder="Tên của bạn">
+            <label class="visually-hidden" for="contact-email">Email của bạn</label>
+            <input id="contact-email" name="email" type="email" ngModel required email autocomplete="email" placeholder="Email của bạn">
+          </div>
+          <label class="visually-hidden" for="contact-phone">Số điện thoại</label>
+          <input id="contact-phone" name="phone" type="tel" ngModel autocomplete="tel" placeholder="Số điện thoại">
+          <label class="visually-hidden" for="contact-message">Nội dung</label>
+          <textarea id="contact-message" name="message" ngModel required rows="5" placeholder="Nội dung"></textarea>
+          <p class="form-hint">Khi gửi, ứng dụng email trên thiết bị của bạn sẽ mở một thư nháp gửi đến Floralia.</p>
+          <button type="submit">Gửi cho chúng tôi <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+          <p class="form-feedback" role="status" *ngIf="submitted">Thư nháp đã được chuẩn bị. Hãy gửi thư từ ứng dụng email của bạn nhé.</p>
+        </form>
+      </section>
+    </div>
+  </section>
+
+  <section class="contact-map-section" aria-label="Bản đồ địa chỉ Floralia Tea">
+    <iframe
+      title="Bản đồ đến Floralia Tea tại 11A Bế Văn Đàn, Dĩ An, Bình Dương"
+      src="https://maps.google.com/maps?q=11A%20B%E1%BA%BF%20V%C4%83n%20%C4%90%C3%A0n%2C%20D%C4%A9%20An%2C%20B%C3%ACnh%20D%C6%B0%C6%A1ng&output=embed"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen>
+    </iframe>
+    <a class="map-open-link" href="https://www.google.com/maps/search/?api=1&query=11A+B%E1%BA%BF+V%C4%83n+%C4%90%C3%A0n%2C+D%C4%A9+An%2C+B%C3%ACnh+D%C6%B0%C6%A1ng" target="_blank" rel="noopener">Mở bản đồ <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+  </section>
+</main>

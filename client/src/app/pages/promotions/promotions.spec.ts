@@ -33,6 +33,7 @@ describe('PromotionsComponent', () => {
   });
 
   it('should toggle wishlist', () => {
+    localStorage.setItem('currentUser', JSON.stringify({ id: 'user-1' }));
     const mockProduct: any = { _id: 'prod123', name: 'Trà hoa cúc', price: 100000 };
     component.toggleWish(mockProduct);
     expect(component.isWished(mockProduct)).toBe(true);

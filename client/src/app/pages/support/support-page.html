@@ -1,0 +1,80 @@
+<main class="support-page">
+  <nav class="support-breadcrumb" aria-label="Điều hướng">
+    <div class="container">
+      <a routerLink="/home">Trang chủ</a><span>/</span><span aria-current="page">Hỗ trợ</span><span>/</span><strong>{{ page.label }}</strong>
+    </div>
+  </nav>
+
+  <section class="support-hero">
+    <div class="container support-hero-inner">
+      <div class="support-hero-copy">
+        <span class="support-eyebrow"><i aria-hidden="true"></i> FLORALIA CARE</span>
+        <h1>{{ page.title }}</h1>
+        <p>{{ page.intro }}</p>
+      </div>
+      <div class="support-hero-art" aria-hidden="true">
+        <span class="support-art-ring ring-one"></span>
+        <span class="support-art-ring ring-two"></span>
+        <svg viewBox="0 0 220 250" role="presentation">
+          <path d="M27 235C80 194 72 142 116 110S149 49 194 18" />
+          <path d="M75 181C37 181 28 151 39 133C67 137 83 155 75 181ZM93 135C89 102 113 87 134 96C135 121 117 139 93 135ZM133 82C104 65 112 37 132 27C152 44 153 65 133 82ZM127 111C156 106 171 125 168 148C146 155 128 139 127 111Z" />
+          <path d="M40 138C52 152 64 168 75 181M130 99C116 110 104 123 93 135M130 31C133 49 134 66 133 82M165 145C153 133 140 121 127 111" />
+        </svg>
+        <span class="support-art-dot dot-one"></span><span class="support-art-dot dot-two"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="support-content-section">
+    <div class="container support-layout">
+      <aside class="support-sidebar" aria-label="Các chủ đề hỗ trợ">
+        <p class="support-sidebar-title">TRUNG TÂM HỖ TRỢ</p>
+        <a *ngFor="let item of pages" [routerLink]="item.path" [class.current]="item.key === page.key">
+          <span>{{ item.label }}</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+        </a>
+        <div class="support-contact-card">
+          <span class="contact-leaf" aria-hidden="true"></span>
+          <h2>Cần thêm trợ giúp?</h2>
+          <p>Đội ngũ Floralia sẵn lòng lắng nghe bạn.</p>
+          <a href="mailto:floralia@gmail.com">Gửi email <i class="bi bi-arrow-right"></i></a>
+          <a href="tel:0901234567">0901 234 567</a>
+        </div>
+      </aside>
+
+      <article class="support-article">
+        <div class="article-heading">
+          <span class="article-label">{{ page.label }}</span>
+          <span class="article-mark" aria-hidden="true"></span>
+        </div>
+
+        <ng-container *ngIf="page.sections; else faqContent">
+          <section class="policy-section" *ngFor="let section of page.sections; let i = index">
+            <span class="policy-index">0{{ i + 1 }}</span>
+            <div>
+              <h2>{{ section.title }}</h2>
+              <p>{{ section.text }}</p>
+              <ul *ngIf="section.points?.length">
+                <li *ngFor="let point of section.points">{{ point }}</li>
+              </ul>
+            </div>
+          </section>
+        </ng-container>
+
+        <ng-template #faqContent>
+          <div class="faq-list">
+            <details class="faq-item" *ngFor="let item of page.questions; let i = index" [open]="i === 0">
+              <summary><span>{{ item.question }}</span><i class="bi bi-plus-lg" aria-hidden="true"></i></summary>
+              <p>{{ item.answer }}</p>
+            </details>
+          </div>
+        </ng-template>
+
+        <div class="support-article-footer">
+          <span class="footer-leaf" aria-hidden="true"></span>
+          <p>Floralia luôn trân trọng sự tin tưởng và góp ý của bạn.</p>
+          <a routerLink="/about">Tìm hiểu về Floralia <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>

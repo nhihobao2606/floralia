@@ -5,6 +5,7 @@ import { ProductService } from '../services/product-service';
 import { ReviewService } from '../services/review-service';
 import { ProductNavigationService } from '../services/product-navigation-service';
 import { CartService } from '../services/cart-service';
+import { WishlistService } from '../services/wishlist-service';
 import { Products } from '../classes/Products';
 
 @Component({
@@ -63,6 +64,7 @@ export class ProductListComponent implements OnInit {
     private router: Router,
     private changeDetector: ChangeDetectorRef,
     readonly cartService: CartService,
+    private readonly wishlistService: WishlistService,
   ) {}
 
   get pageSize(): number {
@@ -308,16 +310,12 @@ export class ProductListComponent implements OnInit {
   }
 
   isWished(product: Products): boolean {
-    return this.wishlist.has(this.getProductId(product));
+    return this.wishlistService.isSaved(product);
   }
 
   toggleWish(product: Products): void {
-    const id = this.getProductId(product);
-    if (this.wishlist.has(id)) {
-      this.wishlist.delete(id);
-    } else {
-      this.wishlist.add(id);
-    }
+    this.wishlistService.toggle(product);
+    this.wishlist = new Set(this.wishlistService.ids());
   }
 
   private normalizeSlug(value: string): string {
