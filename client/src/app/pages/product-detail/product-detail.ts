@@ -1,12 +1,12 @@
 ﻿import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ProductService } from '../services/product-service';
-import { NewProductReview, ProductReview, ReviewService } from '../services/review-service';
-import { CartService } from '../services/cart-service';
-import { WishlistService } from '../services/wishlist-service';
-import { ProductNavigationService } from '../services/product-navigation-service';
-import { Products } from '../classes/Products';
+import { ProductService } from '../../services/product-service';
+import { NewProductReview, ProductReview, ReviewService } from '../../services/review-service';
+import { CartService } from '../../services/cart-service';
+import { WishlistService } from '../../services/wishlist-service';
+import { ProductNavigationService } from '../../services/product-navigation-service';
+import { Products } from '../../classes/Products';
 
 interface ProductVariant {
   sku: string;

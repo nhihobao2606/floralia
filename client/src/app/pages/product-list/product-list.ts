@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProductService } from '../services/product-service';
-import { ReviewService } from '../services/review-service';
-import { ProductNavigationService } from '../services/product-navigation-service';
-import { CartService } from '../services/cart-service';
-import { WishlistService } from '../services/wishlist-service';
-import { Products } from '../classes/Products';
+import { ProductService } from '../../services/product-service';
+import { ReviewService } from '../../services/review-service';
+import { ProductNavigationService } from '../../services/product-navigation-service';
+import { CartService } from '../../services/cart-service';
+import { WishlistService } from '../../services/wishlist-service';
+import { Products } from '../../classes/Products';
 
 @Component({
   selector: 'app-product-list',
