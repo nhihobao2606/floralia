@@ -777,3 +777,79 @@ a { text-decoration: none; color: inherit; }
   background: var(--matcha-dark);
   box-shadow: 0 4px 12px rgba(29, 83, 56, .2);
 }
+
+/* ================= EXTRA MODALS (CONTACT, REFUND, REVIEW) ================= */
+.contact-modal-body {
+  padding: 10px 0 16px;
+}
+.contact-desc {
+  font-size: 14px;
+  color: #556c5c;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #f7faf5;
+  border: 1px solid #e4ece1;
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.contact-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.contact-info-row i {
+  color: var(--matcha);
+  font-size: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.contact-info-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+.contact-link {
+  color: var(--matcha);
+  font-weight: 600;
+  text-decoration: none;
+}
+.contact-link:hover {
+  text-decoration: underline;
+}
+.form-control {
+  width: 100%;
+  border: 1px solid #d4dfd4;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+.form-control:focus {
+  border-color: var(--matcha);
+}
+.form-select {
+  width: 100%;
+  border: 1px solid #d4dfd4;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+}
+.form-select:focus {
+  border-color: var(--matcha);
+}
+.rating-stars i.text-warning {
+  color: #f59e0b !important;
+}
+.rating-stars i.text-muted {
+  color: #cbd5e1 !important;
+}

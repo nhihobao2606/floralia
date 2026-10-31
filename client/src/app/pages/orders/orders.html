@@ -62,7 +62,7 @@
         </div>
 
         <!-- ORDERS LIST -->
-        <div class="orders-list" *ngIf="filteredOrders.length > 0">
+        <div class="orders-list" *ngIf="filteredOrders && filteredOrders.length > 0">
           <div class="order-card" *ngFor="let order of filteredOrders">
 
             <!-- Card Header -->
@@ -89,8 +89,8 @@
             </div>
 
             <!-- Items -->
-            <div class="order-items-list" (click)="viewDetail(order)">
-              <div class="order-item-row" *ngFor="let it of order.items">
+            <div class="order-items-list" (click)="viewDetail(order, $event)">
+              <div class="order-item-row" *ngFor="let it of order.items || []">
                 <div class="item-thumb-box">
                   <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'">
                 </div>
@@ -127,51 +127,51 @@
                 <ng-container [ngSwitch]="order.status">
                   <!-- Delivered -->
                   <ng-container *ngSwitchCase="'delivered'">
-                    <button type="button" class="btn-action-outline">Trả hàng/Hoàn tiền</button>
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Đã nhận được hàng</button>
+                    <button type="button" class="btn-action-outline" (click)="openRefundModal(order, $event)">Trả hàng/Hoàn tiền</button>
+                    <button type="button" class="btn-action-outline" (click)="confirmReceived(order, $event)">Đã nhận được hàng</button>
                   </ng-container>
 
                   <!-- Pending -->
                   <ng-container *ngSwitchCase="'pending'">
-                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
                     <button type="button" class="btn-action-outline" (click)="openCancelModal(order, $event)">Hủy đơn hàng</button>
                   </ng-container>
 
                   <!-- Processing -->
                   <ng-container *ngSwitchCase="'processing'">
-                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
-                    <button type="button" class="btn-action-primary" (click)="viewDetail(order)">Theo dõi đơn hàng</button>
+                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-primary" (click)="trackOrder(order, $event)">Theo dõi đơn hàng</button>
                   </ng-container>
 
                   <!-- Shipping -->
                   <ng-container *ngSwitchCase="'shipping'">
-                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Theo dõi đơn hàng</button>
+                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="trackOrder(order, $event)">Theo dõi đơn hàng</button>
                   </ng-container>
 
                   <!-- Completed -->
                   <ng-container *ngSwitchCase="'completed'">
-                    <button type="button" class="btn-action-primary">Đánh giá</button>
-                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
-                    <button type="button" class="btn-action-outline" routerLink="/products">Mua lại</button>
+                    <button type="button" class="btn-action-primary" (click)="openReviewModal(order, $event)">Đánh giá</button>
+                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="reorder(order, $event)">Mua lại</button>
                   </ng-container>
 
                   <!-- Cancelled -->
                   <ng-container *ngSwitchCase="'cancelled'">
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Xem chi tiết đơn hủy</button>
-                    <button type="button" class="btn-action-outline" routerLink="/products">Mua lại</button>
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết đơn hủy</button>
+                    <button type="button" class="btn-action-outline" (click)="reorder(order, $event)">Mua lại</button>
                   </ng-container>
 
                   <!-- Refunded -->
                   <ng-container *ngSwitchCase="'refunded'">
-                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order)">Xem chi tiết</button>
+                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
 
                   <!-- Default -->
                   <ng-container *ngSwitchDefault>
-                    <button type="button" class="btn-action-outline">Liên hệ Floralia</button>
-                    <button type="button" class="btn-action-primary" (click)="viewDetail(order)">Xem chi tiết</button>
+                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-primary" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
                 </ng-container>
               </div>
@@ -181,7 +181,7 @@
         </div>
 
         <!-- Empty State -->
-        <div class="empty-state" *ngIf="filteredOrders.length === 0 && !loading">
+        <div class="empty-state" *ngIf="(!filteredOrders || filteredOrders.length === 0) && !loading">
           <i class="bi bi-box2"></i>
           <h3>Chưa có đơn hàng nào</h3>
           <p>Không tìm thấy đơn hàng nào phù hợp với bộ lọc hiện tại.</p>
@@ -191,49 +191,6 @@
       </main>
 
     </div>
-
-    <!-- 4 VALUE PROPOSITIONS -->
-    <section class="value-props-section">
-      <div class="prop-item">
-        <div class="prop-icon">
-          <i class="bi bi-flower1"></i>
-        </div>
-        <div class="prop-info">
-          <h4>100% Thảo Mộc Tự Nhiên</h4>
-          <p>Được tuyển chọn kỹ lưỡng từ các nguồn nguyên liệu chất lượng</p>
-        </div>
-      </div>
-
-      <div class="prop-item">
-        <div class="prop-icon">
-          <i class="bi bi-truck"></i>
-        </div>
-        <div class="prop-info">
-          <h4>Giao hàng toàn quốc</h4>
-          <p>Nhanh chóng và tiện lợi</p>
-        </div>
-      </div>
-
-      <div class="prop-item">
-        <div class="prop-icon">
-          <i class="bi bi-headset"></i>
-        </div>
-        <div class="prop-info">
-          <h4>Hỗ trợ tận tâm 24/7</h4>
-          <p>Tư vấn khi cần thiết</p>
-        </div>
-      </div>
-
-      <div class="prop-item">
-        <div class="prop-icon">
-          <i class="bi bi-box-seam"></i>
-        </div>
-        <div class="prop-info">
-          <h4>Đảm bảo chất lượng</h4>
-          <p>Đảm bảo sản phẩm đạt tiêu chuẩn trước khi đến tay khách hàng.</p>
-        </div>
-      </div>
-    </section>
 
   </div>
 
@@ -283,6 +240,115 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ============ LIÊN HỆ FLORALIA MODAL ============ -->
+  <div class="modal-backdrop" *ngIf="showContactModal" (click)="closeContactModal()">
+    <div class="modal-card contact-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Liên hệ hỗ trợ đơn hàng {{ contactingOrder?.code }}</h3>
+        <button type="button" class="btn-close-modal" (click)="closeContactModal()" aria-label="Đóng">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="contact-modal-body">
+        <p class="contact-desc">Đội ngũ chăm sóc khách hàng Floralia Herbal Tea luôn sẵn sàng hỗ trợ bạn 24/7:</p>
+        <div class="contact-info-list">
+          <div class="contact-info-row">
+            <i class="bi bi-telephone-fill"></i>
+            <div>
+              <strong>Hotline hỗ trợ:</strong>
+              <a href="tel:0901234567" class="contact-link">0901 234 567</a>
+            </div>
+          </div>
+          <div class="contact-info-row">
+            <i class="bi bi-chat-dots-fill"></i>
+            <div>
+              <strong>Zalo tư vấn:</strong>
+              <a href="https://zalo.me/0901234567" target="_blank" rel="noopener noreferrer" class="contact-link">0901 234 567 (Floralia Herbal Tea)</a>
+            </div>
+          </div>
+          <div class="contact-info-row">
+            <i class="bi bi-envelope-fill"></i>
+            <div>
+              <strong>Email:</strong>
+              <a href="mailto:floralia@gmail.com" class="contact-link">floralia@gmail.com</a>
+            </div>
+          </div>
+          <div class="contact-info-row">
+            <i class="bi bi-geo-alt-fill"></i>
+            <div>
+              <strong>Địa chỉ:</strong>
+              <span>11A Bế Văn Đàn, Dĩ An, Bình Dương</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <a href="tel:0901234567" class="btn-cancel-confirm"><i class="bi bi-telephone-outbound"></i> Gọi ngay</a>
+        <button type="button" class="btn-cancel-back" (click)="closeContactModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TRẢ HÀNG / HOÀN TIỀN MODAL ============ -->
+  <div class="modal-backdrop" *ngIf="showRefundModal" (click)="closeRefundModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Yêu cầu Trả hàng / Hoàn tiền {{ refundingOrder?.code }}</h3>
+        <button type="button" class="btn-close-modal" (click)="closeRefundModal()" aria-label="Đóng">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="contact-modal-body">
+        <div class="form-group mb-3">
+          <label class="form-label mb-2"><strong>Lý do yêu cầu:</strong></label>
+          <select class="form-select" [(ngModel)]="refundReason">
+            <option value="Hàng bị vỡ/hỏng khi vận chuyển">Hàng bị vỡ/hỏng khi vận chuyển</option>
+            <option value="Giao sai/thiếu sản phẩm">Giao sai/thiếu sản phẩm</option>
+            <option value="Sản phẩm lỗi/không đúng chất lượng">Sản phẩm lỗi/không đúng chất lượng</option>
+            <option value="Khác">Lý do khác</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label mb-2"><strong>Ghi chú chi tiết:</strong></label>
+          <textarea class="form-control" [(ngModel)]="refundNote" rows="3" placeholder="Mô tả cụ thể tình trạng sản phẩm để Floralia hỗ trợ bạn nhanh nhất..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel-back" (click)="closeRefundModal()">Hủy</button>
+        <button type="button" class="btn-cancel-confirm" (click)="confirmRefund()">Gửi yêu cầu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ĐÁNH GIÁ MODAL ============ -->
+  <div class="modal-backdrop" *ngIf="showReviewModal" (click)="closeReviewModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Đánh giá đơn hàng {{ reviewingOrder?.code }}</h3>
+        <button type="button" class="btn-close-modal" (click)="closeReviewModal()" aria-label="Đóng">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="contact-modal-body text-center">
+        <p class="mb-2">Chất lượng sản phẩm & dịch vụ:</p>
+        <div class="rating-stars mb-3">
+          <i
+            *ngFor="let s of [1,2,3,4,5]"
+            class="bi"
+            [ngClass]="s <= reviewRating ? 'bi-star-fill text-warning' : 'bi-star text-muted'"
+            style="font-size: 26px; cursor: pointer; margin: 0 4px;"
+            (click)="reviewRating = s"
+          ></i>
+        </div>
+        <textarea class="form-control" [(ngModel)]="reviewComment" rows="3" placeholder="Hãy chia sẻ cảm nhận của bạn về hương vị trà Floralia..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel-back" (click)="closeReviewModal()">Đóng</button>
+        <button type="button" class="btn-cancel-confirm" (click)="submitReview()">Gửi đánh giá</button>
+      </div>
     </div>
   </div>
 

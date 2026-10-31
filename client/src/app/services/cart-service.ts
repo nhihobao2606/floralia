@@ -218,7 +218,11 @@ export class CartService {
       (left.variantSku || '') === (right.variantSku || '');
   }
 
-  private saveCart(cart: CartItem[]): void {
+  clearCart(): void {
+    this.saveCart([]);
+  }
+
+  saveCart(cart: CartItem[]): void {
     localStorage.setItem(this.cartKey, JSON.stringify(cart));
     window.dispatchEvent(new Event('cart-updated'));
   }

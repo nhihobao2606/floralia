@@ -576,6 +576,12 @@ export class ProductDetail implements OnInit {
     this.cartService.addProduct(this.product, this.selectedVariant, this.quantity, this.activeImage);
   }
 
+  buyNow(): void {
+    if (!this.product || this.currentStock < 1) return;
+    this.cartService.addProduct(this.product, this.selectedVariant, this.quantity, this.activeImage);
+    this.router.navigate(['/checkout']);
+  }
+
   isProductFavorite(product: ProductDetails): boolean {
     const id = this.productIdentifier(product);
     return this.readFavorites().includes(id);

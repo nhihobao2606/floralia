@@ -385,6 +385,53 @@ export class OrderService {
     );
   }
 
+  getDefaultOrders(): Order[] {
+    return JSON.parse(JSON.stringify(this.defaultOrders));
+  }
+
+  createOrder(orderData: Partial<Order>): Observable<{ success: boolean; order: Order }> {
+    return this.http.post<{ success: boolean; order: Order }>(this.apiUrl, orderData).pipe(
+      map(res => {
+        if (res.order) {
+          this.defaultOrders.unshift(res.order);
+        }
+        return res;
+      }),
+      catchError(() => {
+        const id = orderData.id || String(Math.floor(1000 + Math.random() * 9000));
+        const newOrder: Order = {
+          id,
+          code: orderData.code || ('#' + id),
+          date: orderData.date || new Date().toLocaleDateString('vi-VN'),
+          time: orderData.time || new Date().toLocaleTimeString('vi-VN'),
+          status: orderData.status || 'processing',
+          statusLabel: orderData.statusLabel || 'ĐANG XỬ LÝ',
+          step: orderData.step || 2,
+          paymentMethod: orderData.paymentMethod || 'Paypal',
+          sender: orderData.sender || {
+            name: 'Hà Anh',
+            address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
+            email: 'Haanh.BD@gmail.com',
+            phone: '(671) 555-0110'
+          },
+          receiver: orderData.receiver || {
+            name: 'Minh Trần',
+            address: '12C, Võ Thị Sáu, Hà Tĩnh',
+            email: 'MinhTran.thuu@gmail.com',
+            phone: '(671) 555-0110'
+          },
+          items: orderData.items || [],
+          subtotal: orderData.subtotal || 0,
+          discount: orderData.discount || 0,
+          shippingFee: orderData.shippingFee || 0,
+          total: orderData.total || 0
+        };
+        this.defaultOrders.unshift(newOrder);
+        return of({ success: true, order: newOrder });
+      })
+    );
+  }
+
   updateOrderStatus(id: string, status: Order['status'], statusLabel: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}`, { status, statusLabel }).pipe(
       catchError(() => {

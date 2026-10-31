@@ -278,7 +278,9 @@ export class ProductListComponent implements OnInit {
 
   openBuyNowPopup(product: Products): void {
     this.closeCartPopup();
-    this.buyNowProduct = product;
+    const variant = product.variants?.find(v => v.stock > 0) || product.variants?.[0] || null;
+    this.cartService.addProduct(product, variant, 1, this.getProductImage(product));
+    this.router.navigate(['/checkout']);
   }
 
   closeBuyNowPopup(): void {

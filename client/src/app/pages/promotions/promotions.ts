@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { ProductService } from '../../services/product-service';
 import { CartService } from '../../services/cart-service';
@@ -43,6 +44,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     readonly cartService: CartService,
     readonly productNavigation: ProductNavigationService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -228,7 +230,9 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   }
 
   openBuyNowPopup(product: Products): void {
-    this.buyNowProduct = product;
+    const variant = product.variants?.find(v => v.stock > 0) || product.variants?.[0] || null;
+    this.cartService.addProduct(product, variant, 1, this.getProductImage(product));
+    this.router.navigate(['/checkout']);
   }
 
   closeBuyNowPopup(): void {

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Order, OrderService } from '../../services/order-service';
+import { CartService } from '../../services/cart-service';
 
 @Component({
   selector: 'app-orders',
@@ -30,7 +31,7 @@ export class Orders implements OnInit {
   searchQuery = '';
   orders: Order[] = [];
   filteredOrders: Order[] = [];
-  loading = true;
+  loading = false;
 
   user: any = null;
   initial = 'H';
@@ -50,13 +51,37 @@ export class Orders implements OnInit {
   ];
   selectedCancelReason = 'Muốn thay đổi sản phẩm (loại trà, dung lượng, số lượng...)';
 
+  // Contact modal state
+  showContactModal = false;
+  contactingOrder: Order | null = null;
+
+  // Refund modal state
+  showRefundModal = false;
+  refundingOrder: Order | null = null;
+  refundReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
+  refundNote = '';
+
+  // Review modal state
+  showReviewModal = false;
+  reviewingOrder: Order | null = null;
+  reviewRating = 5;
+  reviewComment = '';
+
   constructor(
     private orderService: OrderService,
+    private cartService: CartService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadUserData();
+    // Load default orders IMMEDIATELY so the view never starts blank
+    const defaults = this.orderService.getDefaultOrders();
+    if (Array.isArray(defaults) && defaults.length > 0) {
+      this.orders = defaults;
+      this.applyFilter();
+    }
+    // Then sync with backend asynchronously
     this.loadOrders();
   }
 
@@ -79,15 +104,15 @@ export class Orders implements OnInit {
   }
 
   loadOrders(): void {
-    this.loading = true;
     this.orderService.getOrders().subscribe({
       next: (data) => {
-        this.orders = data;
-        this.applyFilter();
-        this.loading = false;
+        if (Array.isArray(data) && data.length > 0) {
+          this.orders = data;
+          this.applyFilter();
+        }
       },
       error: () => {
-        this.loading = false;
+        // Fallback already populated
       }
     });
   }
@@ -103,7 +128,7 @@ export class Orders implements OnInit {
   }
 
   applyFilter(): void {
-    let list = [...this.orders];
+    let list = Array.isArray(this.orders) ? [...this.orders] : [];
 
     // Filter by tab
     if (this.activeTab !== 'all') {
@@ -122,17 +147,125 @@ export class Orders implements OnInit {
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.trim().toLowerCase();
       list = list.filter(o =>
-        o.id.toLowerCase().includes(q) ||
-        o.code.toLowerCase().includes(q) ||
-        o.items.some(it => it.name.toLowerCase().includes(q))
+        (o.id && o.id.toLowerCase().includes(q)) ||
+        (o.code && o.code.toLowerCase().includes(q)) ||
+        (o.items && o.items.some(it => it.name && it.name.toLowerCase().includes(q)))
       );
     }
 
     this.filteredOrders = list;
   }
 
-  viewDetail(order: Order): void {
+  viewDetail(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
     this.router.navigate(['/orders', order.id]);
+  }
+
+  trackOrder(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.router.navigate(['/orders', order.id]);
+  }
+
+  contactFloralia(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.contactingOrder = order;
+    this.showContactModal = true;
+  }
+
+  closeContactModal(): void {
+    this.showContactModal = false;
+    this.contactingOrder = null;
+  }
+
+  confirmReceived(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (confirm(`Xác nhận bạn đã nhận được đầy đủ sản phẩm của đơn hàng ${order.code}?`)) {
+      order.status = 'completed';
+      order.statusLabel = 'HOÀN THÀNH';
+      this.orderService.updateOrderStatus(order.id, 'completed', 'HOÀN THÀNH').subscribe();
+      this.applyFilter();
+    }
+  }
+
+  openRefundModal(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.refundingOrder = order;
+    this.refundReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
+    this.refundNote = '';
+    this.showRefundModal = true;
+  }
+
+  closeRefundModal(): void {
+    this.showRefundModal = false;
+    this.refundingOrder = null;
+  }
+
+  confirmRefund(): void {
+    if (!this.refundingOrder) return;
+    this.refundingOrder.status = 'refunded';
+    this.refundingOrder.statusLabel = 'ĐÃ HOÀN TIỀN';
+    this.refundingOrder.refundAmount = this.refundingOrder.total;
+    this.orderService.updateOrderStatus(this.refundingOrder.id, 'refunded', 'ĐÃ HOÀN TIỀN').subscribe();
+    this.applyFilter();
+    this.closeRefundModal();
+    alert('Yêu cầu trả hàng/hoàn tiền đã được ghi nhận. Chúng tôi sẽ liên hệ trong 24h!');
+  }
+
+  openReviewModal(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.reviewingOrder = order;
+    this.reviewRating = 5;
+    this.reviewComment = '';
+    this.showReviewModal = true;
+  }
+
+  closeReviewModal(): void {
+    this.showReviewModal = false;
+    this.reviewingOrder = null;
+  }
+
+  submitReview(): void {
+    alert('Cảm ơn bạn đã gửi đánh giá cho sản phẩm!');
+    this.closeReviewModal();
+  }
+
+  reorder(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (order.items && order.items.length > 0) {
+      const currentCart = this.cartService.getCart();
+      order.items.forEach(it => {
+        currentCart.push({
+          id: it.sku,
+          productId: it.sku,
+          sku: it.sku,
+          name: it.name,
+          title: it.name,
+          price: it.price,
+          quantity: it.quantity,
+          image: it.image,
+          thumbnail: it.image,
+          variantLabel: it.variant || ''
+        });
+      });
+      this.cartService.saveCart(currentCart);
+      this.router.navigate(['/cart']);
+    } else {
+      this.router.navigate(['/products']);
+    }
   }
 
   openCancelModal(order: Order, event?: Event): void {
@@ -156,14 +289,12 @@ export class Orders implements OnInit {
     targetOrder.status = 'cancelled';
     targetOrder.statusLabel = 'ĐÃ HỦY';
 
-    // Call service update if available
     this.orderService.updateOrderStatus(targetOrder.id, 'cancelled', 'ĐÃ HỦY').subscribe({
       next: () => {
         this.applyFilter();
         this.closeCancelModal();
       },
       error: () => {
-        // Fallback local update
         this.applyFilter();
         this.closeCancelModal();
       }

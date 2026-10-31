@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { OrderService } from '../../services/order-service';
+import { OrderService, Order } from '../../services/order-service';
+import { CartService } from '../../services/cart-service';
 
 interface CheckoutItem {
   sku: string;
@@ -63,6 +64,7 @@ export class CheckoutComponent implements OnInit {
 
   constructor(
     private readonly orderService: OrderService,
+    private readonly cartService: CartService,
     private readonly router: Router
   ) {}
 
@@ -114,8 +116,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   placeOrder(): void {
-    // Tạo đơn hàng mới và chuyển hướng sang trang Đặt Hàng Thành Công
-    const orderData = {
+    const orderData: Partial<Order> = {
       id: '4152',
       code: '#4152',
       date: new Date().toLocaleDateString('vi-VN'),
@@ -143,8 +144,19 @@ export class CheckoutComponent implements OnInit {
       total: this.total
     };
 
-    sessionStorage.removeItem('checkout_items');
-    this.router.navigate(['/order-success']);
+    this.orderService.createOrder(orderData).subscribe({
+      next: (res) => {
+        sessionStorage.removeItem('checkout_items');
+        this.cartService.clearCart();
+        const targetId = res.order?.id || '4152';
+        this.router.navigate(['/order-success', targetId]);
+      },
+      error: () => {
+        sessionStorage.removeItem('checkout_items');
+        this.cartService.clearCart();
+        this.router.navigate(['/order-success', '4152']);
+      }
+    });
   }
 
   continueShopping(): void {
