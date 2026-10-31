@@ -14,8 +14,8 @@ export interface CartDisplayItem extends CartItem {
 })
 export class CartComponent implements OnInit {
   items: CartDisplayItem[] = [];
+  pageSize = 4;
   currentPage = 1;
-  totalPages = 3;
 
   private readonly sampleItems: CartDisplayItem[] = [
     {
@@ -99,6 +99,32 @@ export class CartComponent implements OnInit {
   removeItem(item: CartDisplayItem): void {
     this.items = this.items.filter(i => i !== item);
     this.cartService.changeQuantity(item, -item.quantity);
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.items.length / this.pageSize));
+  }
+
+  get pages(): number[] {
+    const list: number[] = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      list.push(i);
+    }
+    return list;
+  }
+
+  get pagedItems(): CartDisplayItem[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.items.slice(start, start + this.pageSize);
+  }
+
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
   get selectedSubtotal(): number {
@@ -132,9 +158,5 @@ export class CartComponent implements OnInit {
 
   continueShopping(): void {
     this.router.navigate(['/products']);
-  }
-
-  setPage(page: number): void {
-    this.currentPage = page;
   }
 }

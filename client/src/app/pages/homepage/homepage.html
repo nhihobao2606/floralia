@@ -182,12 +182,22 @@
         <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
       </div>
 
-      <button type="button" class="sale-cart" (click)="addToCart(p, $event)">
-        Thêm vào giỏ hàng
+      <button type="button" class="sale-cart" [class.added]="addedSku() === p.sku" (click)="addToCart(p, $event)">
+        <i class="bi" [ngClass]="addedSku() === p.sku ? 'bi-check2' : 'bi-bag-plus'"></i>
+        {{ addedSku() === p.sku ? 'Đã thêm vào giỏ!' : 'Thêm vào giỏ hàng' }}
       </button>
     </div>
   </div>
 </ng-template>
+
+<!-- TOAST THÔNG BÁO TỰ ĐỘNG THÊM GIỎ HÀNG THÀNH CÔNG -->
+<div class="cart-floating-toast" *ngIf="addedProductMessage() as msg">
+  <div class="toast-left">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>{{ msg }}</span>
+  </div>
+  <a routerLink="/cart" class="toast-link">Xem giỏ hàng</a>
+</div>
 
 <ng-template #skeleton>
   <div class="product-list">

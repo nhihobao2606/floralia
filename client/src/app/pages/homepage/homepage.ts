@@ -1,4 +1,4 @@
-﻿import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../services/product-service';
 import { ReviewService } from '../../services/review-service';
@@ -103,6 +103,10 @@ export class Homepage implements OnInit {
     private router: Router
   ) {}
 
+  addedSku = signal<string | null>(null);
+  addedProductMessage = signal<string | null>(null);
+  private messageTimeout: any = null;
+
   addToCart(product: Products, event?: Event): void {
     if (event) {
       event.preventDefault();
@@ -112,8 +116,21 @@ export class Homepage implements OnInit {
     const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
     const image = this.getProductImage(product);
 
+    // 1. Tự động thêm vào giỏ hàng
     this.cartService.addProduct(product, variant, 1, image);
-    this.router.navigate(['/cart']);
+
+    // 2. KHÔNG chuyển trang để người xem tiếp tục lướt xem sản phẩm mà không cần tua về!
+    const name = product.name || 'Sản phẩm';
+    this.addedSku.set(product.sku);
+    this.addedProductMessage.set(`Đã thêm "${name}" vào giỏ hàng!`);
+
+    if (this.messageTimeout) {
+      clearTimeout(this.messageTimeout);
+    }
+    this.messageTimeout = setTimeout(() => {
+      this.addedProductMessage.set(null);
+      this.addedSku.set(null);
+    }, 2500);
   }
   
 

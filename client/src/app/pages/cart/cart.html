@@ -27,7 +27,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let it of items" [class.unselected]="!it.selected">
+              <tr *ngFor="let it of pagedItems" [class.unselected]="!it.selected">
                 <!-- Product info -->
                 <td class="td-prod">
                   <div class="prod-cell">
@@ -69,13 +69,13 @@
             « Tiếp tục mua hàng
           </button>
 
-          <div class="pagination-bar">
+          <div class="pagination-bar" *ngIf="totalPages > 1">
             <button type="button" class="page-arrow" [disabled]="currentPage === 1" (click)="setPage(currentPage - 1)">
               <i class="bi bi-chevron-left"></i>
             </button>
             <button
               type="button"
-              *ngFor="let p of [1, 2, 3]"
+              *ngFor="let p of pages"
               class="page-num"
               [class.active]="currentPage === p"
               (click)="setPage(p)"
