@@ -375,6 +375,50 @@ export class OrderService {
     );
   }
 
+  getOrderByIdSync(id: string): Order {
+    const found = this.defaultOrders.find(o => o.id === id || o.code === ('#' + id) || o.id === '4152');
+    return found || this.defaultOrders[0];
+  }
+
+  saveOrderLocal(orderData: Partial<Order>): Order {
+    const id = orderData.id || '4152';
+    const newOrder: Order = {
+      id,
+      code: orderData.code || ('#' + id),
+      date: orderData.date || new Date().toLocaleDateString('vi-VN'),
+      time: orderData.time || new Date().toLocaleTimeString('vi-VN'),
+      status: orderData.status || 'processing',
+      statusLabel: orderData.statusLabel || 'ĐANG XỬ LÝ',
+      step: orderData.step || 2,
+      paymentMethod: orderData.paymentMethod || 'Paypal',
+      sender: orderData.sender || {
+        name: 'Hà Anh',
+        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
+        email: 'Haanh.BD@gmail.com',
+        phone: '(671) 555-0110'
+      },
+      receiver: orderData.receiver || {
+        name: 'Minh Trần',
+        address: '12C, Võ Thị Sáu, Hà Tĩnh',
+        email: 'MinhTran.thuu@gmail.com',
+        phone: '(671) 555-0110'
+      },
+      items: orderData.items || [],
+      subtotal: orderData.subtotal || 700000,
+      discount: orderData.discount || 155000,
+      shippingFee: orderData.shippingFee || 0,
+      total: orderData.total || 545000
+    };
+
+    const idx = this.defaultOrders.findIndex(o => o.id === id || o.code === ('#' + id));
+    if (idx >= 0) {
+      this.defaultOrders[idx] = newOrder;
+    } else {
+      this.defaultOrders.unshift(newOrder);
+    }
+    return newOrder;
+  }
+
   getOrderById(id: string): Observable<Order | null> {
     return this.http.get<{ success: boolean; order: Order }>(`${this.apiUrl}/${id}`).pipe(
       map(res => res.order),

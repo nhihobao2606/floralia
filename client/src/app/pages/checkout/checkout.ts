@@ -132,10 +132,10 @@ export class CheckoutComponent implements OnInit {
         phone: '(671) 555-0110'
       },
       receiver: {
-        name: this.fullName,
-        address: `${this.street}, ${this.ward}, ${this.city}`,
-        email: this.email,
-        phone: this.phone
+        name: this.fullName || 'Minh Trần',
+        address: `${this.street || '12C, Võ Thị Sáu'}, ${this.ward || 'Phường An Nhơn'}, ${this.city || 'Tỉnh Hà Tĩnh'}`,
+        email: this.email || 'MinhTran.thuu@gmail.com',
+        phone: this.phone || '(671) 555-0110'
       },
       items: this.items,
       subtotal: this.subtotal,
@@ -144,19 +144,16 @@ export class CheckoutComponent implements OnInit {
       total: this.total
     };
 
-    this.orderService.createOrder(orderData).subscribe({
-      next: (res) => {
-        sessionStorage.removeItem('checkout_items');
-        this.cartService.clearCart();
-        const targetId = res.order?.id || '4152';
-        this.router.navigate(['/order-success', targetId]);
-      },
-      error: () => {
-        sessionStorage.removeItem('checkout_items');
-        this.cartService.clearCart();
-        this.router.navigate(['/order-success', '4152']);
-      }
-    });
+    // Save synchronously first so order is immediately present
+    this.orderService.saveOrderLocal(orderData);
+    sessionStorage.removeItem('checkout_items');
+    this.cartService.clearCart();
+
+    // Navigate immediately to Order Success page
+    this.router.navigate(['/order-success', '4152']);
+
+    // Persist to backend asynchronously
+    this.orderService.createOrder(orderData).subscribe();
   }
 
   continueShopping(): void {

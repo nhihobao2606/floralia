@@ -82,7 +82,7 @@
       </div>
 
       <!-- Stepper timeline -->
-      <div class="stepper-wrap">
+      <div class="stepper-wrap" (click)="trackOrder()" style="cursor: pointer;" title="Bấm vào để theo dõi chi tiết đơn hàng">
         <!-- 01 -->
         <div class="step-item" [class.completed]="order.step >= 1" [class.active]="order.step === 1">
           <div class="step-circle">

@@ -21,6 +21,9 @@ export class OrderDetail implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       const id = params['id'] || '4152';
+      // Initialize immediately synchronously so page is never blank
+      this.order = this.orderService.getOrderByIdSync(id);
+      this.loading = false;
       this.loadOrderDetail(id);
     });
   }
