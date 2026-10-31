@@ -46,6 +46,6 @@ export class OrderDetail implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/home']);
   }
 }
