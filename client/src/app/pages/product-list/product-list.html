@@ -130,6 +130,7 @@
              <a [routerLink]="productNavigation.detailRoute(item.slug)" [state]="{ product: item, products: products }">
                <img [src]="getProductImage(item)" [alt]="item.name">
              </a>
+             <span class="out-of-stock-overlay" *ngIf="!hasStock(item)">HẾT HÀNG</span>
              <button
                type="button"
                class="sale-heart"

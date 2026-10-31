@@ -350,6 +350,28 @@ export class ProductDetail implements OnInit {
     return Number(ratingAverage ?? 0).toFixed(1);
   }
 
+  getRoundedRatingAverage(ratingAverage: number | null | undefined): number {
+    return Math.round(Number(ratingAverage ?? 0));
+  }
+
+  getLowestPriceVariant(product: ProductDetails): ProductVariant | null {
+    const variants = product.variants ?? [];
+    if (!variants.length) return null;
+
+    return variants.reduce(
+      (lowest, variant) => variant.price < lowest.price ? variant : lowest,
+    );
+  }
+
+  getRelatedPrice(product: ProductDetails): number {
+    return Number(
+      this.getLowestPriceVariant(product)?.price ??
+      product.minPrice ??
+      product.price ??
+      0,
+    );
+  }
+
   private updateDisplayedProductRating(): void {
     const product = this.product;
     const productSku = product?.sku;
@@ -415,6 +437,7 @@ export class ProductDetail implements OnInit {
 
   openQuickAdd(product: ProductDetails): void {
     const variant =
+      this.getLowestPriceVariant(product) ??
       product.variants?.find((option) => option.isDefault && option.stock > 0) ??
       product.variants?.find((option) => option.stock > 0) ??
       product.variants?.find((option) => option.isDefault) ??
@@ -430,6 +453,8 @@ export class ProductDetail implements OnInit {
     if (product.slug === this.product?.slug) return;
 
     this.setProduct(product);
+    const lowestPriceVariant = this.getLowestPriceVariant(product);
+    if (lowestPriceVariant) this.selectVariant(lowestPriceVariant);
     void this.productNavigation.navigateToProduct(product, this.allProducts);
   }
 

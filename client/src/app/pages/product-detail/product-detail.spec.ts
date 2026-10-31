@@ -4,9 +4,9 @@ import { ActivatedRoute, Router, RouterModule, convertToParamMap } from '@angula
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ProductDetail } from './product-detail';
-import { ProductService } from '../services/product-service';
-import { ReviewService } from '../services/review-service';
-import { CartService } from '../services/cart-service';
+import { ProductService } from '../../services/product-service';
+import { ReviewService } from '../../services/review-service';
+import { CartService } from '../../services/cart-service';
 
 describe('ProductDetail', () => {
   let component: ProductDetail;
@@ -194,6 +194,33 @@ describe('ProductDetail', () => {
     expect(fixture.nativeElement.textContent).toContain('Sản phẩm bạn có thể thích');
     expect(fixture.nativeElement.textContent).toContain('Trà liên quan');
     expect(fixture.nativeElement.textContent).not.toContain('Đang tải sản phẩm gợi ý');
+    expect(fixture.nativeElement.querySelectorAll('.related-rating i')).toHaveLength(5);
+  });
+
+  it('shows and selects the lowest-priced variant for a related product', () => {
+    const related = {
+      sku: 'TEA-3',
+      slug: 'related-tea-3',
+      name: 'Trà liên quan',
+      minPrice: 36000,
+      price: 60000,
+      variants: [
+        { sku: 'TEA-3-SMALL', label: 'Gói nhỏ', price: 36000, stock: 5, isDefault: false },
+        { sku: 'TEA-3-LARGE', label: 'Gói lớn', price: 60000, stock: 5, isDefault: true },
+      ],
+    };
+
+    expect(component.getRelatedPrice(related)).toBe(36000);
+    component.openQuickAdd(related);
+
+    expect(component.quickAdd?.variant?.sku).toBe('TEA-3-SMALL');
+    expect(component.quickAdd?.variant?.price).toBe(36000);
+
+    vi.spyOn(component.productNavigation, 'navigateToProduct').mockResolvedValue(true);
+    component.navigateToRelatedProduct(new MouseEvent('click', { cancelable: true }), related);
+
+    expect(component.selectedVariant?.sku).toBe('TEA-3-SMALL');
+    expect(component.currentPrice).toBe(36000);
   });
 
   it('saves and immediately displays a new review', () => {

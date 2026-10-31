@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { ProductListComponent } from './product-list';
-import { ProductService } from '../services/product-service';
-import { ReviewService } from '../services/review-service';
+import { ProductService } from '../../services/product-service';
+import { ReviewService } from '../../services/review-service';
 
 describe('ProductListComponent', () => {
   let component: ProductListComponent;

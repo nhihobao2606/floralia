@@ -301,12 +301,17 @@
                 class="related-name"
                 [href]="productNavigation.detailUrl(related.slug)"
                 (click)="navigateToRelatedProduct($event, related)">{{ related.name }}</a>
-              <div class="related-rating">
-                <i class="bi bi-star-fill"></i>
+              <div class="related-rating" [attr.aria-label]="'Đánh giá ' + formatRatingAverage(related.ratingAverage) + ' trên 5 sao'">
+                <i
+                  *ngFor="let star of [1, 2, 3, 4, 5]"
+                  class="bi"
+                  [class.bi-star-fill]="star <= getRoundedRatingAverage(related.ratingAverage)"
+                  [class.bi-star]="star > getRoundedRatingAverage(related.ratingAverage)">
+                </i>
                 <span>{{ formatRatingAverage(related.ratingAverage) }} ({{ related.ratingCount || 0 }})</span>
               </div>
               <div class="related-action-row">
-                <strong>{{ formatPrice(related.minPrice || related.price || 0) }}</strong>
+                <strong>{{ formatPrice(getRelatedPrice(related)) }}</strong>
                 <button
                   type="button"
                   class="related-cart-link"
