@@ -47,7 +47,7 @@ export interface Order {
 export class OrderService {
   private readonly apiUrl = 'http://localhost:3002/api/orders';
 
-  private readonly defaultOrders: Order[] = [
+  private defaultOrders: Order[] = [
     {
       id: '4152',
       code: '#4152',
@@ -370,14 +370,10 @@ export class OrderService {
     }).pipe(
       map(res => {
         if (res.orders && res.orders.length > 0) {
-          for (const ord of res.orders) {
-            const idx = this.defaultOrders.findIndex(d => d.id === ord.id);
-            if (idx >= 0) {
-              this.defaultOrders[idx] = ord;
-            } else {
-              this.defaultOrders.unshift(ord);
-            }
-          }
+          this.defaultOrders = res.orders;
+          try {
+            localStorage.setItem('floralia_orders', JSON.stringify(res.orders));
+          } catch (e) {}
         }
         return res.orders;
       }),
