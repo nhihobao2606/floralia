@@ -363,9 +363,27 @@ async function createOrder(req, res) {
   }
 }
 
+// PATCH /api/orders/:id
+async function updateOrderStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status, statusLabel } = req.body;
+    const query = { $or: [{ id }, { code: `#${id}` }, { code: id }] };
+    const updated = await Order.findOneAndUpdate(
+      query,
+      { $set: { status, statusLabel } },
+      { new: true }
+    );
+    res.json({ success: true, order: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Lỗi server khi cập nhật trạng thái đơn hàng.' });
+  }
+}
+
 module.exports = {
   initialOrders,
   getOrders,
   getOrderById,
-  createOrder
+  createOrder,
+  updateOrderStatus
 };

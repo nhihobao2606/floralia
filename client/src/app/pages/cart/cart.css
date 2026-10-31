@@ -1,0 +1,351 @@
+:host {
+  --matcha: #1d5338;
+  --matcha-2: #2f7b43;
+  --matcha-dark: #153c29;
+  --leaf: #7cae44;
+  --ink: #2b3e32;
+  --muted: #6f8576;
+  --border: #e6ede3;
+
+  display: block;
+  font-family: 'Roboto', sans-serif;
+  color: var(--ink);
+  background: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+.cart-page {
+  padding-bottom: 70px;
+}
+
+/* ================= BANNER ================= */
+.top-banner-wrap {
+  width: 100%;
+  max-height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+.banner-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ================= CONTAINER ================= */
+.cart-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ================= TITLE ================= */
+.page-title {
+  text-align: center;
+  font: 700 clamp(32px, 4.2vw, 52px) 'Lora', serif;
+  color: var(--matcha);
+  margin: 50px 0 46px;
+  letter-spacing: -0.5px;
+}
+
+/* ================= LAYOUT ================= */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 36px;
+  align-items: start;
+  margin-bottom: 50px;
+}
+
+/* ================= TABLE ================= */
+.cart-table-card {
+  background: #fff;
+  border-top: 1px solid #edf2eb;
+}
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cart-table thead {
+  background: #f8faf7;
+}
+
+.cart-table th {
+  padding: 14px 16px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #556c5c;
+  border-bottom: 1px solid #eef3ec;
+}
+
+.th-prod { text-align: left; }
+.th-price { text-align: right; width: 15%; }
+.th-qty { text-align: center; width: 20%; }
+.th-total { text-align: right; width: 16%; }
+.th-check { text-align: center; width: 8%; }
+
+.cart-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #f0f5ee;
+  vertical-align: middle;
+}
+.cart-table tr.unselected td {
+  opacity: 0.72;
+}
+
+.prod-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.prod-cell img {
+  width: 62px;
+  height: 62px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eef3eb;
+  background: #f8faf6;
+}
+.prod-name {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.td-price {
+  text-align: right;
+  font-size: 14.5px;
+  color: #4b6152;
+}
+.td-qty {
+  text-align: center;
+}
+.td-total {
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e2ece0;
+  border-radius: 30px;
+  padding: 2px 8px;
+  background: #fff;
+}
+.btn-qty {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: #617768;
+  cursor: pointer;
+  padding: 2px 8px;
+  line-height: 1;
+}
+.btn-qty:hover {
+  color: var(--matcha);
+}
+.qty-num {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 24px;
+  text-align: center;
+}
+
+.check-circle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #a4b6aa;
+  padding: 4px;
+  transition: color .2s;
+}
+.check-circle-btn.checked {
+  color: #556c5c;
+}
+
+/* Bottom Bar */
+.table-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 26px;
+}
+
+.btn-continue {
+  background: #f8faf7;
+  color: #495e50;
+  border: 1px solid #d5ded2;
+  padding: 10px 22px;
+  border-radius: 4px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-continue:hover {
+  background: #eef4ec;
+  color: var(--matcha);
+  border-color: var(--matcha);
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-arrow, .page-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e2ece0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #556c5c;
+  cursor: pointer;
+  transition: all .2s;
+}
+.page-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.page-num.active {
+  background: var(--matcha);
+  border-color: var(--matcha);
+  color: #fff;
+  font-weight: 600;
+}
+.page-num:hover:not(.active) {
+  background: #f2f7ef;
+}
+
+/* ================= SUMMARY CARD ================= */
+.summary-card {
+  background: #fff;
+  border: 1px solid #e8f0e4;
+  border-radius: 12px;
+  padding: 24px 22px;
+  box-shadow: 0 4px 16px rgba(29, 83, 56, .04);
+}
+
+.sum-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #edf2eb;
+}
+
+.sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.sum-label {
+  font-size: 14px;
+  color: #65776a;
+}
+.sum-val {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sum-divider {
+  height: 1px;
+  background: #edf2eb;
+  margin: 16px 0;
+}
+
+.total-row {
+  margin-bottom: 24px;
+}
+.sum-label-total {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.sum-val-total {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.btn-checkout {
+  width: 100%;
+  background: var(--matcha);
+  color: #fff;
+  border: none;
+  padding: 13px 0;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+.btn-checkout:hover {
+  background: var(--matcha-dark);
+  box-shadow: 0 6px 16px rgba(29, 83, 56, .2);
+}
+
+/* ================= 4 VALUE PROPOSITIONS ================= */
+.value-props-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  padding: 48px 0 20px;
+  border-top: 1px solid #edf2eb;
+  margin-top: 40px;
+}
+.prop-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.prop-icon {
+  font-size: 32px;
+  color: var(--leaf);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.prop-info h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+.prop-info p {
+  font-size: 13px;
+  color: #65776a;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+  .value-props-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .value-props-section {
+    grid-template-columns: 1fr;
+  }
+}

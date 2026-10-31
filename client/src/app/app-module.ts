@@ -19,6 +19,8 @@ import { ProductDetail } from './product-detail/product-detail';
 import { BlogComponent } from './pages/blog/blog';
 import { BlogDetailComponent } from './pages/blog-detail/blog-detail';
 import { PromotionsComponent } from './pages/promotions/promotions';
+import { CartComponent } from './pages/cart/cart';
+import { CheckoutComponent } from './pages/checkout/checkout';
 import { Orders } from './pages/orders/orders';
 import { OrderDetail } from './pages/order-detail/order-detail';
 import { OrderSuccess } from './pages/order-success/order-success';
@@ -41,6 +43,8 @@ registerLocaleData(localeVi);
     BlogComponent,
     BlogDetailComponent,
     PromotionsComponent,
+    CartComponent,
+    CheckoutComponent,
     Orders,
     OrderDetail,
     OrderSuccess,

@@ -1,0 +1,166 @@
+<div class="cart-page">
+
+  <!-- TOP TEA BANNER -->
+  <div class="top-banner-wrap">
+    <img src="/assets/images/banner2.png" alt="Floralia Herbal Tea" class="banner-img">
+  </div>
+
+  <div class="container cart-container">
+
+    <!-- PAGE TITLE -->
+    <h1 class="page-title">Giỏ hàng</h1>
+
+    <!-- 2-COLUMNS CART LAYOUT -->
+    <div class="cart-layout">
+
+      <!-- Left Column: Items Table -->
+      <div class="cart-main">
+        <div class="cart-table-card">
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th class="th-prod">SẢN PHẨM</th>
+                <th class="th-price">GIÁ</th>
+                <th class="th-qty">SỐ LƯỢNG</th>
+                <th class="th-total">THÀNH TIỀN</th>
+                <th class="th-check"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let it of items" [class.unselected]="!it.selected">
+                <!-- Product info -->
+                <td class="td-prod">
+                  <div class="prod-cell">
+                    <img [src]="it.image || it.thumbnail" [alt]="it.name || it.title" (error)="it.image = '/assets/images/no-image.svg'">
+                    <span class="prod-name">{{ it.name || it.title }}</span>
+                  </div>
+                </td>
+
+                <!-- Unit Price -->
+                <td class="td-price">{{ formatPrice(it.price) }}</td>
+
+                <!-- Quantity Stepper -->
+                <td class="td-qty">
+                  <div class="qty-stepper">
+                    <button type="button" class="btn-qty" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
+                    <span class="qty-num">{{ it.quantity }}</span>
+                    <button type="button" class="btn-qty" (click)="changeQty(it, 1)" aria-label="Tăng">+</button>
+                  </div>
+                </td>
+
+                <!-- Line Total -->
+                <td class="td-total">{{ formatPrice(it.price * it.quantity) }}</td>
+
+                <!-- Checkbox circle -->
+                <td class="td-check">
+                  <button type="button" class="check-circle-btn" [class.checked]="it.selected" (click)="toggleSelect(it)">
+                    <i class="bi bi-check-circle-fill" *ngIf="it.selected"></i>
+                    <i class="bi bi-circle" *ngIf="!it.selected"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Bottom: Continue Shopping & Pagination -->
+        <div class="table-bottom-bar">
+          <button type="button" class="btn-continue" (click)="continueShopping()">
+            « Tiếp tục mua hàng
+          </button>
+
+          <div class="pagination-bar">
+            <button type="button" class="page-arrow" [disabled]="currentPage === 1" (click)="setPage(currentPage - 1)">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button
+              type="button"
+              *ngFor="let p of [1, 2, 3]"
+              class="page-num"
+              [class.active]="currentPage === p"
+              (click)="setPage(p)"
+            >
+              {{ p }}
+            </button>
+            <button type="button" class="page-arrow" [disabled]="currentPage === totalPages" (click)="setPage(currentPage + 1)">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Summary Card -->
+      <aside class="cart-summary-side">
+        <div class="summary-card">
+          <h2 class="sum-title">Tổng giỏ hàng</h2>
+
+          <div class="sum-row">
+            <span class="sum-label">Tạm tính:</span>
+            <span class="sum-val">{{ formatPrice(selectedSubtotal) }}</span>
+          </div>
+
+          <div class="sum-row">
+            <span class="sum-label">Phí vận chuyển:</span>
+            <span class="sum-val">{{ shippingFee === 0 ? 'Free' : formatPrice(shippingFee) }}</span>
+          </div>
+
+          <div class="sum-divider"></div>
+
+          <div class="sum-row total-row">
+            <span class="sum-label-total">Thành tiền:</span>
+            <strong class="sum-val-total">{{ formatPrice(total) }}</strong>
+          </div>
+
+          <button type="button" class="btn-checkout" (click)="proceedToCheckout()">
+            Tiến hành thanh toán
+          </button>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- 4 VALUE PROPOSITIONS -->
+    <section class="value-props-section">
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-flower1"></i>
+        </div>
+        <div class="prop-info">
+          <h4>100% Thảo Mộc Tự Nhiên</h4>
+          <p>Được tuyển chọn kỹ lưỡng từ các nguồn nguyên liệu chất lượng</p>
+        </div>
+      </div>
+
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-truck"></i>
+        </div>
+        <div class="prop-info">
+          <h4>Giao hàng toàn quốc</h4>
+          <p>Nhanh chóng và tiện lợi</p>
+        </div>
+      </div>
+
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-headset"></i>
+        </div>
+        <div class="prop-info">
+          <h4>Hỗ trợ tận tâm 24/7</h4>
+          <p>Tư vấn khi cần thiết</p>
+        </div>
+      </div>
+
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="prop-info">
+          <h4>Đảm bảo chất lượng</h4>
+          <p>Đảm bảo sản phẩm đạt tiêu chuẩn trước khi đến tay khách hàng.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

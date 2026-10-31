@@ -10,6 +10,8 @@ import { ProductDetail } from './product-detail/product-detail';
 import { BlogComponent } from './pages/blog/blog';
 import { BlogDetailComponent } from './pages/blog-detail/blog-detail';
 import { PromotionsComponent } from './pages/promotions/promotions';
+import { CartComponent } from './pages/cart/cart';
+import { CheckoutComponent } from './pages/checkout/checkout';
 import { Orders } from './pages/orders/orders';
 import { OrderDetail } from './pages/order-detail/order-detail';
 import { OrderSuccess } from './pages/order-success/order-success';
@@ -32,6 +34,10 @@ const routes: Routes = [
   { path: 'blog', component: BlogComponent },
   { path: 'blog/:slug', component: BlogDetailComponent },
   { path: 'sales', component: PromotionsComponent },
+
+  // Giỏ hàng & Thanh toán
+  { path: 'cart', component: CartComponent },
+  { path: 'checkout', component: CheckoutComponent },
 
   // Đơn hàng của tôi, Chi tiết đơn hàng & Đặt hàng thành công
   { path: 'orders', component: Orders },

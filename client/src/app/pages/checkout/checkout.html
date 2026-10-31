@@ -1,0 +1,240 @@
+<div class="checkout-page">
+
+  <!-- TOP TEA BANNER -->
+  <div class="top-banner-wrap">
+    <img src="/assets/images/banner2.png" alt="Floralia Herbal Tea" class="banner-img">
+  </div>
+
+  <div class="container checkout-container">
+
+    <!-- PAGE TITLE -->
+    <h1 class="page-title">Thanh Toán</h1>
+
+    <!-- 2-COLUMNS CHECKOUT LAYOUT -->
+    <div class="checkout-layout">
+
+      <!-- LEFT COLUMN: THÔNG TIN NHẬN HÀNG -->
+      <div class="checkout-left-col">
+        <div class="info-card">
+          <h2 class="card-title">THÔNG TIN NHẬN HÀNG</h2>
+
+          <!-- Row 1: Name, Email, Phone -->
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">HỌ VÀ TÊN</label>
+              <div class="form-display-val" *ngIf="!isEditingAddress">{{ fullName }}</div>
+              <input type="text" class="form-input" [(ngModel)]="fullName" *ngIf="isEditingAddress" placeholder="Nhập họ và tên">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">EMAIL (OPTIONAL)</label>
+              <div class="form-display-val" *ngIf="!isEditingAddress">{{ email }}</div>
+              <input type="email" class="form-input" [(ngModel)]="email" *ngIf="isEditingAddress" placeholder="Nhập email">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">SỐ ĐIỆN THOẠI</label>
+              <div class="form-display-val" *ngIf="!isEditingAddress">{{ phone }}</div>
+              <input type="tel" class="form-input" [(ngModel)]="phone" *ngIf="isEditingAddress" placeholder="Nhập số điện thoại">
+            </div>
+          </div>
+
+          <!-- Row 2: Address with "Thay đổi" button -->
+          <div class="address-row">
+            <div class="form-group flex-1">
+              <label class="form-label">ĐỊA CHỈ (SỐ NHÀ, TÊN ĐƯỜNG)</label>
+              <div class="form-display-val" *ngIf="!isEditingAddress">{{ street }}</div>
+              <input type="text" class="form-input" [(ngModel)]="street" *ngIf="isEditingAddress" placeholder="Nhập số nhà, tên đường">
+            </div>
+            <button type="button" class="btn-change-address" (click)="toggleEditAddress()">
+              {{ isEditingAddress ? 'Lưu' : 'Thay đổi' }}
+            </button>
+          </div>
+
+          <!-- Row 3: Dropdowns for City & Ward -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">TỈNH / THÀNH PHỐ</label>
+              <div class="select-wrapper">
+                <select class="form-select" [(ngModel)]="city">
+                  <option value="Tỉnh Hà Tĩnh">Tỉnh Hà Tĩnh</option>
+                  <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                  <option value="TP. Hà Nội">TP. Hà Nội</option>
+                  <option value="TP. Đà Nẵng">TP. Đà Nẵng</option>
+                  <option value="Tỉnh Bình Dương">Tỉnh Bình Dương</option>
+                </select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">PHƯỜNG / XÃ</label>
+              <div class="select-wrapper">
+                <select class="form-select" [(ngModel)]="ward">
+                  <option value="Phường An Nhơn">Phường An Nhơn</option>
+                  <option value="Phường Bến Nghé">Phường Bến Nghé</option>
+                  <option value="Phường Tân Định">Phường Tân Định</option>
+                  <option value="Phường Dĩ An">Phường Dĩ An</option>
+                </select>
+                <i class="bi bi-chevron-down select-arrow"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 4: GHI CHÚ ĐƠN HÀNG -->
+          <div class="form-group form-group-note">
+            <label class="form-label">GHI CHÚ ĐƠN HÀNG</label>
+            <textarea
+              class="form-textarea"
+              [(ngModel)]="note"
+              rows="4"
+              placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn."
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Back to shopping button below info card -->
+        <div class="continue-action-wrap">
+          <button type="button" class="btn-continue" (click)="continueShopping()">
+            « Tiếp tục mua hàng
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: ĐƠN ĐẶT HÀNG -->
+      <div class="checkout-right-col">
+        <div class="summary-card">
+          <h2 class="card-title">Đơn đặt hàng</h2>
+
+          <!-- Products list -->
+          <div class="checkout-items-list">
+            <div class="checkout-item-row" *ngFor="let it of items">
+              <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'" class="item-img">
+              <div class="item-meta">
+                <span class="item-name">{{ it.name }}</span>
+                <span class="item-qty">x{{ it.quantity }}</span>
+              </div>
+              <span class="item-total">{{ formatPrice(it.price * it.quantity) }}</span>
+            </div>
+          </div>
+
+          <!-- Coupon Code Input -->
+          <div class="coupon-box">
+            <input
+              type="text"
+              class="coupon-input"
+              [(ngModel)]="couponCode"
+              placeholder="Mã giảm giá"
+            >
+            <button type="button" class="btn-apply-coupon" (click)="applyCoupon()">
+              Áp dụng
+            </button>
+          </div>
+
+          <!-- Floralia Herbal Tea Voucher Banner -->
+          <div class="voucher-banner">
+            <span>Voucher của Floralia Herbal Tea</span>
+            <i class="bi bi-chevron-right"></i>
+          </div>
+
+          <!-- Pricing breakdown -->
+          <div class="pricing-breakdown">
+            <div class="price-row">
+              <span class="label">Tạm tính:</span>
+              <span class="val">{{ formatPrice(subtotal) }}</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Giảm giá:</span>
+              <span class="val">{{ discount.toLocaleString('vi-VN') }}</span>
+            </div>
+            <div class="price-row">
+              <span class="label">Phí vận chuyển</span>
+              <span class="val">{{ shippingFee === 0 ? 'Free' : formatPrice(shippingFee) }}</span>
+            </div>
+          </div>
+
+          <div class="breakdown-divider"></div>
+
+          <!-- Total -->
+          <div class="price-row total-row">
+            <span class="total-label">Tổng cộng:</span>
+            <strong class="total-val">{{ formatPrice(total) }}</strong>
+          </div>
+
+          <!-- Payment methods -->
+          <div class="payment-methods-block">
+            <h3 class="pm-title">Phương thức thanh toán</h3>
+
+            <label class="pm-item" [class.selected]="paymentMethod === 'paypal'">
+              <input type="radio" name="paymentMethod" value="paypal" [(ngModel)]="paymentMethod">
+              <span class="custom-radio"></span>
+              <span class="pm-text">Paypal</span>
+            </label>
+
+            <label class="pm-item" [class.selected]="paymentMethod === 'cod'">
+              <input type="radio" name="paymentMethod" value="cod" [(ngModel)]="paymentMethod">
+              <span class="custom-radio"></span>
+              <span class="pm-text">Thanh toán khi nhận hàng</span>
+            </label>
+
+            <label class="pm-item" [class.selected]="paymentMethod === 'vnpay'">
+              <input type="radio" name="paymentMethod" value="vnpay" [(ngModel)]="paymentMethod">
+              <span class="custom-radio"></span>
+              <span class="pm-text">VnPay</span>
+            </label>
+          </div>
+
+          <!-- Submit Order CTA -->
+          <button type="button" class="btn-place-order" (click)="placeOrder()">
+            Đặt hàng
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 4 VALUE PROPOSITIONS -->
+    <section class="value-props-section">
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-flower1"></i>
+        </div>
+        <div class="prop-info">
+          <h4>100% Thảo Mộc Tự Nhiên</h4>
+          <p>Được tuyển chọn kỹ lưỡng từ các nguồn nguyên liệu chất lượng</p>
+        </div>
+      </div>
+
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-truck"></i>
+        </div>
+        <div class="prop-info">
+          <h4>Giao hàng toàn quốc</h4>
+          <p>Nhanh chóng và tiện lợi</p>
+        </div>
+      </div>
+
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-headset"></i>
+        </div>
+        <div class="prop-info">
+          <h4>Hỗ trợ tận tâm 24/7</h4>
+          <p>Tư vấn khi cần thiết</p>
+        </div>
+      </div>
+
+      <div class="prop-item">
+        <div class="prop-icon">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="prop-info">
+          <h4>Đảm bảo chất lượng</h4>
+          <p>Đảm bảo sản phẩm đạt tiêu chuẩn trước khi đến tay khách hàng.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

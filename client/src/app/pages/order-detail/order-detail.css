@@ -358,6 +358,40 @@
   transform: translateX(-3px);
 }
 
+/* ================= 4 VALUE PROPOSITIONS ================= */
+.value-props-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  padding: 56px 0 20px;
+  border-top: 1px solid #edf2eb;
+  margin-top: 60px;
+}
+.prop-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.prop-icon {
+  font-size: 32px;
+  color: var(--leaf);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.prop-info h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+.prop-info p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 991px) {
   .info-grid {

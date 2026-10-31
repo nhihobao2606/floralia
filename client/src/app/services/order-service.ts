@@ -385,6 +385,19 @@ export class OrderService {
     );
   }
 
+  updateOrderStatus(id: string, status: Order['status'], statusLabel: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}`, { status, statusLabel }).pipe(
+      catchError(() => {
+        const found = this.defaultOrders.find(o => o.id === id || o.code === `#${id}`);
+        if (found) {
+          found.status = status;
+          found.statusLabel = statusLabel;
+        }
+        return of({ success: true });
+      })
+    );
+  }
+
   formatPrice(num: number): string {
     return (num || 0).toLocaleString('vi-VN') + 'đ';
   }

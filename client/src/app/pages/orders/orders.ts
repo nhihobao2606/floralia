@@ -36,6 +36,20 @@ export class Orders implements OnInit {
   initial = 'H';
   avatar = '';
 
+  // Cancel order modal state
+  showCancelModal = false;
+  cancellingOrder: Order | null = null;
+  cancelReasons: string[] = [
+    'Muốn thay đổi địa chỉ giao hàng',
+    'Muốn nhập/thay đổi mã giảm giá',
+    'Muốn thay đổi sản phẩm (loại trà, dung lượng, số lượng...)',
+    'Thủ tục thanh toán quá rắc rối',
+    'Tìm thấy giá rẻ hơn ở chỗ khác',
+    'Đổi ý, không muốn mua nữa',
+    'Khác'
+  ];
+  selectedCancelReason = 'Muốn thay đổi sản phẩm (loại trà, dung lượng, số lượng...)';
+
   constructor(
     private orderService: OrderService,
     private router: Router
@@ -119,6 +133,41 @@ export class Orders implements OnInit {
 
   viewDetail(order: Order): void {
     this.router.navigate(['/orders', order.id]);
+  }
+
+  openCancelModal(order: Order, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.cancellingOrder = order;
+    this.selectedCancelReason = 'Muốn thay đổi sản phẩm (loại trà, dung lượng, số lượng...)';
+    this.showCancelModal = true;
+  }
+
+  closeCancelModal(): void {
+    this.showCancelModal = false;
+    this.cancellingOrder = null;
+  }
+
+  confirmCancelOrder(): void {
+    if (!this.cancellingOrder) return;
+
+    const targetOrder = this.cancellingOrder;
+    targetOrder.status = 'cancelled';
+    targetOrder.statusLabel = 'ĐÃ HỦY';
+
+    // Call service update if available
+    this.orderService.updateOrderStatus(targetOrder.id, 'cancelled', 'ĐÃ HỦY').subscribe({
+      next: () => {
+        this.applyFilter();
+        this.closeCancelModal();
+      },
+      error: () => {
+        // Fallback local update
+        this.applyFilter();
+        this.closeCancelModal();
+      }
+    });
   }
 
   formatPrice(num: number): string {
