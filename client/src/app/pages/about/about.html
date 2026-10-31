@@ -1,0 +1,291 @@
+<div class="editorial-about-page">
+  <!-- ================= BREADCRUMB ================= -->
+  <nav class="editorial-breadcrumb" aria-label="breadcrumb">
+    <div class="container">
+      <ol class="breadcrumb-nav">
+        <li><a routerLink="/home">TRANG CHỦ</a></li>
+        <li class="sep">/</li>
+        <li class="active" aria-current="page">GIỚI THIỆU</li>
+      </ol>
+    </div>
+  </nav>
+
+  <!-- ================= CÂU CHUYỆN THƯƠNG HIỆU ================= -->
+  <section id="story" class="brand-story-section">
+    <div class="container">
+      <div class="story-grid">
+        <!-- Cột ảnh pha trà / nguyên liệu thực tế -->
+        <div class="story-visual-col">
+          <div class="story-image-card">
+            <img src="/assets/images/logoabout.png" alt="Logo Floralia Tea với ấm trà và cành lá" class="story-img story-logo-img">
+          </div>
+        </div>
+
+        <!-- Cột câu chuyện biên tập -->
+        <div class="story-text-col">
+          <span class="section-tag">CÂU CHUYỆN THƯƠNG HIỆU</span>
+          <h2 class="editorial-heading">Bắt đầu từ những điều tự nhiên nhất</h2>
+
+          <div class="story-narrative">
+            <p>
+              Floralia Tea ra đời vào năm 2025 từ niềm say mê cây cỏ thiên nhiên và mong muốn đem lại sự bình an cho cuộc sống hiện đại bộn bề. Từ những cánh đồng hoa rực rỡ và đồi chè xanh ngát, chúng tôi tuyển chọn kỹ lưỡng từng nguyên liệu thảo mộc vào thời điểm căng tràn sinh khí nhất.
+            </p>
+
+            <blockquote class="editorial-quote">
+              “Chúng tôi tin rằng một tách trà không chỉ là thức uống, mà là khoảng thời gian dịu dàng để mỗi người lắng lại và yêu thương chính mình.”
+            </blockquote>
+
+            <p>
+              Với đa dạng các dòng trà như trà hoa cúc, trà hoa hồng, hoa đậu biếc và trà thảo mộc phối vị, Floralia mang đến hương thơm mộc mạc cùng vị thanh ngọt tự nhiên. Qua phương pháp sấy lạnh hiện đại, từng cánh hoa vẫn lưu giữ trọn vẹn dưỡng chất quý giá — như một món quà thuần khiết của đất trời gửi trao đến bạn.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4: TRIẾT LÝ FLORALIA ================= -->
+  <section class="philosophy-section">
+    <div class="container">
+      <div class="section-header-editorial text-center">
+        <span class="section-tag">GIÁ TRỊ CỐT LÕI</span>
+        <h2 class="editorial-heading">Những giá trị làm nên Floralia</h2>
+        <p class="section-desc">Triết lý dung dị đồng hành cùng từng búp trà và lối sống xanh bền vững</p>
+      </div>
+
+      <div class="philosophy-grid">
+        <article class="philosophy-item" *ngFor="let item of philosophies">
+          <span class="philosophy-index" aria-hidden="true">{{ item.num }}</span>
+          <div class="item-body">
+            <h3 class="item-title">{{ item.title }}</h3>
+            <p class="item-desc">{{ item.desc }}</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BOTANICAL TEA IN MOTION ================= -->
+  <section class="botanical-art-section">
+    <div class="container">
+      <div class="section-header-editorial text-center">
+        <span class="section-tag">THE FLORALIA BOTANICAL GARDEN</span>
+        <h2 class="editorial-heading">Một khu vườn, ba sắc trà</h2>
+        <p class="section-desc">Những hộp trà Floralia khẽ trôi giữa tầng lá, ánh sương và cánh hoa.</p>
+      </div>
+
+      <div class="garden-stage">
+        <span class="garden-ghost-word" aria-hidden="true">FLORALIA</span>
+        <svg class="garden-growth growth-left" viewBox="0 0 280 270" aria-hidden="true">
+          <path class="growth-stem stem-one" pathLength="1" d="M18 270C34 220 72 195 74 143S103 72 132 24" />
+          <path class="growth-stem stem-two" pathLength="1" d="M44 270C87 226 121 206 125 159S158 100 196 76" />
+          <path class="growth-stem stem-three" pathLength="1" d="M7 270C17 222 15 188 31 153" />
+          <path class="growth-leaf leaf-a" d="M74 185C34 184 25 151 37 135C66 140 81 158 74 185Z" />
+          <path class="growth-vein" d="M39 141C51 157 64 172 74 185" />
+          <path class="growth-leaf leaf-b" d="M87 131C83 95 111 80 132 91C132 117 113 136 87 131Z" />
+          <path class="growth-vein" d="M128 94C113 107 100 120 87 131" />
+          <path class="growth-leaf leaf-c" d="M124 220C88 204 93 174 111 163C134 179 143 201 124 220Z" />
+          <path class="growth-vein" d="M113 168C118 188 122 203 124 220" />
+          <path class="growth-leaf leaf-d" d="M139 173C142 140 170 131 188 142C181 168 162 180 139 173Z" />
+          <path class="growth-vein" d="M183 145C167 154 152 164 139 173" />
+          <g class="growth-bloom bloom-a" transform="translate(132 24)">
+            <ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(45)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(90)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(135)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(180)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(225)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(270)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(315)" />
+            <circle class="bloom-core" r="3.5" />
+          </g>
+        </svg>
+        <svg class="garden-growth growth-right" viewBox="0 0 280 270" aria-hidden="true">
+          <path class="growth-stem stem-one" pathLength="1" d="M18 270C34 220 72 195 74 143S103 72 132 24" />
+          <path class="growth-stem stem-two" pathLength="1" d="M44 270C87 226 121 206 125 159S158 100 196 76" />
+          <path class="growth-stem stem-three" pathLength="1" d="M7 270C17 222 15 188 31 153" />
+          <path class="growth-leaf leaf-a" d="M74 185C34 184 25 151 37 135C66 140 81 158 74 185Z" />
+          <path class="growth-vein" d="M39 141C51 157 64 172 74 185" />
+          <path class="growth-leaf leaf-b" d="M87 131C83 95 111 80 132 91C132 117 113 136 87 131Z" />
+          <path class="growth-vein" d="M128 94C113 107 100 120 87 131" />
+          <path class="growth-leaf leaf-c" d="M124 220C88 204 93 174 111 163C134 179 143 201 124 220Z" />
+          <path class="growth-vein" d="M113 168C118 188 122 203 124 220" />
+          <path class="growth-leaf leaf-d" d="M139 173C142 140 170 131 188 142C181 168 162 180 139 173Z" />
+          <path class="growth-vein" d="M183 145C167 154 152 164 139 173" />
+          <g class="growth-bloom bloom-a" transform="translate(132 24)">
+            <ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(45)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(90)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(135)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(180)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(225)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(270)" /><ellipse class="bloom-petal" cy="-8" rx="3.5" ry="8" transform="rotate(315)" />
+            <circle class="bloom-core" r="3.5" />
+          </g>
+        </svg>
+        <svg class="garden-vine vine-left" viewBox="0 0 220 300" aria-hidden="true">
+          <path class="vine-stem" d="M8 292C44 247 24 211 70 176S93 99 157 55" />
+          <path class="vine-leaf" d="M57 190C20 185 19 153 31 140C58 145 68 163 57 190Z" />
+          <path class="vine-vein" d="M31 146C42 160 49 173 57 190" />
+          <path class="vine-leaf" d="M75 164C76 128 106 121 122 132C117 158 98 170 75 164Z" />
+          <path class="vine-vein" d="M117 135C102 145 88 154 75 164" />
+          <path class="vine-leaf" d="M91 116C60 101 67 71 85 60C107 76 110 97 91 116Z" />
+          <path class="vine-vein" d="M85 66C90 84 91 99 91 116" />
+          <path class="vine-leaf" d="M128 82C130 49 158 40 176 51C171 77 151 89 128 82Z" />
+          <path class="vine-vein" d="M170 54C154 64 140 74 128 82" />
+        </svg>
+        <svg class="garden-vine vine-right" viewBox="0 0 220 300" aria-hidden="true">
+          <path class="vine-stem" d="M8 292C44 247 24 211 70 176S93 99 157 55" />
+          <path class="vine-leaf" d="M57 190C20 185 19 153 31 140C58 145 68 163 57 190Z" />
+          <path class="vine-vein" d="M31 146C42 160 49 173 57 190" />
+          <path class="vine-leaf" d="M75 164C76 128 106 121 122 132C117 158 98 170 75 164Z" />
+          <path class="vine-vein" d="M117 135C102 145 88 154 75 164" />
+          <path class="vine-leaf" d="M91 116C60 101 67 71 85 60C107 76 110 97 91 116Z" />
+          <path class="vine-vein" d="M85 66C90 84 91 99 91 116" />
+          <path class="vine-leaf" d="M128 82C130 49 158 40 176 51C171 77 151 89 128 82Z" />
+          <path class="vine-vein" d="M170 54C154 64 140 74 128 82" />
+        </svg>
+        <svg class="garden-blossom blossom-left" viewBox="0 0 100 100" aria-hidden="true">
+          <g class="blossom-petals">
+            <ellipse cx="50" cy="25" rx="9" ry="20" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(45 50 50)" />
+            <ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(90 50 50)" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(135 50 50)" />
+            <ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(180 50 50)" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(225 50 50)" />
+            <ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(270 50 50)" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(315 50 50)" />
+          </g><circle class="blossom-center" cx="50" cy="50" r="9" />
+        </svg>
+        <svg class="garden-blossom blossom-right" viewBox="0 0 100 100" aria-hidden="true">
+          <g class="blossom-petals">
+            <ellipse cx="50" cy="25" rx="9" ry="20" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(45 50 50)" />
+            <ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(90 50 50)" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(135 50 50)" />
+            <ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(180 50 50)" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(225 50 50)" />
+            <ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(270 50 50)" /><ellipse cx="50" cy="25" rx="9" ry="20" transform="rotate(315 50 50)" />
+          </g><circle class="blossom-center" cx="50" cy="50" r="9" />
+        </svg>
+        <span class="drifting-petal petal-a" aria-hidden="true"></span>
+        <span class="drifting-petal petal-b" aria-hidden="true"></span>
+        <span class="drifting-petal petal-c" aria-hidden="true"></span>
+        <span class="drifting-petal petal-d" aria-hidden="true"></span>
+        <span class="garden-leaf leaf-one" aria-hidden="true"></span>
+        <span class="garden-leaf leaf-two" aria-hidden="true"></span>
+        <span class="garden-flower flower-one" aria-hidden="true"></span>
+        <span class="garden-flower flower-two" aria-hidden="true"></span>
+        <span class="garden-caption">HERBAL TEA · EST. 2025</span>
+        <a class="garden-product product-left" routerLink="/products" aria-label="Khám phá bộ trà Bạch Liên">
+          <img src="/assets/images/settrabachlien.png" alt="Bộ trà Bạch Liên Floralia" loading="lazy">
+          <span><small>01 / FLORALIA</small>Bạch Liên</span>
+        </a>
+        <a class="garden-product product-center" routerLink="/products" aria-label="Khám phá bộ trà Tâm Liên">
+          <img src="/assets/images/settratamlien.png" alt="Bộ trà Tâm Liên Floralia" loading="lazy">
+          <span><small>02 / FLORALIA</small>Tâm Liên</span>
+        </a>
+        <a class="garden-product product-right" routerLink="/products" aria-label="Khám phá bộ trà hoa hồng">
+          <img src="/assets/images/settrahoahong.png" alt="Bộ trà hoa hồng Floralia" loading="lazy">
+          <span><small>03 / FLORALIA</small>Hoa Hồng</span>
+        </a>
+        <a routerLink="/products" class="garden-cta">Khám phá bộ sưu tập <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 6: TẦM NHÌN, SỨ MỆNH & GIÁ TRỊ CỐT LÕI ================= -->
+  <section class="vision-mission-section">
+    <div class="container">
+      <div class="section-header-editorial text-center">
+        <span class="section-tag">ĐỊNH HƯỚNG & CAM KẾT</span>
+        <h2 class="editorial-heading">Tầm nhìn & Sứ mệnh</h2>
+      </div>
+
+      <div class="vision-three-columns">
+        <div class="vision-column">
+          <span class="col-pill">TẦM NHÌN</span>
+          <h3 class="col-title">Thương hiệu trà thảo mộc được yêu thích nhất</h3>
+          <p class="col-text">
+            Trở thành thương hiệu trà thảo mộc Việt Nam được tin yêu hàng đầu, tiên phong lan tỏa lối sống xanh, kết nối con người với thiên nhiên thuần khiết và nét đẹp thưởng trà thanh tao.
+          </p>
+        </div>
+
+        <div class="vision-column">
+          <span class="col-pill">SỨ MỆNH</span>
+          <h3 class="col-title">Nuôi dưỡng sức khỏe & khơi nguồn an nhiên</h3>
+          <p class="col-text">
+            Mang đến những tách trà tinh khiết từ thảo mộc thiên nhiên, giúp mỗi người tìm lại sự thư thái, nuôi dưỡng sức khỏe thể chất từ bên trong và tái tạo năng lượng bình an cho mỗi ngày.
+          </p>
+        </div>
+
+        <div class="vision-column">
+          <span class="col-pill">GIÁ TRỊ CỐT LÕI</span>
+          <h3 class="col-title">Bốn trụ cột của Floralia</h3>
+          <ul class="col-values-list">
+            <li><strong>Thuần khiết:</strong> Tôn trọng sự tự nhiên và nguyên bản của cỏ cây.</li>
+            <li><strong>Tận tâm:</strong> Tỉ mỉ từ khâu chọn nguyên liệu đến đóng gói thành phẩm.</li>
+            <li><strong>Chân thành:</strong> Lấy sự an tâm và sức khỏe của khách hàng làm kim chỉ nam.</li>
+            <li><strong>Bền vững:</strong> Đồng hành cùng bảo vệ môi trường và tiêu dùng có trách nhiệm.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 7: FLORALIA MOMENTS ================= -->
+  <section class="moments-editorial-section">
+    <div class="container">
+      <div class="section-header-editorial text-center">
+        <span class="section-tag">KHOẢNH KHẮC THƯỜNG NHẬT</span>
+        <h2 class="editorial-heading">Khoảnh khắc cùng Floralia</h2>
+        <p class="section-desc">
+          Góc ban công sớm mai, cuốn sách yêu thích và một tách trà ấm — nơi bình yên luôn hiện diện
+        </p>
+      </div>
+
+      <!-- Banner toàn cảnh đồi chè và bộ ảnh kỷ niệm -->
+      <div class="moments-panorama-wrap">
+        <img src="/assets/images/moment.png" alt="Floralia Moments - Khoảnh khắc cùng Floralia" class="panorama-img">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= SECTION 8: ĐỘI NGŨ FLORALIA ================= -->
+  <section class="team-editorial-section">
+    <div class="container">
+      <div class="section-header-editorial text-center">
+        <span class="section-tag">CON NGƯỜI FLORALIA</span>
+        <h2 class="editorial-heading">Những người gieo mầm an yên</h2>
+        <p class="section-desc">
+          Đội ngũ sáng lập Floralia Tea — những người trẻ cùng chung một tình yêu sâu sắc với cỏ cây và ước muốn mang lại sự bình yên cho cuộc sống
+        </p>
+      </div>
+
+      <div class="team-roster">
+        <!-- Hàng 1: 3 thành viên sáng lập -->
+        <div class="team-row row-three">
+          <div class="team-member-card" *ngFor="let m of team.slice(0, 3)">
+            <div class="member-portrait-frame">
+              <img [src]="m.img" [alt]="m.name">
+            </div>
+            <div class="member-details">
+              <span class="member-role-tag">{{ m.role }}</span>
+              <h3 class="member-fullname">{{ m.name }}</h3>
+              <div class="member-social-links">
+                <a *ngIf="m.facebook" [href]="m.facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <i class="bi bi-facebook"></i>
+                </a>
+                <a *ngIf="m.instagram" [href]="m.instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <i class="bi bi-instagram"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hàng 2: 2 thành viên chuyên môn -->
+        <div class="team-row row-two">
+          <div class="team-member-card" *ngFor="let m of team.slice(3, 5)">
+            <div class="member-portrait-frame">
+              <img [src]="m.img" [alt]="m.name">
+            </div>
+            <div class="member-details">
+              <span class="member-role-tag">{{ m.role }}</span>
+              <h3 class="member-fullname">{{ m.name }}</h3>
+              <div class="member-social-links">
+                <a *ngIf="m.facebook" [href]="m.facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <i class="bi bi-facebook"></i>
+                </a>
+                <a *ngIf="m.instagram" [href]="m.instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <i class="bi bi-instagram"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

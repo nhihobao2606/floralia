@@ -4,6 +4,7 @@ import { CartService } from '../../services/cart-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { Products } from '../../classes/Products';
 import { CouponItem, DEFAULT_COUPONS } from '../../classes/Coupon';
+import { WishlistService } from '../../services/wishlist-service';
 
 @Component({
   selector: 'app-promotions',
@@ -43,6 +44,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     readonly cartService: CartService,
     readonly productNavigation: ProductNavigationService,
+    private readonly wishlistService: WishlistService,
   ) {}
 
   ngOnInit(): void {
@@ -236,14 +238,12 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   }
 
   isWished(product: Products): boolean {
-    return this.wishlist().has(this.getProductId(product));
+    return this.wishlistService.isSaved(product);
   }
 
   toggleWish(product: Products): void {
-    const id = this.getProductId(product);
-    const next = new Set(this.wishlist());
-    next.has(id) ? next.delete(id) : next.add(id);
-    this.wishlist.set(next);
+    this.wishlistService.toggle(product);
+    this.wishlist.set(new Set(this.wishlistService.ids()));
   }
 
   onImageError(event: Event): void {

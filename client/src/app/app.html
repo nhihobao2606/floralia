@@ -2,3 +2,7 @@
 <app-header2 *ngIf="!isLoggedIn"></app-header2>
 <router-outlet></router-outlet>
 <app-footer></app-footer>
+<div class="favorite-toast" *ngIf="wishlistService.toastMessage()" role="status" aria-live="polite">
+  <i class="bi bi-heart" aria-hidden="true"></i>
+  <span>{{ wishlistService.toastMessage() }}</span>
+</div>

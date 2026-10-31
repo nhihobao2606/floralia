@@ -375,6 +375,7 @@ describe('ProductDetail', () => {
   });
 
   it('toggles and persists the current product favorite', () => {
+    localStorage.setItem('currentUser', JSON.stringify({ id: 'user-1' }));
     component.toggleFavorite();
 
     expect(component.favorite).toBe(true);

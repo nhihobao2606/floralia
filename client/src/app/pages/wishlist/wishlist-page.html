@@ -1,0 +1,87 @@
+<main class="wishlist-page">
+  <div class="container wishlist-shell">
+    <header class="page-heading">
+      <p class="eyebrow">TÀI KHOẢN CỦA TÔI</p>
+      <h1>Sản phẩm yêu thích</h1>
+    </header>
+
+    <div class="account-layout">
+      <aside class="side-card" aria-label="Điều hướng tài khoản">
+        <div class="side-user">
+          <div class="avatar sm">
+            <img *ngIf="avatar" [src]="avatar" alt="Ảnh đại diện">
+            <span *ngIf="!avatar">{{ initial }}</span>
+          </div>
+          <div class="side-user-info">
+            <strong>{{ user?.fullName || 'Khách hàng' }}</strong>
+            <small>{{ user?.email || 'Tài khoản Floralia' }}</small>
+          </div>
+        </div>
+        <nav class="side-nav">
+          <a class="side-link" href="/account"><i class="bi bi-grid" aria-hidden="true"></i> Tổng quan</a>
+          <a class="side-link" href="/orders"><i class="bi bi-box-seam" aria-hidden="true"></i> Đơn hàng</a>
+          <a class="side-link" href="/addresses"><i class="bi bi-geo-alt" aria-hidden="true"></i> Sổ địa chỉ</a>
+          <a class="side-link active" href="/wishlist" aria-current="page"><i class="bi bi-heart" aria-hidden="true"></i> Sản phẩm yêu thích</a>
+          <button class="side-link logout" type="button" (click)="logout()"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất</button>
+        </nav>
+      </aside>
+
+      <section class="wishlist-panel">
+        <div class="panel-head">
+          <h2><i class="bi bi-heart-fill" aria-hidden="true"></i> Sản phẩm yêu thích</h2>
+          <span class="item-count" *ngIf="!loading()">{{ products().length }} sản phẩm</span>
+        </div>
+        <div class="panel-body">
+          <div class="wishlist-state" *ngIf="loading()" role="status">
+            <span class="spinner-border spinner-border-sm text-success" aria-hidden="true"></span>
+            <span>Đang tải danh sách yêu thích…</span>
+          </div>
+
+          <div class="wishlist-state wishlist-error" *ngIf="!loading() && errorMessage()" role="alert">
+            {{ errorMessage() }}
+          </div>
+
+          <section class="wishlist-empty" *ngIf="!loading() && !errorMessage() && products().length === 0">
+            <span class="empty-heart" aria-hidden="true"><i class="bi bi-heart"></i></span>
+            <h3>Chưa có sản phẩm yêu thích</h3>
+            <p>Lưu lại những hương vị trà bạn muốn thưởng thức hoặc dành tặng.</p>
+            <a href="/products" class="wishlist-browse">Khám phá trà Floralia <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+          </section>
+
+          <div class="wishlist-grid" *ngIf="!loading() && !errorMessage() && products().length">
+            <article class="product-card" *ngFor="let product of products()">
+              <div class="product-img">
+                <span class="sale-badge" *ngIf="product.discount > 0">-{{ product.discount }}%</span>
+                <a [attr.href]="productNavigation.detailUrl(product.slug)" (click)="openProduct($event, product)">
+                  <img [src]="getProductImage(product)" [alt]="product.name" loading="lazy" (error)="onImageError($event)">
+                </a>
+                <button type="button" class="sale-heart on" (click)="remove(product)" [attr.aria-label]="'Bỏ ' + product.name + ' khỏi yêu thích'" aria-pressed="true">
+                  <i class="bi bi-heart-fill" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="product-info">
+                <a class="sale-name" [attr.href]="productNavigation.detailUrl(product.slug)" (click)="openProduct($event, product)">{{ product.name }}</a>
+                <div class="sale-rating" [attr.aria-label]="'Đánh giá ' + (product.ratingAverage || 0) + ' trên 5 sao'">
+                  <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi" [class.bi-star-fill]="star <= rating(product)" [class.bi-star]="star > rating(product)"></i>
+                  <small>{{ ratingText(product) }}</small>
+                </div>
+                <div class="sale-price">
+                  <span class="sale-current">{{ formatPrice(product.price) }}</span>
+                  <del class="sale-old" *ngIf="product.oldPrice">{{ formatPrice(product.oldPrice) }}</del>
+                </div>
+                <div class="product-actions">
+                  <button type="button" class="sale-cart-icon" [disabled]="!hasStock(product)" (click)="addToCart(product)" [attr.aria-label]="'Thêm ' + product.name + ' vào giỏ hàng'" title="Thêm vào giỏ hàng">
+                    <i class="bi bi-bag-plus" aria-hidden="true"></i>
+                  </button>
+                  <a class="sale-buy-now" [attr.href]="productNavigation.detailUrl(product.slug)" (click)="openProduct($event, product)">
+                    <i class="bi bi-lightning-charge" aria-hidden="true"></i> Mua ngay
+                  </a>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>

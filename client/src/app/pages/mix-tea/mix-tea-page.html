@@ -1,0 +1,129 @@
+<main class="mix-page">
+  <nav class="mix-breadcrumb" aria-label="Điều hướng">
+    <div class="container">
+      <a routerLink="/home">Trang chủ</a><span aria-hidden="true">/</span>
+      <span aria-current="page">Tự phối trà</span>
+    </div>
+  </nav>
+
+  <section class="mix-intro">
+    <div class="container mix-intro-inner">
+      <div class="mix-intro-copy">
+        <span class="mix-eyebrow"><i aria-hidden="true"></i> FLORALIA TEA STUDIO</span>
+        <h1>Pha nên hương vị <em>của riêng bạn</em></h1>
+        <p>Chọn những vị trà Floralia bạn yêu thích, kết hợp theo cảm nhận của riêng mình và gửi công thức để chúng tôi tư vấn.</p>
+        <a class="mix-start" href="#tea-builder">Bắt đầu phối trà <i class="bi bi-arrow-down" aria-hidden="true"></i></a>
+      </div>
+      <div class="mix-hero-art" aria-hidden="true">
+        <span class="art-halo"></span>
+        <span class="art-leaf leaf-a"></span><span class="art-leaf leaf-b"></span>
+        <span class="art-flower flower-a">✳</span><span class="art-flower flower-b">✳</span>
+        <div class="tea-cup"><span class="tea-liquid"></span><span class="tea-steam steam-a"></span><span class="tea-steam steam-b"></span></div>
+        <span class="cup-saucer"></span>
+      </div>
+      <span class="mix-side-note" aria-hidden="true">A LITTLE MOMENT, YOUR OWN BLEND</span>
+    </div>
+  </section>
+
+  <section id="tea-builder" class="mix-builder-section">
+    <div class="container">
+      <header class="builder-heading">
+        <span class="mix-eyebrow">TỰ TAY PHỐI HƯƠNG</span>
+        <h2>Cân bằng cốt trà, chọn độ ngọt</h2>
+        <p>Tạo một mẻ phối 100g với tối đa hai cốt trà, tỷ lệ riêng và lượng đường bạn thích.</p>
+      </header>
+
+      <div class="mix-presets" aria-label="Gợi ý phối trà">
+        <button type="button" *ngFor="let preset of presets" (click)="applyPreset(preset)" [class.active]="isPresetSelected(preset)">
+          <span>{{ preset.name }}</span><small>{{ preset.description }}</small><i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="mix-workspace">
+        <div class="tea-choice-area">
+          <div class="choice-heading"><span>01 / CHỌN CỐT TRÀ</span><span>{{ selectedSkus.length }} / {{ maxChoices }} cốt</span></div>
+          <div class="tea-choice-grid">
+            <button type="button" class="tea-choice" *ngFor="let tea of teas" [class.selected]="isSelected(tea.sku)" [attr.aria-pressed]="isSelected(tea.sku)" (click)="toggleTea(tea.sku)">
+              <span class="tea-choice-image"><img [src]="'/assets/images/products/' + tea.image" [alt]="tea.name" loading="lazy"><span class="choice-check"><i class="bi bi-check2" aria-hidden="true"></i></span></span>
+              <span class="tea-choice-name">{{ tea.name }}</span>
+              <span class="tea-choice-note">{{ tea.tastingNote }}</span>
+            </button>
+          </div>
+          <p class="selection-limit" role="status" *ngIf="selectionLimitMessage">{{ selectionLimitMessage }}</p>
+
+          <div class="ratio-control" *ngIf="selectedTeas.length === 2">
+            <label for="tea-ratio"><span>Tỷ lệ hai cốt trà</span><strong>{{ teaRatio }} : {{ 100 - teaRatio }}</strong></label>
+            <input id="tea-ratio" type="range" min="20" max="80" step="5" [value]="teaRatio" (input)="teaRatio = +$any($event.target).value">
+            <div class="ratio-caption"><span>{{ selectedTeas[0].name }} · {{ selectedTeas[1].name }}</span><span>Điều chỉnh tỷ lệ theo gu của bạn</span></div>
+          </div>
+
+          <div class="sugar-selection">
+            <div class="choice-heading sugar-heading"><span>02 / CHỌN ĐƯỜNG</span><span>Tùy chọn</span></div>
+            <div class="sugar-choice-grid">
+              <button type="button" class="sugar-choice no-sugar" [class.selected]="!sugarSku" [attr.aria-pressed]="!sugarSku" (click)="chooseSugar('')">
+                <span class="sugar-choice-mark"><i class="bi bi-dash" aria-hidden="true"></i></span>
+                <span><strong>Không thêm đường</strong><small>Giữ vị trà nguyên bản</small></span>
+              </button>
+              <button type="button" class="sugar-choice" *ngFor="let sugar of sugars" [class.selected]="sugarSku === sugar.sku" [attr.aria-pressed]="sugarSku === sugar.sku" (click)="chooseSugar(sugar.sku)">
+                <span class="sugar-choice-image"><img [src]="'/assets/images/products/' + sugar.image" [alt]="sugar.name" loading="lazy"></span>
+                <span><strong>{{ sugar.name }}</strong><small>{{ sugar.detail }}</small></span>
+                <i class="bi bi-check-circle-fill sugar-check" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="sugar-amount-control" *ngIf="selectedSugar">
+              <label for="sugar-amount"><span>Lượng {{ selectedSugar?.name }}</span><strong>{{ sugarGrams }}g / 100g</strong></label>
+              <input id="sugar-amount" type="range" min="0" max="30" step="1" [value]="sugarGrams" (input)="sugarGrams = +$any($event.target).value">
+              <div class="ratio-caption"><span>0g · ít ngọt</span><span>30g · ngọt đậm</span></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="recipe-card" aria-live="polite">
+          <div class="recipe-card-top"><span>03 / LỌ PHỐI CỦA BẠN</span><i class="bi bi-flower1" aria-hidden="true"></i></div>
+          <h3>{{ selectedTeas.length ? 'Công thức đang pha' : 'Một chiếc lọ chờ hương trà' }}</h3>
+          <p class="recipe-description">Mẻ phối thử <strong>{{ batchGrams }}g</strong> · {{ selectedTeas.length ? 'định lượng thay đổi theo lựa chọn' : 'chọn cốt trà để bắt đầu' }}</p>
+
+          <div class="jar-display" [class.jar-filled]="selectedTeas.length > 0" aria-label="Lọ hiển thị công thức trà">
+            <span class="jar-spark spark-a" aria-hidden="true"></span><span class="jar-spark spark-b" aria-hidden="true"></span>
+            <div class="blend-orbit" *ngIf="selectedTeas.length" aria-hidden="true">
+              <span class="blend-orbit-item" *ngFor="let tea of selectedTeas; let i = index" [class.orbit-second]="i === 1">
+                <img [src]="'/assets/images/products/' + tea.image" alt="" loading="lazy">
+                <small>{{ tea.name }}</small>
+              </span>
+            </div>
+            <div class="jar-lid" aria-hidden="true"></div>
+            <div class="jar-neck" aria-hidden="true"></div>
+            <div class="tea-jar">
+              <div class="jar-fill" [style.height.%]="jarFillPercent" [style.background]="jarColor">
+                <span class="jar-botanical botanical-a" aria-hidden="true"></span><span class="jar-botanical botanical-b" aria-hidden="true"></span><span class="jar-botanical botanical-c" aria-hidden="true"></span>
+              </div>
+              <div class="jar-glass-shine" aria-hidden="true"></div>
+              <div class="jar-label">FLORALIA<small>BOTANICAL TEA</small><i></i></div>
+            </div>
+            <span class="jar-capacity">100 g</span>
+          </div>
+
+          <div class="recipe-summary">
+            <div class="summary-empty" *ngIf="!selectedTeas.length">Công thức của bạn sẽ hiện ở đây</div>
+            <div class="summary-line" *ngFor="let tea of selectedTeas">
+              <span><i class="summary-dot tea-dot" [style.background]="jarColor" aria-hidden="true"></i>{{ tea.name }}</span><strong>{{ getTeaGrams(tea.sku) }}g</strong>
+            </div>
+            <div class="summary-line" *ngIf="selectedSugar">
+              <span><i class="summary-dot sugar-dot" aria-hidden="true"></i>{{ selectedSugar?.name }}</span><strong>{{ sugarGrams }}g</strong>
+            </div>
+            <div class="summary-line no-sugar-summary" *ngIf="!selectedSugar">
+              <span><i class="summary-dot no-sugar-dot" aria-hidden="true"></i>Không thêm đường</span><strong>0g</strong>
+            </div>
+            <div class="summary-total"><span>Tổng mẻ phối</span><strong>{{ batchGrams }}g</strong></div>
+          </div>
+
+          <div class="recipe-actions">
+            <button class="recipe-submit" type="button" [disabled]="!selectedTeas.length" (click)="sendRecipe()">Gửi công thức tư vấn <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            <button class="recipe-clear" type="button" *ngIf="selectedTeas.length" (click)="clearSelection()">Xóa lựa chọn</button>
+          </div>
+          <p class="recipe-footnote">Lượng trà và đường được tính trên mẻ phối 100g. Công thức sẽ được Floralia xác nhận cùng bạn trước khi đặt.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>

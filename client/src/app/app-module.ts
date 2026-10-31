@@ -21,9 +21,18 @@ registerLocaleData(localeVi);
 import { BlogComponent } from './pages/blog/blog';
 import { BlogDetailComponent } from './pages/blog-detail/blog-detail';
 import { PromotionsComponent } from './pages/promotions/promotions';
+import { About } from './pages/about/about';
+import { SupportPage } from './pages/support/support-page';
+import { ContactPage } from './pages/contact/contact-page';
+import { MixTeaPage } from './pages/mix-tea/mix-tea-page';
+import { WishlistPage } from './pages/wishlist/wishlist-page';
 
 @NgModule({
-  declarations: [App, Header, Header2, Footer, Homepage, Login, Signup, Profile, Addresses, ProductListComponent, ProductDetail, BlogComponent, BlogDetailComponent, PromotionsComponent],
+  declarations: [
+    App, Header, Header2, Footer, Homepage, Login, Signup, Profile, Addresses,
+    ProductListComponent, ProductDetail, BlogComponent, BlogDetailComponent,
+    PromotionsComponent, About, SupportPage, ContactPage, MixTeaPage, WishlistPage,
+  ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners(), { provide: LOCALE_ID, useValue: 'vi' }],
   bootstrap: [App],

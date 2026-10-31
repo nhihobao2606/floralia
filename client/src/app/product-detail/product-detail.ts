@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../services/product-service';
 import { NewProductReview, ProductReview, ReviewService } from '../services/review-service';
 import { CartService } from '../services/cart-service';
+import { WishlistService } from '../services/wishlist-service';
 import { ProductNavigationService } from '../services/product-navigation-service';
 import { Products } from '../classes/Products';
 
@@ -98,6 +99,7 @@ export class ProductDetail implements OnInit {
     private readonly reviewService: ReviewService,
     readonly productNavigation: ProductNavigationService,
     readonly cartService: CartService,
+    private readonly wishlistService: WishlistService,
   ) {}
 
   ngOnInit(): void {
@@ -577,36 +579,12 @@ export class ProductDetail implements OnInit {
   }
 
   isProductFavorite(product: ProductDetails): boolean {
-    const id = this.productIdentifier(product);
-    return this.readFavorites().includes(id);
+    return this.wishlistService.isSaved(product);
   }
 
   toggleFavorite(): void {
     if (!this.product) return;
-    const id = this.productIdentifier(this.product);
-    const favorites = this.readFavorites();
-    const index = favorites.indexOf(id);
-    if (index >= 0) favorites.splice(index, 1);
-    else favorites.push(id);
-    localStorage.setItem('wishlist', JSON.stringify(favorites));
-    this.favorite = index < 0;
-    window.dispatchEvent(new Event('wishlist-updated'));
-  }
-
-  private productIdentifier(product: ProductDetails): string {
-    return String(product._id || product.id || product.sku || product.slug || '');
-  }
-
-  private readFavorites(): string[] {
-    const raw = localStorage.getItem('wishlist');
-    if (!raw) return [];
-    try {
-      const value: unknown = JSON.parse(raw);
-      return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
-    } catch (error) {
-      console.error('Không đọc được danh sách yêu thích:', error);
-      return [];
-    }
+    this.favorite = this.wishlistService.toggle(this.product);
   }
 
   productImage(product: ProductDetails): string {
