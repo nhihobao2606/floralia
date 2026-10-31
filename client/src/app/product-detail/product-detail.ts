@@ -155,7 +155,7 @@ export class ProductDetail implements OnInit {
       ? navigationState.products
       : null;
     const cachedProducts = this.productService.getCachedProducts();
-    const initialProduct = navigationProduct?.slug === slug && navigationProduct.isActive !== false
+    const initialProduct = (navigationProduct?.slug === slug || navigationProduct?.sku === slug || (navigationProduct as any)?.id === slug || (navigationProduct as any)?._id === slug) && navigationProduct?.isActive !== false
       ? navigationProduct
       : null;
 
@@ -185,7 +185,7 @@ export class ProductDetail implements OnInit {
           : [];
         this.allProducts = products;
         this.relatedProductsLoading = false;
-        const product = products.find((item) => item.slug === slug && item.isActive !== false);
+        const product = products.find((item) => (item.slug === slug || item.sku === slug || (item as any)._id === slug || (item as any).id === slug) && item.isActive !== false);
 
         if (!product) {
           if (!initialProduct) {
