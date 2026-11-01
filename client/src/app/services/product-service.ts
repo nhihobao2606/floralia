@@ -11,6 +11,7 @@ export class ProductService {
   private productsCache: Products[] | null = null;
   private productsCacheExpiresAt = 0;
   private productsRequest: Observable<Products[]> | null = null;
+  private cacheVersion = 0;
 
   constructor(private http: HttpClient) {}
 
@@ -20,6 +21,13 @@ export class ProductService {
 
   getCachedProducts(): Products[] | null {
     return this.productsCache;
+  }
+
+  invalidateCache(): void {
+    this.cacheVersion += 1;
+    this.productsCache = null;
+    this.productsCacheExpiresAt = 0;
+    this.productsRequest = null;
   }
 
   // Lấy danh sách sản phẩm
@@ -32,21 +40,28 @@ export class ProductService {
       return this.productsRequest;
     }
 
-    this.productsRequest = this.http.get<Products[]>(this.apiUrl).pipe(
+    const requestVersion = this.cacheVersion;
+    let request: Observable<Products[]>;
+    request = this.http.get<Products[]>(this.apiUrl).pipe(
       tap((products) => {
-        this.productsCache = products;
-        this.productsCacheExpiresAt = Date.now() + 30_000;
+        if (requestVersion === this.cacheVersion) {
+          this.productsCache = products;
+          this.productsCacheExpiresAt = Date.now() + 30_000;
+        }
       }),
       catchError((error: unknown) => {
         return throwError(() => error);
       }),
       finalize(() => {
-        this.productsRequest = null;
+        if (this.productsRequest === request) {
+          this.productsRequest = null;
+        }
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
 
-    return this.productsRequest;
+    this.productsRequest = request;
+    return request;
   }
 
   // Lấy chi tiết 1 sản phẩm theo Slug

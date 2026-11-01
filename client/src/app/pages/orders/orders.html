@@ -27,7 +27,7 @@
              [routerLinkActiveOptions]="{ exact: true }">
             <i class="bi" [ngClass]="m.icon"></i> {{ m.label }}
           </a>
-          <a href="#" class="side-link logout" (click)="logout($event)">
+          <a href="#" class="side-link logout" (click)="requestLogout($event)">
             <i class="bi bi-box-arrow-right"></i> Đăng xuất
           </a>
         </nav>
@@ -353,3 +353,4 @@
   </div>
 
 </div>
+<app-logout-confirmation [open]="showLogoutConfirm" (cancelled)="showLogoutConfirm = false" (confirmed)="confirmLogout()"></app-logout-confirmation>

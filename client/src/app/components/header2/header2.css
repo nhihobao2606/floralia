@@ -48,6 +48,15 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 }
 .nav-link:hover, .nav-link.active { color: var(--matcha-2) !important; }
 .nav-link:hover::after, .nav-link.active::after { width: 55%; }
+.guest-order-tracker {
+  position: fixed; z-index: 1045; bottom: 26px; left: 24px;
+  display: inline-flex; min-height: 48px; align-items: center; gap: 9px;
+  padding: 0 18px; border: 1px solid #d9e8d2; border-radius: 28px;
+  background: #fff; color: var(--matcha); font-size: 14px; font-weight: 700;
+  box-shadow: 0 8px 24px rgba(29, 83, 56, .16); transition: transform .2s, box-shadow .2s;
+}
+.guest-order-tracker i { color: var(--matcha-2); font-size: 18px; }
+.guest-order-tracker:hover { transform: translateY(-2px); color: var(--matcha); box-shadow: 0 12px 28px rgba(29, 83, 56, .22); }
 
 /* Menu xổ xuống */
 .dropdown-menu {
@@ -360,6 +369,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 }
 
 @media (max-width: 576px) {
+  .guest-order-tracker { bottom: 18px; left: 14px; min-height: 44px; padding: 0 14px; font-size: 12px; }
   .auth-btn { padding: 7px 12px; font-size: 12.5px; }
   .contact-buttons { right: 14px; bottom: 22px; gap: 11px; }
   .fab { width: 48px; height: 48px; font-size: 21px; }

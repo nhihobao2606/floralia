@@ -1,0 +1,132 @@
+<main class="admin-login-page">
+  <section class="login-shell" aria-label="Đăng nhập Floralia Admin">
+    <aside class="brand-panel">
+      <div class="brand-panel-glow brand-panel-glow-top"></div>
+      <div class="brand-panel-glow brand-panel-glow-bottom"></div>
+
+      <a class="brand-logo" href="/" aria-label="Floralia Tea">
+        <img src="/assets/logo.png" alt="Floralia Tea">
+      </a>
+
+      <div class="brand-copy">
+        <span class="brand-kicker"><i class="bi bi-flower1" aria-hidden="true"></i> KHÔNG GIAN QUẢN TRỊ</span>
+        <h1>Chăm chút từng điều nhỏ, vun đầy những điều lành.</h1>
+        <p>Đăng nhập vào Floralia Admin để cùng chăm sóc những trải nghiệm tuyệt vời dành cho khách hàng.</p>
+      </div>
+
+      <div class="brand-note">
+        <span class="note-icon"><i class="bi bi-leaf" aria-hidden="true"></i></span>
+        <span>Chậm lại một chút,<br><strong>an nhiên thêm mỗi ngày.</strong></span>
+      </div>
+      <span class="brand-copyright">FLORALIA TEA <span>·</span> EST. 2025</span>
+    </aside>
+
+    <section class="form-panel">
+      <div class="form-content">
+        <div class="mobile-logo">
+          <img src="/assets/logo.png" alt="Floralia Tea">
+        </div>
+        <div class="form-heading">
+          <span class="form-eyebrow">CHÀO MỪNG TRỞ LẠI</span>
+          <h2>Đăng nhập quản trị</h2>
+          <p>Vui lòng đăng nhập bằng tài khoản quản trị Floralia của bạn.</p>
+        </div>
+
+        <form #loginForm="ngForm" (ngSubmit)="login(loginForm)" novalidate>
+          <div class="form-field">
+            <label for="adminEmail">Email <span class="required-mark" aria-label="bắt buộc">*</span></label>
+            <div
+              class="input-wrap"
+              [class.invalid]="emailCtrl.invalid && (emailCtrl.touched || loginForm.submitted)"
+              [class.valid]="emailCtrl.valid && emailCtrl.touched">
+              <i class="bi bi-envelope" aria-hidden="true"></i>
+              <input
+                type="email"
+                id="adminEmail"
+                name="email"
+                [(ngModel)]="email"
+                #emailCtrl="ngModel"
+                [pattern]="emailPattern"
+                required
+                autocomplete="username"
+                placeholder="admin@floralia.vn">
+            </div>
+            <div class="field-error" *ngIf="emailCtrl.invalid && (emailCtrl.touched || loginForm.submitted)">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              <span *ngIf="emailCtrl.errors?.['required']">Vui lòng nhập email.</span>
+              <span *ngIf="!emailCtrl.errors?.['required'] && emailCtrl.errors?.['pattern']">
+                Email chưa đúng định dạng (ví dụ: ten@gmail.com).
+              </span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="adminPassword">Mật khẩu <span class="required-mark" aria-label="bắt buộc">*</span></label>
+            <div
+              class="input-wrap"
+              [class.invalid]="passwordCtrl.invalid && (passwordCtrl.touched || loginForm.submitted)"
+              [class.valid]="passwordCtrl.valid && passwordCtrl.touched">
+              <i class="bi bi-lock" aria-hidden="true"></i>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="adminPassword"
+                name="password"
+                [(ngModel)]="password"
+                #passwordCtrl="ngModel"
+                required
+                minlength="8"
+                autocomplete="current-password"
+                placeholder="Nhập mật khẩu của bạn">
+              <button
+                type="button"
+                class="password-toggle"
+                [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+                (click)="togglePassword()">
+                <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="field-error" *ngIf="passwordCtrl.invalid && (passwordCtrl.touched || loginForm.submitted)">
+              <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+              <span *ngIf="passwordCtrl.errors?.['required']">Vui lòng nhập mật khẩu.</span>
+              <span *ngIf="!passwordCtrl.errors?.['required'] && passwordCtrl.errors?.['minlength']">
+                Mật khẩu phải có ít nhất 8 ký tự.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="remember-option">
+              <input type="checkbox" name="rememberMe" [(ngModel)]="rememberMe">
+              <span class="custom-checkbox"><i class="bi bi-check2" aria-hidden="true"></i></span>
+              Ghi nhớ đăng nhập
+            </label>
+            <span class="secure-label"><i class="bi bi-shield-lock" aria-hidden="true"></i> Bảo mật</span>
+          </div>
+
+          <div class="form-message error-message" *ngIf="errorMessage()" role="alert">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            <span>{{ errorMessage() }}</span>
+          </div>
+          <div class="form-message success-message" *ngIf="successMessage()" role="status">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            <span>{{ successMessage() }}</span>
+          </div>
+
+          <button class="submit-button" type="submit" [disabled]="isSubmitting()">
+            <span>{{ isSubmitting() ? 'Đang xác thực...' : 'Đăng nhập' }}</span>
+          </button>
+        </form>
+
+        <div class="form-security">
+          <span class="security-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
+          <p>Trang đăng nhập dành riêng cho nhân sự được cấp quyền quản trị Floralia.</p>
+        </div>
+        <a class="back-to-store" href="http://localhost:4200/">
+          <i class="bi bi-arrow-left" aria-hidden="true"></i>
+          Quay lại cửa hàng Floralia
+        </a>
+      </div>
+      <p class="form-footer">© 2025 Floralia Tea. All rights reserved.</p>
+    </section>
+  </section>
+</main>

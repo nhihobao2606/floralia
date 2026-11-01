@@ -149,6 +149,7 @@
                   [ngClass]="star <= getRoundedRatingAverage(item.ratingAverage) ? 'bi-star-fill' : 'bi-star'"></i>
                <small>{{ formatRatingAverage(item.ratingAverage) }} ({{ item.ratingCount || 0 }})</small>
              </div>
+             <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ item.sold || 0 }}</div>
 
              <div class="sale-price">
                <span class="sale-current">{{ item.price | currency:'VND':'symbol':'1.0-0':'vi' }}</span>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Order, OrderService } from '../../services/order-service';
+import { GUEST_TRACKED_ORDER_KEY, Order, OrderService } from '../../services/order-service';
 
 @Component({
   selector: 'app-order-success',
@@ -21,6 +21,8 @@ export class OrderSuccess implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       const id = params['id'] || '4152';
+      localStorage.setItem(GUEST_TRACKED_ORDER_KEY, id);
+      window.dispatchEvent(new Event('guest-order-tracked'));
       // Initialize immediately synchronously so page is never blank
       this.order = this.orderService.getOrderByIdSync(id);
       this.loading = false;

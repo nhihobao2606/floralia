@@ -22,7 +22,7 @@
           <a class="side-link" href="/orders"><i class="bi bi-box-seam" aria-hidden="true"></i> Đơn hàng</a>
           <a class="side-link" href="/addresses"><i class="bi bi-geo-alt" aria-hidden="true"></i> Sổ địa chỉ</a>
           <a class="side-link active" href="/wishlist" aria-current="page"><i class="bi bi-heart" aria-hidden="true"></i> Sản phẩm yêu thích</a>
-          <button class="side-link logout" type="button" (click)="logout()"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất</button>
+          <button class="side-link logout" type="button" (click)="requestLogout()"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất</button>
         </nav>
       </aside>
 
@@ -32,6 +32,11 @@
           <span class="item-count" *ngIf="!loading()">{{ products().length }} sản phẩm</span>
         </div>
         <div class="panel-body">
+          <div class="alert-msg ok" *ngIf="removeMessage()" role="status" aria-live="polite">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            <span>{{ removeMessage() }}</span>
+          </div>
+
           <div class="wishlist-state" *ngIf="loading()" role="status">
             <span class="spinner-border spinner-border-sm text-success" aria-hidden="true"></span>
             <span>Đang tải danh sách yêu thích…</span>
@@ -65,6 +70,7 @@
                   <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi" [class.bi-star-fill]="star <= rating(product)" [class.bi-star]="star > rating(product)"></i>
                   <small>{{ ratingText(product) }}</small>
                 </div>
+                <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ product.sold || 0 }}</div>
                 <div class="sale-price">
                   <span class="sale-current">{{ formatPrice(product.price) }}</span>
                   <del class="sale-old" *ngIf="product.oldPrice">{{ formatPrice(product.oldPrice) }}</del>
@@ -73,9 +79,9 @@
                   <button type="button" class="sale-cart-icon" [disabled]="!hasStock(product)" (click)="addToCart(product)" [attr.aria-label]="'Thêm ' + product.name + ' vào giỏ hàng'" title="Thêm vào giỏ hàng">
                     <i class="bi bi-bag-plus" aria-hidden="true"></i>
                   </button>
-                  <a class="sale-buy-now" [attr.href]="productNavigation.detailUrl(product.slug)" (click)="openProduct($event, product)">
+                  <button type="button" class="sale-buy-now" [disabled]="!hasStock(product)" (click)="buyNow(product)">
                     <i class="bi bi-lightning-charge" aria-hidden="true"></i> Mua ngay
-                  </a>
+                  </button>
                 </div>
               </div>
             </article>
@@ -85,3 +91,4 @@
     </div>
   </div>
 </main>
+<app-logout-confirmation [open]="showLogoutConfirm" (cancelled)="showLogoutConfirm = false" (confirmed)="confirmLogout()"></app-logout-confirmation>

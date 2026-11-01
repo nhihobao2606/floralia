@@ -18,7 +18,7 @@
           <a *ngFor="let m of menu" class="side-link" [routerLink]="m.link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             <i class="bi" [ngClass]="m.icon"></i>{{ m.label }}
           </a>
-          <a href="#" class="side-link logout" (click)="logout($event)"><i class="bi bi-box-arrow-right"></i>Đăng xuất</a>
+          <a href="#" class="side-link logout" (click)="requestLogout($event)"><i class="bi bi-box-arrow-right"></i>Đăng xuất</a>
         </nav>
       </aside>
 
@@ -32,7 +32,9 @@
           <i class="bi" [ngClass]="msg.type === 'ok' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>{{ msg.text }}
         </div>
 
-        <div class="address-loading" *ngIf="loadingAddresses" role="status"><span>Đang tải sổ địa chỉ…</span></div>
+        <div class="address-loading" *ngIf="loadingAddresses" role="status">
+          <span class="spinner-border spinner-border-sm text-success" aria-hidden="true"></span>
+          <span>Đang tải sổ địa chỉ…</span></div>
 
         <div class="address-list" *ngIf="!loadingAddresses && addresses.length; else emptyState">
           <h3>Địa chỉ nhận hàng</h3>
@@ -74,6 +76,7 @@
     </form>
   </section>
 </div>
+<app-logout-confirmation [open]="showLogoutConfirm" (cancelled)="showLogoutConfirm = false" (confirmed)="confirmLogout()"></app-logout-confirmation>
 
 <div class="confirm-backdrop" *ngIf="deleteConfirmId" (click)="cancelDelete()">
   <section class="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-title" (click)="$event.stopPropagation()">

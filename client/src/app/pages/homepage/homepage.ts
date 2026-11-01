@@ -7,8 +7,8 @@ import { BlogService } from '../../services/blog-service';
 import { Products } from '../../classes/Products';
 import { Blog } from '../../classes/Blog';
 import { CartService } from '../../services/cart-service';
-import { Router } from '@angular/router';
 import { WishlistService } from '../../services/wishlist-service';
+import { BuyNowService } from '../../services/buy-now-service';
 
 @Component({
   selector: 'app-homepage',
@@ -71,68 +71,77 @@ export class Homepage implements OnInit {
     },
   ];
 
-  blogs = signal<any[]>([
-    {
-      img: '/assets/images/bl1.jpg',
-      date: '29 Tháng 5, 2026',
-      link: '/blog',
-      title: 'Pha Trà Thảo Mộc Chuẩn Floralia',
-      desc: 'Khám phá cách pha trà thảo mộc để tận hưởng hương thơm và vị trà trọn vẹn.',
-    },
-    {
-      img: '/assets/images/bl2.jpg',
-      date: '31 Tháng 5, 2026',
-      link: '/blog',
-      title: 'Bắt Đầu Ngày Mới Với Một Tách Trà',
-      desc: 'Một thói quen nhỏ để bạn dành thời gian cho bản thân giữa nhịp sống bận rộn.',
-    },
-    {
-      img: '/assets/images/bl3.jpg',
-      date: '2 Tháng 6, 2026',
-      link: '/blog',
-      title: 'Trà Hoa Cúc Cho Khoảng Thời Gian Thư Giãn',
-      desc: 'Tìm hiểu hương vị thanh nhẹ của trà hoa cúc và cách thưởng thức tại nhà.',
-    },
-  ]);
+  blogs = signal<Blog[]>([]);
+  blogsLoading = signal(true);
 
   constructor(
     private productService: ProductService,
     private blogService: BlogService,
     private reviewService: ReviewService,
     readonly productNavigation: ProductNavigationService,
-    private cartService: CartService,
-    private router: Router,
+    readonly cartService: CartService,
+    readonly buyNowService: BuyNowService,
     private readonly wishlistService: WishlistService,
   ) {}
 
-  addedSku = signal<string | null>(null);
-  addedProductMessage = signal<string | null>(null);
-  private messageTimeout: any = null;
+  cartPopupProduct: Products | null = null;
+  cartPopupVariant: Products['variants'][number] | null = null;
+  cartPopupQuantity = 1;
 
   addToCart(product: Products, event?: Event): void {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-    const variant = product.variants?.find(v => (v.stock ?? 0) > 0) || product.variants?.[0] || null;
-    const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
-    const image = this.getProductImage(product);
+    if (!this.hasStock(product)) return;
+    this.cartPopupProduct = product;
+    this.cartPopupVariant =
+      product.variants?.find(option => option.isDefault && option.stock > 0) ??
+      product.variants?.find(option => option.stock > 0) ??
+      product.variants?.find(option => option.isDefault) ??
+      product.variants?.[0] ?? null;
+    this.cartPopupQuantity = 1;
+  }
 
-    // 1. Tự động thêm vào giỏ hàng
-    this.cartService.addProduct(product, variant, 1, image);
+  hasStock(product: Products): boolean {
+    return product.variants?.length
+      ? product.variants.some(variant => variant.stock > 0)
+      : product.stock > 0;
+  }
 
-    // 2. KHÔNG chuyển trang để người xem tiếp tục lướt xem sản phẩm mà không cần tua về!
-    const name = product.name || 'Sản phẩm';
-    this.addedSku.set(product.sku);
-    this.addedProductMessage.set(`Đã thêm "${name}" vào giỏ hàng!`);
+  closeCartPopup(): void {
+    this.cartPopupProduct = null;
+    this.cartPopupVariant = null;
+    this.cartPopupQuantity = 1;
+  }
 
-    if (this.messageTimeout) {
-      clearTimeout(this.messageTimeout);
-    }
-    this.messageTimeout = setTimeout(() => {
-      this.addedProductMessage.set(null);
-      this.addedSku.set(null);
-    }, 2500);
+  selectCartPopupVariant(variant: Products['variants'][number]): void {
+    this.cartPopupVariant = variant;
+    this.cartPopupQuantity = Math.min(this.cartPopupQuantity, Math.max(variant.stock, 1));
+  }
+
+  get cartPopupStock(): number {
+    return this.cartPopupVariant?.stock ?? this.cartPopupProduct?.stock ?? 0;
+  }
+
+  get cartPopupPrice(): number {
+    return this.cartPopupVariant?.price ?? this.cartPopupProduct?.price ?? 0;
+  }
+
+  changeCartPopupQuantity(delta: number): void {
+    const next = this.cartPopupQuantity + delta;
+    if (next >= 1 && next <= this.cartPopupStock) this.cartPopupQuantity = next;
+  }
+
+  confirmAddToCart(): void {
+    const product = this.cartPopupProduct;
+    if (!product || this.cartPopupStock < 1) return;
+    this.cartService.addProduct(product, this.cartPopupVariant, this.cartPopupQuantity, this.getProductImage(product));
+    this.closeCartPopup();
+  }
+
+  buyNow(product: Products): void {
+    this.buyNowService.open(product, this.getProductImage(product));
   }
   
 
@@ -158,6 +167,10 @@ export class Homepage implements OnInit {
         else if (Array.isArray(res?.data)) list = res.data;
         else if (Array.isArray(res?.products)) list = res.products;
 
+        list = list.map(product => {
+          const defaultVariant = product.variants?.find(variant => variant.isDefault) ?? product.variants?.[0];
+          return defaultVariant ? { ...product, price: defaultVariant.price } : product;
+        });
         this.products.set(list);
        
 
@@ -182,27 +195,22 @@ export class Homepage implements OnInit {
       },
     });
 
-    // Tải bài viết blog nổi bật từ máy chủ
+    // Lấy trực tiếp các bài viết từ cùng API với trang blog.
+    this.blogsLoading.set(true);
     this.blogService.getAll({ limit: 3 }).subscribe({
       next: (res) => {
-        if (res?.data && res.data.length > 0) {
-          const mapped = res.data.map((b: Blog) => ({
-            img: this.getBlogImg(b),
-            date: b.date || 'Gần đây',
-            link: `/blog/${b.slug}`,
-            title: b.title,
-            desc: b.excerpt || '',
-          }));
-          this.blogs.set(mapped);
-        }
+        this.blogs.set(res?.data || []);
+        this.blogsLoading.set(false);
       },
       error: (err) => {
-        console.warn('Không tải được blog từ API, dùng dữ liệu mặc định:', err);
+        console.warn('Không tải được danh sách blog từ API:', err);
+        this.blogs.set([]);
+        this.blogsLoading.set(false);
       },
     });
   }
 
-  private getBlogImg(blog: Blog): string {
+  getBlogImg(blog: Blog): string {
     if (blog.imageData) {
       if (blog.imageData.startsWith('data:image/')) return blog.imageData;
       const mime = blog.imageMimeType || 'image/jpeg';
@@ -288,7 +296,7 @@ export class Homepage implements OnInit {
     if (p.imageUrl) {
       return p.imageUrl.startsWith('http://') || p.imageUrl.startsWith('https://')
         ? p.imageUrl
-        : `http://localhost:3002${p.imageUrl}`;
+        : `http://localhost:3002${p.imageUrl.startsWith('/') ? '' : '/'}${p.imageUrl}`;
     }
 
     return '/assets/images/no-image.svg';

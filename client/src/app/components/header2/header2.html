@@ -120,6 +120,15 @@
     </div>
   </nav>
 
+  <a
+    *ngIf="guestTrackedOrderId"
+    class="guest-order-tracker"
+    [routerLink]="['/orders', guestTrackedOrderId]"
+    aria-label="Theo dõi đơn hàng gần nhất">
+    <i class="bi bi-truck" aria-hidden="true"></i>
+    <span>Theo dõi đơn hàng</span>
+  </a>
+
   <!-- CÁC NÚT CỐ ĐỊNH -->
   <div class="contact-buttons" [class.show]="showFloat">
     <button type="button" class="fab fab-top" (click)="scrollTop()" aria-label="Lên đầu trang">

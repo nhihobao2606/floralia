@@ -9,7 +9,12 @@ async function getBlogs(req, res) {
     try {
         const { featured, category, q, limit, page } = req.query;
         const filter = {};
-        const conditions = [];
+        const conditions = [{
+            $or: [
+                { status: "published" },
+                { status: { $exists: false } }
+            ]
+        }];
 
         if (featured === "true") {
             filter.featured = true;
@@ -72,20 +77,31 @@ async function getBlogByIdentifier(req, res) {
 
         if (ObjectId.isValid(identifier)) {
             blog = await Blog.findOneAndUpdate(
-                { $or: [{ _id: new ObjectId(identifier) }, { slug: identifier }] },
+                {
+                    $and: [
+                        { $or: [{ status: "published" }, { status: { $exists: false } }] },
+                        { $or: [{ _id: new ObjectId(identifier) }, { slug: identifier }] }
+                    ]
+                },
                 { $inc: { views: 1 } },
                 { returnDocument: "after" }
             );
         } else {
             blog = await Blog.findOneAndUpdate(
-                { slug: identifier },
+                {
+                    slug: identifier,
+                    $or: [{ status: "published" }, { status: { $exists: false } }]
+                },
                 { $inc: { views: 1 } },
                 { returnDocument: "after" }
             );
 
             if (!blog) {
                 blog = await Blog.findOneAndUpdate(
-                    { slug: new RegExp(escapeRegex(identifier), "i") },
+                    {
+                        slug: new RegExp(escapeRegex(identifier), "i"),
+                        $or: [{ status: "published" }, { status: { $exists: false } }]
+                    },
                     { $inc: { views: 1 } },
                     { returnDocument: "after" }
                 );

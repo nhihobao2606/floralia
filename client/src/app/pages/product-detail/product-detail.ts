@@ -7,6 +7,7 @@ import { CartService } from '../../services/cart-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { Products } from '../../classes/Products';
+import { BuyNowService } from '../../services/buy-now-service';
 
 interface ProductVariant {
   sku: string;
@@ -100,6 +101,7 @@ export class ProductDetail implements OnInit {
     readonly productNavigation: ProductNavigationService,
     readonly cartService: CartService,
     private readonly wishlistService: WishlistService,
+    private readonly buyNowService: BuyNowService,
   ) {}
 
   ngOnInit(): void {
@@ -580,30 +582,12 @@ export class ProductDetail implements OnInit {
 
   buyNow(): void {
     if (!this.product) return;
-    const variant = this.selectedVariant;
-    const price = Number(variant?.price ?? this.product.price ?? this.product.minPrice ?? 0);
-    const qty = Math.max(1, this.quantity || 1);
-    const image = this.activeImage || this.productImage(this.product);
-
-    this.cartService.addProduct(this.product, variant, qty, image);
-
-    const checkoutItem = {
-      id: variant?.sku || this.product.sku || this.product._id || 'PROD',
-      productId: this.product._id || this.product.id || this.product.sku,
-      sku: variant?.sku || this.product.sku || 'PROD',
-      name: this.product.name,
-      title: this.product.name,
-      image: image,
-      thumbnail: image,
-      variant: variant?.label || '',
-      variantLabel: variant?.label || '',
-      price: price,
-      quantity: qty,
-      total: price * qty
-    };
-    sessionStorage.setItem('checkout_items', JSON.stringify([checkoutItem]));
-
-    this.router.navigate(['/checkout']);
+    this.buyNowService.open(
+      this.product,
+      this.activeImage || this.productImage(this.product),
+      this.selectedVariant,
+      this.quantity,
+    );
   }
 
   isProductFavorite(product: ProductDetails): boolean {

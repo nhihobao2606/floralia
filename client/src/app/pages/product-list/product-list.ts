@@ -7,6 +7,7 @@ import { ProductNavigationService } from '../../services/product-navigation-serv
 import { CartService } from '../../services/cart-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { Products } from '../../classes/Products';
+import { BuyNowService } from '../../services/buy-now-service';
 
 @Component({
   selector: 'app-product-list',
@@ -28,7 +29,6 @@ export class ProductListComponent implements OnInit {
   selectedTag: string = '';
   currentPage = 1;
   wishlist = new Set<string>();
-  buyNowProduct: Products | null = null;
   cartPopupProduct: Products | null = null;
   cartPopupVariant: Products['variants'][number] | null = null;
   cartPopupQuantity = 1;
@@ -65,6 +65,7 @@ export class ProductListComponent implements OnInit {
     private changeDetector: ChangeDetectorRef,
     readonly cartService: CartService,
     private readonly wishlistService: WishlistService,
+    readonly buyNowService: BuyNowService,
   ) {}
 
   get pageSize(): number {
@@ -134,9 +135,13 @@ export class ProductListComponent implements OnInit {
 
     this.route.queryParamMap.subscribe(params => {
       this.selectedCategory = params.get('category') || 'all';
-      this.applyFilters();
-      this.changeDetector.markForCheck();
-    });
+        const benefitSlug = this.normalizeSlug(params.get('congdung') || '');
+        this.selectedTag = this.benefitsList.find(benefit =>
+          benefit.values.some(value => this.normalizeSlug(value) === benefitSlug)
+        )?.label ?? '';
+        this.applyFilters();
+        this.changeDetector.markForCheck();
+      });
     this.fetchProducts();
   }
 
@@ -175,10 +180,14 @@ export class ProductListComponent implements OnInit {
 
   onSelectCategory(slug: string): void {
     this.selectedCategory = slug;
+    this.selectedTag = '';
     this.applyFilters();
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { category: slug === 'all' ? null : slug },
+      queryParams: {
+        category: slug === 'all' ? null : slug,
+        congdung: null,
+      },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -191,7 +200,7 @@ export class ProductListComponent implements OnInit {
     this.applyFilters();
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { category: null },
+      queryParams: { category: null, congdung: null },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });
@@ -205,6 +214,13 @@ export class ProductListComponent implements OnInit {
   onSelectTag(tag: string): void {
     this.selectedTag = this.selectedTag === tag ? '' : tag; // Toggle chọn / bỏ chọn
     this.applyFilters();
+    const benefit = this.benefitsList.find(item => item.label === this.selectedTag);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { congdung: benefit?.values[0] ?? null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   goToPage(page: number): void {
@@ -230,7 +246,6 @@ export class ProductListComponent implements OnInit {
   }
 
   addToCart(product: Products): void {
-    this.buyNowProduct = null;
     this.cartPopupProduct = product;
     this.cartPopupVariant =
       product.variants?.find((option) => option.isDefault && option.stock > 0) ??
@@ -279,34 +294,7 @@ export class ProductListComponent implements OnInit {
   }
 
   openBuyNowPopup(product: Products): void {
-    this.closeCartPopup();
-    const variant = product.variants?.find(v => (v.stock ?? 0) > 0) || product.variants?.[0] || null;
-    const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
-    const image = this.getProductImage(product);
-
-    this.cartService.addProduct(product, variant, 1, image);
-
-    const checkoutItem = {
-      id: variant?.sku || product.sku || product._id || 'PROD',
-      productId: product._id || product.id || product.sku,
-      sku: variant?.sku || product.sku || 'PROD',
-      name: product.name,
-      title: product.name,
-      image: image,
-      thumbnail: image,
-      variant: variant?.label || '',
-      variantLabel: variant?.label || '',
-      price: price,
-      quantity: 1,
-      total: price
-    };
-    sessionStorage.setItem('checkout_items', JSON.stringify([checkoutItem]));
-
-    this.router.navigate(['/checkout']);
-  }
-
-  closeBuyNowPopup(): void {
-    this.buyNowProduct = null;
+    this.buyNowService.open(product, this.getProductImage(product));
   }
 
   isWished(product: Products): boolean {

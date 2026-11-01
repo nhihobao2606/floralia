@@ -2,6 +2,7 @@ import { Component, HostListener, OnDestroy, OnInit, signal } from '@angular/cor
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WishlistService } from './services/wishlist-service';
+import { BuyNowService } from './services/buy-now-service';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,11 @@ export class App implements OnInit, OnDestroy {
   isLoggedIn = false;
   private subs = new Subscription();
 
-  constructor(private router: Router, readonly wishlistService: WishlistService) {}
+  constructor(
+    private router: Router,
+    readonly wishlistService: WishlistService,
+    readonly buyNowService: BuyNowService,
+  ) {}
 
   ngOnInit(): void {
     this.checkAuth();

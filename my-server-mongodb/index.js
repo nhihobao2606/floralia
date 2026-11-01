@@ -19,6 +19,7 @@ const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const addressRoutes = require('./routes/addressRoutes');
 const blogRoutes = require('./routes/blogRoutes');
+const adminBlogRoutes = require('./routes/adminBlogRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/users', userRoutes);
 app.use('/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/blogs', blogRoutes);
+app.use('/api/admin/blogs', adminBlogRoutes);
 app.use('/api/orders', orderRoutes);
 
 async function startServer() {

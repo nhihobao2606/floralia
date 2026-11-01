@@ -35,6 +35,7 @@ export class Header implements OnInit, OnDestroy {
   private variantPickerRequestId = 0;
   user: any = null;
   userOpen = false;
+  showLogoutConfirm = false;
 
   // Giao diện
   scrolled = false;
@@ -265,8 +266,14 @@ export class Header implements OnInit, OnDestroy {
     this.userOpen = !this.userOpen;
   }
 
-  logout(e: Event): void {
+  requestLogout(e: Event): void {
     e.preventDefault();
+    this.showLogoutConfirm = true;
+    this.userOpen = false;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
     localStorage.removeItem('currentUser');
     sessionStorage.removeItem('currentUser');
     localStorage.removeItem('token');

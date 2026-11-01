@@ -47,7 +47,7 @@ describe('PromotionsComponent', () => {
     expect(component.copiedCode()).toBe('FLORA10');
   });
 
-  it('should add an in-stock promotional product to the cart and notify the header', () => {
+  it('should let shoppers choose a variant and quantity before adding a promotional product', () => {
     const product: any = {
       sku: 'TEA-1',
       slug: 'tra-hoa',
@@ -63,12 +63,17 @@ describe('PromotionsComponent', () => {
     window.addEventListener('cart-updated', onCartUpdated);
 
     component.addToCart(product);
+    expect(component.cartPopupProduct).toBe(product);
+    expect(component.cartPopupVariant?.sku).toBe('TEA-1-100G');
+    component.changeCartPopupQuantity(1);
+    component.confirmAddToCart();
 
     const cart = TestBed.inject(CartService).getCart();
     expect(cart).toHaveLength(1);
     expect(cart[0].variantSku).toBe('TEA-1-100G');
-    expect(cart[0].quantity).toBe(1);
+    expect(cart[0].quantity).toBe(2);
     expect(cartUpdated).toBe(true);
+    expect(component.cartPopupProduct).toBeNull();
 
     window.removeEventListener('cart-updated', onCartUpdated);
   });

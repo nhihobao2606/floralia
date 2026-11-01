@@ -10,6 +10,7 @@ import { CartService } from '../../services/cart-service';
   styleUrl: './orders.css'
 })
 export class Orders implements OnInit {
+  showLogoutConfirm = false;
   menu = [
     { label: 'Tổng quan', icon: 'bi-grid', link: '/account' },
     { label: 'Đơn hàng', icon: 'bi-box-seam', link: '/orders' },
@@ -305,8 +306,13 @@ export class Orders implements OnInit {
     return (num || 0).toLocaleString('vi-VN') + 'đ';
   }
 
-  logout(event: Event): void {
+  requestLogout(event: Event): void {
     event.preventDefault();
+    this.showLogoutConfirm = true;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
     sessionStorage.removeItem('currentUser');

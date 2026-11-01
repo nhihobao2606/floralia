@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { OrderService, Order } from '../../services/order-service';
+import { GUEST_TRACKED_ORDER_KEY, OrderService, Order } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
 import { ProductService } from '../../services/product-service';
 
@@ -10,6 +10,7 @@ interface CheckoutItem {
   image: string;
   variant?: string;
   price: number;
+  productDiscount?: number;
   quantity: number;
   total: number;
 }
@@ -32,7 +33,7 @@ export class CheckoutComponent implements OnInit {
   isEditingAddress = false;
 
   couponCode = '';
-  shippingFee = 0;
+  shippingFee = Number(sessionStorage.getItem('checkout_shipping_fee') || 30000);
   paymentMethod = 'paypal';
 
   items: CheckoutItem[] = [];
@@ -73,6 +74,7 @@ export class CheckoutComponent implements OnInit {
         image: p.image || p.thumbnail || '/assets/images/products/74.png',
         variant: p.variantLabel || p.variant || '',
         price: Number(p.price || 0),
+        productDiscount: Number(p.productDiscount || 0),
         quantity: Number(p.quantity || 1),
         total: Number(p.price || 0) * Number(p.quantity || 1)
       }));
@@ -121,13 +123,14 @@ export class CheckoutComponent implements OnInit {
 
   get discount(): number {
     if (this.subtotal <= 0) return 0;
+    const productDiscount = this.items.reduce((sum, item) => sum + (Number(item.productDiscount) || 0), 0);
     if (this.couponCode.trim()) {
-      return Math.min(this.subtotal, 155000);
+      return productDiscount + Math.min(this.subtotal, 155000);
     }
     if (this.subtotal >= 500000) {
-      return 155000;
+      return productDiscount + 155000;
     }
-    return Math.min(this.subtotal, Math.floor(this.subtotal * 0.1));
+    return productDiscount + Math.min(this.subtotal, Math.floor(this.subtotal * 0.1));
   }
 
   get total(): number {
@@ -183,15 +186,23 @@ export class CheckoutComponent implements OnInit {
     // 1. Lưu ngay vào OrderService và LocalStorage để hiển thị tức thì không độ trễ
     this.orderService.saveOrderLocal(orderData);
     sessionStorage.removeItem('checkout_items');
+    sessionStorage.removeItem('checkout_shipping_fee');
     this.cartService.clearCart();
 
     // 2. Gửi request tạo đơn hàng lên MongoDB Atlas backend (FloraliaTea.Orders)
     this.orderService.createOrder(orderData).subscribe({
       next: (res) => {
+        if (res.persisted) {
+          this.productService.invalidateCache();
+        }
         const targetId = res?.order?.id || orderId;
+        localStorage.setItem(GUEST_TRACKED_ORDER_KEY, String(targetId));
+        window.dispatchEvent(new Event('guest-order-tracked'));
         this.router.navigate(['/order-success', targetId]);
       },
       error: () => {
+        localStorage.setItem(GUEST_TRACKED_ORDER_KEY, orderId);
+        window.dispatchEvent(new Event('guest-order-tracked'));
         this.router.navigate(['/order-success', orderId]);
       }
     });

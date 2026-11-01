@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
   styleUrl: './addresses.css',
 })
 export class Addresses implements OnInit {
+  showLogoutConfirm = false;
   private readonly API = 'http://localhost:3002/api';
   private readonly PROVINCES_API = 'https://provinces.open-api.vn/api/v2';
 
@@ -442,6 +443,16 @@ export class Addresses implements OnInit {
     });
     window.dispatchEvent(new Event('auth-changed'));
     this.router.navigate(['/login']);
+  }
+
+  requestLogout(e: Event): void {
+    e.preventDefault();
+    this.showLogoutConfirm = true;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
+    this.logout();
   }
 }
 

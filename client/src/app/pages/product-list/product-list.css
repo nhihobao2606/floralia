@@ -383,6 +383,8 @@
   color: #e9b44c;
   font-size: 15px;
 }
+.sale-sold { display: flex; align-items: center; gap: 5px; margin: -4px 0 12px; color: #78877c; font-size: 12px; }
+.sale-sold i { color: #789879; font-size: 13px; }
 
 .sale-rating small {
   margin-left: 4px;

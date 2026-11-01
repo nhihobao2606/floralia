@@ -110,7 +110,7 @@
                 <li><a class="dropdown-item" routerLink="/orders"><i class="bi bi-box-seam"></i> Đơn hàng của tôi</a></li>
                 <li><a class="dropdown-item" routerLink="/wishlist"><i class="bi bi-heart"></i> Sản phẩm yêu thích</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item logout" href="#" (click)="logout($event)"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                <li><a class="dropdown-item logout" href="#" (click)="requestLogout($event)"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
               </ul>
             </div>
           </div>
@@ -257,4 +257,5 @@
       </div>
     </section>
   </div>
+  <app-logout-confirmation [open]="showLogoutConfirm" (cancelled)="showLogoutConfirm = false" (confirmed)="confirmLogout()"></app-logout-confirmation>
 </header>

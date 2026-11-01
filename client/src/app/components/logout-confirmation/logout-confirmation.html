@@ -1,0 +1,16 @@
+<div class="logout-confirm-backdrop" *ngIf="open" (click)="cancelled.emit()">
+  <section
+    class="logout-confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="logout-confirm-title"
+    (click)="$event.stopPropagation()">
+    <div class="logout-confirm-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></div>
+    <h2 id="logout-confirm-title">Đăng xuất khỏi tài khoản?</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất không?</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="logout-cancel-button" (click)="cancelled.emit()">Ở lại</button>
+      <button type="button" class="logout-accept-button" (click)="confirmed.emit()">Đăng xuất</button>
+    </div>
+  </section>
+</div>

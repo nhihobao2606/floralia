@@ -10,6 +10,7 @@ export interface CartProduct {
   price?: number;
   minPrice?: number;
   oldPrice?: number;
+  discount?: number;
   stock?: number;
   variants?: CartVariant[];
 }
@@ -33,11 +34,13 @@ export interface CartItem {
   slug?: string;
   price: number;
   oldPrice?: number;
+  discount?: number;
   quantity: number;
   image?: string;
   thumbnail?: string;
   variantLabel?: string;
   variantCount?: number;
+  selected?: boolean;
   productSku?: string;
   variants?: CartVariant[];
   [key: string]: unknown;
@@ -101,7 +104,13 @@ export class CartService {
       existing.variantCount = product.variants?.length ?? existing.variantCount ?? 0;
     } else {
       const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
-      const oldPrice = Number(variant?.oldPrice ?? product.oldPrice ?? 0);
+      const discount = Math.max(0, Math.min(99, Number(product.discount) || 0));
+      const variantOldPrice = Number(variant?.oldPrice) || 0;
+      const productOldPrice = Number(product.oldPrice) || 0;
+      const suppliedOldPrice = variantOldPrice > price ? variantOldPrice : productOldPrice;
+      const oldPrice = suppliedOldPrice > price
+        ? suppliedOldPrice
+        : discount > 0 ? Math.round(price / (1 - discount / 100)) : price;
       cart.push({
         id: variantSku || productId,
         productId,
@@ -113,6 +122,7 @@ export class CartService {
         slug: product.slug,
         price,
         oldPrice,
+        discount,
         quantity: quantityToAdd,
         image,
         thumbnail: image,
@@ -184,7 +194,11 @@ export class CartService {
     target.id = variantSku;
     target.variantLabel = variant.label || '';
     target.price = Number(variant.price || 0);
-    target.oldPrice = Number(variant.oldPrice || 0);
+    const suppliedOldPrice = Number(variant.oldPrice || 0);
+    const discount = Math.max(0, Math.min(99, Number(target.discount) || 0));
+    target.oldPrice = suppliedOldPrice > target.price
+      ? suppliedOldPrice
+      : discount > 0 ? Math.round(target.price / (1 - discount / 100)) : target.price;
     target.quantity = quantityToSet;
     this.saveCart(cart);
     this.showCartMessage('Đã đổi phân loại trong giỏ hàng.');
