@@ -34,6 +34,7 @@ export interface CartItem {
   price: number;
   oldPrice?: number;
   quantity: number;
+  stock?: number;
   image?: string;
   thumbnail?: string;
   variantLabel?: string;
@@ -99,6 +100,7 @@ export class CartService {
       );
       existing.variants = product.variants?.map((option) => ({ ...option }));
       existing.variantCount = product.variants?.length ?? existing.variantCount ?? 0;
+      existing.stock = stock;
     } else {
       const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
       const oldPrice = Number(variant?.oldPrice ?? product.oldPrice ?? 0);
@@ -114,6 +116,7 @@ export class CartService {
         price,
         oldPrice,
         quantity: quantityToAdd,
+        stock,
         image,
         thumbnail: image,
         variantLabel: variant?.label || '',
@@ -132,13 +135,7 @@ export class CartService {
     const target = cart.find((candidate) => this.matches(candidate, item));
     if (!target) return;
 
-    const quantity = Number(target.quantity || 0) + delta;
-    if (quantity < 1) {
-      this.saveCart(cart.filter((candidate) => candidate !== target));
-      return;
-    }
-
-    target.quantity = quantity;
+    target.quantity = Math.max(1, Number(target.quantity || 1) + delta);
     this.saveCart(cart);
   }
 
@@ -161,6 +158,7 @@ export class CartService {
     const quantityToSet = Math.min(Math.max(1, Math.floor(Number(quantity) || 1)), stock);
     if ((target.variantSku || '') === variantSku) {
       target.quantity = quantityToSet;
+      target.stock = stock;
       this.saveCart(cart);
       return true;
     }
@@ -186,6 +184,7 @@ export class CartService {
     target.price = Number(variant.price || 0);
     target.oldPrice = Number(variant.oldPrice || 0);
     target.quantity = quantityToSet;
+    target.stock = stock;
     this.saveCart(cart);
     this.showCartMessage('Đã đổi phân loại trong giỏ hàng.');
     return true;

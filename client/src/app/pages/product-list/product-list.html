@@ -99,7 +99,7 @@
               <div class="sale-item">
                 <img [src]="getProductImage(p)" [alt]="p.name" loading="lazy">
                 <div>
-                  <h6><a [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p, products: products }">{{ p.name }}</a></h6>
+                  <h6><a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products }">{{ p.name }}</a></h6>
                   <p>
                     {{ p.price | currency:'VND':'symbol':'1.0-0':'vi' }}
                     <del *ngIf="p.oldPrice">{{ p.oldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</del>
@@ -127,7 +127,7 @@
           <div class="product-card" *ngFor="let item of paginatedProducts">
             <div class="product-img">
              <span class="sale-badge" *ngIf="item.isSale || item.discount > 0">-{{ item.discount }}%</span>
-             <a [routerLink]="productNavigation.detailRoute(item.slug)" [state]="{ product: item, products: products }">
+             <a [routerLink]="productNavigation.detailRoute(item)" [state]="{ product: item, products: products }">
                <img [src]="getProductImage(item)" [alt]="item.name">
              </a>
              <span class="out-of-stock-overlay" *ngIf="!hasStock(item)">HẾT HÀNG</span>
@@ -143,7 +143,7 @@
             </div>
 
             <div class="product-info">
-             <a [routerLink]="productNavigation.detailRoute(item.slug)" [state]="{ product: item, products: products }" class="sale-name">{{ item.name }}</a>
+             <a [routerLink]="productNavigation.detailRoute(item)" [state]="{ product: item, products: products }" class="sale-name">{{ item.name }}</a>
 
              <div class="sale-rating" [attr.aria-label]="'Đánh giá ' + formatRatingAverage(item.ratingAverage) + ' trên 5 sao'">
                <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi"
@@ -258,7 +258,10 @@
       <div>
         <p class="cart-add-eyebrow">THÊM VÀO GIỎ HÀNG</p>
         <h2 id="cart-add-title">{{ product.name }}</h2>
-        <strong>{{ cartPopupPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
+        <div class="cart-add-price">
+          <strong>{{ cartPopupPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
+          <del *ngIf="cartPopupOldPrice > cartPopupPrice">{{ cartPopupOldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</del>
+        </div>
       </div>
     </div>
 
@@ -278,6 +281,8 @@
         </button>
       </div>
     </div>
+
+    <p class="cart-add-stock">Kho: {{ cartPopupStock }}</p>
 
     <div class="cart-add-footer">
       <div class="cart-add-quantity" aria-label="Số lượng">

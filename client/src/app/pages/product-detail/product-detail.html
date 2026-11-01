@@ -277,6 +277,30 @@
         </div>
       </section>
 
+      <div
+        class="login-prompt-backdrop"
+        *ngIf="loginPromptOpen"
+        (click)="closeLoginPrompt()"
+        (keydown.escape)="closeLoginPrompt()">
+        <section
+          class="login-prompt-dialog"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="login-prompt-title"
+          aria-describedby="login-prompt-description"
+          (click)="$event.stopPropagation()">
+          <button type="button" class="login-prompt-close" aria-label="Đóng" (click)="closeLoginPrompt()">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
+          <h2 id="login-prompt-title">Vui lòng đăng nhập</h2>
+          <p id="login-prompt-description">Bạn cần đăng nhập để đánh giá sản phẩm.</p>
+          <div class="login-prompt-actions">
+            <button type="button" class="login-prompt-cancel" (click)="closeLoginPrompt()">Hủy</button>
+            <button type="button" class="login-prompt-confirm" (click)="goToLoginFromPrompt()">OK</button>
+          </div>
+        </section>
+      </div>
+
       <section class="related-section">
         <div class="section-heading">
           <p class="eyebrow">Khám phá thêm</p>
@@ -290,7 +314,7 @@
             <div class="related-visual">
               <a
                 class="related-image"
-                [href]="productNavigation.detailUrl(related.slug)"
+                [href]="productNavigation.detailUrl(related)"
                 (click)="navigateToRelatedProduct($event, related)">
                 <img [src]="productImage(related)" [alt]="related.name || 'Sản phẩm'" (error)="onImageError($event)">
                 <span *ngIf="related.discount" class="related-discount">-{{ related.discount }}%</span>
@@ -299,7 +323,7 @@
             <div class="related-info">
               <a
                 class="related-name"
-                [href]="productNavigation.detailUrl(related.slug)"
+                [href]="productNavigation.detailUrl(related)"
                 (click)="navigateToRelatedProduct($event, related)">{{ related.name }}</a>
               <div class="related-rating" [attr.aria-label]="'Đánh giá ' + formatRatingAverage(related.ratingAverage) + ' trên 5 sao'">
                 <i
@@ -347,7 +371,10 @@
         <div>
           <p class="eyebrow">Thêm vào giỏ hàng</p>
           <h2 id="quick-add-title">{{ selection.product.name }}</h2>
-          <strong>{{ formatPrice(selection.variant?.price ?? selection.product.price ?? selection.product.minPrice ?? 0) }}</strong>
+          <div class="quick-add-price">
+            <strong>{{ formatPrice(selection.variant?.price ?? selection.product.price ?? selection.product.minPrice ?? 0) }}</strong>
+            <del *ngIf="(selection.variant?.oldPrice ?? selection.product.oldPrice ?? 0) > (selection.variant?.price ?? selection.product.price ?? selection.product.minPrice ?? 0)">{{ formatPrice(selection.variant?.oldPrice ?? selection.product.oldPrice ?? 0) }}</del>
+          </div>
         </div>
       </div>
 
@@ -367,6 +394,8 @@
           </button>
         </div>
       </div>
+
+      <p class="quick-add-stock">Kho: {{ selection.variant?.stock ?? selection.product.stock ?? 0 }}</p>
 
       <div class="quick-add-footer">
         <div class="quantity-control" aria-label="Số lượng">

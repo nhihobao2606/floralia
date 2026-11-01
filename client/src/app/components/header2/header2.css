@@ -292,9 +292,12 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 .cart-item img { width: 76px; height: 76px; border-radius: 16px; object-fit: cover; }
 .cart-info { flex: 1; min-width: 0; }
 .cart-info h5 { margin: 0 0 8px; font-size: 15px; line-height: 1.45; color: var(--matcha); }
+.cart-stock { margin: -3px 0 8px; color: #758477; font-size: 12px; }
 .quantity { display: inline-flex; align-items: center; gap: 4px; padding: 3px; border-radius: 50px; background: #fff; border: 1px solid #e1ebde; }
 .quantity button { width: 26px; height: 26px; border: 0; border-radius: 50%; background: var(--mint); color: var(--matcha); cursor: pointer; transition: .25s; }
 .quantity button:hover { background: var(--matcha); color: #fff; }
+.quantity button:disabled,
+.quantity button:disabled:hover { background: transparent; color: #b8c3b5; cursor: not-allowed; }
 .quantity span { min-width: 24px; text-align: center; font-size: 14px; }
 .cart-controls { display: flex; min-width: 0; align-items: center; gap: 6px; }
 .cart-controls .quantity { flex: 0 0 auto; }
@@ -314,7 +317,10 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 .variant-picker-dialog .cart-add-eyebrow { margin: 0 0 8px; color: #82957c; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
 .variant-picker-dialog .cart-add-product h2 { margin: 0 0 8px; color: #214e36; font: 600 23px/1.35 'Lora', Georgia, serif; }
 .variant-picker-dialog .cart-add-product strong { color: #245c3e; font-size: 23px; }
+.variant-picker-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.variant-picker-price del { color: #a7aaa6; font-size: 15px; }
 .variant-picker-dialog .cart-add-variants { margin-top: 28px; }
+.variant-picker-stock { margin: 16px 0 0; color: #657568; font-size: 14px; }
 .variant-picker-dialog .cart-add-variants h3 { margin: 0 0 12px; color: #39483d; font: 600 17px 'Lora', Georgia, serif; }
 .variant-picker-dialog .cart-add-variant-options { display: flex; flex-wrap: wrap; gap: 10px; }
 .variant-picker-dialog .cart-add-variant { min-height: 48px; padding: 0 17px; border: 1px solid #dfe5dc; border-radius: 16px; background: #fff; color: #5b685f; font: inherit; cursor: pointer; }

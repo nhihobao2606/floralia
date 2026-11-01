@@ -71,7 +71,7 @@
               </form>
 
               <div class="search-results-list">
-                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p }">
+                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p }">
                   <img
                     [src]="getSearchProductImage(p)"
                     [alt]="getName(p)"
@@ -171,9 +171,10 @@
           <img [src]="cartImage(it)" [alt]="it.name" (error)="onImgError($event)">
           <div class="cart-info">
             <h5>{{ it.name || it.title }}</h5>
+            <div class="cart-stock">Kho: {{ cartStock(it) }}</div>
             <div class="cart-controls">
               <div class="quantity">
-                <button type="button" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
+                <button type="button" (click)="changeQty(it, -1)" [disabled]="it.quantity <= 1" aria-label="Giảm">−</button>
                 <span>{{ it.quantity }}</span>
                 <button type="button" (click)="changeQty(it, 1)" aria-label="Tăng">+</button>
               </div>
@@ -223,7 +224,10 @@
         <div>
           <p class="cart-add-eyebrow">ĐỔI PHÂN LOẠI</p>
           <h2 id="cartVariantTitleGuest">{{ variantPickerItem?.name || variantPickerItem?.title }}</h2>
-          <strong>{{ formatPrice(variantPickerPrice) }}</strong>
+          <div class="variant-picker-price">
+            <strong>{{ formatPrice(variantPickerPrice) }}</strong>
+            <del *ngIf="variantPickerOldPrice > variantPickerPrice">{{ formatPrice(variantPickerOldPrice) }}</del>
+          </div>
         </div>
       </div>
 
@@ -245,6 +249,8 @@
         </div>
       </div>
       <p class="variant-picker-error" *ngIf="variantPickerError">{{ variantPickerError }}</p>
+
+      <p class="variant-picker-stock" *ngIf="selectedVariant">Kho: {{ selectedVariant.stock ?? 0 }}</p>
 
       <div class="cart-add-footer">
         <div class="cart-add-quantity" aria-label="Số lượng">

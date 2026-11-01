@@ -6,6 +6,7 @@
   name: string;
   category: string;
   categorySlug: string;
+  subCategory?: string;
   featured: boolean;
   price: number;
   oldPrice: number;

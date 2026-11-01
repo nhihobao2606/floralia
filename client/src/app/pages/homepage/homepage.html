@@ -159,7 +159,7 @@
     <div class="product-img">
       <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
       <span class="sale-badge" *ngIf="hasDiscount(p)">-{{ getDiscount(p) }}%</span>
-      <a [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p, products: products() }">
+      <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products() }">
         <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
       </a>
       <button class="sale-heart" type="button" aria-label="Yêu thích"
@@ -169,7 +169,7 @@
     </div>
 
     <div class="product-info">
-      <a [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p, products: products() }" class="sale-name">{{ getProductName(p) }}</a>
+      <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products() }" class="sale-name">{{ getProductName(p) }}</a>
 
       <div class="sale-rating">
         <i *ngFor="let s of stars" class="bi"

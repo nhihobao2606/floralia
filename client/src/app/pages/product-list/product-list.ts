@@ -24,6 +24,7 @@ export class ProductListComponent implements OnInit {
 
   // Trạng thái lọc
   selectedCategory: string = 'all';
+  selectedSubCategory = '';
   selectedPriceRange: string = 'all';
   selectedTag: string = '';
   currentPage = 1;
@@ -77,6 +78,7 @@ export class ProductListComponent implements OnInit {
 
   get hasActiveFilters(): boolean {
     return this.selectedCategory !== 'all' ||
+      this.selectedSubCategory !== '' ||
       this.selectedPriceRange !== 'all' ||
       this.selectedTag !== '';
   }
@@ -132,12 +134,20 @@ export class ProductListComponent implements OnInit {
         this.changeDetector.markForCheck();
       });
 
-    this.route.queryParamMap.subscribe(params => {
-      this.selectedCategory = params.get('category') || 'all';
-      this.applyFilters();
-      this.changeDetector.markForCheck();
-    });
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncCategoryFromRoute());
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncCategoryFromRoute());
     this.fetchProducts();
+  }
+
+  private syncCategoryFromRoute(): void {
+    this.selectedCategory = this.route.snapshot.queryParamMap.get('category') || 'all';
+    this.selectedSubCategory = this.route.snapshot.queryParamMap.get('subCategory') || '';
+    this.applyFilters();
+    this.changeDetector.markForCheck();
   }
 
   fetchProducts(): void {
@@ -175,25 +185,24 @@ export class ProductListComponent implements OnInit {
 
   onSelectCategory(slug: string): void {
     this.selectedCategory = slug;
+    this.selectedSubCategory = '';
     this.applyFilters();
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { category: slug === 'all' ? null : slug },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
+    void this.router.navigate(['/products'], {
+      queryParams: {
+        category: slug === 'all' ? null : slug,
+        subCategory: null,
+      },
     });
   }
 
   clearFilters(): void {
     this.selectedCategory = 'all';
+    this.selectedSubCategory = '';
     this.selectedPriceRange = 'all';
     this.selectedTag = '';
     this.applyFilters();
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { category: null },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
+    void this.router.navigate(['/products'], {
+      queryParams: { category: null, subCategory: null },
     });
   }
 
@@ -265,6 +274,10 @@ export class ProductListComponent implements OnInit {
 
   get cartPopupPrice(): number {
     return this.cartPopupVariant?.price ?? this.cartPopupProduct?.price ?? 0;
+  }
+
+  get cartPopupOldPrice(): number {
+    return this.cartPopupVariant?.oldPrice ?? this.cartPopupProduct?.oldPrice ?? 0;
   }
 
   confirmAddToCart(): void {
@@ -371,6 +384,8 @@ export class ProductListComponent implements OnInit {
       const matchCat = this.selectedCategory === 'all' ||
         [item.categorySlug, item.category]
           .some(category => this.normalizeSlug(category ?? '') === this.selectedCategory.toLowerCase());
+      const matchSubCategory = !this.selectedSubCategory ||
+        this.normalizeSlug(item.subCategory ?? '') === this.selectedSubCategory.toLowerCase();
 
       // 2. Lọc theo Giá
       let matchPrice = true;
@@ -391,7 +406,7 @@ export class ProductListComponent implements OnInit {
         ) ?? false;
       }
 
-      return matchCat && matchPrice && matchTag;
+      return matchCat && matchSubCategory && matchPrice && matchTag;
     });
     this.currentPage = 1;
   }

@@ -267,6 +267,11 @@ export class Header2 implements OnInit, OnDestroy {
     this.cartService.changeQuantity(item, delta);
   }
 
+  cartStock(item: CartItem): number {
+    const variant = item.variants?.find((option) => option.sku === item.variantSku);
+    return Number(item.stock ?? variant?.stock ?? 0);
+  }
+
   removeItem(item: any): void {
     this.cartService.removeItem(item);
   }
@@ -355,6 +360,10 @@ export class Header2 implements OnInit, OnDestroy {
 
   get variantPickerPrice(): number {
     return this.selectedVariant?.price ?? 0;
+  }
+
+  get variantPickerOldPrice(): number {
+    return this.selectedVariant?.oldPrice ?? 0;
   }
 
   confirmVariantChange(): void {

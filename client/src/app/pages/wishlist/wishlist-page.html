@@ -52,7 +52,7 @@
             <article class="product-card" *ngFor="let product of products()">
               <div class="product-img">
                 <span class="sale-badge" *ngIf="product.discount > 0">-{{ product.discount }}%</span>
-                <a [attr.href]="productNavigation.detailUrl(product.slug)" (click)="openProduct($event, product)">
+                <a [attr.href]="productNavigation.detailUrl(product)" (click)="openProduct($event, product)">
                   <img [src]="getProductImage(product)" [alt]="product.name" loading="lazy" (error)="onImageError($event)">
                 </a>
                 <button type="button" class="sale-heart on" (click)="remove(product)" [attr.aria-label]="'Bỏ ' + product.name + ' khỏi yêu thích'" aria-pressed="true">
@@ -60,7 +60,7 @@
                 </button>
               </div>
               <div class="product-info">
-                <a class="sale-name" [attr.href]="productNavigation.detailUrl(product.slug)" (click)="openProduct($event, product)">{{ product.name }}</a>
+                <a class="sale-name" [attr.href]="productNavigation.detailUrl(product)" (click)="openProduct($event, product)">{{ product.name }}</a>
                 <div class="sale-rating" [attr.aria-label]="'Đánh giá ' + (product.ratingAverage || 0) + ' trên 5 sao'">
                   <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi" [class.bi-star-fill]="star <= rating(product)" [class.bi-star]="star > rating(product)"></i>
                   <small>{{ ratingText(product) }}</small>
@@ -73,7 +73,7 @@
                   <button type="button" class="sale-cart-icon" [disabled]="!hasStock(product)" (click)="addToCart(product)" [attr.aria-label]="'Thêm ' + product.name + ' vào giỏ hàng'" title="Thêm vào giỏ hàng">
                     <i class="bi bi-bag-plus" aria-hidden="true"></i>
                   </button>
-                  <a class="sale-buy-now" [attr.href]="productNavigation.detailUrl(product.slug)" (click)="openProduct($event, product)">
+                  <a class="sale-buy-now" [attr.href]="productNavigation.detailUrl(product)" (click)="openProduct($event, product)">
                     <i class="bi bi-lightning-charge" aria-hidden="true"></i> Mua ngay
                   </a>
                 </div>

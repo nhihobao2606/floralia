@@ -61,7 +61,7 @@
               </form>
 
               <div class="search-results-list">
-                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p }">
+                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p }">
                   <img [src]="getSearchProductImage(p)" [alt]="getName(p)" (error)="onImgError($event)">
                   <div class="search-item-info">
                     <span class="search-item-name">{{ getName(p) }}</span>

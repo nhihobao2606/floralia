@@ -300,7 +300,7 @@ describe('ProductDetail', () => {
     expect(reviewPrompt.textContent).toContain('Bình luận dưới tên Thương Trương');
   });
 
-  it('redirects guests to login instead of opening the review form', () => {
+  it('asks guests to log in before opening the review form', () => {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
     component.syncReviewAccount();
@@ -315,10 +315,35 @@ describe('ProductDetail', () => {
     expect(reviewPrompt.textContent?.trim()).toBe('Bình luận');
 
     reviewPrompt.click();
+    fixture.detectChanges();
 
-    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Bạn cần đăng nhập để đánh giá sản phẩm.');
     expect(component.reviewFormOpen).toBe(false);
     expect(fixture.nativeElement.querySelector('.review-form')).toBeNull();
+
+    const cancelButton = fixture.nativeElement.querySelector('.login-prompt-cancel') as HTMLButtonElement;
+    cancelButton.click();
+    fixture.detectChanges();
+    expect(component.loginPromptOpen).toBe(false);
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('navigates guests to login after confirming the review prompt', () => {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
+    component.syncReviewAccount();
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.toggleReviewForm();
+    expect(navigateSpy).not.toHaveBeenCalled();
+
+    component.goToLoginFromPrompt();
+
+    expect(component.loginPromptOpen).toBe(false);
+    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
   });
 
   it('removes an optimistic review and reopens the form if saving fails', () => {

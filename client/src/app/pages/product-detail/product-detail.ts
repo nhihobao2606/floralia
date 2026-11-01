@@ -80,6 +80,7 @@ export class ProductDetail implements OnInit {
   reviewRating = 0;
   reviewAccount: ReviewAccount | null = null;
   reviewFormOpen = false;
+  loginPromptOpen = false;
   reviewSubmitting = false;
   reviewSubmitError = '';
   reviewSubmitMessage = '';
@@ -107,7 +108,7 @@ export class ProductDetail implements OnInit {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const slug = params.get('slug');
+        const slug = params.get('productSlug') || params.get('slug');
         if (slug) {
           window.scrollTo(0, 0);
           this.loadProduct(slug);
@@ -511,7 +512,7 @@ export class ProductDetail implements OnInit {
   submitReview(event: Event): void {
     event.preventDefault();
     if (!this.canSubmitReview) {
-      this.router.navigate(['/login']);
+      this.loginPromptOpen = true;
       return;
     }
 
@@ -575,7 +576,7 @@ export class ProductDetail implements OnInit {
 
   toggleReviewForm(): void {
     if (!this.canSubmitReview) {
-      this.router.navigate(['/login']);
+      this.loginPromptOpen = true;
       return;
     }
 
@@ -584,6 +585,15 @@ export class ProductDetail implements OnInit {
       this.reviewSubmitError = '';
       this.reviewSubmitMessage = '';
     }
+  }
+
+  closeLoginPrompt(): void {
+    this.loginPromptOpen = false;
+  }
+
+  goToLoginFromPrompt(): void {
+    this.closeLoginPrompt();
+    void this.router.navigate(['/login']);
   }
 
   changeQuantity(delta: number): void {
