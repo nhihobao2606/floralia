@@ -16,78 +16,90 @@
       <!-- LEFT COLUMN: THÔNG TIN NHẬN HÀNG -->
       <div class="checkout-left-col">
         <div class="info-card">
-          <h2 class="card-title">THÔNG TIN NHẬN HÀNG</h2>
-
-          <!-- Row 1: Name, Email, Phone -->
-          <div class="form-row-3">
-            <div class="form-group">
-              <label class="form-label">HỌ VÀ TÊN</label>
-              <div class="form-display-val" *ngIf="!isEditingAddress">{{ fullName }}</div>
-              <input type="text" class="form-input" [(ngModel)]="fullName" *ngIf="isEditingAddress" placeholder="Nhập họ và tên">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">EMAIL (OPTIONAL)</label>
-              <div class="form-display-val" *ngIf="!isEditingAddress">{{ email }}</div>
-              <input type="email" class="form-input" [(ngModel)]="email" *ngIf="isEditingAddress" placeholder="Nhập email">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">SỐ ĐIỆN THOẠI</label>
-              <div class="form-display-val" *ngIf="!isEditingAddress">{{ phone }}</div>
-              <input type="tel" class="form-input" [(ngModel)]="phone" *ngIf="isEditingAddress" placeholder="Nhập số điện thoại">
-            </div>
-          </div>
-
-          <!-- Row 2: Address with "Thay đổi" button -->
-          <div class="address-row">
-            <div class="form-group flex-1">
-              <label class="form-label">ĐỊA CHỈ (SỐ NHÀ, TÊN ĐƯỜNG)</label>
-              <div class="form-display-val" *ngIf="!isEditingAddress">{{ street }}</div>
-              <input type="text" class="form-input" [(ngModel)]="street" *ngIf="isEditingAddress" placeholder="Nhập số nhà, tên đường">
-            </div>
-            <button type="button" class="btn-change-address" (click)="toggleEditAddress()">
-              {{ isEditingAddress ? 'Lưu' : 'Thay đổi' }}
+          <div class="card-header-bar">
+            <h2 class="card-title">THÔNG TIN NHẬN HÀNG</h2>
+            <button type="button" class="btn-change-address-main" (click)="openAddressModal()" *ngIf="savedAddresses.length > 0">
+              <i class="bi bi-geo-alt"></i> Thay đổi địa chỉ
             </button>
           </div>
 
-          <!-- Row 3: Dropdowns for City & Ward -->
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">TỈNH / THÀNH PHỐ</label>
-              <div class="select-wrapper">
-                <select class="form-select" [(ngModel)]="city">
-                  <option value="Tỉnh Hà Tĩnh">Tỉnh Hà Tĩnh</option>
-                  <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                  <option value="TP. Hà Nội">TP. Hà Nội</option>
-                  <option value="TP. Đà Nẵng">TP. Đà Nẵng</option>
-                  <option value="Tỉnh Bình Dương">Tỉnh Bình Dương</option>
-                </select>
-                <i class="bi bi-chevron-down select-arrow"></i>
+          <!-- If has address: show summary card with edit toggle -->
+          <div class="selected-address-box" *ngIf="hasAddress && !isLoadingAddress">
+            <div class="addr-box-left">
+              <div class="addr-recipient">
+                <strong class="recipient-name">{{ fullName }}</strong>
+                <span class="addr-sep" *ngIf="phone">|</span>
+                <span class="recipient-phone">{{ phone }}</span>
+                <span class="default-badge">Địa chỉ nhận hàng</span>
+              </div>
+              <p class="addr-text">
+                {{ street ? street + ', ' : '' }}{{ ward ? ward + ', ' : '' }}{{ city }}
+              </p>
+              <p class="addr-email" *ngIf="email">
+                <i class="bi bi-envelope"></i> {{ email }}
+              </p>
+            </div>
+            <button type="button" class="btn-toggle-manual-edit" (click)="toggleEditAddress()" title="Chỉnh sửa thông tin">
+              <i class="bi bi-pencil-square"></i> {{ isEditingAddress ? 'Thu gọn' : 'Chỉnh sửa' }}
+            </button>
+          </div>
+
+          <!-- If no address yet: show notice banner (only when finished loading) -->
+          <div class="no-address-notice" *ngIf="!hasAddress && !isLoadingAddress">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Bạn chưa có địa chỉ nhận hàng. Vui lòng điền thông tin bên dưới.</span>
+          </div>
+          <p class="order-error" role="alert" *ngIf="addressLoadError">{{ addressLoadError }}</p>
+
+          <!-- Manual Edit Form — always open when no address, collapsible when has address -->
+          <div class="manual-address-form" *ngIf="isEditingAddress || !hasAddress">
+            <!-- Row 1: Name, Email, Phone -->
+            <div class="form-row-3">
+              <div class="form-group">
+                <label class="form-label">HỌ VÀ TÊN <span class="req">*</span></label>
+                <input type="text" class="form-input" [(ngModel)]="fullName" placeholder="Nhập họ và tên" autocomplete="name" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">EMAIL</label>
+                <input type="email" class="form-input" [(ngModel)]="email" placeholder="Nhập email">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">SỐ ĐIỆN THOẠI <span class="req">*</span></label>
+                <input type="tel" class="form-input" [(ngModel)]="phone" placeholder="Nhập số điện thoại" autocomplete="tel" required>
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">PHƯỜNG / XÃ</label>
-              <div class="select-wrapper">
-                <select class="form-select" [(ngModel)]="ward">
-                  <option value="Phường An Nhơn">Phường An Nhơn</option>
-                  <option value="Phường Bến Nghé">Phường Bến Nghé</option>
-                  <option value="Phường Tân Định">Phường Tân Định</option>
-                  <option value="Phường Dĩ An">Phường Dĩ An</option>
-                </select>
-                <i class="bi bi-chevron-down select-arrow"></i>
+            <!-- Row 2: Address -->
+            <div class="address-row">
+              <div class="form-group flex-1">
+                <label class="form-label">ĐỊA CHỈ (SỐ NHÀ, TÊN ĐƯỜNG) <span class="req">*</span></label>
+                <input type="text" class="form-input" [(ngModel)]="street" placeholder="Nhập số nhà, tên đường" autocomplete="street-address" required>
+              </div>
+            </div>
+
+            <!-- Row 3: Dropdowns for City & Ward -->
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">TỈNH / THÀNH PHỐ <span class="req">*</span></label>
+                <input type="text" class="form-input" [(ngModel)]="city" placeholder="Nhập tỉnh / thành phố" autocomplete="address-level1" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">PHƯỜNG / XÃ <span class="req">*</span></label>
+                <input type="text" class="form-input" [(ngModel)]="ward" placeholder="Nhập phường / xã" autocomplete="address-level2" required>
               </div>
             </div>
           </div>
 
-          <!-- Row 4: GHI CHÚ ĐƠN HÀNG -->
+          <!-- GHI CHÚ ĐƠN HÀNG -->
           <div class="form-group form-group-note">
-            <label class="form-label">GHI CHÚ ĐƠN HÀNG</label>
+            <label class="form-label">GHI CHÚ ĐƠN HÀNG (TÙY CHỌN)</label>
             <textarea
               class="form-textarea"
               [(ngModel)]="note"
-              rows="4"
+              rows="3"
               placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay chỉ dẫn địa điểm giao hàng chi tiết hơn."
             ></textarea>
           </div>
@@ -104,37 +116,71 @@
       <!-- RIGHT COLUMN: ĐƠN ĐẶT HÀNG -->
       <div class="checkout-right-col">
         <div class="summary-card">
-          <h2 class="card-title">Đơn đặt hàng</h2>
+          <div class="summary-card-head">
+            <h2 class="card-title">Đơn đặt hàng</h2>
+            <span class="items-count-badge">{{ items.length }} sản phẩm</span>
+          </div>
 
-          <!-- Products list -->
+          <!-- Products list with Variants and exact Prices -->
+          <p class="order-error" role="alert" *ngIf="checkoutItemsError">{{ checkoutItemsError }}</p>
+          <p class="checkout-items-loading" role="status" *ngIf="checkoutItemsLoading">
+            Đang xác nhận giá và tồn kho sản phẩm...
+          </p>
           <div class="checkout-items-list">
             <div class="checkout-item-row" *ngFor="let it of items">
-              <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'" class="item-img">
+              <div class="item-img-wrap">
+                <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'" class="item-img">
+              </div>
               <div class="item-meta">
                 <span class="item-name">{{ it.name }}</span>
-                <small class="item-discount" *ngIf="it.productDiscount">Đã giảm {{ formatPrice(it.productDiscount) }}</small>
-                <span class="item-qty">x{{ it.quantity }}</span>
+                <span class="item-variant" *ngIf="it.variant">
+                  <i class="bi bi-tag-fill"></i> {{ it.variant }}
+                </span>
+                <div class="item-price-qty">
+                  <span class="item-unit-price">{{ formatPrice(it.price) }}</span>
+                  <span class="item-qty">x{{ it.quantity }}</span>
+                </div>
+                <small class="item-discount" *ngIf="it.productDiscount">
+                  Đã giảm {{ formatPrice(it.productDiscount) }}
+                </small>
               </div>
-              <span class="item-total">{{ formatPrice(it.price * it.quantity) }}</span>
+              <div class="item-total-col">
+                <strong class="item-total">{{ formatPrice(it.price * it.quantity) }}</strong>
+              </div>
             </div>
           </div>
 
           <!-- Coupon Code Input -->
-          <div class="coupon-box">
+          <div class="coupon-box" *ngIf="!couponApplied">
             <input
               type="text"
               class="coupon-input"
               [(ngModel)]="couponCode"
-              placeholder="Mã giảm giá"
+              placeholder="Nhập mã voucher"
+              (keyup.enter)="applyCoupon()"
             >
-            <button type="button" class="btn-apply-coupon" (click)="applyCoupon()">
-              Áp dụng
+            <button type="button" class="btn-apply-coupon" (click)="applyCoupon()" [disabled]="couponApplying">
+              {{ couponApplying ? 'Đang kiểm tra...' : 'Áp dụng' }}
             </button>
           </div>
 
+          <!-- Coupon Applied State -->
+          <div class="coupon-applied-bar" *ngIf="couponApplied">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Đã áp dụng mã <strong>{{ couponCode.toUpperCase() }}</strong></span>
+            <button type="button" class="btn-remove-coupon" (click)="removeCoupon()">
+              <i class="bi bi-x"></i> Xóa
+            </button>
+          </div>
+
+          <!-- Coupon message feedback -->
+          <p class="coupon-message" *ngIf="couponMessage && !couponApplied" [class.error]="!couponApplied">
+            {{ couponMessage }}
+          </p>
+
           <!-- Floralia Herbal Tea Voucher Banner -->
           <div class="voucher-banner">
-            <span>Voucher của Floralia Herbal Tea</span>
+            <span><i class="bi bi-ticket-perforated-fill"></i> Voucher của Floralia Herbal Tea</span>
             <i class="bi bi-chevron-right"></i>
           </div>
 
@@ -144,13 +190,9 @@
               <span class="label">Tạm tính:</span>
               <span class="val">{{ formatPrice(subtotal) }}</span>
             </div>
-            <div class="price-row">
+            <div class="price-row" *ngIf="discount > 0">
               <span class="label">Giảm giá:</span>
-              <span class="val">{{ discount.toLocaleString('vi-VN') }}</span>
-            </div>
-            <div class="price-row">
-              <span class="label">Phí vận chuyển</span>
-              <span class="val">{{ shippingFee === 0 ? 'Free' : formatPrice(shippingFee) }}</span>
+              <span class="val discount-val">-{{ discount.toLocaleString('vi-VN') }}đ</span>
             </div>
           </div>
 
@@ -166,28 +208,62 @@
           <div class="payment-methods-block">
             <h3 class="pm-title">Phương thức thanh toán</h3>
 
+            <!-- 1. COD -->
+            <label class="pm-item" [class.selected]="paymentMethod === 'cod'">
+              <input type="radio" name="paymentMethod" value="cod" [(ngModel)]="paymentMethod" (change)="onPaymentMethodChange()">
+              <span class="custom-radio"></span>
+              <span class="pm-text">Thanh toán khi nhận hàng (COD)</span>
+            </label>
+
+            <!-- 2. Paypal -->
             <label class="pm-item" [class.selected]="paymentMethod === 'paypal'">
-              <input type="radio" name="paymentMethod" value="paypal" [(ngModel)]="paymentMethod">
+              <input type="radio" name="paymentMethod" value="paypal" [(ngModel)]="paymentMethod" (change)="onPaymentMethodChange()">
               <span class="custom-radio"></span>
               <span class="pm-text">Paypal</span>
             </label>
 
-            <label class="pm-item" [class.selected]="paymentMethod === 'cod'">
-              <input type="radio" name="paymentMethod" value="cod" [(ngModel)]="paymentMethod">
-              <span class="custom-radio"></span>
-              <span class="pm-text">Thanh toán khi nhận hàng</span>
-            </label>
-
+            <!-- 3. VnPay -->
             <label class="pm-item" [class.selected]="paymentMethod === 'vnpay'">
-              <input type="radio" name="paymentMethod" value="vnpay" [(ngModel)]="paymentMethod">
+              <input type="radio" name="paymentMethod" value="vnpay" [(ngModel)]="paymentMethod" (change)="onPaymentMethodChange()">
               <span class="custom-radio"></span>
               <span class="pm-text">VnPay</span>
             </label>
+
+            <!-- Khối quét mã QR - chỉ hiện khi chọn Paypal hoặc VnPay -->
+            <div class="common-qr-preview-card" *ngIf="paymentMethod === 'paypal' || paymentMethod === 'vnpay'">
+              <div class="qr-thumbnail-box" (click)="openQRModal()" title="Bấm để phóng to mã QR">
+                <img src="/assets/images/payment-qr.png" alt="Mã QR thanh toán" class="qr-thumb-img">
+                <span class="qr-zoom-hint"><i class="bi bi-arrows-fullscreen"></i> Phóng to</span>
+              </div>
+              <div class="qr-text-info">
+                <div class="qr-recipient">
+                  <strong>Floralia</strong>
+                </div>
+                <div class="qr-stk-row">
+                  <span>STK: <code>PSP2605813700000226</code></span>
+                  <button type="button" class="btn-copy-stk" (click)="copyAccountNumber()">
+                    <i class="bi" [ngClass]="copiedText ? 'bi-check-lg' : 'bi-clipboard'"></i>
+                    {{ copiedText ? 'Đã chép' : 'Sao chép' }}
+                  </button>
+                </div>
+                <div class="qr-amount-row">
+                  <span>Số tiền: <strong>{{ formatPrice(total) }}</strong></span>
+                </div>
+                <div class="qr-amount-row">
+                  <span>Nội dung CK: <strong>FLORALIA</strong></span>
+                </div>
+                <button type="button" class="btn-open-qr-popup" (click)="openQRModal()">
+                  <i class="bi bi-qr-code-scan"></i> Xem mã QR thanh toán
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Submit Order CTA -->
-          <button type="button" class="btn-place-order" (click)="placeOrder()">
-            Đặt hàng
+          <p class="order-error" role="alert" *ngIf="submitError">{{ submitError }}</p>
+          <button type="button" class="btn-place-order" (click)="placeOrder()"
+            [disabled]="isSubmitting || checkoutItemsLoading || items.length === 0 || !!checkoutItemsError">
+            {{ isSubmitting ? 'Đang xử lý...' : 'Đặt hàng' }}
           </button>
         </div>
       </div>
@@ -195,4 +271,115 @@
     </div>
 
   </div>
+
+  <!-- ================= MODAL CHỌN ĐỊA CHỈ NHẬN HÀNG ================= -->
+  <div class="modal-backdrop" *ngIf="showAddressModal" (click)="closeAddressModal()">
+    <div class="modal-dialog-card address-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="bi bi-geo-alt-fill"></i> Chọn địa chỉ nhận hàng</h3>
+        <button type="button" class="btn-close-modal" (click)="closeAddressModal()" aria-label="Đóng">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body address-modal-body">
+        <div class="saved-addresses-list" *ngIf="savedAddresses.length > 0">
+          <div
+            class="address-pick-item"
+            *ngFor="let addr of savedAddresses"
+            [class.selected]="selectedAddressId === addr._id || (street === addr.address && fullName === addr.fullName)"
+            (click)="selectAddress(addr)"
+          >
+            <div class="pick-radio">
+              <span class="custom-radio-circle" [class.checked]="selectedAddressId === addr._id || (street === addr.address && fullName === addr.fullName)"></span>
+            </div>
+            <div class="pick-details">
+              <div class="pick-head">
+                <strong class="pick-name">{{ addr.fullName }}</strong>
+                <span class="pick-phone">({{ addr.phone }})</span>
+                <span class="pick-badge-default" *ngIf="addr.isDefault">Mặc định</span>
+              </div>
+              <p class="pick-street">{{ addr.address }}</p>
+              <p class="pick-location">{{ addr.ward }}, {{ addr.province }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-addresses-state" *ngIf="savedAddresses.length === 0">
+          <i class="bi bi-geo-alt"></i>
+          <p>Bạn chưa lưu địa chỉ nào trong sổ địa chỉ.</p>
+          <a routerLink="/addresses" (click)="closeAddressModal()" class="btn-link-addresses">
+            + Thêm địa chỉ mới vào Sổ địa chỉ
+          </a>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a routerLink="/addresses" (click)="closeAddressModal()" class="btn-manage-addresses">
+          <i class="bi bi-plus-circle"></i> Quản lý / Thêm địa chỉ mới
+        </a>
+        <button type="button" class="btn-modal-close" (click)="closeAddressModal()">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL HIỂN THỊ MÃ QR THANH TOÁN ================= -->
+  <div class="modal-backdrop" *ngIf="showQRModal" (click)="closeQRModal()">
+    <div class="modal-dialog-card qr-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="bi bi-qr-code-scan"></i> Mã QR Thanh Toán</h3>
+        <button type="button" class="btn-close-modal" (click)="closeQRModal()" aria-label="Đóng">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body qr-modal-body">
+        <div class="qr-full-image-wrap">
+          <img src="/assets/images/payment-qr.png" alt="Mã QR thanh toán" class="qr-full-img">
+        </div>
+
+        <div class="qr-account-info-card">
+          <div class="info-row">
+            <span class="label">Người thụ hưởng:</span>
+            <strong class="value highlight">Floralia</strong>
+          </div>
+          <div class="info-row">
+            <span class="label">Ví / Ngân hàng:</span>
+            <span class="value">MoMo / VietQR</span>
+          </div>
+          <div class="info-row stk-row">
+            <span class="label">Số tài khoản:</span>
+            <div class="stk-copy-box">
+              <strong class="value code">PSP2605813700000226</strong>
+              <button type="button" class="btn-copy-chip" (click)="copyAccountNumber()">
+                <i class="bi" [ngClass]="copiedText ? 'bi-check-lg' : 'bi-clipboard'"></i>
+                {{ copiedText ? 'Đã chép' : 'Sao chép' }}
+              </button>
+            </div>
+          </div>
+          <div class="info-row">
+            <span class="label">Số tiền:</span>
+            <strong class="value price">{{ formatPrice(total) }}</strong>
+          </div>
+          <div class="info-row">
+            <span class="label">Nội dung CK:</span>
+            <span class="value note">FLORALIA</span>
+          </div>
+        </div>
+
+        <p class="qr-instruction">
+          <i class="bi bi-info-circle"></i> Mở ứng dụng MoMo hoặc ngân hàng bất kỳ để quét mã QR và thanh toán.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-confirm-qr-done" (click)="closeQRModal()">
+          <i class="bi bi-check2"></i> Đã quét mã xong
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

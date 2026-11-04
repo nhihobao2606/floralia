@@ -3,6 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, finalize, of, shareReplay, tap, throwError } from 'rxjs';
 import { Products } from '../classes/Products';
 
+export interface CheckoutProduct {
+  sku: string;
+  name: string;
+  imageUrl: string | null;
+  variant: string;
+  price: number;
+  oldPrice: number;
+  stock: number;
+  productDiscount: number;
+}
+
+export interface ValidatedVoucher {
+  code: string;
+  discount: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -66,6 +82,19 @@ export class ProductService {
 
   // Lấy chi tiết 1 sản phẩm theo Slug
   getProductBySlug(slug: string): Observable<Products> {
-    return this.http.get<Products>(`${this.apiUrl}/slug/${slug}`);
+    return this.http.get<Products>(`${this.apiUrl}/slug/${encodeURIComponent(slug)}`);
+  }
+
+  getProductBySku(sku: string, variant?: string): Observable<CheckoutProduct> {
+    return this.http.get<CheckoutProduct>(`${this.apiUrl}/sku/${encodeURIComponent(sku)}`, {
+      params: variant ? { variant } : {}
+    });
+  }
+
+  validateVoucher(code: string, subtotal: number): Observable<{ success: boolean; voucher: ValidatedVoucher }> {
+    return this.http.post<{ success: boolean; voucher: ValidatedVoucher }>(
+      'http://localhost:3002/api/vouchers/validate',
+      { code, subtotal }
+    );
   }
 }

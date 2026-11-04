@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Order, OrderService } from '../../services/order-service';
+import { CancelReason, getOrderSlug, Order, OrderService, sortOrdersNewestFirst } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
 
 @Component({
@@ -32,7 +32,8 @@ export class Orders implements OnInit {
   searchQuery = '';
   orders: Order[] = [];
   filteredOrders: Order[] = [];
-  loading = false;
+  loading = true;
+  loadError = '';
 
   user: any = null;
   initial = 'H';
@@ -50,17 +51,28 @@ export class Orders implements OnInit {
     'Đổi ý, không muốn mua nữa',
     'Khác'
   ];
-  selectedCancelReason = 'Muốn thay đổi sản phẩm (loại trà, dung lượng, số lượng...)';
+  selectedCancelReasons: string[] = [];
+  otherCancelReason = '';
+  isCancelSubmitting = false;
 
   // Contact modal state
   showContactModal = false;
   contactingOrder: Order | null = null;
 
-  // Refund modal state
-  showRefundModal = false;
-  refundingOrder: Order | null = null;
-  refundReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
-  refundNote = '';
+  // Return & refund modal (for completed orders only)
+  showReturnModal = false;
+  returningOrder: Order | null = null;
+  returnReasons: string[] = [
+    'Hàng bị vỡ/hỏng khi vận chuyển',
+    'Hàng không đúng mô tả',
+    'Giao sai sản phẩm',
+    'Chất lượng không như kỳ vọng',
+    'Muốn đổi sang sản phẩm khác',
+    'Lý do khác'
+  ];
+  selectedReturnReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
+  returnNote2 = '';
+  returnImages: string[] = [];
 
   // Review modal state
   showReviewModal = false;
@@ -76,13 +88,6 @@ export class Orders implements OnInit {
 
   ngOnInit(): void {
     this.loadUserData();
-    // Load default orders IMMEDIATELY so the view never starts blank
-    const defaults = this.orderService.getDefaultOrders();
-    if (Array.isArray(defaults) && defaults.length > 0) {
-      this.orders = defaults;
-      this.applyFilter();
-    }
-    // Then sync with backend asynchronously
     this.loadOrders();
   }
 
@@ -92,28 +97,33 @@ export class Orders implements OnInit {
       try {
         this.user = JSON.parse(raw);
         this.avatar = this.user.avatar || '';
-        const name = this.user.fullName || this.user.name || 'Hồ Bảo Nhi';
-        this.initial = name.trim().charAt(0).toUpperCase();
-      } catch (e) {
-        this.user = { fullName: 'Hồ Bảo Nhi', email: 'hobaonhi400@gmail.com' };
-        this.initial = 'H';
+        const name = this.user.fullName || this.user.name || '';
+        this.initial = name.trim().charAt(0).toUpperCase() || '?';
+      } catch {
+        this.user = null;
+        this.initial = '?';
       }
     } else {
-      this.user = { fullName: 'Hồ Bảo Nhi', email: 'hobaonhi400@gmail.com' };
-      this.initial = 'H';
+      this.user = null;
+      this.initial = '?';
     }
   }
 
   loadOrders(): void {
+    this.orders = this.orderService.getDefaultOrders();
+    this.applyFilter();
+    this.loading = true;
+    this.loadError = '';
     this.orderService.getOrders().subscribe({
       next: (data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          this.orders = data;
-          this.applyFilter();
-        }
+        this.orders = sortOrdersNewestFirst(data);
+        this.applyFilter();
+        this.loading = false;
       },
-      error: () => {
-        // Fallback already populated
+      error: (error) => {
+        this.applyFilter();
+        this.loading = false;
+        this.loadError = error?.error?.message || 'Không thể tải đơn hàng. Vui lòng thử lại.';
       }
     });
   }
@@ -129,17 +139,21 @@ export class Orders implements OnInit {
   }
 
   applyFilter(): void {
-    let list = Array.isArray(this.orders) ? [...this.orders] : [];
+    let list = Array.isArray(this.orders) ? sortOrdersNewestFirst(this.orders) : [];
 
     // Filter by tab
     if (this.activeTab !== 'all') {
       list = list.filter(o => {
-        if (this.activeTab === 'waiting') {
+        if (this.activeTab === 'shipping') {
           return o.status === 'shipping' || o.status === 'processing';
         }
-        if (this.activeTab === 'completed') {
-          return o.status === 'completed' || o.status === 'delivered';
+        if (this.activeTab === 'waiting') {
+          return o.status === 'delivered' || o.status === 'waiting';
         }
+        if (this.activeTab === 'completed') {
+          return o.status === 'completed';
+        }
+        if (this.activeTab === 'refunded') return o.status === 'refunded' || o.status === 'refund_pending' || o.status === 'refund_approved';
         return o.status === this.activeTab;
       });
     }
@@ -154,21 +168,27 @@ export class Orders implements OnInit {
       );
     }
 
-    this.filteredOrders = list;
+    this.filteredOrders = sortOrdersNewestFirst(list);
+  }
+
+  getDisplayItems(order: Order): Array<Order['items'][number] & { cancelled: boolean }> {
+    const activeItems = (order.items || []).map(item => ({ ...item, cancelled: false }));
+    const cancelledItems = (order.cancelledItems || []).map(item => ({ ...item, cancelled: true }));
+    return [...activeItems, ...cancelledItems];
   }
 
   viewDetail(order: Order, event?: Event): void {
     if (event) {
       event.stopPropagation();
     }
-    this.router.navigate(['/orders', order.id]);
+    this.router.navigate(['/orders', getOrderSlug(order)]);
   }
 
   trackOrder(order: Order, event?: Event): void {
     if (event) {
       event.stopPropagation();
     }
-    this.router.navigate(['/orders', order.id]);
+    this.router.navigate(['/orders', getOrderSlug(order)]);
   }
 
   contactFloralia(order: Order, event?: Event): void {
@@ -189,37 +209,17 @@ export class Orders implements OnInit {
       event.stopPropagation();
     }
     if (confirm(`Xác nhận bạn đã nhận được đầy đủ sản phẩm của đơn hàng ${order.code}?`)) {
-      order.status = 'completed';
-      order.statusLabel = 'HOÀN THÀNH';
-      this.orderService.updateOrderStatus(order.id, 'completed', 'HOÀN THÀNH').subscribe();
-      this.applyFilter();
+      this.orderService.updateOrderStatus(order.id, 'completed', 'HOÀN THÀNH').subscribe({
+        next: ({ order: updated }) => {
+          Object.assign(order, updated);
+          this.activeTab = 'completed';
+          this.applyFilter();
+        },
+        error: (error) => {
+          alert(error?.error?.message || 'Không thể xác nhận đã nhận hàng.');
+        }
+      });
     }
-  }
-
-  openRefundModal(order: Order, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.refundingOrder = order;
-    this.refundReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
-    this.refundNote = '';
-    this.showRefundModal = true;
-  }
-
-  closeRefundModal(): void {
-    this.showRefundModal = false;
-    this.refundingOrder = null;
-  }
-
-  confirmRefund(): void {
-    if (!this.refundingOrder) return;
-    this.refundingOrder.status = 'refunded';
-    this.refundingOrder.statusLabel = 'ĐÃ HOÀN TIỀN';
-    this.refundingOrder.refundAmount = this.refundingOrder.total;
-    this.orderService.updateOrderStatus(this.refundingOrder.id, 'refunded', 'ĐÃ HOÀN TIỀN').subscribe();
-    this.applyFilter();
-    this.closeRefundModal();
-    alert('Yêu cầu trả hàng/hoàn tiền đã được ghi nhận. Chúng tôi sẽ liên hệ trong 24h!');
   }
 
   openReviewModal(order: Order, event?: Event): void {
@@ -274,8 +274,19 @@ export class Orders implements OnInit {
       event.stopPropagation();
     }
     this.cancellingOrder = order;
-    this.selectedCancelReason = 'Muốn thay đổi sản phẩm (loại trà, dung lượng, số lượng...)';
+    this.selectedCancelReasons = [];
+    this.otherCancelReason = '';
+    this.isCancelSubmitting = false;
     this.showCancelModal = true;
+  }
+
+  toggleCancelReason(reason: string): void {
+    this.selectedCancelReasons = this.selectedCancelReasons.includes(reason)
+      ? this.selectedCancelReasons.filter(selected => selected !== reason)
+      : [...this.selectedCancelReasons, reason];
+    if (!this.selectedCancelReasons.includes('Khác')) {
+      this.otherCancelReason = '';
+    }
   }
 
   closeCancelModal(): void {
@@ -284,20 +295,87 @@ export class Orders implements OnInit {
   }
 
   confirmCancelOrder(): void {
-    if (!this.cancellingOrder) return;
+    if (!this.cancellingOrder || this.isCancelSubmitting) return;
+    if (this.selectedCancelReasons.length === 0) {
+      alert('Vui lòng chọn ít nhất một lý do hủy đơn.');
+      return;
+    }
+    if (this.selectedCancelReasons.includes('Khác') && !this.otherCancelReason.trim()) {
+      alert('Vui lòng nhập lý do khác.');
+      return;
+    }
 
     const targetOrder = this.cancellingOrder;
-    targetOrder.status = 'cancelled';
-    targetOrder.statusLabel = 'ĐÃ HỦY';
+    const pm = (targetOrder.paymentMethod || '').toLowerCase();
+    const isPaid = ['paypal', 'vnpay', 'chuyển khoản', 'momo', 'qr'].some(method => pm.includes(method));
+    const cancelReasons: CancelReason[] = this.selectedCancelReasons.map(reason => ({
+      reason,
+      ...(reason === 'Khác' ? { detail: this.otherCancelReason.trim() } : {})
+    }));
 
-    this.orderService.updateOrderStatus(targetOrder.id, 'cancelled', 'ĐÃ HỦY').subscribe({
-      next: () => {
+    this.isCancelSubmitting = true;
+    this.closeCancelModal();
+    this.orderService.updateOrderStatus(targetOrder.id, 'cancelled', 'ĐÃ HỦY', {
+      cancelReasons
+    }).subscribe({
+      next: ({ order }) => {
+        this.isCancelSubmitting = false;
+        Object.assign(targetOrder, order);
         this.applyFilter();
-        this.closeCancelModal();
+        if (isPaid) {
+          alert('Hủy đơn thành công!\nSẽ sớm hoàn tiền về cho bạn.');
+        } else {
+          alert('Hủy đơn hàng thành công!');
+        }
       },
-      error: () => {
+      error: (error) => {
+        this.isCancelSubmitting = false;
+        alert(error?.error?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
+      }
+    });
+  }
+
+  // Return & Refund (only for completed orders)
+  openReturnModal(order: Order, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.returningOrder = order;
+    this.selectedReturnReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
+    this.returnNote2 = '';
+    this.returnImages = [];
+    this.showReturnModal = true;
+  }
+
+  closeReturnModal(): void {
+    this.showReturnModal = false;
+    this.returningOrder = null;
+  }
+
+  onReturnImagesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => this.returnImages.push(e.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  confirmReturn(): void {
+    if (!this.returningOrder) return;
+    const targetOrder = this.returningOrder;
+    this.orderService.updateOrderStatus(targetOrder.id, 'refund_pending', 'CHỜ DUYỆT HOÀN TIỀN', {
+      refundReason: this.selectedReturnReason,
+      refundNote: this.returnNote2,
+      refundImages: this.returnImages
+    }).subscribe({
+      next: ({ order }) => {
+        Object.assign(targetOrder, order);
         this.applyFilter();
-        this.closeCancelModal();
+        this.closeReturnModal();
+        alert('Yêu cầu hoàn tiền đã được gửi. Sẽ sớm được duyệt.');
+      },
+      error: (error) => {
+        alert(error?.error?.message || 'Không thể gửi yêu cầu hoàn tiền. Vui lòng thử lại.');
       }
     });
   }

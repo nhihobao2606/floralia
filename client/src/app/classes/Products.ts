@@ -22,6 +22,7 @@
   images: string[];
   ratingAverage: number;
   ratingCount: number;
+  isActive?: boolean;
   description: string;
   tags: string[];
   benefits: string[];

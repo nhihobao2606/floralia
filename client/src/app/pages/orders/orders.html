@@ -17,8 +17,8 @@
             <span *ngIf="!avatar">{{ initial }}</span>
           </div>
           <div class="side-user-info">
-            <strong>{{ user?.fullName || 'Hồ Bảo Nhi' }}</strong>
-            <small>{{ user?.email || 'hobaonhi400@gmail.com' }}</small>
+            <strong>{{ user?.fullName || user?.name || 'Khách hàng' }}</strong>
+            <small>{{ user?.email || '' }}</small>
           </div>
         </div>
 
@@ -62,6 +62,19 @@
         </div>
 
         <!-- ORDERS LIST -->
+        <p class="orders-loading" role="status" *ngIf="loading && filteredOrders.length === 0">
+          <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+          Đang tải sản phẩm và đơn hàng của bạn...
+        </p>
+        <div class="orders-empty orders-error" role="alert" *ngIf="!loading && loadError">
+          <p>{{ loadError }}</p>
+          <button type="button" class="btn-shop-now" (click)="loadOrders()">Tải lại</button>
+        </div>
+        <div class="orders-empty" *ngIf="!loading && !loadError && filteredOrders.length === 0">
+          <i class="bi bi-bag-x" aria-hidden="true"></i>
+          <p>{{ searchQuery || activeTab !== 'all' ? 'Không tìm thấy đơn hàng phù hợp.' : 'Bạn chưa có đơn hàng nào.' }}</p>
+          <a class="btn-shop-now" routerLink="/products" *ngIf="!searchQuery && activeTab === 'all'">Khám phá sản phẩm</a>
+        </div>
         <div class="orders-list" *ngIf="filteredOrders && filteredOrders.length > 0">
           <div class="order-card" *ngFor="let order of filteredOrders">
 
@@ -90,7 +103,8 @@
 
             <!-- Items -->
             <div class="order-items-list" (click)="viewDetail(order, $event)">
-              <div class="order-item-row" *ngFor="let it of order.items || []">
+              <div class="order-item-row" *ngFor="let it of getDisplayItems(order)"
+                [class.cancelled-order-item]="it.cancelled">
                 <div class="item-thumb-box">
                   <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'">
                 </div>
@@ -98,6 +112,7 @@
                   <div class="item-name">{{ it.name }}</div>
                   <div class="item-variant" *ngIf="it.variant">{{ it.variant }}</div>
                   <div class="item-qty">x{{ it.quantity }}</div>
+                  <div class="cancelled-item-label" *ngIf="it.cancelled">Sản phẩm đã hủy</div>
                 </div>
                 <div class="item-price-box">
                   <span class="old-price" *ngIf="it.oldPrice">{{ formatPrice(it.oldPrice) }}</span>
@@ -125,10 +140,11 @@
               <div class="action-buttons-group">
                 <!-- Status specific buttons -->
                 <ng-container [ngSwitch]="order.status">
-                  <!-- Delivered -->
+                  <!-- Delivered: customer must confirm received -->
                   <ng-container *ngSwitchCase="'delivered'">
-                    <button type="button" class="btn-action-outline" (click)="openRefundModal(order, $event)">Trả hàng/Hoàn tiền</button>
-                    <button type="button" class="btn-action-outline" (click)="confirmReceived(order, $event)">Đã nhận được hàng</button>
+                    <button type="button" class="btn-action-primary" (click)="confirmReceived(order, $event)">Đã nhận được hàng</button>
+                    <button type="button" class="btn-action-outline" (click)="openReturnModal(order, $event)">Trả hàng – Hoàn tiền</button>
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
 
                   <!-- Pending -->
@@ -139,20 +155,19 @@
 
                   <!-- Processing -->
                   <ng-container *ngSwitchCase="'processing'">
-                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="openCancelModal(order, $event)">Hủy đơn hàng</button>
                     <button type="button" class="btn-action-primary" (click)="trackOrder(order, $event)">Theo dõi đơn hàng</button>
                   </ng-container>
 
                   <!-- Shipping -->
                   <ng-container *ngSwitchCase="'shipping'">
-                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
+                    <button type="button" class="btn-action-outline" (click)="openCancelModal(order, $event)">Hủy đơn hàng</button>
                     <button type="button" class="btn-action-outline" (click)="trackOrder(order, $event)">Theo dõi đơn hàng</button>
                   </ng-container>
 
                   <!-- Completed -->
                   <ng-container *ngSwitchCase="'completed'">
                     <button type="button" class="btn-action-primary" (click)="openReviewModal(order, $event)">Đánh giá</button>
-                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
                     <button type="button" class="btn-action-outline" (click)="reorder(order, $event)">Mua lại</button>
                   </ng-container>
 
@@ -160,6 +175,16 @@
                   <ng-container *ngSwitchCase="'cancelled'">
                     <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết đơn hủy</button>
                     <button type="button" class="btn-action-outline" (click)="reorder(order, $event)">Mua lại</button>
+                  </ng-container>
+
+                  <!-- Refund Pending -->
+                  <ng-container *ngSwitchCase="'refund_pending'">
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
+                  </ng-container>
+
+                  <!-- Refund Approved -->
+                  <ng-container *ngSwitchCase="'refund_approved'">
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
 
                   <!-- Refunded -->
@@ -181,7 +206,7 @@
         </div>
 
         <!-- Empty State -->
-        <div class="empty-state" *ngIf="(!filteredOrders || filteredOrders.length === 0) && !loading">
+        <div class="empty-state" *ngIf="(!filteredOrders || filteredOrders.length === 0) && !loading && !loadError">
           <i class="bi bi-box2"></i>
           <h3>Chưa có đơn hàng nào</h3>
           <p>Không tìm thấy đơn hàng nào phù hợp với bộ lọc hiện tại.</p>
@@ -217,26 +242,35 @@
         <label
           class="reason-item"
           *ngFor="let r of cancelReasons"
-          [class.selected]="selectedCancelReason === r"
+          [class.selected]="selectedCancelReasons.includes(r)"
         >
           <input
-            type="radio"
-            name="cancelReason"
-            [value]="r"
-            [(ngModel)]="selectedCancelReason"
+            type="checkbox"
+            [checked]="selectedCancelReasons.includes(r)"
+            (change)="toggleCancelReason(r)"
           />
-          <span class="custom-radio"></span>
+          <span class="custom-checkbox" aria-hidden="true"></span>
           <span class="reason-text">{{ r }}</span>
         </label>
+      </div>
+      <div class="other-cancel-reason" *ngIf="selectedCancelReasons.includes('Khác')">
+        <label for="other-order-cancel-reason">Lý do khác <span>*</span></label>
+        <textarea
+          id="other-order-cancel-reason"
+          [(ngModel)]="otherCancelReason"
+          rows="3"
+          maxlength="500"
+          placeholder="Nhập lý do bạn muốn hủy đơn hàng..."
+        ></textarea>
       </div>
 
       <!-- Modal Actions -->
       <div class="modal-actions">
-        <button type="button" class="btn-cancel-back" (click)="closeCancelModal()">
+        <button type="button" class="btn-cancel-back" [disabled]="isCancelSubmitting" (click)="closeCancelModal()">
           Không phải bây giờ
         </button>
-        <button type="button" class="btn-cancel-confirm" (click)="confirmCancelOrder()">
-          Hủy đơn hàng
+        <button type="button" class="btn-cancel-confirm" [disabled]="isCancelSubmitting" (click)="confirmCancelOrder()">
+          {{ isCancelSubmitting ? 'Đang lưu...' : 'Hủy đơn hàng' }}
         </button>
       </div>
 
@@ -292,37 +326,6 @@
     </div>
   </div>
 
-  <!-- ============ TRẢ HÀNG / HOÀN TIỀN MODAL ============ -->
-  <div class="modal-backdrop" *ngIf="showRefundModal" (click)="closeRefundModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3 class="modal-title">Yêu cầu Trả hàng / Hoàn tiền {{ refundingOrder?.code }}</h3>
-        <button type="button" class="btn-close-modal" (click)="closeRefundModal()" aria-label="Đóng">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
-      <div class="contact-modal-body">
-        <div class="form-group mb-3">
-          <label class="form-label mb-2"><strong>Lý do yêu cầu:</strong></label>
-          <select class="form-select" [(ngModel)]="refundReason">
-            <option value="Hàng bị vỡ/hỏng khi vận chuyển">Hàng bị vỡ/hỏng khi vận chuyển</option>
-            <option value="Giao sai/thiếu sản phẩm">Giao sai/thiếu sản phẩm</option>
-            <option value="Sản phẩm lỗi/không đúng chất lượng">Sản phẩm lỗi/không đúng chất lượng</option>
-            <option value="Khác">Lý do khác</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label mb-2"><strong>Ghi chú chi tiết:</strong></label>
-          <textarea class="form-control" [(ngModel)]="refundNote" rows="3" placeholder="Mô tả cụ thể tình trạng sản phẩm để Floralia hỗ trợ bạn nhanh nhất..."></textarea>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-cancel-back" (click)="closeRefundModal()">Hủy</button>
-        <button type="button" class="btn-cancel-confirm" (click)="confirmRefund()">Gửi yêu cầu</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ============ ĐÁNH GIÁ MODAL ============ -->
   <div class="modal-backdrop" *ngIf="showReviewModal" (click)="closeReviewModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
@@ -348,6 +351,45 @@
       <div class="modal-actions">
         <button type="button" class="btn-cancel-back" (click)="closeReviewModal()">Đóng</button>
         <button type="button" class="btn-cancel-confirm" (click)="submitReview()">Gửi đánh giá</button>
+      </div>
+    </div>
+  </div>
+  <!-- ============ TRẢ HÀNG / HOÀN TIỀN MODAL (RETURN - for completed orders) ============ -->
+  <div class="modal-backdrop" *ngIf="showReturnModal" (click)="closeReturnModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Trả hàng – Hoàn tiền {{ returningOrder?.code }}</h3>
+        <button type="button" class="btn-close-modal" (click)="closeReturnModal()" aria-label="Đóng">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="contact-modal-body">
+        <p style="font-size:14px;color:#555;margin:0 0 12px">Vui lòng chọn lý do trả hàng:</p>
+        <div class="reasons-list">
+          <label class="reason-item" *ngFor="let r of returnReasons" [class.selected]="selectedReturnReason === r">
+            <input type="radio" name="returnReasonOrders" [value]="r" [(ngModel)]="selectedReturnReason">
+            <span class="custom-radio"></span>
+            <span class="reason-text">{{ r }}</span>
+          </label>
+        </div>
+        <div style="margin-top:14px">
+          <label style="font:600 13px Roboto,sans-serif;color:#555;display:block;margin-bottom:6px">Ghi chú thêm:</label>
+          <textarea style="width:100%;border:1px solid #cde0c6;border-radius:10px;padding:10px 13px;font-size:14px;resize:vertical;outline:none" rows="2" [(ngModel)]="returnNote2" placeholder="Mô tả thêm..."></textarea>
+        </div>
+        <div style="margin-top:12px">
+          <label style="font:600 13px Roboto,sans-serif;color:#555;display:block;margin-bottom:6px">Ảnh minh chứng:</label>
+          <input type="file" accept="image/*" multiple style="display:none" #returnFileInput (change)="onReturnImagesSelected($event)">
+          <button type="button" class="btn-cancel-back" (click)="returnFileInput.click()"><i class="bi bi-image"></i> Chọn ảnh</button>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px" *ngIf="returnImages.length > 0">
+            <img *ngFor="let img of returnImages" [src]="img" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #cde0c6" alt="proof">
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel-back" (click)="closeReturnModal()">Hủy bỏ</button>
+        <button type="button" class="btn-cancel-confirm" (click)="confirmReturn()">
+          <i class="bi bi-send"></i> Gửi yêu cầu hoàn tiền
+        </button>
       </div>
     </div>
   </div>

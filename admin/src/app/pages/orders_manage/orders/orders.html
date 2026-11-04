@@ -1,0 +1,60 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+  <main class="admin-main">
+    <header class="topbar">
+      <h1>Quản lý đơn hàng</h1>
+      <button type="button" class="refresh-button" (click)="loadOrders()" [disabled]="loading">Làm mới</button>
+    </header>
+    <div class="admin-orders">
+      <p class="message error" role="alert" *ngIf="error">{{ error }}</p>
+      <p class="message success" role="status" *ngIf="success">{{ success }}</p>
+      <p class="empty-state" *ngIf="loading">Đang tải đơn hàng...</p>
+      <p class="empty-state" *ngIf="!loading && !error && orders.length === 0">Chưa có đơn hàng.</p>
+
+      <section class="orders-list" *ngIf="!loading && orders.length">
+        <article class="order-card" *ngFor="let order of orders">
+          <header class="order-heading">
+            <div>
+              <strong>{{ order.code }}</strong>
+              <span>{{ order.receiver?.name }} · {{ order.receiver?.phone }}</span>
+            </div>
+            <span class="status">{{ order.statusLabel }}</span>
+          </header>
+          <p class="address">{{ order.receiver?.address }}</p>
+          <ul class="items">
+            <li *ngFor="let item of order.items">{{ item.name }} × {{ item.quantity }}</li>
+          </ul>
+          <p class="payment">{{ order.paymentMethod }} · {{ order.total | number }}đ</p>
+
+          <div class="refund-details" *ngIf="order.status === 'refund_pending'">
+            <strong>Yêu cầu trả hàng / hoàn tiền</strong>
+            <p>{{ order.refundReason }}</p>
+            <p *ngIf="order.refundNote">{{ order.refundNote }}</p>
+            <div class="proof-images" *ngIf="order.refundImages?.length">
+              <img *ngFor="let image of order.refundImages" [src]="image" alt="Ảnh minh chứng hoàn tiền">
+            </div>
+          </div>
+
+          <footer>
+            <button
+              type="button"
+              class="approve-button"
+              *ngIf="order.status === 'refund_pending'"
+              [disabled]="updatingId === order.id"
+              (click)="approveRefund(order)">
+              {{ updatingId === order.id ? 'Đang xử lý...' : 'Duyệt hoàn tiền' }}
+            </button>
+            <button
+              type="button"
+              class="status-button"
+              *ngIf="nextStatus(order) as status"
+              [disabled]="updatingId === order.id"
+              (click)="updateStatus(order)">
+              {{ status === 'processing' ? 'Xác nhận đơn' : status === 'shipping' ? 'Bắt đầu giao hàng' : 'Xác nhận đã giao' }}
+            </button>
+          </footer>
+        </article>
+      </section>
+    </div>
+  </main>
+</div>

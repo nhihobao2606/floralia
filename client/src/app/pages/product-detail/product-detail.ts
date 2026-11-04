@@ -150,67 +150,41 @@ export class ProductDetail implements OnInit {
 
   private loadProduct(slug: string): void {
     const requestId = ++this.productLoadRequestId;
-    const navigationState = window.history.state as {
-      product?: ProductDetails;
-      products?: ProductDetails[];
-    } | undefined;
-    const navigationProduct = navigationState?.product;
-    const navigationProducts = Array.isArray(navigationState?.products)
-      ? navigationState.products
-      : null;
-    const cachedProducts = this.productService.getCachedProducts();
-    const initialProduct = (navigationProduct?.slug === slug || navigationProduct?.sku === slug || (navigationProduct as any)?.id === slug || (navigationProduct as any)?._id === slug) && navigationProduct?.isActive !== false
-      ? navigationProduct
-      : null;
-
-    if (navigationProducts?.length) {
-      this.allProducts = navigationProducts;
-    } else if (cachedProducts?.length) {
-      this.allProducts = cachedProducts;
-    } else if (initialProduct && !this.allProducts.length) {
-      this.allProducts = [initialProduct];
-    }
-    this.relatedProductsLoading = this.allProducts.length === 0;
-
-    this.loading = !initialProduct;
+    this.allProducts = [];
+    this.relatedProductsLoading = true;
+    this.loading = true;
+    this.product = null;
     this.errorMessage = '';
-    if (initialProduct) {
-      this.setProduct(initialProduct);
-    } else {
-      this.product = null;
-    }
 
-    this.productService.getAll().subscribe({
-      next: (response: unknown) => {
+    this.productService.getProductBySlug(slug).subscribe({
+      next: (product) => {
         if (requestId !== this.productLoadRequestId) return;
-
-        const products = Array.isArray(response)
-          ? response as ProductDetails[]
-          : [];
-        this.allProducts = products;
-        this.relatedProductsLoading = false;
-        const product = products.find((item) => (item.slug === slug || item.sku === slug || (item as any)._id === slug || (item as any).id === slug) && item.isActive !== false);
-
-        if (!product) {
-          if (!initialProduct) {
-            this.errorMessage = 'Không tìm thấy sản phẩm này.';
-            this.loading = false;
-          }
+        if (!product || product.isActive === false) {
+          this.errorMessage = 'Không tìm thấy sản phẩm này.';
+          this.loading = false;
           return;
         }
-
         this.setProduct(product);
       },
       error: (error: unknown) => {
         if (requestId !== this.productLoadRequestId) return;
-
         console.error('Không thể tải thông tin sản phẩm:', error);
-        this.relatedProductsLoading = false;
-        if (!initialProduct) {
-          this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
-          this.loading = false;
-        }
+        this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
+        this.loading = false;
       },
+    });
+
+    this.productService.getAll().subscribe({
+      next: (products) => {
+        if (requestId !== this.productLoadRequestId) return;
+        this.allProducts = products;
+        this.relatedProductsLoading = false;
+      },
+      error: (error: unknown) => {
+        if (requestId !== this.productLoadRequestId) return;
+        console.error('Không thể tải sản phẩm liên quan:', error);
+        this.relatedProductsLoading = false;
+      }
     });
   }
 

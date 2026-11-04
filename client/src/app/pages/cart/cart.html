@@ -114,13 +114,11 @@
           <div class="summary-row"><span>Đã chọn</span><strong>{{ selectedItems.length }} sản phẩm</strong></div>
           <div class="summary-row"><span>Tạm tính (giá gốc)</span><strong>{{ formatPrice(selectedSubtotal) }}</strong></div>
           <div class="summary-row discount-row"><span><i class="bi bi-tag" aria-hidden="true"></i> Giảm giá sản phẩm</span><strong>−{{ formatPrice(productDiscount) }}</strong></div>
-          <div class="summary-row"><span>Phí vận chuyển</span><strong>{{ formatPrice(shippingFee) }}</strong></div>
           <div class="summary-divider"></div>
           <div class="summary-total"><span>Thành tiền</span><strong>{{ formatPrice(total) }}</strong></div>
           <button type="button" class="checkout-button" [disabled]="selectedItems.length === 0" (click)="proceedToCheckout()">
             Tiến hành thanh toán <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </button>
-          <p class="shipping-note"><i class="bi bi-truck" aria-hidden="true"></i> Phí giao hàng cố định 30.000đ</p>
         </div>
       </aside>
     </div>

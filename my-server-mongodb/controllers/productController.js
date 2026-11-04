@@ -196,9 +196,65 @@ async function getProductById(req, res) {
     }
 }
 
+async function getProductBySlug(req, res) {
+    try {
+        const product = await Product.getBySlug(req.params.slug);
+        if (!product || product.isActive === false) {
+            return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        }
+
+        res.json({
+            ...product,
+            imageUrl: product.thumbnail
+                ? `/products/image/${encodeURIComponent(String(product.thumbnail))}`
+                : null
+        });
+    } catch (error) {
+        console.error('Lỗi lấy sản phẩm theo slug:', error);
+        res.status(500).json({ message: 'Không thể lấy sản phẩm' });
+    }
+}
+
+async function getProductBySku(req, res) {
+    try {
+        const sku = req.params.sku;
+        const product = await Product.getBySku(sku);
+        if (!product || product.isActive === false) {
+            return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        }
+
+        const variants = Array.isArray(product.variants) ? product.variants : [];
+        const variant = variants.find(candidate => candidate.sku === sku) ||
+            (product.sku === sku
+                ? variants.find(candidate => candidate.label === req.query.variant)
+                : null);
+        const thumbnail = product.thumbnail;
+        res.json({
+            sku,
+            name: product.name,
+            imageUrl: thumbnail
+                ? `/products/image/${encodeURIComponent(String(thumbnail))}`
+                : null,
+            variant: variant?.label || '',
+            price: Number(variant?.price ?? product.price),
+            oldPrice: Number(variant?.oldPrice ?? product.oldPrice ?? variant?.price ?? product.price),
+            stock: Number(variant?.stock ?? product.stock),
+            productDiscount: Math.max(
+                0,
+                Number(variant?.oldPrice ?? product.oldPrice ?? 0) - Number(variant?.price ?? product.price)
+            )
+        });
+    } catch (error) {
+        console.error('Lỗi lấy sản phẩm theo SKU:', error);
+        res.status(500).json({ message: 'Không thể lấy sản phẩm' });
+    }
+}
+
 module.exports = {
     getProducts,
     getProductById,
+    getProductBySlug,
+    getProductBySku,
     getProductImage,
     getProductReviews,
     createProductReview

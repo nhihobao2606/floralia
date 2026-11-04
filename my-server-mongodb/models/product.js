@@ -54,7 +54,16 @@ function getById(id) {
 }
 
 function getBySku(sku) {
-    return productsCollection.findOne({ sku });
+    return productsCollection.findOne({
+        $or: [
+            { sku },
+            { 'variants.sku': sku }
+        ]
+    });
+}
+
+function getBySlug(slug) {
+    return productsCollection.findOne({ slug });
 }
 
 function incrementSoldBySku(sku, quantity) {
@@ -149,6 +158,7 @@ module.exports = {
     getAll,
     getById,
     getBySku,
+    getBySlug,
     incrementSoldBySku,
     getAllAssets,
     getAssetsByThumbnails,

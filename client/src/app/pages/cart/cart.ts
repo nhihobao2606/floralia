@@ -18,7 +18,6 @@ export class CartComponent implements OnInit {
   items: CartDisplayItem[] = [];
   pageSize = 4;
   currentPage = 1;
-  readonly defaultShippingFee = 30000;
   openVariantItem: CartDisplayItem | null = null;
 
   constructor(
@@ -152,12 +151,8 @@ export class CartComponent implements OnInit {
     return this.selectedItems.reduce((sum, item) => sum + this.lineDiscount(item), 0);
   }
 
-  get shippingFee(): number {
-    return this.selectedItems.length ? this.defaultShippingFee : 0;
-  }
-
   get total(): number {
-    return Math.max(0, this.selectedSubtotal - this.productDiscount + this.shippingFee);
+    return Math.max(0, this.selectedSubtotal - this.productDiscount);
   }
 
   formatPrice(num: number): string {
@@ -174,7 +169,7 @@ export class CartComponent implements OnInit {
       total: this.lineOriginalTotal(item),
     }));
     sessionStorage.setItem('checkout_items', JSON.stringify(checkoutItems));
-    sessionStorage.setItem('checkout_shipping_fee', String(this.defaultShippingFee));
+    sessionStorage.removeItem('checkout_shipping_fee');
     void this.router.navigate(['/checkout']);
   }
 

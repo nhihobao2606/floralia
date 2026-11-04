@@ -7,9 +7,10 @@
     <a
       *ngFor="let item of menu"
       class="sidebar-link"
-      [class.active]="!item.disabled"
       [class.disabled]="item.disabled"
-      [routerLink]="item.disabled ? null : '/articles'"
+      [routerLink]="item.disabled ? null : item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
       [attr.aria-label]="item.label"
       [attr.aria-disabled]="item.disabled"
       [attr.title]="item.disabled ? 'Mục này sẽ được triển khai sau' : null">

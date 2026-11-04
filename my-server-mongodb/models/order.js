@@ -24,6 +24,23 @@ function getById(id) {
     return ordersCollection.findOne(getIdFilter(id));
 }
 
+function getBySlug(slug) {
+    if (!ordersCollection) return Promise.resolve(null);
+    const identifier = String(slug).replace(/^don-hang-/, '');
+    const upperIdentifier = identifier.toUpperCase();
+    return ordersCollection.findOne({
+        $or: [
+            { slug: String(slug) },
+            { id: identifier },
+            { id: upperIdentifier },
+            { code: identifier },
+            { code: `#${identifier}` },
+            { code: upperIdentifier },
+            { code: `#${upperIdentifier}` }
+        ]
+    });
+}
+
 function create(order) {
     if (!ordersCollection) return Promise.resolve({ insertedId: null });
     return ordersCollection.insertOne({
@@ -37,11 +54,6 @@ function count() {
     return ordersCollection.countDocuments();
 }
 
-function insertMany(orders) {
-    if (!ordersCollection) return Promise.resolve();
-    return ordersCollection.insertMany(orders);
-}
-
 function findOneAndUpdate(filter, update, options = {}) {
     if (!ordersCollection) return Promise.resolve(null);
     return ordersCollection.findOneAndUpdate(filter, update, { returnDocument: 'after', ...options });
@@ -51,8 +63,8 @@ module.exports = {
     setCollection,
     getAll,
     getById,
+    getBySlug,
     create,
     count,
-    insertMany,
     findOneAndUpdate
 };

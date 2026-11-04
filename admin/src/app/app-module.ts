@@ -8,6 +8,7 @@ import { AdminLogin } from './pages/admin-login/admin-login';
 import { Articles } from './pages/articles_manage/articles/articles';
 import { ArticleEditor } from './pages/articles_manage/article-editor/article-editor';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
+import { AdminOrders } from './pages/orders_manage/orders/orders';
 
 @NgModule({
   declarations: [App, Pagenotfound],
@@ -19,6 +20,7 @@ import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
     AdminLogin,
     Articles,
     ArticleEditor,
+    AdminOrders,
   ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],

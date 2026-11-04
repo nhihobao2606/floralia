@@ -231,6 +231,28 @@ function requireAuth(req, res, next) {
     }
 }
 
+function optionalAuth(req, res, next) {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ')
+        ? header.slice(7)
+        : '';
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.userId = decoded.id;
+        next();
+    } catch {
+        res.status(401).json({
+            success: false,
+            message: 'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.'
+        });
+    }
+}
+
 async function requireAdmin(req, res, next) {
     try {
         const user = await User.getById(req.userId);
@@ -258,6 +280,7 @@ module.exports = {
     forgotPassword,
     resetPassword,
     requireAuth,
+    optionalAuth,
     requireAdmin,
     toPublicUser
 };

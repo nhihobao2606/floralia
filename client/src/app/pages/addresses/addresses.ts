@@ -203,6 +203,11 @@ export class Addresses implements OnInit {
         this.ngZone.run(() => {
           if (res.success) {
             this.addresses = res.addresses || [];
+            try {
+              localStorage.setItem('floralia_cached_addresses', JSON.stringify(this.addresses));
+              const def = this.addresses.find((a: any) => a.isDefault) || this.addresses[0];
+              if (def) localStorage.setItem('floralia_cached_address', JSON.stringify(def));
+            } catch (e) {}
           }
           this.loadingAddresses = false;
           this.cdr.detectChanges();
