@@ -1,3 +1,7 @@
+<div class="order-load-state" *ngIf="loading && !order" role="status" aria-live="polite">
+  <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+  Đang tải chi tiết đơn hàng...
+</div>
 <div class="order-load-state order-load-error" *ngIf="!loading && !order" role="alert">
   {{ pageError || 'Không tìm thấy đơn hàng.' }}
   <button type="button" (click)="goBack()">Quay lại đơn hàng</button>
@@ -12,9 +16,10 @@
       <div class="order-date-meta" aria-label="Thời gian và số sản phẩm">
         <span *ngIf="order.time">{{ order.time }}</span>
         <span>{{ order.date }}</span>
-        <span>{{ (order.items?.length || 0) + (order.cancelledItems?.length || 0) }} sản phẩm</span>
+        <span>{{ getDisplayItems().length }} sản phẩm</span>
       </div>
     </header>
+    <p class="order-action-error" role="status" *ngIf="pageError">{{ pageError }}</p>
 
     <section class="info-grid" aria-label="Thông tin đơn hàng">
 
@@ -74,11 +79,7 @@
           </div>
           <div class="sum-row">
             <span class="sum-label">Giảm giá sản phẩm</span>
-            <span class="sum-price">-{{ (order.productDiscount || 0).toLocaleString('vi-VN') }}đ</span>
-          </div>
-          <div class="sum-row" *ngIf="order.voucherDiscount || (!order.productDiscount && order.discount)">
-            <span class="sum-label">Giảm giá voucher</span>
-            <span class="sum-price">-{{ (order.voucherDiscount ?? (order.discount - (order.productDiscount || 0))).toLocaleString('vi-VN') }}đ</span>
+            <span class="sum-price">-{{ (order.productDiscount || order.discount || 0).toLocaleString('vi-VN') }}đ</span>
           </div>
           <div class="sum-row" *ngIf="order.shippingFee > 0">
             <span class="sum-label">Phí vận chuyển</span>
@@ -118,23 +119,22 @@
     <!-- CANCELLED/REFUND STATUS NOTICE -->
     <div class="status-notice-box" *ngIf="order.status === 'cancelled'">
       <i class="bi bi-x-circle-fill"></i>
-      <span>Đơn hàng đã bị hủy.<span *ngIf="order.cancelReason"> Lý do: {{ order.cancelReason }}</span></span>
+      <span>Đơn hàng đã bị hủy.</span>
     </div>
     <div class="status-notice-box refund-notice" *ngIf="order.status === 'refund_pending'">
       <i class="bi bi-hourglass-split"></i>
       <span>
         Yêu cầu hoàn tiền đang chờ duyệt.
-        <span *ngIf="getReturnReason()">Lý do trả hàng: {{ getReturnReason() }}.</span>
         <span *ngIf="order.refundNote"> {{ order.refundNote }}</span>
       </span>
     </div>
     <div class="status-notice-box refund-approved-notice" *ngIf="order.status === 'refund_approved'">
       <i class="bi bi-check-circle-fill"></i>
-      <span>Đã duyệt yêu cầu trả hàng/hoàn tiền.<span *ngIf="getReturnReason()"> Lý do trả hàng: {{ getReturnReason() }}</span></span>
+      <span>Đã duyệt yêu cầu trả hàng/hoàn tiền.</span>
     </div>
     <div class="status-notice-box refund-approved-notice" *ngIf="order.status === 'refunded'">
       <i class="bi bi-arrow-return-left"></i>
-      <span>Đơn hàng đã hoàn tiền.<span *ngIf="getReturnReason()"> Lý do trả hàng: {{ getReturnReason() }}</span></span>
+      <span>Đơn hàng đã hoàn tiền.</span>
     </div>
     <div class="order-customer-note" *ngIf="order.customerNote">
       <strong>Ghi chú đơn hàng:</strong> {{ order.customerNote }}
@@ -146,18 +146,13 @@
         <h2 class="cart-panel-title">
           <i class="bi bi-bag-check"></i> Sản phẩm trong đơn hàng
         </h2>
-        <span class="cart-panel-count">{{ order.items?.length || 0 }} sản phẩm còn lại</span>
+        <span class="cart-panel-count">{{ getDisplayItems().length }} sản phẩm</span>
       </div>
-
-      <p class="cancel-selection-hint" *ngIf="canCancel()">
-        Chọn những sản phẩm bạn muốn hủy bằng ô vuông bên cạnh từng dòng.
-      </p>
 
       <div class="cart-table-container">
         <table class="detail-cart-table">
           <thead>
             <tr>
-              <th class="th-select" *ngIf="canCancel()">CHỌN HỦY</th>
               <th class="th-product">SẢN PHẨM</th>
               <th class="th-price">ĐƠN GIÁ</th>
               <th class="th-qty">SỐ LƯỢNG</th>
@@ -165,17 +160,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let it of order.items; let i = index"
-              [class.cancel-item-selected]="selectedCancelItemIndexes.includes(i)">
-              <td class="td-select" *ngIf="canCancel()">
-                <label class="item-cancel-select" [attr.aria-label]="'Chọn hủy ' + it.name">
-                  <input
-                    type="checkbox"
-                    [checked]="selectedCancelItemIndexes.includes(i)"
-                    (change)="toggleCancelItem(i)">
-                  <span class="item-cancel-checkbox" aria-hidden="true"></span>
-                </label>
-              </td>
+            <tr *ngFor="let it of getDisplayItems()">
               <td class="td-product">
                 <div class="cart-item-row">
                   <button type="button" class="product-image-link"
@@ -189,49 +174,25 @@
                     <span class="cart-variant-badge" *ngIf="it.variant">
                       <i class="bi bi-tag-fill"></i> {{ it.variant }}
                     </span>
+                    <small class="product-status-reason" *ngIf="it.statusReason">{{ it.statusReason }}</small>
                   </div>
                 </div>
               </td>
               <td class="td-price">
-                <span class="unit-price">{{ (it.oldPrice || it.price || 0).toLocaleString('vi-VN') }}đ</span>
+                <span class="unit-old-price" *ngIf="it.oldPrice && it.oldPrice > (it.salePrice ?? it.price)">{{ it.oldPrice.toLocaleString('vi-VN') }}đ</span>
+                <span class="unit-price">{{ (it.salePrice ?? it.price ?? it.oldPrice ?? 0).toLocaleString('vi-VN') }}đ</span>
               </td>
               <td class="td-qty">
                 <span class="qty-pill">x{{ it.quantity }}</span>
               </td>
               <td class="td-total">
-                <strong class="line-total">{{ (((it.oldPrice || it.price || 0) * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
+                <strong class="line-total">{{ (((it.salePrice ?? it.price ?? it.oldPrice ?? 0) * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="cancelled-items-history" *ngIf="order.cancelledItems?.length">
-        <h3>Sản phẩm đã hủy</h3>
-        <div class="cancelled-item-row" *ngFor="let it of order.cancelledItems">
-          <button type="button" class="product-image-link"
-            [attr.aria-label]="'Xem chi tiết ' + it.name" (click)="openProduct(it)">
-            <span class="cart-item-img-box">
-              <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'">
-            </span>
-          </button>
-          <div class="cart-item-info">
-            <button type="button" class="product-name-link" (click)="openProduct(it)">{{ it.name }}</button>
-            <span class="cart-variant-badge" *ngIf="it.variant">{{ it.variant }}</span>
-            <span class="cancelled-item-reason" *ngIf="it.cancelReasons?.length">
-              Lý do hủy:
-              <span *ngFor="let reason of it.cancelReasons; let last = last">
-                {{ reason.reason }}<span *ngIf="reason.detail">: {{ reason.detail }}</span><span *ngIf="!last">, </span>
-              </span>
-            </span>
-            <span class="cancelled-item-reason" *ngIf="!it.cancelReasons?.length">Lý do hủy: {{ it.cancelReason }}</span>
-          </div>
-          <span class="qty-pill">x{{ it.quantity }}</span>
-          <strong class="cancelled-item-total">
-            {{ ((it.total != null ? it.total : it.price * it.quantity) || 0).toLocaleString('vi-VN') }}đ
-          </strong>
-        </div>
-      </div>
     </div>
 
     <!-- ACTIONS BAR -->
@@ -243,15 +204,15 @@
       </button>
 
       <div class="action-right-group">
-        <!-- Cancel selected products: visible for pending/processing/shipping -->
+        <!-- Cancel the whole order while it is still pending or processing -->
         <button
           *ngIf="canCancel()"
           type="button"
           class="btn-cancel-action"
-          [disabled]="selectedCancelItemIndexes.length === 0 || isCancelSubmitting"
+          [disabled]="isCancelSubmitting"
           (click)="openCancelModal()"
         >
-          <i class="bi bi-x-circle"></i> Hủy sản phẩm đã chọn
+          <i class="bi bi-x-circle"></i> Hủy đơn hàng
         </button>
 
         <!-- Confirm Received: only when status = 'delivered' -->
@@ -261,20 +222,20 @@
           class="btn-received-action"
           (click)="confirmReceived()"
         >
-          <i class="bi bi-check2-circle"></i> Đã nhận được hàng
+          Đã nhận được hàng
         </button>
 
         <!-- Return & Refund: only when status = 'completed' -->
         <button
-          *ngIf="canReturn()"
+          *ngIf="order.status === 'delivered' || order.status === 'completed'"
           type="button"
           class="btn-return-action"
           (click)="openReturnModal()"
         >
-          <i class="bi bi-arrow-return-left"></i> Trả hàng – Hoàn tiền
+          Yêu cầu Trả hàng/Hoàn tiền
         </button>
 
-        <button type="button" class="btn-reorder-action" (click)="reorder()">
+        <button *ngIf="order.status === 'completed' || order.status === 'cancelled' || order.status === 'refunded'" type="button" class="btn-reorder-action" (click)="reorder()">
           <i class="bi bi-arrow-repeat"></i> Mua lại
         </button>
       </div>
@@ -282,48 +243,56 @@
 
   </div>
 </div>
+<app-order-reorder-dialog
+  [items]="reorderItems"
+  (closed)="reorderItems = null"
+  (checkout)="proceedToReorderCheckout()">
+</app-order-reorder-dialog>
 
 <!-- ====== CANCEL ORDER MODAL ====== -->
 <div class="modal-backdrop" *ngIf="showCancelModal" (click)="closeCancelModal()">
-  <div class="modal-dialog-card cancel-modal" (click)="$event.stopPropagation()">
+  <div class="modal-card cancel-order-modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3 class="modal-title"><i class="bi bi-x-circle"></i> Hủy sản phẩm đã chọn</h3>
-      <button type="button" class="btn-close-modal" (click)="closeCancelModal()">
+      <h3 class="modal-title">Lý do hủy đơn {{ order?.code }}</h3>
+      <button type="button" class="btn-close-modal" (click)="closeCancelModal()" aria-label="Đóng">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
-    <div class="modal-body">
-      <p class="modal-desc">Các sản phẩm sẽ hủy:</p>
-      <ul class="selected-cancel-items">
-        <li *ngFor="let it of getSelectedCancelItems()">{{ it.name }} · x{{ it.quantity }}</li>
-      </ul>
-      <p class="modal-desc">Vui lòng chọn lý do hủy:</p>
-      <div class="reason-list">
-        <label class="reason-item" *ngFor="let r of cancelReasons" [class.selected]="selectedCancelReasons.includes(r)">
-          <input
-            type="checkbox"
-            [checked]="selectedCancelReasons.includes(r)"
-            (change)="toggleCancelReason(r)">
-          <span class="reason-checkbox" aria-hidden="true"></span>
-          <span class="reason-text">{{ r }}</span>
-        </label>
-      </div>
-      <div class="other-cancel-reason" *ngIf="selectedCancelReasons.includes('Khác')">
-        <label for="other-item-cancel-reason">Lý do khác <span class="req">*</span></label>
-        <textarea
-          id="other-item-cancel-reason"
-          class="return-note-input"
-          rows="3"
-          maxlength="500"
-          [(ngModel)]="otherCancelReason"
-          placeholder="Nhập lý do bạn muốn hủy sản phẩm..."
-        ></textarea>
-      </div>
-      <p class="order-action-error" role="alert" *ngIf="actionError">{{ actionError }}</p>
+    <div class="modal-alert-warning">
+      <i class="bi bi-exclamation-circle-fill alert-icon"></i>
+      <span>Vui lòng chọn lý do hủy. Thao tác này sẽ hủy toàn bộ sản phẩm trong đơn hàng và không thể hoàn tác.</span>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-modal-secondary" (click)="closeCancelModal()">Không hủy</button>
-      <button type="button" class="btn-modal-danger" [disabled]="isCancelSubmitting" (click)="confirmCancelOrder()">Xác nhận hủy sản phẩm</button>
+    <div class="reasons-list">
+      <label class="reason-item" *ngFor="let r of cancelReasons" [class.selected]="selectedCancelReason === r">
+        <input
+          type="radio"
+          name="detailOrderCancelReason"
+          [value]="r"
+          [(ngModel)]="selectedCancelReason"
+          (change)="toggleCancelReason(r)">
+        <span class="custom-radio" aria-hidden="true"></span>
+        <span class="reason-text">{{ r }}</span>
+      </label>
+    </div>
+    <div class="other-cancel-reason" *ngIf="selectedCancelReason === 'Khác'">
+      <label for="other-item-cancel-reason">Lý do khác <span class="req">*</span></label>
+      <textarea
+        id="other-item-cancel-reason"
+        class="return-note-input"
+        rows="3"
+        maxlength="500"
+        [(ngModel)]="otherCancelReason"
+        placeholder="Nhập lý do bạn muốn hủy đơn hàng..."
+      ></textarea>
+    </div>
+    <p class="order-action-error" role="alert" *ngIf="actionError">{{ actionError }}</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-cancel-back" [disabled]="isCancelSubmitting" (click)="closeCancelModal()">
+        Không phải bây giờ
+      </button>
+      <button type="button" class="btn-cancel-confirm" [disabled]="isCancelSubmitting" (click)="confirmCancelOrder()">
+        {{ isCancelSubmitting ? 'Đang lưu...' : 'Hủy đơn hàng' }}
+      </button>
     </div>
   </div>
 </div>

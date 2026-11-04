@@ -1,14 +1,10 @@
 <div class="checkout-page">
-
-  <!-- TOP TEA BANNER -->
-  <div class="top-banner-wrap">
-    <img src="/assets/images/tea-banner.png" alt="Floralia Herbal Tea" class="banner-img">
-  </div>
-
   <div class="container checkout-container">
 
-    <!-- PAGE TITLE -->
-    <h1 class="page-title">Thanh Toán</h1>
+    <header class="checkout-heading">
+      <p class="checkout-eyebrow">ĐƠN HÀNG CỦA BẠN</p>
+      <h1 class="page-title">Thanh toán</h1>
+    </header>
 
     <!-- 2-COLUMNS CHECKOUT LAYOUT -->
     <div class="checkout-layout">
@@ -17,7 +13,7 @@
       <div class="checkout-left-col">
         <div class="info-card">
           <div class="card-header-bar">
-            <h2 class="card-title">THÔNG TIN NHẬN HÀNG</h2>
+            <h2 class="card-title">Thông tin nhận hàng</h2>
             <button type="button" class="btn-change-address-main" (click)="openAddressModal()">
               <i class="bi" [ngClass]="savedAddresses.length ? 'bi-geo-alt' : 'bi-plus-circle'"></i>
               {{ savedAddresses.length ? 'Thay đổi địa chỉ' : 'Thêm địa chỉ' }}
@@ -151,40 +147,6 @@
             </div>
           </div>
 
-          <!-- Coupon Code Input -->
-          <div class="coupon-box" *ngIf="!couponApplied">
-            <input
-              type="text"
-              class="coupon-input"
-              [(ngModel)]="couponCode"
-              placeholder="Nhập mã voucher"
-              (keyup.enter)="applyCoupon()"
-            >
-            <button type="button" class="btn-apply-coupon" (click)="applyCoupon()" [disabled]="couponApplying">
-              {{ couponApplying ? 'Đang kiểm tra...' : 'Áp dụng' }}
-            </button>
-          </div>
-
-          <!-- Coupon Applied State -->
-          <div class="coupon-applied-bar" *ngIf="couponApplied">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>Đã áp dụng mã <strong>{{ couponCode.toUpperCase() }}</strong></span>
-            <button type="button" class="btn-remove-coupon" (click)="removeCoupon()">
-              <i class="bi bi-x"></i> Xóa
-            </button>
-          </div>
-
-          <!-- Coupon message feedback -->
-          <p class="coupon-message" *ngIf="couponMessage && !couponApplied" [class.error]="!couponApplied">
-            {{ couponMessage }}
-          </p>
-
-          <!-- Floralia Herbal Tea Voucher Banner -->
-          <div class="voucher-banner">
-            <span><i class="bi bi-ticket-perforated-fill"></i> Voucher của Floralia Herbal Tea</span>
-            <i class="bi bi-chevron-right"></i>
-          </div>
-
           <!-- Pricing breakdown -->
           <div class="pricing-breakdown">
             <div class="price-row">
@@ -194,10 +156,6 @@
             <div class="price-row">
               <span class="label">Giảm giá sản phẩm:</span>
               <span class="val discount-val">-{{ productDiscount.toLocaleString('vi-VN') }}đ</span>
-            </div>
-            <div class="price-row" *ngIf="voucherDiscount > 0">
-              <span class="label">Giảm giá voucher:</span>
-              <span class="val discount-val">-{{ voucherDiscount.toLocaleString('vi-VN') }}đ</span>
             </div>
             <div class="price-row">
               <span class="label">Phí vận chuyển:</span>

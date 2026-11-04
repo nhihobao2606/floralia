@@ -8,7 +8,6 @@ const {
   getOrderById,
   createOrder,
   updateOrderStatus,
-  cancelOrderItems,
   approveRefund,
   updateAdminOrderStatus
 } = require('../controllers/orderController');
@@ -22,7 +21,6 @@ router.patch('/:id/admin-status', requireAuth, requireAdmin, updateAdminOrderSta
 router.get('/', getOrders);
 router.get('/:id', getOrderById);
 router.post('/', createOrder);
-router.patch('/:id/cancel-items', cancelOrderItems);
 router.patch('/:id', updateOrderStatus);
 
 module.exports = router;

@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CancelReason, getOrderSlug, Order, OrderService } from '../../services/order-service';
-import { CartService } from '../../services/cart-service';
+import { CancelReason, getOrderSlug, Order, OrderItem, OrderService } from '../../services/order-service';
 
 @Component({
   selector: 'app-orders',
@@ -36,6 +35,7 @@ export class Orders implements OnInit, OnDestroy {
   filteredOrders: Order[] = [];
   loading = true;
   loadError = '';
+  reorderItems: OrderItem[] | null = null;
 
   user: any = null;
   initial = 'H';
@@ -53,7 +53,7 @@ export class Orders implements OnInit, OnDestroy {
     'Đổi ý, không muốn mua nữa',
     'Khác'
   ];
-  selectedCancelReasons: string[] = [];
+  selectedCancelReason = '';
   otherCancelReason = '';
   isCancelSubmitting = false;
 
@@ -84,7 +84,6 @@ export class Orders implements OnInit, OnDestroy {
 
   constructor(
     private orderService: OrderService,
-    private cartService: CartService,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
@@ -195,10 +194,9 @@ export class Orders implements OnInit, OnDestroy {
     this.filteredOrders = list;
   }
 
-  getDisplayItems(order: Order): Array<Order['items'][number] & { cancelled: boolean }> {
-    const activeItems = (order.items || []).map(item => ({ ...item, cancelled: false }));
-    const cancelledItems = (order.cancelledItems || []).map(item => ({ ...item, cancelled: true }));
-    return [...activeItems, ...cancelledItems];
+  getDisplayItems(order: Order): Order['items'] {
+    if (order.items?.length || order.status !== 'cancelled') return order.items || [];
+    return order.cancelledItems || [];
   }
 
   viewDetail(order: Order, event?: Event): void {
@@ -279,27 +277,16 @@ export class Orders implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
     }
-    if (order.items && order.items.length > 0) {
-      const currentCart = this.cartService.getCart();
-      order.items.forEach(it => {
-        currentCart.push({
-          id: it.sku,
-          productId: it.sku,
-          sku: it.sku,
-          name: it.name,
-          title: it.name,
-          price: it.price,
-          quantity: it.quantity,
-          image: it.image,
-          thumbnail: it.image,
-          variantLabel: it.variant || ''
-        });
-      });
-      this.cartService.saveCart(currentCart);
-      this.router.navigate(['/cart']);
+    if (order.items?.length) {
+      this.reorderItems = order.items;
     } else {
       this.router.navigate(['/products']);
     }
+  }
+
+  proceedToReorderCheckout(): void {
+    this.reorderItems = null;
+    void this.router.navigate(['/checkout']);
   }
 
   openCancelModal(order: Order, event?: Event): void {
@@ -307,33 +294,32 @@ export class Orders implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     this.cancellingOrder = order;
-    this.selectedCancelReasons = [];
+    this.selectedCancelReason = '';
     this.otherCancelReason = '';
     this.isCancelSubmitting = false;
     this.showCancelModal = true;
   }
 
   toggleCancelReason(reason: string): void {
-    this.selectedCancelReasons = this.selectedCancelReasons.includes(reason)
-      ? this.selectedCancelReasons.filter(selected => selected !== reason)
-      : [...this.selectedCancelReasons, reason];
-    if (!this.selectedCancelReasons.includes('Khác')) {
+    this.selectedCancelReason = reason;
+    if (reason !== 'Khác') {
       this.otherCancelReason = '';
     }
   }
 
   closeCancelModal(): void {
+    if (this.isCancelSubmitting) return;
     this.showCancelModal = false;
     this.cancellingOrder = null;
   }
 
   confirmCancelOrder(): void {
     if (!this.cancellingOrder || this.isCancelSubmitting) return;
-    if (this.selectedCancelReasons.length === 0) {
-      alert('Vui lòng chọn ít nhất một lý do hủy đơn.');
+    if (!this.selectedCancelReason) {
+      alert('Vui lòng chọn lý do hủy đơn.');
       return;
     }
-    if (this.selectedCancelReasons.includes('Khác') && !this.otherCancelReason.trim()) {
+    if (this.selectedCancelReason === 'Khác' && !this.otherCancelReason.trim()) {
       alert('Vui lòng nhập lý do khác.');
       return;
     }
@@ -341,20 +327,23 @@ export class Orders implements OnInit, OnDestroy {
     const targetOrder = this.cancellingOrder;
     const pm = (targetOrder.paymentMethod || '').toLowerCase();
     const isPaid = ['paypal', 'vnpay', 'chuyển khoản', 'momo', 'qr'].some(method => pm.includes(method));
-    const cancelReasons: CancelReason[] = this.selectedCancelReasons.map(reason => ({
-      reason,
-      ...(reason === 'Khác' ? { detail: this.otherCancelReason.trim() } : {})
-    }));
+    const cancelReasons: CancelReason[] = [{
+      reason: this.selectedCancelReason,
+      ...(this.selectedCancelReason === 'Khác' ? { detail: this.otherCancelReason.trim() } : {})
+    }];
 
     this.isCancelSubmitting = true;
-    this.closeCancelModal();
+    this.cdr.markForCheck();
     this.orderService.updateOrderStatus(targetOrder.id, 'cancelled', 'ĐÃ HỦY', {
       cancelReasons
     }).subscribe({
       next: ({ order }) => {
         this.isCancelSubmitting = false;
         Object.assign(targetOrder, order);
-        this.applyFilter();
+        this.activeTab = 'cancelled';
+        this.loadOrders();
+        this.closeCancelModal();
+        this.cdr.markForCheck();
         if (isPaid) {
           alert('Hủy đơn thành công!\nSẽ sớm hoàn tiền về cho bạn.');
         } else {
@@ -363,6 +352,7 @@ export class Orders implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isCancelSubmitting = false;
+        this.cdr.markForCheck();
         alert(error?.error?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
       }
     });

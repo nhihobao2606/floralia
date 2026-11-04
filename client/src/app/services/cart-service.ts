@@ -206,8 +206,15 @@ export class CartService {
   }
 
   removeItem(item: CartItem): void {
+    this.removeItems([item]);
+  }
+
+  removeItems(items: CartItem[]): void {
+    if (!items.length) return;
     const cart = this.getCart();
-    const updatedCart = cart.filter((candidate) => !this.matches(candidate, item));
+    const updatedCart = cart.filter(candidate =>
+      !items.some(item => this.matches(candidate, item))
+    );
     if (updatedCart.length !== cart.length) this.saveCart(updatedCart);
   }
 

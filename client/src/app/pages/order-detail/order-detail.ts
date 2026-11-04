@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CancelReason, Order, OrderItem, OrderService } from '../../services/order-service';
-import { CartService } from '../../services/cart-service';
 import { ProductService } from '../../services/product-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 
@@ -20,10 +19,12 @@ export class OrderDetail implements OnInit {
     'Đã giao'
   ];
   order: Order | null = null;
+  reorderItems: OrderItem[] | null = null;
   loading = true;
   pageError = '';
   actionError = '';
   actionMessage = '';
+  private loadRequestId = 0;
 
   // Cancel modal
   showCancelModal = false;
@@ -36,9 +37,8 @@ export class OrderDetail implements OnInit {
     'Đổi ý, không muốn mua nữa',
     'Khác'
   ];
-  selectedCancelReasons: string[] = [];
+  selectedCancelReason = '';
   otherCancelReason = '';
-  selectedCancelItemIndexes: number[] = [];
   isCancelSubmitting = false;
 
   // Return/Refund modal
@@ -59,9 +59,9 @@ export class OrderDetail implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private orderService: OrderService,
-    private cartService: CartService,
     private productService: ProductService,
-    private productNavigation: ProductNavigationService
+    private productNavigation: ProductNavigationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -73,26 +73,41 @@ export class OrderDetail implements OnInit {
   }
 
   loadOrderDetail(id: string): void {
+    const requestId = ++this.loadRequestId;
+    this.order = id ? this.orderService.getOrderByIdSync(id) : null;
     this.loading = true;
+    this.pageError = '';
+    if (!id) {
+      this.loading = false;
+      this.pageError = 'Không tìm thấy đơn hàng.';
+      return;
+    }
+
     this.orderService.getOrderById(id).subscribe({
       next: (order) => {
+        if (requestId !== this.loadRequestId) return;
         if (order) {
           this.order = order;
-        } else {
+        } else if (!this.order) {
           this.pageError = 'Không tìm thấy đơn hàng.';
+        } else {
+          this.pageError = 'Không thể làm mới đơn hàng. Đang hiển thị dữ liệu đã lưu.';
         }
         this.loading = false;
       },
       error: (error) => {
+        if (requestId !== this.loadRequestId) return;
         this.loading = false;
-        this.pageError = error?.error?.message || 'Không thể tải thông tin đơn hàng.';
+        this.pageError = this.order
+          ? 'Không thể làm mới đơn hàng. Đang hiển thị dữ liệu đã lưu.'
+          : error?.error?.message || 'Không thể tải thông tin đơn hàng.';
       }
     });
   }
 
   // --- Helpers ---
   canCancel(): boolean {
-    if (!this.order?.userId) return false;
+    if (!this.order) return false;
     const s = this.order.status;
     return s === 'pending' || s === 'processing';
   }
@@ -110,12 +125,38 @@ export class OrderDetail implements OnInit {
     return this.order?.status === 'refund_approved';
   }
 
-  getReturnReason(): string {
+  getDisplayItems(): Array<OrderItem & { statusReason: string }> {
+    if (!this.order) return [];
+    const items = this.order.items?.length
+      ? this.order.items
+      : this.order.status === 'cancelled'
+        ? this.order.cancelledItems || []
+        : [];
+    return items.map(item => ({
+      ...item,
+      statusReason: this.getItemStatusReason(item)
+    }));
+  }
+
+  private getItemStatusReason(item: OrderItem): string {
     if (!this.order) return '';
-    return this.order.refundReason ||
-      this.order.cancelReason ||
-      this.order.cancelReasons?.map(reason => reason.reason).join(', ') ||
-      '';
+    if (this.order.status === 'cancelled') {
+      const cancelledItem = this.order.cancelledItems?.find(
+        candidate => candidate.sku === item.sku && candidate.variant === item.variant
+      );
+      const reasons = cancelledItem?.cancelReasons?.length
+        ? cancelledItem.cancelReasons
+        : this.order.cancelReasons;
+      const reason = reasons?.map(entry =>
+        entry.detail ? `${entry.reason}: ${entry.detail}` : entry.reason
+      ).join(', ') || cancelledItem?.cancelReason || this.order.cancelReason;
+      return reason ? `Lý do hủy: ${reason}` : '';
+    }
+
+    if (['refund_pending', 'refund_approved', 'refunded'].includes(this.order.status)) {
+      return this.order.refundReason ? `Lý do trả hàng: ${this.order.refundReason}` : '';
+    }
+    return '';
   }
 
   get currentProgressStep(): number {
@@ -167,136 +208,61 @@ export class OrderDetail implements OnInit {
   openCancelModal(): void {
     this.actionError = '';
     this.actionMessage = '';
-    if (this.selectedCancelItemIndexes.length === 0) {
-      this.actionError = 'Vui lòng chọn ít nhất một sản phẩm muốn hủy.';
-      return;
-    }
-    this.selectedCancelReasons = [];
+    this.selectedCancelReason = '';
     this.otherCancelReason = '';
     this.showCancelModal = true;
   }
 
-  toggleCancelItem(index: number): void {
-    this.selectedCancelItemIndexes = this.selectedCancelItemIndexes.includes(index)
-      ? this.selectedCancelItemIndexes.filter(selected => selected !== index)
-      : [...this.selectedCancelItemIndexes, index];
-    this.actionError = '';
-    this.actionMessage = '';
-  }
-
-  getSelectedCancelItems(): OrderItem[] {
-    return this.order?.items.filter((_, index) => this.selectedCancelItemIndexes.includes(index)) || [];
-  }
-
   toggleCancelReason(reason: string): void {
-    this.selectedCancelReasons = this.selectedCancelReasons.includes(reason)
-      ? this.selectedCancelReasons.filter(selected => selected !== reason)
-      : [...this.selectedCancelReasons, reason];
-    if (!this.selectedCancelReasons.includes('Khác')) {
+    this.selectedCancelReason = reason;
+    if (reason !== 'Khác') {
       this.otherCancelReason = '';
     }
     this.actionError = '';
   }
 
   closeCancelModal(): void {
+    if (this.isCancelSubmitting) return;
     this.showCancelModal = false;
   }
 
   confirmCancelOrder(): void {
-    if (!this.order) return;
-    if (this.selectedCancelItemIndexes.length === 0) {
-      this.actionError = 'Vui lòng chọn ít nhất một sản phẩm muốn hủy.';
+    if (!this.order || this.isCancelSubmitting) return;
+    if (!this.selectedCancelReason) {
+      this.actionError = 'Vui lòng chọn lý do hủy đơn.';
       return;
     }
-    if (this.selectedCancelReasons.length === 0) {
-      this.actionError = 'Vui lòng chọn ít nhất một lý do hủy đơn.';
-      return;
-    }
-    if (this.selectedCancelReasons.includes('Khác') && !this.otherCancelReason.trim()) {
+    if (this.selectedCancelReason === 'Khác' && !this.otherCancelReason.trim()) {
       this.actionError = 'Vui lòng nhập lý do khác.';
       return;
     }
     const pm = (this.order.paymentMethod || '').toLowerCase();
     const isPaid = ['paypal', 'vnpay', 'chuyển khoản', 'momo', 'qr'].some(method => pm.includes(method));
     this.actionError = '';
-    const previousTotal = this.order.total;
-    const cancelReasons: CancelReason[] = this.selectedCancelReasons.map(reason => ({
-      reason,
-      ...(reason === 'Khác' ? { detail: this.otherCancelReason.trim() } : {})
-    }));
-    const selectedIndexes = [...this.selectedCancelItemIndexes];
-    const previousOrder = this.order;
-    const selectedIndexSet = new Set(selectedIndexes);
-    const reasonSummary = cancelReasons
-      .map(reason => reason.detail ? `${reason.reason}: ${reason.detail}` : reason.reason)
-      .join(', ');
-    const cancelledItems = previousOrder.items
-      .filter((_, index) => selectedIndexSet.has(index))
-      .map(item => ({ ...item, cancelReason: reasonSummary, cancelReasons }));
-    const remainingItems = previousOrder.items.filter((_, index) => !selectedIndexSet.has(index));
-    const subtotal = remainingItems.reduce(
-      (sum, item) => sum + Number(item.total ?? item.price * item.quantity),
-      0
-    );
-    const itemProductDiscount = (item: Order['items'][number]): number => Number(
-      item.productDiscount ??
-      Math.max(0, Number(item.oldPrice ?? item.price) - Number(item.salePrice ?? item.price)) * item.quantity
-    ) || 0;
-    const productDiscount = remainingItems.reduce((sum, item) => sum + itemProductDiscount(item), 0);
-    const allProductDiscount = previousOrder.items.reduce((sum, item) => sum + itemProductDiscount(item), 0);
-    const oldVoucherDiscount = Number(
-      previousOrder.voucherDiscount ?? Math.max(0, previousOrder.discount - allProductDiscount)
-    ) || 0;
-    const oldSaleSubtotal = previousOrder.items.reduce(
-      (sum, item) => sum + Number(item.salePrice ?? item.price) * item.quantity,
-      0
-    );
-    const remainingSaleSubtotal = remainingItems.reduce(
-      (sum, item) => sum + Number(item.salePrice ?? item.price) * item.quantity,
-      0
-    );
-    const voucherDiscount = remainingItems.length && oldSaleSubtotal > 0
-      ? Math.min(remainingSaleSubtotal, Math.round(oldVoucherDiscount * remainingSaleSubtotal / oldSaleSubtotal))
-      : 0;
-    const discount = productDiscount + voucherDiscount;
-    const optimisticOrder: Order = {
-      ...previousOrder,
-      items: remainingItems,
-      cancelledItems: [...(previousOrder.cancelledItems || []), ...cancelledItems],
-      cancelReasons,
-      cancelReason: reasonSummary,
-      subtotal,
-      productDiscount,
-      voucherDiscount,
-      discount,
-      shippingFee: remainingItems.length ? previousOrder.shippingFee : 0,
-      total: subtotal - discount + (remainingItems.length ? previousOrder.shippingFee : 0),
-      ...(remainingItems.length === 0 ? { status: 'cancelled', statusLabel: 'ĐÃ HỦY' } : {})
-    };
+    const cancelReasons: CancelReason[] = [{
+      reason: this.selectedCancelReason,
+      ...(this.selectedCancelReason === 'Khác' ? { detail: this.otherCancelReason.trim() } : {})
+    }];
     this.isCancelSubmitting = true;
-    this.closeCancelModal();
-    this.order = optimisticOrder;
-    this.selectedCancelItemIndexes = [];
-    this.orderService.cancelOrderItems(
+    this.orderService.updateOrderStatus(
       this.order.id,
-      selectedIndexes,
-      cancelReasons
+      'cancelled',
+      'ĐÃ HỦY',
+      { cancelReasons }
     ).subscribe({
       next: ({ order }) => {
         this.isCancelSubmitting = false;
         this.order = order;
-        const refundDue = Math.max(0, previousTotal - order.total);
-        const partial = order.status !== 'cancelled';
-        const successMessage = partial ? 'Đã hủy sản phẩm đã chọn.' : 'Đã hủy toàn bộ đơn hàng.';
-        this.actionMessage = isPaid && refundDue > 0
-          ? `${successMessage}\nSẽ sớm hoàn tiền phần chênh lệch về cho bạn.`
-          : successMessage;
+        this.closeCancelModal();
+        this.actionMessage = isPaid
+          ? 'Đã hủy đơn hàng. Sẽ sớm hoàn tiền về cho bạn.'
+          : 'Đã hủy đơn hàng.';
+        this.cdr.markForCheck();
       },
       error: (error) => {
         this.isCancelSubmitting = false;
-        this.order = previousOrder;
-        this.selectedCancelItemIndexes = selectedIndexes;
         this.actionError = error?.error?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -363,23 +329,12 @@ export class OrderDetail implements OnInit {
       this.router.navigate(['/products']);
       return;
     }
-    const currentCart = this.cartService.getCart();
-    this.order.items.forEach(it => {
-      currentCart.push({
-        id: it.sku,
-        productId: it.sku,
-        sku: it.sku,
-        name: it.name,
-        title: it.name,
-        price: it.price,
-        quantity: it.quantity,
-        image: it.image,
-        thumbnail: it.image,
-        variantLabel: it.variant || ''
-      });
-    });
-    this.cartService.saveCart(currentCart);
-    this.router.navigate(['/cart']);
+    this.reorderItems = this.order.items;
+  }
+
+  proceedToReorderCheckout(): void {
+    this.reorderItems = null;
+    void this.router.navigate(['/checkout']);
   }
 
   formatPrice(num?: number): string {

@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartItem, CartService, CartVariant } from '../../services/cart-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
@@ -31,11 +30,37 @@ export class CartComponent implements OnInit {
   }
 
   loadCart(): void {
-    this.items = this.cartService.getCart().map(item => ({
-      ...item,
-      selected: false,
-    }));
+    this.syncCart(false);
+  }
+
+  @HostListener('window:cart-updated')
+  onCartUpdated(): void {
+    this.syncCart(true);
+  }
+
+  private syncCart(preserveSelection: boolean): void {
+    const previousItems = this.items;
+    const currentItems = this.cartService.getCart();
+    this.items = currentItems.map(item => {
+      const exactMatch = previousItems.find(previous => this.cartItemKey(previous) === this.cartItemKey(item));
+      const sameProductItems = previousItems.filter(previous => this.productKey(previous) === this.productKey(item));
+      const previousMatch = exactMatch || (sameProductItems.length === 1 ? sameProductItems[0] : undefined);
+      return {
+        ...item,
+        selected: preserveSelection
+          ? previousMatch?.selected ?? item.selected ?? false
+          : false,
+      };
+    });
     if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+  }
+
+  private cartItemKey(item: CartItem): string {
+    return `${this.productKey(item)}::${item.variantSku || ''}`;
+  }
+
+  private productKey(item: CartItem): string {
+    return String(item.productId || item.productSku || item.slug || item.id || '');
   }
 
   get allSelected(): boolean {
@@ -62,7 +87,6 @@ export class CartComponent implements OnInit {
     const stock = this.stock(item);
     if (nextQuantity < 1 || (delta > 0 && stock > 0 && nextQuantity > stock)) return;
     this.cartService.changeQuantity(item, delta);
-    item.quantity = nextQuantity;
   }
 
   stock(item: CartDisplayItem): number {
@@ -83,7 +107,7 @@ export class CartComponent implements OnInit {
     const variant = item.variants?.find(option => option.sku === variantSku);
     if (!variant) return;
     this.openVariantItem = null;
-    if (this.cartService.changeVariant(item, variant, item.quantity)) this.loadCart();
+    this.cartService.changeVariant(item, variant, item.quantity);
   }
 
   selectedVariantLabel(item: CartDisplayItem): string {
@@ -102,7 +126,14 @@ export class CartComponent implements OnInit {
 
   removeItem(item: CartDisplayItem): void {
     this.cartService.removeItem(item);
-    this.loadCart();
+  }
+
+  removeSelectedItems(): void {
+    const selectedItems = this.selectedItems;
+    if (!selectedItems.length) return;
+    if (!window.confirm(`Bạn có chắc muốn xóa ${selectedItems.length} sản phẩm đã chọn khỏi giỏ hàng không?`)) return;
+    this.openVariantItem = null;
+    this.cartService.removeItems(selectedItems);
   }
 
   get totalPages(): number {

@@ -35,9 +35,19 @@ export interface Order {
   slug?: string;
   date: string;
   time?: string;
+  createdAt?: string;
   status: 'pending' | 'shipping' | 'waiting' | 'completed' | 'delivered' | 'cancelled' | 'refunded' | 'processing' | 'refund_pending' | 'refund_approved';
   statusLabel: string;
   step: number; // 1: Đã ghi nhận, 2: Chờ xác nhận, 3: Chờ lấy hàng, 4: Đang giao, 5: Đã giao
+  paymentStatus?: string;
+  paymentStatusLabel?: string;
+  trackingTimeline?: Array<{
+    status: Order['status'];
+    statusLabel: string;
+    notice: string;
+    createdAt: string;
+  }>;
+  notes?: string[];
   notice?: string;
   customerNote?: string;
   cancelReason?: string;
@@ -163,9 +173,26 @@ export class OrderService {
   getOrderByIdSync(id: string): Order | null {
     if (!id) return null;
     const cleanId = id.startsWith('#') ? id.substring(1) : id;
-    return this.ordersCache.find(order =>
-      order.id === cleanId || order.id === id || order.code === id || order.code === `#${cleanId}` || order.slug === id
-    ) || null;
+    const cachedOrder = this.ordersCacheOwner === this.currentUserKey()
+      ? this.ordersCache.find(order =>
+        order.id === cleanId || order.id === id || order.code === id || order.code === `#${cleanId}` || order.slug === id
+      )
+      : null;
+    if (cachedOrder) return cachedOrder;
+
+    for (const lookupId of new Set([id, cleanId])) {
+      try {
+        const raw = sessionStorage.getItem(this.orderDetailCacheKey(lookupId));
+        if (!raw) continue;
+        const order = JSON.parse(raw) as Order;
+        if (order && typeof order.id === 'string' && Array.isArray(order.items)) return order;
+        sessionStorage.removeItem(this.orderDetailCacheKey(lookupId));
+      } catch (error) {
+        console.warn('Không thể đọc bộ nhớ tạm chi tiết đơn hàng:', error);
+      }
+    }
+
+    return null;
   }
 
   saveOrderLocal(order: Order): Order {
@@ -182,6 +209,7 @@ export class OrderService {
       this.ordersCache.unshift(order);
     }
     this.ordersCache = sortOrdersNewestFirst(this.ordersCache);
+    this.cacheOrderDetail(order);
     return order;
   }
 
@@ -226,22 +254,6 @@ export class OrderService {
     );
   }
 
-  cancelOrderItems(
-    id: string,
-    itemIndexes: number[],
-    cancelReasons: CancelReason[]
-  ): Observable<{ success: boolean; order: Order }> {
-    return this.http.patch<{ success: boolean; order: Order }>(
-      `${this.apiUrl}/${encodeURIComponent(id)}/cancel-items`,
-      { itemIndexes, cancelReasons },
-      { headers: this.authHeaders() }
-    ).pipe(
-      tap(res => {
-        if (res.order) this.saveOrderLocal(res.order);
-      })
-    );
-  }
-
   private currentUserKey(): string {
     const rawUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
     if (rawUser) {
@@ -254,6 +266,23 @@ export class OrderService {
       }
     }
     return localStorage.getItem('token') || sessionStorage.getItem('token') || 'anonymous';
+  }
+
+  private orderDetailCacheKey(id: string): string {
+    return `floralia_order_detail_${encodeURIComponent(this.currentUserKey())}_${encodeURIComponent(id)}`;
+  }
+
+  private cacheOrderDetail(order: Order): void {
+    const identifiers = new Set([order.id, order.code, order.code?.replace(/^#/, ''), order.slug]);
+    for (const id of identifiers) {
+      if (!id) continue;
+      try {
+        sessionStorage.setItem(this.orderDetailCacheKey(id), JSON.stringify(order));
+      } catch (error) {
+        console.warn('Không thể lưu bộ nhớ tạm chi tiết đơn hàng:', error);
+        return;
+      }
+    }
   }
 
   private authHeaders(): HttpHeaders {

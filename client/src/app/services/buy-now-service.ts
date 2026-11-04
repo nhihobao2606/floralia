@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartProduct, CartService, CartVariant } from './cart-service';
 
-interface BuyNowRequest {
+export interface BuyNowRequest {
   product: CartProduct;
   image: string;
 }

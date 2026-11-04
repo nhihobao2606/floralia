@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GUEST_TRACKED_ORDER_KEY, getOrderSlug, OrderService, Order } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
-import { CheckoutProduct, ProductService, ValidatedVoucher } from '../../services/product-service';
+import { CheckoutProduct, ProductService } from '../../services/product-service';
 import { forkJoin } from 'rxjs';
 
 interface CheckoutItem {
@@ -65,11 +65,6 @@ export class CheckoutComponent implements OnInit {
   showQRModal = false;
   copiedText = false;
 
-  couponCode = '';
-  couponApplied = false; // Only true after user clicks "Áp dụng" with valid code
-  couponMessage = '';
-  couponApplying = false;
-  appliedVoucher: ValidatedVoucher | null = null;
   paymentMethod = 'cod';
 
   items: CheckoutItem[] = [];
@@ -544,11 +539,7 @@ export class CheckoutComponent implements OnInit {
     this.couponApplied = false;
     this.appliedVoucher = null;
     this.couponApplying = true;
-<<<<<<< HEAD
-    this.productService.validateVoucher(code, this.subtotal, this.items.map(item => ({ sku: item.sku, quantity: item.quantity, variant: item.variant }))).subscribe({
-=======
     this.productService.validateVoucher(code, this.saleSubtotal).subscribe({
->>>>>>> d8b712c2e3626c761721e9c750ba391fbee365bf
       next: response => {
         this.couponApplying = false;
         this.appliedVoucher = response.voucher;
@@ -580,18 +571,8 @@ export class CheckoutComponent implements OnInit {
     return this.items.reduce((sum, item) => sum + (item.productDiscount || 0), 0);
   }
 
-  get saleSubtotal(): number {
-    return Math.max(0, this.subtotal - this.productDiscount);
-  }
-
-  get voucherDiscount(): number {
-    return this.couponApplied
-      ? Math.min(this.saleSubtotal, this.appliedVoucher?.discount || 0)
-      : 0;
-  }
-
   get discount(): number {
-    return Math.min(this.subtotal, this.productDiscount + this.voucherDiscount);
+    return Math.min(this.subtotal, this.productDiscount);
   }
 
   readonly shippingFee = 30_000;
@@ -674,8 +655,7 @@ export class CheckoutComponent implements OnInit {
       })),
       notice: 'Đơn hàng đang chờ cửa hàng xác nhận',
       ...(this.note.trim() ? { customerNote: this.note.trim() } : {}),
-      shippingFee: this.shippingFee,
-      ...(this.couponApplied && this.appliedVoucher ? { voucherCode: this.appliedVoucher.code } : {})
+      shippingFee: this.shippingFee
     };
 
     this.isSubmitting = true;

@@ -1,7 +1,6 @@
 const Order = require('../models/order');
 const Product = require('../models/product');
 const ProductSalesService = require('../models/product-sales-service');
-const Voucher = require('../models/voucher');
 const { randomBytes } = require('crypto');
 const { ObjectId } = require('mongodb');
 
@@ -288,41 +287,31 @@ async function createOrder(req, res) {
     let voucherDiscount = 0;
     if (voucherCode) {
       const voucher = await Voucher.getByCode(voucherCode);
-<<<<<<< HEAD
-      discount = Voucher.calculateDiscount(voucher, subtotal, verifiedItems);
-      if (discount === null || discount <= 0) {
-=======
       voucherDiscount = Voucher.calculateDiscount(voucher, saleSubtotal);
       if (voucherDiscount === null || voucherDiscount <= 0) {
->>>>>>> d8b712c2e3626c761721e9c750ba391fbee365bf
         return res.status(400).json({
           success: false,
           message: 'Mã voucher không hợp lệ hoặc không còn đủ điều kiện áp dụng.'
         });
       }
-      if (req.userId) {
-        const userOrders = await Order.getAll({ userId: req.userId });
-        const voucherUses = userOrders.filter(order => String(order.voucherCode || '').toUpperCase() === voucher.code.toUpperCase()).length;
-        if (voucher.audience === 'new_customer' && userOrders.length > 0) {
-          return res.status(400).json({ success: false, message: 'Voucher này chỉ dành cho khách hàng mới.' });
-        }
-        if (Number(voucher.perUserLimit || 0) > 0 && voucherUses >= Number(voucher.perUserLimit)) {
-          return res.status(400).json({ success: false, message: 'Bạn đã sử dụng hết số lượt cho phép của voucher này.' });
-        }
-      }
     }
     const discount = Math.min(subtotal, productDiscount + voucherDiscount);
     const shippingFee = 30_000;
     const id = randomBytes(16).toString('hex');
+    const createdAt = new Date();
+    const statusNotice = 'Đơn hàng đang chờ cửa hàng xác nhận';
     const newOrder = {
       id,
       code: `#${id.slice(-8).toUpperCase()}`,
       slug: `don-hang-${id.slice(-8).toLowerCase()}`,
-      date: new Date().toLocaleDateString('vi-VN'),
-      time: new Date().toLocaleTimeString('vi-VN'),
+      date: createdAt.toLocaleDateString('vi-VN'),
+      time: createdAt.toLocaleTimeString('vi-VN'),
+      createdAt,
       status: 'pending',
       statusLabel: 'CHỜ XÁC NHẬN',
-      step: 2,
+      step: 1,
+      paymentStatus: 'unpaid',
+      paymentStatusLabel: 'Chưa thanh toán',
       paymentMethod: String(body.paymentMethod || 'Thanh toán khi nhận hàng (COD)'),
       sender: body.sender || {},
       receiver: {
@@ -332,20 +321,23 @@ async function createOrder(req, res) {
         phone: receiver.phone.trim()
       },
       items: verifiedItems,
-      notice: typeof body.notice === 'string' && body.notice.trim()
-        ? body.notice.trim()
-        : 'Đơn hàng đang chờ cửa hàng xác nhận',
+      notice: statusNotice,
+      trackingTimeline: [{
+        status: 'pending',
+        statusLabel: 'CHỜ XÁC NHẬN',
+        notice: statusNotice,
+        createdAt
+      }],
+      notes: [],
       ...(typeof body.customerNote === 'string' && body.customerNote.trim()
         ? { customerNote: body.customerNote.trim() }
         : {}),
-      ...(voucherCode ? { voucherCode } : {}),
       subtotal,
       productDiscount,
-      voucherDiscount,
       discount,
       shippingFee,
       total: subtotal - discount + shippingFee,
-      ...(req.userId ? { userId: req.userId } : {})
+      ...(req.userId ? { userId: String(req.userId) } : {})
     };
     await Order.create(newOrder);
     if (voucherCode) await Voucher.incrementUsed(voucherCode);
@@ -368,10 +360,13 @@ async function updateOrderStatus(req, res) {
     const { id } = req.params;
     const order = await Order.getById(id);
     const { status, cancelReason, cancelReasons, refundReason, refundNote, refundImages } = req.body || {};
+    const canCancelSharedDemo = Boolean(
+      order && !order.userId && ['pending', 'processing'].includes(order.status) && status === 'cancelled' && req.userId
+    );
     const canCompleteSharedDemo = Boolean(
       order && !order.userId && order.status === 'delivered' && status === 'completed' && req.userId
     );
-    if (!(await belongsToUser(order, req.userId)) && !canCompleteSharedDemo) {
+    if (!(await belongsToUser(order, req.userId)) && !canCancelSharedDemo && !canCompleteSharedDemo) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
 
@@ -384,6 +379,7 @@ async function updateOrderStatus(req, res) {
       updateFields = {
         status,
         statusLabel: 'ĐÃ HỦY',
+        notice: 'Đơn hàng đã được hủy',
         cancelReasons: normalizedCancelReasons,
         cancelReason: summarizeCancelReasons(normalizedCancelReasons)
       };
@@ -436,7 +432,7 @@ function normalizeCancelReasons(reasons, legacyReason) {
 
   if (
     reasons.length === 0 ||
-    reasons.length > 10 ||
+    reasons.length > 1 ||
     reasons.some(reason =>
       !reason ||
       typeof reason.reason !== 'string' ||
@@ -459,102 +455,6 @@ function summarizeCancelReasons(reasons) {
   return reasons
     .map(reason => reason.detail ? `${reason.reason}: ${reason.detail}` : reason.reason)
     .join(', ');
-}
-
-async function cancelOrderItems(req, res) {
-  try {
-    const order = await Order.getById(req.params.id);
-    if (!(await belongsToUser(order, req.userId))) {
-      return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
-    }
-    if (!['pending', 'processing'].includes(order.status)) {
-      return res.status(409).json({
-        success: false,
-        message: 'Đơn hàng hiện tại không còn cho phép hủy sản phẩm.'
-      });
-    }
-
-    const { itemIndexes, cancelReason, cancelReasons } = req.body || {};
-    const normalizedCancelReasons = normalizeCancelReasons(cancelReasons, cancelReason);
-    if (
-      !Array.isArray(itemIndexes) ||
-      itemIndexes.length === 0 ||
-      itemIndexes.some(index => !Number.isSafeInteger(index) || index < 0 || index >= order.items.length) ||
-      new Set(itemIndexes).size !== itemIndexes.length ||
-      !normalizedCancelReasons
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'Vui lòng chọn sản phẩm và nhập lý do hủy hợp lệ.'
-      });
-    }
-
-    const selectedIndexes = new Set(itemIndexes);
-    const reasonSummary = summarizeCancelReasons(normalizedCancelReasons);
-    const cancelledItems = order.items
-      .filter((_, index) => selectedIndexes.has(index))
-      .map(item => ({
-        ...item,
-        cancelReason: reasonSummary,
-        cancelReasons: normalizedCancelReasons,
-        cancelledAt: new Date()
-      }));
-    const remainingItems = order.items.filter((_, index) => !selectedIndexes.has(index));
-    const subtotal = remainingItems.reduce(
-      (sum, item) => sum + Number(item.total ?? Number(item.price) * Number(item.quantity)),
-      0
-    );
-    const itemProductDiscount = item => Number(
-      item.productDiscount ??
-      Math.max(0, Number(item.oldPrice ?? item.price) - Number(item.salePrice ?? item.price)) * Number(item.quantity)
-    ) || 0;
-    const productDiscount = remainingItems.reduce((sum, item) => sum + itemProductDiscount(item), 0);
-    const allProductDiscount = order.items.reduce((sum, item) => sum + itemProductDiscount(item), 0);
-    const oldVoucherDiscount = Number(order.voucherDiscount ?? Math.max(0, Number(order.discount) - allProductDiscount)) || 0;
-    const oldSaleSubtotal = order.items.reduce(
-      (sum, item) => sum + Number(item.salePrice ?? item.price) * Number(item.quantity),
-      0
-    );
-    const remainingSaleSubtotal = remainingItems.reduce(
-      (sum, item) => sum + Number(item.salePrice ?? item.price) * Number(item.quantity),
-      0
-    );
-    const voucherDiscount = remainingItems.length && oldSaleSubtotal > 0
-      ? Math.min(remainingSaleSubtotal, Math.round(oldVoucherDiscount * remainingSaleSubtotal / oldSaleSubtotal))
-      : 0;
-    const discount = productDiscount + voucherDiscount;
-    const shippingFee = remainingItems.length ? Math.max(0, Number(order.shippingFee) || 0) : 0;
-    const fullyCancelled = remainingItems.length === 0;
-    const previousCancelledItems = Array.isArray(order.cancelledItems) ? order.cancelledItems : [];
-    const updateFields = {
-      items: remainingItems,
-      cancelledItems: [...previousCancelledItems, ...cancelledItems],
-      cancelReasons: normalizedCancelReasons,
-      cancelReason: reasonSummary,
-      subtotal,
-      productDiscount,
-      voucherDiscount,
-      discount,
-      shippingFee,
-      total: subtotal - discount + shippingFee,
-      ...(fullyCancelled ? { status: 'cancelled', statusLabel: 'ĐÃ HỦY' } : {})
-    };
-
-    const updated = await Order.findOneAndUpdate(
-      { id: order.id, status: order.status, items: order.items },
-      { $set: updateFields }
-    );
-    if (!updated) {
-      return res.status(409).json({
-        success: false,
-        message: 'Đơn hàng vừa được cập nhật. Vui lòng tải lại trang rồi thử lại.'
-      });
-    }
-    res.json({ success: true, order: updated });
-  } catch (err) {
-    console.error('Lỗi khi hủy sản phẩm trong đơn hàng:', err);
-    res.status(500).json({ success: false, message: 'Không thể hủy sản phẩm trong đơn hàng.' });
-  }
 }
 
 async function updateAdminOrderStatus(req, res) {
@@ -610,7 +510,6 @@ module.exports = {
   getOrderById,
   createOrder,
   updateOrderStatus,
-  cancelOrderItems,
   updateAdminOrderStatus,
   approveRefund
 };

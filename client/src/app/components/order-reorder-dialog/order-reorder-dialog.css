@@ -1,0 +1,371 @@
+:host {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.reorder-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(25, 42, 31, .48);
+  backdrop-filter: blur(4px);
+}
+
+.reorder-dialog {
+  position: relative;
+  display: flex;
+  width: min(650px, 100%);
+  max-height: min(90vh, 760px);
+  flex-direction: column;
+  overflow: hidden;
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, .8);
+  border-radius: 28px;
+  background: #fff;
+  color: #2f4a3a;
+  box-shadow: 0 24px 70px rgba(13, 37, 22, .25);
+}
+
+.reorder-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5ef;
+  color: #1d5338;
+  cursor: pointer;
+}
+
+.reorder-header {
+  flex: 0 0 auto;
+  padding-right: 42px;
+}
+
+.reorder-eyebrow {
+  margin: 0 0 4px;
+  color: #82957c;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.reorder-header h2 {
+  margin: 0;
+  color: #214e36;
+  font: 600 23px/1.35 'Lora', Georgia, serif;
+}
+
+.reorder-items {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 14px;
+  min-height: 0;
+  margin: 20px -4px 0 0;
+  padding: 0 4px 4px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.reorder-item {
+  padding: 16px;
+  border: 1px solid #e8eee6;
+  border-radius: 18px;
+  background: #fcfdfb;
+}
+
+.reorder-item-content {
+  min-width: 0;
+}
+
+.reorder-product {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.reorder-image {
+  width: 78px;
+  height: 78px;
+  flex: 0 0 78px;
+  border-radius: 14px;
+  background: #f0eee8;
+  object-fit: cover;
+}
+
+.reorder-product-name {
+  margin: 0 0 7px;
+  color: #214e36;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.reorder-product-price {
+  color: #245c3e;
+  font-size: 17px;
+}
+
+.reorder-variants {
+  margin-top: 16px;
+}
+
+.reorder-variants h3 {
+  margin: 0 0 9px;
+  color: #39483d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reorder-variant-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reorder-variant {
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid #dfe5dc;
+  border-radius: 12px;
+  background: #fff;
+  color: #5b685f;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.reorder-variant.selected {
+  border-color: #245c3e;
+  background: #eef5ef;
+  color: #214e36;
+  box-shadow: 0 0 0 2px rgba(36, 92, 62, .1);
+}
+
+.reorder-variant:disabled {
+  color: #aab4aa;
+  cursor: not-allowed;
+  opacity: .7;
+}
+
+.reorder-variant small {
+  display: block;
+  font-size: 10px;
+}
+
+.reorder-no-variants {
+  margin: 12px 0 0;
+  color: #6b7f72;
+  font-size: 14px;
+}
+
+.reorder-item-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.reorder-quantity {
+  display: inline-flex;
+  min-width: 126px;
+  height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #dfe5dc;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.reorder-quantity button {
+  width: 40px;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: #245c3e;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.reorder-quantity button:disabled {
+  color: #bec7bd;
+  cursor: not-allowed;
+}
+
+.reorder-quantity span {
+  min-width: 24px;
+  color: #2f4a3a;
+  font-weight: 700;
+  text-align: center;
+}
+
+.reorder-stock {
+  color: #6b7f72;
+  font-size: 14px;
+}
+
+.reorder-stock.out-of-stock {
+  color: #a4262c;
+}
+
+.reorder-loading,
+.reorder-error {
+  display: flex;
+  min-height: 140px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #315a40;
+  text-align: center;
+}
+
+.reorder-spinner {
+  font-size: 24px;
+  animation: reorder-spin 1s linear infinite;
+}
+
+@keyframes reorder-spin {
+  to { transform: rotate(360deg); }
+}
+
+.reorder-error {
+  color: #a4262c;
+}
+
+.reorder-error button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #d8e5d3;
+  border-radius: 20px;
+  background: #fff;
+  color: #1d5338;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reorder-actions {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #edf1eb;
+}
+
+.reorder-cancel,
+.reorder-continue {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reorder-cancel {
+  border: 1px solid #d8e5d3;
+  background: #fff;
+  color: #315a40;
+}
+
+.reorder-continue {
+  border: 1px solid #245c3e;
+  background: #245c3e;
+  color: #fff;
+}
+
+.reorder-continue:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+@media (max-width: 575px) {
+  .reorder-backdrop {
+    padding: 12px;
+  }
+
+  .reorder-dialog {
+    max-height: 94vh;
+    padding: 26px 18px 18px;
+    border-radius: 22px;
+  }
+
+  .reorder-close {
+    top: 13px;
+    right: 13px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .reorder-header {
+    padding-right: 34px;
+  }
+
+  .reorder-header h2 {
+    font-size: 19px;
+  }
+
+  .reorder-description {
+    font-size: 13px;
+  }
+
+  .reorder-items {
+    max-height: 58vh;
+    margin-top: 14px;
+  }
+
+  .reorder-item {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .reorder-image {
+    width: 62px;
+    height: 62px;
+    flex-basis: 62px;
+    border-radius: 11px;
+  }
+
+  .reorder-product {
+    gap: 10px;
+  }
+
+  .reorder-product-name {
+    font-size: 13px;
+  }
+
+  .reorder-product-price {
+    font-size: 15px;
+  }
+
+  .reorder-actions {
+    gap: 8px;
+  }
+
+  .reorder-cancel,
+  .reorder-continue {
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reorder-spinner {
+    animation: none;
+  }
+}

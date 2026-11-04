@@ -32,7 +32,6 @@ import { WishlistPage } from './pages/wishlist/wishlist-page';
 import { LogoutConfirmation } from './components/logout-confirmation/logout-confirmation';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 import { PasswordRecovery } from './pages/password-recovery/password-recovery';
-import { AuthSessionInterceptor } from './services/auth-session.interceptor';
 
 registerLocaleData(localeVi);
 
@@ -63,6 +62,7 @@ registerLocaleData(localeVi);
     MixTeaPage,
     WishlistPage,
     LogoutConfirmation,
+    OrderReorderDialog,
     Pagenotfound,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],

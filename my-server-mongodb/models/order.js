@@ -45,10 +45,12 @@ function getBySlug(slug) {
 }
 
 function create(order) {
-    if (!ordersCollection) return Promise.resolve({ insertedId: null });
+    if (!ordersCollection) {
+        throw new Error('Orders collection has not been initialized.');
+    }
     return ordersCollection.insertOne({
         ...order,
-        createdAt: new Date()
+        createdAt: order.createdAt || new Date()
     });
 }
 

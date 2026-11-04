@@ -4,7 +4,7 @@
     <!-- PAGE HEADING -->
     <div class="page-heading">
       <p class="eyebrow">Tài khoản của tôi</p>
-      <h1>ĐƠN HÀNG</h1>
+      <h1>Đơn hàng</h1>
     </div>
 
     <div class="orders-layout">
@@ -104,8 +104,7 @@
 
             <!-- Items -->
             <div class="order-items-list" (click)="viewDetail(order, $event)">
-              <div class="order-item-row" *ngFor="let it of getDisplayItems(order)"
-                [class.cancelled-order-item]="it.cancelled">
+              <div class="order-item-row" *ngFor="let it of getDisplayItems(order)">
                 <div class="item-thumb-box">
                   <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'">
                 </div>
@@ -113,11 +112,10 @@
                   <div class="item-name">{{ it.name }}</div>
                   <div class="item-variant" *ngIf="it.variant">{{ it.variant }}</div>
                   <div class="item-qty">x{{ it.quantity }}</div>
-                  <div class="cancelled-item-label" *ngIf="it.cancelled">Sản phẩm đã hủy</div>
                 </div>
                 <div class="item-price-box">
-                  <span class="old-price" *ngIf="it.oldPrice">{{ formatPrice(it.oldPrice) }}</span>
-                  <span class="curr-price">{{ formatPrice(it.price) }}</span>
+                  <span class="old-price" *ngIf="it.oldPrice && it.oldPrice > (it.salePrice ?? it.price)">{{ formatPrice(it.oldPrice) }}</span>
+                  <span class="curr-price">{{ formatPrice(it.salePrice ?? it.price) }}</span>
                 </div>
               </div>
             </div>
@@ -135,7 +133,7 @@
             <div class="card-footer-bar">
               <div class="total-line">
                 <span class="total-label">
-                  {{ order.status === 'refunded' ? 'Số tiền hoàn:' : 'Thành tiền:' }}
+                  {{ order.status === 'refunded' ? 'Tổng tiền hoàn:' : 'Thành tiền:' }}
                 </span>
                 <strong class="total-amount">
                   {{ formatPrice(order.refundAmount || order.total) }}
@@ -148,8 +146,7 @@
                   <!-- Delivered: customer must confirm received -->
                   <ng-container *ngSwitchCase="'delivered'">
                     <button type="button" class="btn-action-primary" (click)="confirmReceived(order, $event)">Đã nhận được hàng</button>
-                    <button type="button" class="btn-action-outline" (click)="openReturnModal(order, $event)">Trả hàng – Hoàn tiền</button>
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
+                    <button type="button" class="btn-action-outline" (click)="openReturnModal(order, $event)">Trả hàng/Hoàn tiền</button>
                   </ng-container>
 
                   <!-- Pending -->
@@ -183,21 +180,19 @@
 
                   <!-- Refund Pending -->
                   <ng-container *ngSwitchCase="'refund_pending'">
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Lý do trả hàng</button>
                     <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
 
                   <!-- Refund Approved -->
                   <ng-container *ngSwitchCase="'refund_approved'">
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Lý do trả hàng</button>
                     <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
+                    <button type="button" class="btn-action-outline" (click)="reorder(order, $event)">Mua lại</button>
                   </ng-container>
 
                   <!-- Refunded -->
                   <ng-container *ngSwitchCase="'refunded'">
-                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Lý do trả hàng</button>
-                    <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
                     <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
+                    <button type="button" class="btn-action-outline" (click)="reorder(order, $event)">Mua lại</button>
                   </ng-container>
 
                   <!-- Default -->
@@ -249,18 +244,20 @@
         <label
           class="reason-item"
           *ngFor="let r of cancelReasons"
-          [class.selected]="selectedCancelReasons.includes(r)"
+          [class.selected]="selectedCancelReason === r"
         >
           <input
-            type="checkbox"
-            [checked]="selectedCancelReasons.includes(r)"
+            type="radio"
+            name="orderCancelReason"
+            [value]="r"
+            [(ngModel)]="selectedCancelReason"
             (change)="toggleCancelReason(r)"
           />
-          <span class="custom-checkbox" aria-hidden="true"></span>
+          <span class="custom-radio" aria-hidden="true"></span>
           <span class="reason-text">{{ r }}</span>
         </label>
       </div>
-      <div class="other-cancel-reason" *ngIf="selectedCancelReasons.includes('Khác')">
+      <div class="other-cancel-reason" *ngIf="selectedCancelReason === 'Khác'">
         <label for="other-order-cancel-reason">Lý do khác <span>*</span></label>
         <textarea
           id="other-order-cancel-reason"
@@ -365,7 +362,7 @@
   <div class="modal-backdrop" *ngIf="showReturnModal" (click)="closeReturnModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3 class="modal-title">Trả hàng – Hoàn tiền {{ returningOrder?.code }}</h3>
+        <h3 class="modal-title">Trả hàng/Hoàn tiền {{ returningOrder?.code }}</h3>
         <button type="button" class="btn-close-modal" (click)="closeReturnModal()" aria-label="Đóng">
           <i class="bi bi-x-lg"></i>
         </button>
@@ -403,3 +400,8 @@
 
 </div>
 <app-logout-confirmation [open]="showLogoutConfirm" (cancelled)="showLogoutConfirm = false" (confirmed)="confirmLogout()"></app-logout-confirmation>
+<app-order-reorder-dialog
+  [items]="reorderItems"
+  (closed)="reorderItems = null"
+  (checkout)="proceedToReorderCheckout()">
+</app-order-reorder-dialog>

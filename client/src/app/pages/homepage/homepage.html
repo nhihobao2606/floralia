@@ -29,7 +29,7 @@
           Floralia mang đến những dòng trà thảo mộc được tuyển chọn kỹ lưỡng,
           giúp bạn tận hưởng những phút giây thư giãn và cân bằng giữa nhịp sống hiện đại.
         </p>
-        <a routerLink="/sales" class="about-btn">
+        <a routerLink="/products" class="about-btn">
           Khám phá ngay <i class="bi bi-arrow-right"></i>
         </a>
       </div>
@@ -91,7 +91,9 @@
         <ng-container *ngTemplateOutlet="card; context: { $implicit: p }"></ng-container>
       </ng-container>
     </div>
-
+    <p class="empty" *ngIf="!loading() && featured().length === 0">
+      Sản phẩm đang được cập nhật, bạn quay lại sau nhé.
+    </p>
     <div class="view-more">
       <a routerLink="/products" class="more-btn">Xem Thêm</a>
     </div>

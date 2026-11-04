@@ -453,16 +453,6 @@ a { text-decoration: none; color: inherit; }
   color: #65776a;
 }
 
-.order-item-row.cancelled-order-item {
-  opacity: .76;
-}
-
-.cancelled-item-label {
-  color: #c9475a;
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .item-price-box {
   text-align: right;
   display: flex;
@@ -775,18 +765,18 @@ a { text-decoration: none; color: inherit; }
   border-bottom: none;
 }
 
-.reason-item input[type="checkbox"] {
+.reason-item input[type="radio"] {
   position: absolute;
   width: 1px;
   height: 1px;
   opacity: 0;
 }
 
-.custom-checkbox {
+.custom-radio {
   width: 20px;
   height: 20px;
   border: 2px solid #b8cbbe;
-  border-radius: 5px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -794,16 +784,16 @@ a { text-decoration: none; color: inherit; }
   flex-shrink: 0;
 }
 
-.reason-item.selected .custom-checkbox {
+.reason-item.selected .custom-radio {
   border-color: var(--matcha);
-  background: var(--matcha);
 }
 
-.reason-item.selected .custom-checkbox::after {
-  content: '✓';
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
+.reason-item.selected .custom-radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--matcha);
 }
 
 .reason-text {
