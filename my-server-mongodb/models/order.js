@@ -14,9 +14,12 @@ function getIdFilter(id) {
     return { $or: conditions };
 }
 
-function getAll(filter = {}) {
+function getAll(filter = {}, options = {}) {
     if (!ordersCollection) return Promise.resolve([]);
-    return ordersCollection.find(filter).toArray();
+    let cursor = ordersCollection.find(filter);
+    if (options.sort) cursor = cursor.sort(options.sort);
+    if (options.limit) cursor = cursor.limit(options.limit);
+    return cursor.toArray();
 }
 
 function getById(id) {

@@ -3,35 +3,23 @@
   <button type="button" (click)="goBack()">Quay lại đơn hàng</button>
 </div>
 <div class="order-detail-page" *ngIf="order">
+  <div class="detail-container">
+    <header class="order-overview-header">
+      <div>
+        <p class="order-eyebrow">FLORALIA HERBAL TEA</p>
+        <h1 class="page-title">Chi tiết đơn hàng</h1>
+      </div>
+      <div class="order-date-meta" aria-label="Thời gian và số sản phẩm">
+        <span *ngIf="order.time">{{ order.time }}</span>
+        <span>{{ order.date }}</span>
+        <span>{{ (order.items?.length || 0) + (order.cancelledItems?.length || 0) }} sản phẩm</span>
+      </div>
+    </header>
 
-  <!-- TOP TEA BANNER -->
-  <div class="top-banner-wrap">
-    <img src="/assets/images/tea-banner.png" alt="Floralia Herbal Tea" class="banner-img">
-  </div>
-
-  <div class="container detail-container">
-
-    <!-- PAGE TITLE -->
-    <h1 class="page-title">
-      Chi tiết đơn hàng · {{ order.date }} · {{ (order.items?.length || 0) + (order.cancelledItems?.length || 0) }} Sản Phẩm
-    </h1>
-
-    <!-- STATUS BADGE -->
-    <div class="status-badge-wrap" *ngIf="order.statusLabel">
-      <span class="status-badge"
-        [class.badge-cancelled]="order.status === 'cancelled'"
-        [class.badge-completed]="order.status === 'completed'"
-        [class.badge-refund]="order.status === 'refund_pending' || order.status === 'refund_approved'"
-        [class.badge-active]="order.status !== 'cancelled' && order.status !== 'completed' && order.status !== 'refund_pending' && order.status !== 'refund_approved'">
-        {{ order.statusLabel }}
-      </span>
-    </div>
-
-    <!-- 3-COLUMNS INFO CARDS -->
-    <div class="info-grid">
+    <section class="info-grid" aria-label="Thông tin đơn hàng">
 
       <!-- Box 1: Địa chỉ gửi -->
-      <div class="info-box">
+      <div class="address-info">
         <h3 class="box-title">ĐỊA CHỈ GỬI</h3>
         <div class="box-content">
           <p class="person-name">{{ order.sender?.name || 'Floralia Herbal Tea' }}</p>
@@ -48,7 +36,7 @@
       </div>
 
       <!-- Box 2: Địa chỉ nhận -->
-      <div class="info-box">
+      <div class="address-info">
         <h3 class="box-title">ĐỊA CHỈ NHẬN</h3>
         <div class="box-content">
           <p class="person-name">{{ order.receiver?.name || 'Khách hàng' }}</p>
@@ -65,13 +53,13 @@
       </div>
 
       <!-- Box 3: Thông tin thanh toán & Tổng -->
-      <div class="info-box summary-box">
+      <div class="summary-box">
         <div class="summary-top">
-          <div class="sum-row">
+          <div class="summary-meta-row">
             <span class="sum-label-dim">MÃ ĐƠN HÀNG</span>
             <strong class="sum-code">{{ order.code }}</strong>
           </div>
-          <div class="sum-row">
+          <div class="summary-meta-row">
             <span class="sum-label-dim">PHƯƠNG THỨC THANH TOÁN</span>
             <strong class="sum-val">{{ order.paymentMethod }}</strong>
           </div>
@@ -81,12 +69,16 @@
 
         <div class="summary-middle">
           <div class="sum-row">
-            <span class="sum-label">Tổng đơn hàng</span>
+            <span class="sum-label">Tạm tính</span>
             <span class="sum-price">{{ formatPrice(order.subtotal) }}</span>
           </div>
           <div class="sum-row">
-            <span class="sum-label">Giảm giá</span>
-            <span class="sum-price">{{ (order.discount || 0).toLocaleString('vi-VN') }}đ</span>
+            <span class="sum-label">Giảm giá sản phẩm</span>
+            <span class="sum-price">-{{ (order.productDiscount || 0).toLocaleString('vi-VN') }}đ</span>
+          </div>
+          <div class="sum-row" *ngIf="order.voucherDiscount || (!order.productDiscount && order.discount)">
+            <span class="sum-label">Giảm giá voucher</span>
+            <span class="sum-price">-{{ (order.voucherDiscount ?? (order.discount - (order.productDiscount || 0))).toLocaleString('vi-VN') }}đ</span>
           </div>
           <div class="sum-row" *ngIf="order.shippingFee > 0">
             <span class="sum-label">Phí vận chuyển</span>
@@ -102,10 +94,10 @@
         </div>
       </div>
 
-    </div>
+    </section>
 
     <!-- PROGRESS STEPPER (only for non-cancelled/non-refund orders) -->
-    <div class="stepper-section" *ngIf="order.status !== 'cancelled' && order.status !== 'refund_pending' && order.status !== 'refund_approved'">
+    <div class="stepper-section" *ngIf="order.status !== 'cancelled' && order.status !== 'refund_pending' && order.status !== 'refund_approved' && order.status !== 'refunded'">
       <div class="stepper-wrap">
         <ng-container *ngFor="let label of progressSteps; let i = index">
           <div class="step-item"
@@ -132,13 +124,20 @@
       <i class="bi bi-hourglass-split"></i>
       <span>
         Yêu cầu hoàn tiền đang chờ duyệt.
-        <span *ngIf="order.refundReason">Lý do: {{ order.refundReason }}.</span>
+        <span *ngIf="getReturnReason()">Lý do trả hàng: {{ getReturnReason() }}.</span>
         <span *ngIf="order.refundNote"> {{ order.refundNote }}</span>
       </span>
     </div>
     <div class="status-notice-box refund-approved-notice" *ngIf="order.status === 'refund_approved'">
       <i class="bi bi-check-circle-fill"></i>
-      <span>Đã duyệt. Sẽ sớm hoàn tiền cho bạn.</span>
+      <span>Đã duyệt yêu cầu trả hàng/hoàn tiền.<span *ngIf="getReturnReason()"> Lý do trả hàng: {{ getReturnReason() }}</span></span>
+    </div>
+    <div class="status-notice-box refund-approved-notice" *ngIf="order.status === 'refunded'">
+      <i class="bi bi-arrow-return-left"></i>
+      <span>Đơn hàng đã hoàn tiền.<span *ngIf="getReturnReason()"> Lý do trả hàng: {{ getReturnReason() }}</span></span>
+    </div>
+    <div class="order-customer-note" *ngIf="order.customerNote">
+      <strong>Ghi chú đơn hàng:</strong> {{ order.customerNote }}
     </div>
 
     <!-- PRODUCTS TABLE (CART-STYLE) -->
@@ -194,13 +193,13 @@
                 </div>
               </td>
               <td class="td-price">
-                <span class="unit-price">{{ (it.price || 0).toLocaleString('vi-VN') }}đ</span>
+                <span class="unit-price">{{ (it.oldPrice || it.price || 0).toLocaleString('vi-VN') }}đ</span>
               </td>
               <td class="td-qty">
                 <span class="qty-pill">x{{ it.quantity }}</span>
               </td>
               <td class="td-total">
-                <strong class="line-total">{{ ((it.total != null ? it.total : it.price * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
+                <strong class="line-total">{{ (((it.oldPrice || it.price || 0) * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
               </td>
             </tr>
           </tbody>

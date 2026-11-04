@@ -2,44 +2,53 @@ const Order = require('../models/order');
 const Product = require('../models/product');
 const ProductSalesService = require('../models/product-sales-service');
 const Voucher = require('../models/voucher');
-const User = require('../models/user');
 const { randomBytes } = require('crypto');
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-async function getOrdersForUser(userId) {
-  const user = await User.getById(userId);
-  if (!user) return [];
+async function getOrdersForUser(userId, status, query) {
+  const filters = [{
+    $or: [
+      { userId: String(userId) },
+      { userId: { $exists: false } },
+      { userId: null },
+      { userId: '' }
+    ]
+  }];
 
-  const legacyOrderFilter = user.email
-    ? {
-        $and: [
-          { $or: [{ userId: { $exists: false } }, { userId: null }, { userId: '' }] },
-          {
-            'receiver.email': {
-              $regex: `^${escapeRegex(String(user.email).trim())}$`,
-              $options: 'i'
-            }
-          }
-        ]
-      }
-    : null;
-  const filter = legacyOrderFilter
-    ? { $or: [{ userId: String(userId) }, legacyOrderFilter] }
-    : { userId: String(userId) };
+  if (status && status !== 'all') {
+    const statuses = status === 'shipping'
+      ? ['shipping', 'delivered', 'waiting']
+      : status === 'completed'
+        ? ['completed']
+        : status === 'refunded'
+          ? ['refunded', 'refund_pending', 'refund_approved']
+          : [status];
+    filters.push({ status: { $in: statuses } });
+  }
 
-  return Order.getAll(filter);
+  const search = String(query || '').trim();
+  if (search) {
+    const term = new RegExp(escapeRegex(search), 'i');
+    filters.push({
+      $or: [
+        { id: term },
+        { code: term },
+        { 'items.name': term }
+      ]
+    });
+  }
+
+  return Order.getAll(
+    { $and: filters },
+    { sort: { createdAt: -1 } }
+  );
 }
 
-async function belongsToUser(order, userId) {
-  if (!order || !userId) return false;
-  if (order.userId) return String(order.userId) === String(userId);
-
-  const user = await User.getById(userId);
-  const orderEmail = String(order.receiver?.email || '').trim().toLowerCase();
-  return Boolean(user?.email && orderEmail && orderEmail === String(user.email).trim().toLowerCase());
+function belongsToUser(order, userId) {
+  return Boolean(order?.userId && userId && String(order.userId) === String(userId));
 }
 
 function getAvailableStock(product, item) {
@@ -105,28 +114,7 @@ async function getOrders(req, res) {
     if (!req.userId) {
       return res.json({ success: true, orders: [] });
     }
-    let list = await getOrdersForUser(req.userId);
-    list = sortOrdersNewestFirst(list);
-
-    if (status && status !== 'all') {
-      if (status === 'waiting') {
-        list = list.filter(o => o.status === 'delivered' || o.status === 'waiting');
-      } else if (status === 'shipping') {
-        list = list.filter(o => o.status === 'shipping' || o.status === 'processing');
-      } else {
-        list = list.filter(o => o.status === status);
-      }
-    }
-
-    if (q) {
-      const term = q.trim().toLowerCase();
-      list = list.filter(o =>
-        (o.id && o.id.toLowerCase().includes(term)) ||
-        (o.code && o.code.toLowerCase().includes(term)) ||
-        (o.items && o.items.some(it => it.name && it.name.toLowerCase().includes(term)))
-      );
-    }
-
+    const list = await getOrdersForUser(req.userId, status, q);
     res.json({ success: true, orders: list });
   } catch (err) {
     console.error('Lỗi server khi lấy danh sách đơn hàng:', err);
@@ -151,7 +139,7 @@ async function getOrderById(req, res) {
     const order = id.startsWith('don-hang-')
       ? await Order.getBySlug(id)
       : await Order.getById(id);
-    if (!(await belongsToUser(order, req.userId))) {
+    if (!order || (order.userId && !(await belongsToUser(order, req.userId))) || (!order.userId && !req.userId)) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
     res.json({ success: true, order });
@@ -227,8 +215,12 @@ async function createOrder(req, res) {
         });
       }
 
-      const price = Number(variant?.price ?? product.price);
-      if (!Number.isFinite(price) || price < 0) {
+      const salePrice = Number(variant?.price ?? product.price);
+      const originalPrice = Math.max(
+        salePrice,
+        Number(variant?.oldPrice ?? product.oldPrice ?? salePrice)
+      );
+      if (!Number.isFinite(salePrice) || salePrice < 0 || !Number.isFinite(originalPrice)) {
         return res.status(400).json({
             success: false,
             message: `Giá sản phẩm "${product.name}" không hợp lệ.`
@@ -241,26 +233,32 @@ async function createOrder(req, res) {
         name: product.name,
         image: typeof item.image === 'string' ? item.image : '',
         variant: variant?.label || '',
-        price,
+        price: originalPrice,
+        oldPrice: originalPrice,
+        salePrice,
+        productDiscount: (originalPrice - salePrice) * item.quantity,
         quantity: item.quantity,
-        total: price * item.quantity
+        total: originalPrice * item.quantity
       });
     }
 
     const subtotal = verifiedItems.reduce((sum, item) => sum + item.total, 0);
+    const productDiscount = verifiedItems.reduce((sum, item) => sum + item.productDiscount, 0);
+    const saleSubtotal = Math.max(0, subtotal - productDiscount);
     const voucherCode = typeof body.voucherCode === 'string' ? body.voucherCode.trim() : '';
-    let discount = 0;
+    let voucherDiscount = 0;
     if (voucherCode) {
       const voucher = await Voucher.getByCode(voucherCode);
-      discount = Voucher.calculateDiscount(voucher, subtotal);
-      if (discount === null || discount <= 0) {
+      voucherDiscount = Voucher.calculateDiscount(voucher, saleSubtotal);
+      if (voucherDiscount === null || voucherDiscount <= 0) {
         return res.status(400).json({
           success: false,
           message: 'Mã voucher không hợp lệ hoặc không còn đủ điều kiện áp dụng.'
         });
       }
     }
-    const shippingFee = 0;
+    const discount = Math.min(subtotal, productDiscount + voucherDiscount);
+    const shippingFee = 30_000;
     const id = randomBytes(16).toString('hex');
     const newOrder = {
       id,
@@ -280,8 +278,16 @@ async function createOrder(req, res) {
         phone: receiver.phone.trim()
       },
       items: verifiedItems,
+      notice: typeof body.notice === 'string' && body.notice.trim()
+        ? body.notice.trim()
+        : 'Đơn hàng đang chờ cửa hàng xác nhận',
+      ...(typeof body.customerNote === 'string' && body.customerNote.trim()
+        ? { customerNote: body.customerNote.trim() }
+        : {}),
       ...(voucherCode ? { voucherCode } : {}),
       subtotal,
+      productDiscount,
+      voucherDiscount,
       discount,
       shippingFee,
       total: subtotal - discount + shippingFee,
@@ -306,13 +312,16 @@ async function updateOrderStatus(req, res) {
   try {
     const { id } = req.params;
     const order = await Order.getById(id);
-    if (!(await belongsToUser(order, req.userId))) {
+    const { status, cancelReason, cancelReasons, refundReason, refundNote, refundImages } = req.body || {};
+    const canCompleteSharedDemo = Boolean(
+      order && !order.userId && order.status === 'delivered' && status === 'completed' && req.userId
+    );
+    if (!(await belongsToUser(order, req.userId)) && !canCompleteSharedDemo) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
 
-    const { status, cancelReason, cancelReasons, refundReason, refundNote, refundImages } = req.body || {};
     let updateFields;
-    if (status === 'cancelled' && ['pending', 'processing', 'shipping'].includes(order.status)) {
+    if (status === 'cancelled' && ['pending', 'processing'].includes(order.status)) {
       const normalizedCancelReasons = normalizeCancelReasons(cancelReasons, cancelReason);
       if (!normalizedCancelReasons) {
         return res.status(400).json({ success: false, message: 'Vui lòng chọn lý do hủy đơn.' });
@@ -403,7 +412,7 @@ async function cancelOrderItems(req, res) {
     if (!(await belongsToUser(order, req.userId))) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
-    if (!['pending', 'processing', 'shipping'].includes(order.status)) {
+    if (!['pending', 'processing'].includes(order.status)) {
       return res.status(409).json({
         success: false,
         message: 'Đơn hàng hiện tại không còn cho phép hủy sản phẩm.'
@@ -440,10 +449,25 @@ async function cancelOrderItems(req, res) {
       (sum, item) => sum + Number(item.total ?? Number(item.price) * Number(item.quantity)),
       0
     );
-    const currentSubtotal = Number(order.subtotal) || 0;
-    const discount = remainingItems.length && currentSubtotal > 0
-      ? Math.min(subtotal, Math.round((Number(order.discount) || 0) * subtotal / currentSubtotal))
+    const itemProductDiscount = item => Number(
+      item.productDiscount ??
+      Math.max(0, Number(item.oldPrice ?? item.price) - Number(item.salePrice ?? item.price)) * Number(item.quantity)
+    ) || 0;
+    const productDiscount = remainingItems.reduce((sum, item) => sum + itemProductDiscount(item), 0);
+    const allProductDiscount = order.items.reduce((sum, item) => sum + itemProductDiscount(item), 0);
+    const oldVoucherDiscount = Number(order.voucherDiscount ?? Math.max(0, Number(order.discount) - allProductDiscount)) || 0;
+    const oldSaleSubtotal = order.items.reduce(
+      (sum, item) => sum + Number(item.salePrice ?? item.price) * Number(item.quantity),
+      0
+    );
+    const remainingSaleSubtotal = remainingItems.reduce(
+      (sum, item) => sum + Number(item.salePrice ?? item.price) * Number(item.quantity),
+      0
+    );
+    const voucherDiscount = remainingItems.length && oldSaleSubtotal > 0
+      ? Math.min(remainingSaleSubtotal, Math.round(oldVoucherDiscount * remainingSaleSubtotal / oldSaleSubtotal))
       : 0;
+    const discount = productDiscount + voucherDiscount;
     const shippingFee = remainingItems.length ? Math.max(0, Number(order.shippingFee) || 0) : 0;
     const fullyCancelled = remainingItems.length === 0;
     const previousCancelledItems = Array.isArray(order.cancelledItems) ? order.cancelledItems : [];
@@ -453,6 +477,8 @@ async function cancelOrderItems(req, res) {
       cancelReasons: normalizedCancelReasons,
       cancelReason: reasonSummary,
       subtotal,
+      productDiscount,
+      voucherDiscount,
       discount,
       shippingFee,
       total: subtotal - discount + shippingFee,

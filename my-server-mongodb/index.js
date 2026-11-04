@@ -72,6 +72,10 @@ async function startServer() {
         Voucher.setCollection(db.collection('Vouchers'));
 
         await db.collection('Users').createIndex({ email: 1 }, { unique: true });
+        await db.collection('Orders').createIndex({ userId: 1, createdAt: -1 });
+        await db.collection('Orders').createIndex({ userId: 1, status: 1, createdAt: -1 });
+        await db.collection('Orders').createIndex({ createdAt: -1 });
+        await db.collection('Orders').createIndex({ status: 1, createdAt: -1 });
         await db.collection('ProductAssets').createIndex({ assetId: 1 });
         await db.collection('ProductAssets').createIndex({ originalFileName: 1 });
         await db.command({ ping: 1 });

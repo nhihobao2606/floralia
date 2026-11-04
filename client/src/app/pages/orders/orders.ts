@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { CancelReason, getOrderSlug, Order, OrderService, sortOrdersNewestFirst } from '../../services/order-service';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CancelReason, getOrderSlug, Order, OrderService } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
 
 @Component({
@@ -9,7 +9,7 @@ import { CartService } from '../../services/cart-service';
   templateUrl: './orders.html',
   styleUrl: './orders.css'
 })
-export class Orders implements OnInit {
+export class Orders implements OnInit, OnDestroy {
   showLogoutConfirm = false;
   menu = [
     { label: 'Tổng quan', icon: 'bi-grid', link: '/account' },
@@ -21,8 +21,8 @@ export class Orders implements OnInit {
   tabs = [
     { id: 'all', label: 'Tất cả' },
     { id: 'pending', label: 'Chờ xác nhận' },
-    { id: 'shipping', label: 'Vận chuyển' },
-    { id: 'waiting', label: 'Chờ giao hàng' },
+    { id: 'processing', label: 'Chờ lấy hàng' },
+    { id: 'shipping', label: 'Chờ giao hàng' },
     { id: 'completed', label: 'Hoàn thành' },
     { id: 'cancelled', label: 'Đã hủy' },
     { id: 'refunded', label: 'Trả hàng/Hoàn tiền' },
@@ -30,6 +30,8 @@ export class Orders implements OnInit {
 
   activeTab = 'all';
   searchQuery = '';
+  private searchTimeout: ReturnType<typeof setTimeout> | null = null;
+  private loadRequestId = 0;
   orders: Order[] = [];
   filteredOrders: Order[] = [];
   loading = true;
@@ -83,12 +85,23 @@ export class Orders implements OnInit {
   constructor(
     private orderService: OrderService,
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadUserData();
+    const requestedTab = this.route.snapshot.queryParamMap.get('tab');
+    if (requestedTab && this.tabs.some(tab => tab.id === requestedTab)) {
+      this.activeTab = requestedTab;
+    }
     this.loadOrders();
+  }
+
+  ngOnDestroy(): void {
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    this.loadRequestId++;
   }
 
   loadUserData(): void {
@@ -110,45 +123,56 @@ export class Orders implements OnInit {
   }
 
   loadOrders(): void {
-    this.orders = this.orderService.getDefaultOrders();
-    this.applyFilter();
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = null;
+    }
+    const requestId = ++this.loadRequestId;
     this.loading = true;
     this.loadError = '';
-    this.orderService.getOrders().subscribe({
+    this.orders = [];
+    this.filteredOrders = [];
+    this.orderService.getOrders(this.activeTab, this.searchQuery).subscribe({
       next: (data) => {
-        this.orders = sortOrdersNewestFirst(data);
+        if (requestId !== this.loadRequestId) return;
+        this.orders = data;
         this.applyFilter();
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (error) => {
+        if (requestId !== this.loadRequestId) return;
         this.applyFilter();
         this.loading = false;
         this.loadError = error?.error?.message || 'Không thể tải đơn hàng. Vui lòng thử lại.';
+        this.cdr.markForCheck();
       }
     });
   }
 
   setTab(tabId: string): void {
     this.activeTab = tabId;
-    this.applyFilter();
+    this.loadOrders();
   }
 
   onSearch(query: string): void {
     this.searchQuery = query;
-    this.applyFilter();
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.searchTimeout = null;
+      this.loadOrders();
+      this.cdr.markForCheck();
+    }, 300);
   }
 
   applyFilter(): void {
-    let list = Array.isArray(this.orders) ? sortOrdersNewestFirst(this.orders) : [];
+    let list = Array.isArray(this.orders) ? this.orders : [];
 
     // Filter by tab
     if (this.activeTab !== 'all') {
       list = list.filter(o => {
         if (this.activeTab === 'shipping') {
-          return o.status === 'shipping' || o.status === 'processing';
-        }
-        if (this.activeTab === 'waiting') {
-          return o.status === 'delivered' || o.status === 'waiting';
+          return o.status === 'shipping' || o.status === 'delivered' || o.status === 'waiting';
         }
         if (this.activeTab === 'completed') {
           return o.status === 'completed';
@@ -168,7 +192,7 @@ export class Orders implements OnInit {
       );
     }
 
-    this.filteredOrders = sortOrdersNewestFirst(list);
+    this.filteredOrders = list;
   }
 
   getDisplayItems(order: Order): Array<Order['items'][number] & { cancelled: boolean }> {
@@ -208,18 +232,27 @@ export class Orders implements OnInit {
     if (event) {
       event.stopPropagation();
     }
-    if (confirm(`Xác nhận bạn đã nhận được đầy đủ sản phẩm của đơn hàng ${order.code}?`)) {
-      this.orderService.updateOrderStatus(order.id, 'completed', 'HOÀN THÀNH').subscribe({
-        next: ({ order: updated }) => {
-          Object.assign(order, updated);
-          this.activeTab = 'completed';
-          this.applyFilter();
-        },
-        error: (error) => {
-          alert(error?.error?.message || 'Không thể xác nhận đã nhận hàng.');
-        }
-      });
-    }
+    this.orderService.updateOrderStatus(order.id, 'completed', 'HOÀN THÀNH').subscribe({
+      next: ({ order: updated }) => {
+        Object.assign(order, updated);
+        this.activeTab = 'completed';
+        this.loadOrders();
+      },
+      error: (error) => {
+        alert(error?.error?.message || 'Không thể xác nhận đã nhận hàng.');
+      }
+    });
+  }
+
+  isReturnOrder(order: Order): boolean {
+    return order.status === 'refund_pending' ||
+      order.status === 'refund_approved' ||
+      order.status === 'refunded' ||
+      Boolean(order.refundReason);
+  }
+
+  getReturnReason(order: Order): string {
+    return order.refundReason || order.cancelReason || order.cancelReasons?.map(reason => reason.reason).join(', ') || '';
   }
 
   openReviewModal(order: Order, event?: Event): void {

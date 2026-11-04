@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GUEST_TRACKED_ORDER_KEY, getOrderSlug, OrderService, Order } from '../../services/order-service';
@@ -11,7 +11,9 @@ interface CheckoutItem {
   name: string;
   image: string;
   variant?: string;
+  oldPrice: number;
   price: number;
+  salePrice: number;
   productDiscount?: number;
   quantity: number;
   total: number;
@@ -42,6 +44,22 @@ export class CheckoutComponent implements OnInit {
   savedAddresses: any[] = [];
   selectedAddressId: string | null = null;
   showAddressModal = false;
+  showAddAddressModal = false;
+  editingAddressId: string | null = null;
+  addAddressFullName = '';
+  addAddressPhone = '';
+  addAddressStreet = '';
+  addAddressProvince: any = null;
+  addAddressWard: any = null;
+  addAddressProvinces: any[] = [];
+  addAddressWards: any[] = [];
+  addAddressIsDefault = false;
+  addAddressProvinceDropdownOpen = false;
+  addAddressWardDropdownOpen = false;
+  addAddressLoadingProvinces = false;
+  addAddressLoadingWards = false;
+  addAddressSaving = false;
+  addAddressError = '';
 
   // QR Payment Modal
   showQRModal = false;
@@ -63,7 +81,9 @@ export class CheckoutComponent implements OnInit {
     private readonly cartService: CartService,
     private readonly productService: ProductService,
     private readonly http: HttpClient,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -91,28 +111,31 @@ export class CheckoutComponent implements OnInit {
       const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
       this.http.get<any>('http://localhost:3002/api/addresses', { headers }).subscribe({
         next: (res) => {
-          this.isLoadingAddress = false;
-          if (res.success && Array.isArray(res.addresses) && res.addresses.length > 0) {
-            this.savedAddresses = res.addresses;
-            const def = res.addresses.find((a: any) => a.isDefault) || res.addresses[0];
-            if (def) {
-              this.applyAddress(def);
+          this.ngZone.run(() => {
+            this.isLoadingAddress = false;
+            if (res.success && Array.isArray(res.addresses) && res.addresses.length > 0) {
+              this.savedAddresses = res.addresses;
+              const def = res.addresses.find((a: any) => a.isDefault) || res.addresses[0];
+              if (def) this.applyAddress(def);
+            } else {
+              this.savedAddresses = [];
+              this.hasAddress = false;
+              this.isEditingAddress = true;
             }
-          } else {
-            // Thực sự chưa có địa chỉ nào trong database
-            this.savedAddresses = [];
-            this.hasAddress = false;
-            this.isEditingAddress = true;
-          }
+            this.cdr.markForCheck();
+          });
         },
         error: (error) => {
-          this.isLoadingAddress = false;
-          this.addressLoadError = error?.error?.message || 'Không thể tải địa chỉ từ tài khoản.';
-          if (!this.hasAddress) {
-            this.savedAddresses = [];
-            this.hasAddress = false;
-            this.isEditingAddress = true;
-          }
+          this.ngZone.run(() => {
+            this.isLoadingAddress = false;
+            this.addressLoadError = error?.error?.message || 'Không thể tải địa chỉ từ tài khoản.';
+            if (!this.hasAddress) {
+              this.savedAddresses = [];
+              this.hasAddress = false;
+              this.isEditingAddress = true;
+            }
+            this.cdr.markForCheck();
+          });
         }
       });
     }
@@ -137,6 +160,248 @@ export class CheckoutComponent implements OnInit {
 
   closeAddressModal(): void {
     this.showAddressModal = false;
+  }
+
+  openAddAddressModal(): void {
+    this.showAddressModal = false;
+    this.showAddAddressModal = true;
+    this.editingAddressId = null;
+    this.addAddressFullName = '';
+    this.addAddressPhone = '';
+    this.addAddressStreet = '';
+    this.addAddressProvince = null;
+    this.addAddressWard = null;
+    this.addAddressWards = [];
+    this.addAddressIsDefault = false;
+    this.addAddressError = '';
+    this.addAddressProvinceDropdownOpen = false;
+    this.addAddressWardDropdownOpen = false;
+    if (!this.addAddressProvinces.length) this.loadAddressProvinces();
+  }
+
+  openEditAddressModal(address: any, event: MouseEvent): void {
+    event.stopPropagation();
+    this.showAddressModal = false;
+    this.showAddAddressModal = true;
+    this.editingAddressId = String(address._id);
+    this.addAddressFullName = address.fullName || '';
+    this.addAddressPhone = address.phone || '';
+    this.addAddressStreet = address.address || '';
+    this.addAddressProvince = address.province
+      ? { code: address.provinceCode ?? null, name: address.province }
+      : null;
+    this.addAddressWard = address.ward
+      ? { code: address.wardCode ?? null, name: address.ward }
+      : null;
+    this.addAddressWards = [];
+    this.addAddressIsDefault = !!address.isDefault;
+    this.addAddressError = '';
+    this.addAddressProvinceDropdownOpen = false;
+    this.addAddressWardDropdownOpen = false;
+
+    if (this.addAddressProvinces.length) {
+      this.restoreAddressLocation(address);
+    } else {
+      this.loadAddressProvinces(address);
+    }
+  }
+
+  private restoreAddressLocation(address: any): void {
+    const savedProvinceName = String(address.province || '');
+    const savedProvinceCode = address.provinceCode;
+    this.addAddressProvince = this.addAddressProvinces.find(province =>
+      (savedProvinceCode != null && String(province.code) === String(savedProvinceCode)) ||
+      this.normalizeAdministrativeName(province.name) === this.normalizeAdministrativeName(savedProvinceName)
+    ) || (savedProvinceName ? { code: null, name: savedProvinceName } : null);
+
+    const savedWardName = String(address.ward || '');
+    const savedWardCode = address.wardCode;
+    this.addAddressWard = savedWardName
+      ? { code: null, name: savedWardName }
+      : null;
+    if (!this.addAddressProvince?.code) return;
+
+    this.addAddressLoadingWards = true;
+    this.http.get<any[]>(`https://provinces.open-api.vn/api/v2/w/?province=${this.addAddressProvince.code}`).subscribe({
+      next: wards => this.ngZone.run(() => {
+        this.addAddressWards = (wards || []).map(ward => ({ code: ward.code, name: ward.name }));
+        this.addAddressWard = this.addAddressWards.find(ward =>
+          (savedWardCode != null && String(ward.code) === String(savedWardCode)) ||
+          this.normalizeAdministrativeName(ward.name) === this.normalizeAdministrativeName(savedWardName)
+        ) || (savedWardName ? { code: null, name: savedWardName } : null);
+        this.addAddressLoadingWards = false;
+        this.cdr.markForCheck();
+      }),
+      error: () => this.ngZone.run(() => {
+        this.addAddressLoadingWards = false;
+        this.addAddressError = 'Không tải được danh sách phường/xã. Vui lòng thử lại.';
+        this.cdr.markForCheck();
+      })
+    });
+  }
+
+  private normalizeAdministrativeName(name: string): string {
+    return String(name)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/^(tinh|thanh pho|tp\.?)\s*/, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  closeAddAddressModal(): void {
+    if (this.addAddressSaving) return;
+    this.showAddAddressModal = false;
+    this.showAddressModal = true;
+    this.addAddressProvinceDropdownOpen = false;
+    this.addAddressWardDropdownOpen = false;
+  }
+
+  loadAddressProvinces(address?: any): void {
+    this.addAddressLoadingProvinces = true;
+    this.http.get<any[]>('https://provinces.open-api.vn/api/v2/p/').subscribe({
+      next: provinces => this.ngZone.run(() => {
+        this.addAddressProvinces = (provinces || []).map(province => ({
+          code: province.code,
+          name: province.name
+        }));
+        this.addAddressLoadingProvinces = false;
+        if (address) this.restoreAddressLocation(address);
+        this.cdr.markForCheck();
+      }),
+      error: () => this.ngZone.run(() => {
+        this.addAddressLoadingProvinces = false;
+        this.addAddressError = 'Không tải được danh sách tỉnh/thành. Vui lòng thử lại.';
+        this.cdr.markForCheck();
+      })
+    });
+  }
+
+  toggleAddAddressProvinceDropdown(): void {
+    this.addAddressProvinceDropdownOpen = !this.addAddressProvinceDropdownOpen;
+    this.addAddressWardDropdownOpen = false;
+  }
+
+  selectAddAddressProvince(province: any): void {
+    this.addAddressProvince = province;
+    this.addAddressWard = null;
+    this.addAddressError = '';
+    this.addAddressWards = [];
+    this.addAddressProvinceDropdownOpen = false;
+    this.addAddressWardDropdownOpen = false;
+    this.addAddressLoadingWards = true;
+    this.http.get<any[]>(`https://provinces.open-api.vn/api/v2/w/?province=${province.code}`).subscribe({
+      next: wards => this.ngZone.run(() => {
+        this.addAddressWards = (wards || []).map(ward => ({ code: ward.code, name: ward.name }));
+        this.addAddressLoadingWards = false;
+        this.cdr.markForCheck();
+      }),
+      error: () => this.ngZone.run(() => {
+        this.addAddressLoadingWards = false;
+        this.addAddressError = 'Không tải được danh sách phường/xã. Vui lòng thử lại.';
+        this.cdr.markForCheck();
+      })
+    });
+  }
+
+  toggleAddAddressWardDropdown(): void {
+    if (!this.addAddressProvince || this.addAddressLoadingWards || !this.addAddressWards.length) return;
+    this.addAddressWardDropdownOpen = !this.addAddressWardDropdownOpen;
+    this.addAddressProvinceDropdownOpen = false;
+  }
+
+  selectAddAddressWard(ward: any): void {
+    this.addAddressWard = ward;
+    this.addAddressWardDropdownOpen = false;
+  }
+
+  submitNewAddress(): void {
+    if (
+      !this.addAddressFullName.trim() ||
+      !this.addAddressPhone.trim() ||
+      !this.addAddressStreet.trim() ||
+      !this.addAddressProvince ||
+      !this.addAddressWard
+    ) {
+      this.addAddressError = 'Vui lòng điền đầy đủ các trường bắt buộc.';
+      return;
+    }
+    if (!/^(0|\+84)(3|5|7|8|9)\d{8}$/.test(this.addAddressPhone.trim())) {
+      this.addAddressError = 'Số điện thoại không hợp lệ.';
+      return;
+    }
+    if (!this.addAddressProvinces.length) {
+      this.addAddressError = 'Danh sách tỉnh/thành chưa tải được. Vui lòng thử lại.';
+      return;
+    }
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      this.addAddressError = 'Vui lòng đăng nhập để lưu địa chỉ vào sổ địa chỉ.';
+      return;
+    }
+
+    this.addAddressSaving = true;
+    this.addAddressError = '';
+    const headers = new HttpHeaders({ Authorization: 'Bearer ' + token });
+    const body = {
+      fullName: this.addAddressFullName.trim(),
+      phone: this.addAddressPhone.trim(),
+      address: this.addAddressStreet.trim(),
+      province: this.addAddressProvince.name,
+      provinceCode: this.addAddressProvince.code,
+      ward: this.addAddressWard.name,
+      wardCode: this.addAddressWard.code,
+      isDefault: this.addAddressIsDefault
+    };
+
+    const request = this.editingAddressId
+      ? this.http.put<any>(`http://localhost:3002/api/addresses/${this.editingAddressId}`, body, { headers })
+      : this.http.post<any>('http://localhost:3002/api/addresses', body, { headers });
+    request.subscribe({
+      next: response => this.ngZone.run(() => {
+        this.addAddressSaving = false;
+        if (!response.success || !response.address) {
+          this.addAddressError = response.message || (this.editingAddressId
+            ? 'Không thể cập nhật địa chỉ.'
+            : 'Không thể thêm địa chỉ.');
+          this.cdr.markForCheck();
+          return;
+        }
+
+        const address = response.address;
+        if (address.isDefault) {
+          this.savedAddresses = this.savedAddresses.map(saved => ({ ...saved, isDefault: false }));
+        }
+        const addressIndex = this.savedAddresses.findIndex(saved => String(saved._id) === String(address._id));
+        if (addressIndex >= 0) {
+          this.savedAddresses = this.savedAddresses.map((saved, index) => index === addressIndex ? address : saved);
+        } else {
+          this.savedAddresses = [...this.savedAddresses, address];
+        }
+        this.applyAddress(address);
+        this.showAddAddressModal = false;
+        this.editingAddressId = null;
+        this.addAddressProvinceDropdownOpen = false;
+        this.addAddressWardDropdownOpen = false;
+        try {
+          localStorage.setItem('floralia_cached_addresses', JSON.stringify(this.savedAddresses));
+          localStorage.setItem('floralia_cached_address', JSON.stringify(address));
+        } catch (error) {
+          console.error('Không thể lưu địa chỉ vào bộ nhớ đệm:', error);
+        }
+        this.showAddressModal = false;
+        this.cdr.markForCheck();
+      }),
+      error: error => this.ngZone.run(() => {
+        this.addAddressSaving = false;
+        this.addAddressError = error?.error?.message || (this.editingAddressId
+          ? 'Không thể cập nhật địa chỉ. Vui lòng thử lại.'
+          : 'Không thể thêm địa chỉ. Vui lòng thử lại.');
+        this.cdr.markForCheck();
+      })
+    });
   }
 
   selectAddress(addr: any): void {
@@ -206,19 +471,25 @@ export class CheckoutComponent implements OnInit {
 
     forkJoin(requestedItems.map(item => this.productService.getProductBySku(item.sku, item.variant))).subscribe({
       next: products => {
-        this.checkoutItemsLoading = false;
-        const outOfStockIndex = products.findIndex((product, index) =>
-          !Number.isFinite(product.stock) || product.stock < requestedItems[index].quantity
-        );
-        if (outOfStockIndex >= 0) {
-          this.checkoutItemsError = `Sản phẩm "${products[outOfStockIndex].name}" không đủ tồn kho. Vui lòng cập nhật giỏ hàng.`;
-          return;
-        }
-        this.items = products.map((product, index) => this.toCheckoutItem(product, requestedItems[index].quantity));
+        this.ngZone.run(() => {
+          this.checkoutItemsLoading = false;
+          const outOfStockIndex = products.findIndex((product, index) =>
+            !Number.isFinite(product.stock) || product.stock < requestedItems[index].quantity
+          );
+          if (outOfStockIndex >= 0) {
+            this.checkoutItemsError = `Sản phẩm "${products[outOfStockIndex].name}" không đủ tồn kho. Vui lòng cập nhật giỏ hàng.`;
+          } else {
+            this.items = products.map((product, index) => this.toCheckoutItem(product, requestedItems[index].quantity));
+          }
+          this.cdr.markForCheck();
+        });
       },
       error: error => {
-        this.checkoutItemsLoading = false;
-        this.checkoutItemsError = error?.error?.message || 'Không thể tải sản phẩm từ MongoDB. Vui lòng thử lại.';
+        this.ngZone.run(() => {
+          this.checkoutItemsLoading = false;
+          this.checkoutItemsError = error?.error?.message || 'Không thể tải sản phẩm từ MongoDB. Vui lòng thử lại.';
+          this.cdr.markForCheck();
+        });
       }
     });
   }
@@ -234,14 +505,18 @@ export class CheckoutComponent implements OnInit {
         ? `http://localhost:3002${image}`
         : image,
       variant: String(item.variantLabel || item.variant || ''),
-      price,
+      oldPrice: Math.max(price, Number(item.oldPrice) || price),
+      price: Math.max(price, Number(item.oldPrice) || price),
+      salePrice: price,
       productDiscount: Math.max(0, Number(item.productDiscount) || 0),
       quantity,
-      total: price * quantity
+      total: Math.max(price, Number(item.oldPrice) || price) * quantity
     };
   }
 
   private toCheckoutItem(product: CheckoutProduct, quantity: number): CheckoutItem {
+    const oldPrice = Math.max(Number(product.price) || 0, Number(product.oldPrice) || 0);
+    const salePrice = Number(product.price) || 0;
     return {
       sku: product.sku,
       name: product.name,
@@ -249,15 +524,13 @@ export class CheckoutComponent implements OnInit {
         ? `http://localhost:3002${product.imageUrl}`
         : '/assets/images/no-image.svg',
       variant: product.variant,
-      price: product.price,
-      productDiscount: product.productDiscount,
+      oldPrice,
+      price: oldPrice,
+      salePrice,
+      productDiscount: Math.max(0, oldPrice - salePrice) * quantity,
       quantity,
-      total: product.price * quantity
+      total: oldPrice * quantity
     };
-  }
-
-  toggleEditAddress(): void {
-    this.isEditingAddress = !this.isEditingAddress;
   }
 
   applyCoupon(): void {
@@ -271,7 +544,7 @@ export class CheckoutComponent implements OnInit {
     this.couponApplied = false;
     this.appliedVoucher = null;
     this.couponApplying = true;
-    this.productService.validateVoucher(code, this.subtotal).subscribe({
+    this.productService.validateVoucher(code, this.saleSubtotal).subscribe({
       next: response => {
         this.couponApplying = false;
         this.appliedVoucher = response.voucher;
@@ -299,13 +572,28 @@ export class CheckoutComponent implements OnInit {
     return this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   }
 
-  get discount(): number {
-    if (this.subtotal <= 0) return 0;
-    return this.couponApplied ? Math.min(this.subtotal, this.appliedVoucher?.discount || 0) : 0;
+  get productDiscount(): number {
+    return this.items.reduce((sum, item) => sum + (item.productDiscount || 0), 0);
   }
 
+  get saleSubtotal(): number {
+    return Math.max(0, this.subtotal - this.productDiscount);
+  }
+
+  get voucherDiscount(): number {
+    return this.couponApplied
+      ? Math.min(this.saleSubtotal, this.appliedVoucher?.discount || 0)
+      : 0;
+  }
+
+  get discount(): number {
+    return Math.min(this.subtotal, this.productDiscount + this.voucherDiscount);
+  }
+
+  readonly shippingFee = 30_000;
+
   get total(): number {
-    const computed = this.subtotal - this.discount;
+    const computed = this.subtotal - this.discount + this.shippingFee;
     return computed > 0 ? computed : 0;
   }
 
@@ -373,12 +661,16 @@ export class CheckoutComponent implements OnInit {
         name: item.name,
         image: item.image,
         variant: item.variant || '',
+        oldPrice: item.oldPrice,
         price: item.price,
+        salePrice: item.salePrice,
+        productDiscount: item.productDiscount || 0,
         quantity: item.quantity,
         total: item.total || item.price * item.quantity
       })),
-      discount: this.discount,
-      shippingFee: 0,
+      notice: 'Đơn hàng đang chờ cửa hàng xác nhận',
+      ...(this.note.trim() ? { customerNote: this.note.trim() } : {}),
+      shippingFee: this.shippingFee,
       ...(this.couponApplied && this.appliedVoucher ? { voucherCode: this.appliedVoucher.code } : {})
     };
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 export interface OrderItem {
@@ -11,6 +11,8 @@ export interface OrderItem {
   variant?: string;
   price: number;
   oldPrice?: number;
+  salePrice?: number;
+  productDiscount?: number;
   quantity: number;
   total: number;
 }
@@ -37,6 +39,7 @@ export interface Order {
   statusLabel: string;
   step: number; // 1: Đã ghi nhận, 2: Chờ xác nhận, 3: Chờ lấy hàng, 4: Đang giao, 5: Đã giao
   notice?: string;
+  customerNote?: string;
   cancelReason?: string;
   cancelReasons?: CancelReason[];
   voucherCode?: string;
@@ -55,6 +58,8 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   discount: number;
+  productDiscount?: number;
+  voucherDiscount?: number;
   shippingFee: number;
   total: number;
   refundAmount?: number;
@@ -119,12 +124,21 @@ export class OrderService {
   private readonly apiUrl = 'http://localhost:3002/api/orders';
   private ordersCache: Order[] = [];
   private ordersCacheOwner: string | null = null;
+  private readonly orderListCache = new Map<string, { orders: Order[]; expiresAt: number }>();
+  private readonly orderListCacheTtlMs = 15_000;
 
   constructor(private http: HttpClient) {
     localStorage.removeItem('floralia_orders');
   }
 
   getOrders(status?: string, query?: string): Observable<Order[]> {
+    const owner = this.currentUserKey();
+    const cacheKey = JSON.stringify([owner, status || 'all', (query || '').trim()]);
+    const cached = this.orderListCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return of([...cached.orders]);
+    }
+
     return this.http.get<{ success: boolean; orders: Order[] }>(this.apiUrl, {
       params: {
         ...(status && status !== 'all' ? { status } : {}),
@@ -133,8 +147,14 @@ export class OrderService {
       headers: this.authHeaders()
     }).pipe(
       map(res => {
-        this.ordersCache = sortOrdersNewestFirst(res.orders || []);
-        this.ordersCacheOwner = this.currentUserKey();
+        const orders = res.orders || [];
+        this.orderListCache.set(cacheKey, { orders, expiresAt: Date.now() + this.orderListCacheTtlMs });
+        if (this.orderListCache.size > 30) {
+          const oldestKey = this.orderListCache.keys().next().value;
+          if (oldestKey) this.orderListCache.delete(oldestKey);
+        }
+        this.ordersCache = orders;
+        this.ordersCacheOwner = owner;
         return this.ordersCache;
       })
     );
@@ -149,6 +169,7 @@ export class OrderService {
   }
 
   saveOrderLocal(order: Order): Order {
+    this.orderListCache.clear();
     const owner = this.currentUserKey();
     if (this.ordersCacheOwner !== owner) {
       this.ordersCache = [];
