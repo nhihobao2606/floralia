@@ -3,8 +3,80 @@ const User = require('../models/user');
 const { toPublicUser } = require('./authController');
 
 const NAME_RE = /^[\p{L}\p{M}]+(?:[ '\-][\p{L}\p{M}]+)*$/u;
+
+function toAdminUser(user) {
+    const isBlocked = Boolean(user.isBlocked || user.status === 'blocked');
+    return {
+        id: user._id ? user._id.toString() : user.id,
+        fullName: user.fullName || 'Người dùng',
+        email: user.email || '',
+        phone: user.phone || '',
+        avatar: user.avatar || '',
+        role: user.role || 'customer',
+        status: isBlocked ? 'blocked' : 'active',
+        isBlocked,
+        createdAt: user.createdAt || null,
+        updatedAt: user.updatedAt || null,
+        totalSpent: Number(user.totalSpent || 0),
+        orderCount: Number(user.orderCount || 0)
+    };
+}
 const PHONE_RE = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
 const PASS_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+async function createUserForAdmin(req, res) {
+    try {
+        const fullName = String(req.body.fullName || '').trim().replace(/\s+/g, ' ');
+        const email = String(req.body.email || '').trim().toLowerCase();
+        // The admin form formats phones with spaces (for example 0912 345 678).
+        // Normalize whitespace before applying the stored E.164/local number rule.
+        const phone = String(req.body.phone || '').replace(/\s+/g, '');
+        const password = String(req.body.password || '');
+        const role = req.body.role === 'admin' ? 'admin' : 'user';
+        const avatar = String(req.body.avatar || '').trim();
+
+        if (!NAME_RE.test(fullName) || fullName.length < 2) {
+            return res.status(400).json({ success: false, message: 'Họ và tên không hợp lệ.' });
+        }
+        if (!EMAIL_RE.test(email)) {
+            return res.status(400).json({ success: false, message: 'Email không hợp lệ.' });
+        }
+        if (!PHONE_RE.test(phone)) {
+            return res.status(400).json({ success: false, message: 'Số điện thoại không hợp lệ.' });
+        }
+        if (!PASS_RE.test(password)) {
+            return res.status(400).json({ success: false, message: 'Mật khẩu tối thiểu 8 ký tự, gồm chữ và số.' });
+        }
+        if (await User.exists(email)) {
+            return res.status(409).json({ success: false, field: 'email', message: 'Email này đã được đăng ký.' });
+        }
+
+        const now = new Date();
+        const isBlocked = req.body.status === 'blocked';
+        const newUser = {
+            fullName, email, phone, avatar,
+            password: await bcrypt.hash(password, 10),
+            role,
+            isBlocked,
+            status: isBlocked ? 'blocked' : 'active',
+            createdAt: now,
+            updatedAt: now,
+        };
+        const result = await User.create(newUser);
+        res.status(201).json({
+            success: true,
+            message: 'Đã tạo tài khoản người dùng thành công.',
+            user: toAdminUser({ ...newUser, _id: result.insertedId }),
+        });
+    } catch (err) {
+        if (err.code === 11000) {
+            return res.status(409).json({ success: false, field: 'email', message: 'Email này đã được đăng ký.' });
+        }
+        console.error('Lỗi tạo tài khoản người dùng:', err);
+        res.status(500).json({ success: false, message: 'Không thể tạo tài khoản người dùng.' });
+    }
+}
 
 // GET /api/users/me
 async function getProfile(req, res) {
@@ -131,8 +203,138 @@ async function changePassword(req, res) {
     }
 }
 
+async function getAllUsersForAdmin(req, res) {
+    try {
+        const users = await User.getAllUsers();
+        const normalized = users.map(toAdminUser);
+
+        res.json({
+            success: true,
+            users: normalized,
+            summary: {
+                total: normalized.length,
+                active: normalized.filter((user) => user.status !== 'blocked').length,
+                blocked: normalized.filter((user) => user.status === 'blocked').length
+            }
+        });
+    } catch (err) {
+        console.error('Lỗi lấy danh sách người dùng:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Không thể tải danh sách người dùng.'
+        });
+    }
+}
+
+async function updateUserForAdmin(req, res) {
+    try {
+        const { id } = req.params;
+        const user = await User.getById(id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy người dùng cần cập nhật.'
+            });
+        }
+
+        const nextFullName = String(req.body.fullName || '').trim().replace(/\s+/g, ' ');
+        const nextPhone = String(req.body.phone || '').trim();
+        const requestedRole = req.body.role ? String(req.body.role) : undefined;
+        const nextRole = requestedRole === 'customer' ? 'user' : requestedRole;
+        const nextAvatar = req.body.avatar !== undefined ? String(req.body.avatar || '').trim() : undefined;
+
+        if (nextFullName && (!NAME_RE.test(nextFullName) || nextFullName.length < 2)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Họ và tên không hợp lệ.'
+            });
+        }
+
+        if (nextPhone && !PHONE_RE.test(nextPhone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Số điện thoại không hợp lệ.'
+            });
+        }
+
+        if (nextRole && !['user', 'admin'].includes(nextRole)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vai trò không hợp lệ.'
+            });
+        }
+
+        const updateData = {};
+        if (nextFullName) updateData.fullName = nextFullName;
+        if (nextPhone) updateData.phone = nextPhone;
+        if (nextAvatar !== undefined) updateData.avatar = nextAvatar;
+        if (nextRole) updateData.role = nextRole;
+
+        if (Object.keys(updateData).length === 0) {
+            return res.json({
+                success: true,
+                message: 'Không có thay đổi nào được cập nhật.',
+                user: toAdminUser(user)
+            });
+        }
+
+        await User.update(id, updateData);
+
+        const updatedUser = await User.getById(id);
+        res.json({
+            success: true,
+            message: 'Cập nhật thông tin người dùng thành công.',
+            user: toAdminUser(updatedUser)
+        });
+    } catch (err) {
+        console.error('Lỗi cập nhật thông tin người dùng:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Không thể cập nhật thông tin người dùng.'
+        });
+    }
+}
+
+async function toggleUserStatusForAdmin(req, res) {
+    try {
+        const { id } = req.params;
+        const { action, reason } = req.body || {};
+        if (!['block', 'unblock'].includes(action)) {
+            return res.status(400).json({ success: false, message: 'Thao tác không hợp lệ.' });
+        }
+        const nextIsBlocked = action === 'block';
+
+        const updatedUser = await User.updateStatus(id, {
+            isBlocked: nextIsBlocked,
+            status: nextIsBlocked ? 'blocked' : 'active',
+            ...(nextIsBlocked ? { blockReason: String(reason || '').trim(), blockedAt: new Date(), blockedBy: req.userId } : { blockReason: '', blockedAt: null, blockedBy: null }),
+            updatedAt: new Date()
+        }, { action, reason: String(reason || '').trim(), adminId: String(req.userId), at: new Date() });
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng cần cập nhật.' });
+        }
+        res.json({
+            success: true,
+            message: nextIsBlocked ? 'Đã khóa tài khoản người dùng.' : 'Đã mở khóa tài khoản người dùng.',
+            user: toAdminUser(updatedUser)
+        });
+    } catch (err) {
+        console.error('Lỗi cập nhật trạng thái người dùng:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Không thể cập nhật trạng thái người dùng.'
+        });
+    }
+}
+
 module.exports = {
+    createUserForAdmin,
     getProfile,
     updateProfile,
-    changePassword
+    changePassword,
+    getAllUsersForAdmin,
+    updateUserForAdmin,
+    toggleUserStatusForAdmin
 };

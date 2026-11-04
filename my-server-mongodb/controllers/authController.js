@@ -130,6 +130,13 @@ async function login(req, res) {
             });
         }
 
+        if (user.isBlocked || user.status === 'blocked') {
+            return res.status(403).json({
+                success: false,
+                message: 'Tài khoản này đã bị khóa. Vui lòng liên hệ quản trị viên.'
+            });
+        }
+
         const token = jwt.sign(
             { id: user._id.toString() },
             JWT_SECRET,
@@ -213,7 +220,23 @@ async function resetPassword(req, res) {
 }
 
 // Middleware kiểm tra đăng nhập
-function requireAuth(req, res, next) {
+async function attachActiveUser(req, res, next) {
+    const user = await User.getById(req.userId);
+    if (!user) {
+        return res.status(401).json({ success: false, message: 'Tài khoản không còn tồn tại. Vui lòng đăng nhập lại.' });
+    }
+    if (user.isBlocked || user.status === 'blocked') {
+        return res.status(403).json({
+            success: false,
+            code: 'ACCOUNT_BLOCKED',
+            message: 'Tài khoản này đã bị khóa. Vui lòng liên hệ quản trị viên.'
+        });
+    }
+    req.authenticatedUser = user;
+    return next();
+}
+
+async function requireAuth(req, res, next) {
     const header = req.headers.authorization || '';
     const token = header.startsWith('Bearer ')
         ? header.slice(7)
@@ -222,7 +245,7 @@ function requireAuth(req, res, next) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.userId = decoded.id;
-        next();
+        await attachActiveUser(req, res, next);
     } catch {
         res.status(401).json({
             success: false,
@@ -231,7 +254,7 @@ function requireAuth(req, res, next) {
     }
 }
 
-function optionalAuth(req, res, next) {
+async function optionalAuth(req, res, next) {
     const header = req.headers.authorization || '';
     const token = header.startsWith('Bearer ')
         ? header.slice(7)
@@ -244,7 +267,7 @@ function optionalAuth(req, res, next) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.userId = decoded.id;
-        next();
+        await attachActiveUser(req, res, next);
     } catch {
         res.status(401).json({
             success: false,

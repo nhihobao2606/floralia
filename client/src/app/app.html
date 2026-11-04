@@ -7,6 +7,15 @@
   <span>{{ wishlistService.toastMessage() }}</span>
 </div>
 
+<div *ngIf="wishlistService.loginPromptVisible()" class="login-prompt-backdrop">
+  <section class="login-prompt-dialog" role="alertdialog" aria-modal="true" aria-labelledby="login-prompt-title" aria-describedby="login-prompt-message">
+    <span class="login-prompt-icon"><i class="bi bi-heart" aria-hidden="true"></i></span>
+    <h2 id="login-prompt-title">Đăng nhập để lưu sản phẩm yêu thích</h2>
+    <p id="login-prompt-message">Vui lòng đăng nhập để lưu và xem danh sách sản phẩm yêu thích.</p>
+    <button type="button" (click)="wishlistService.closeLoginPrompt()">OK</button>
+  </section>
+</div>
+
 <div
   *ngIf="buyNowService.request() as request"
   class="buy-now-backdrop"

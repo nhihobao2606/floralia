@@ -18,9 +18,9 @@ export class AdminSidebar {
     { label: 'Quản lý sản phẩm', icon: 'bi-box-seam', disabled: true, route: '' },
     { label: 'Quản lý danh mục', icon: 'bi-tags', disabled: true, route: '' },
     { label: 'Quản lý tồn kho', icon: 'bi-layers', disabled: true, route: '' },
-    { label: 'Quản lý người dùng', icon: 'bi-person', disabled: true, route: '' },
+    { label: 'Quản lý người dùng', icon: 'bi-person', disabled: false, route: '/users' },
     { label: 'Quản lý bài viết Blog', icon: 'bi-journal-text', disabled: false, route: '/articles' },
-    { label: 'Quản lý khuyến mãi', icon: 'bi-tag', disabled: true, route: '' },
+    { label: 'Quản lý khuyến mãi', icon: 'bi-tag', disabled: false, route: '/vouchers' },
   ];
 
   requestLogout(): void {

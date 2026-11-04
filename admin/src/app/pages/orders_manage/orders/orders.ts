@@ -63,6 +63,10 @@ export class AdminOrders implements OnInit {
     });
   }
 
+  viewDetail(order: AdminOrder): void {
+    void this.router.navigate(['/orders', order.id]);
+  }
+
   approveRefund(order: AdminOrder): void {
     if (this.updatingId) return;
     this.updatingId = order.id;

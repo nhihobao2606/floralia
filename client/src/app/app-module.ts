@@ -8,7 +8,7 @@ import { Header } from './components/header/header';
 import { Header2 } from './components/header2/header2';
 import { Footer } from './components/footer/footer';
 import { Homepage } from './pages/homepage/homepage';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Login } from './pages/login/login';
 import { Signup } from './pages/signup/signup';
@@ -32,6 +32,7 @@ import { WishlistPage } from './pages/wishlist/wishlist-page';
 import { LogoutConfirmation } from './components/logout-confirmation/logout-confirmation';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 import { PasswordRecovery } from './pages/password-recovery/password-recovery';
+import { AuthSessionInterceptor } from './services/auth-session.interceptor';
 
 registerLocaleData(localeVi);
 
@@ -65,7 +66,11 @@ registerLocaleData(localeVi);
     Pagenotfound,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
-  providers: [provideBrowserGlobalErrorListeners(), { provide: LOCALE_ID, useValue: 'vi' }],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    { provide: LOCALE_ID, useValue: 'vi' },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthSessionInterceptor, multi: true },
+  ],
   bootstrap: [App],
 })
 export class AppModule {}

@@ -4,6 +4,7 @@ const ProductSalesService = require('../models/product-sales-service');
 const Voucher = require('../models/voucher');
 const User = require('../models/user');
 const { randomBytes } = require('crypto');
+const { ObjectId } = require('mongodb');
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -13,22 +14,24 @@ async function getOrdersForUser(userId) {
   const user = await User.getById(userId);
   if (!user) return [];
 
-  const legacyOrderFilter = user.email
+  // Match by receiver email as well as userId. Older orders can contain a
+  // legacy/mismatched userId, so restricting email matching to orders without
+  // userId hides valid history from the admin user detail page.
+  const emailOrderFilter = user.email
     ? {
-        $and: [
-          { $or: [{ userId: { $exists: false } }, { userId: null }, { userId: '' }] },
-          {
-            'receiver.email': {
-              $regex: `^${escapeRegex(String(user.email).trim())}$`,
-              $options: 'i'
-            }
-          }
-        ]
+        'receiver.email': {
+          $regex: `^${escapeRegex(String(user.email).trim())}$`,
+          $options: 'i'
+        }
       }
     : null;
-  const filter = legacyOrderFilter
-    ? { $or: [{ userId: String(userId) }, legacyOrderFilter] }
-    : { userId: String(userId) };
+  const userIdMatches = [{ userId: String(userId) }];
+  if (typeof userId === 'string' && ObjectId.isValid(userId) && userId.length === 24) {
+    userIdMatches.push({ userId: new ObjectId(userId) });
+  }
+  const filter = emailOrderFilter
+    ? { $or: [...userIdMatches, emailOrderFilter] }
+    : { $or: userIdMatches };
 
   return Order.getAll(filter);
 }
@@ -144,6 +147,20 @@ async function getAdminOrders(req, res) {
   }
 }
 
+async function getAdminOrdersForUser(req, res) {
+  try {
+    const user = await User.getById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
+    }
+    const orders = sortOrdersNewestFirst(await getOrdersForUser(user._id?.toString() || String(user.id)));
+    return res.json({ success: true, orders });
+  } catch (err) {
+    console.error('Lỗi lấy lịch sử đơn hàng người dùng:', err);
+    return res.status(500).json({ success: false, message: 'Không thể tải lịch sử đơn hàng.' });
+  }
+}
+
 // GET /api/orders/:id
 async function getOrderById(req, res) {
   try {
@@ -238,6 +255,9 @@ async function createOrder(req, res) {
       verifiedItems.push({
         sku: item.sku,
         slug: product.slug || '',
+        productId: product._id?.toString() || '',
+        category: product.category || '',
+        categorySlug: product.categorySlug || '',
         name: product.name,
         image: typeof item.image === 'string' ? item.image : '',
         variant: variant?.label || '',
@@ -252,12 +272,22 @@ async function createOrder(req, res) {
     let discount = 0;
     if (voucherCode) {
       const voucher = await Voucher.getByCode(voucherCode);
-      discount = Voucher.calculateDiscount(voucher, subtotal);
+      discount = Voucher.calculateDiscount(voucher, subtotal, verifiedItems);
       if (discount === null || discount <= 0) {
         return res.status(400).json({
           success: false,
           message: 'Mã voucher không hợp lệ hoặc không còn đủ điều kiện áp dụng.'
         });
+      }
+      if (req.userId) {
+        const userOrders = await Order.getAll({ userId: req.userId });
+        const voucherUses = userOrders.filter(order => String(order.voucherCode || '').toUpperCase() === voucher.code.toUpperCase()).length;
+        if (voucher.audience === 'new_customer' && userOrders.length > 0) {
+          return res.status(400).json({ success: false, message: 'Voucher này chỉ dành cho khách hàng mới.' });
+        }
+        if (Number(voucher.perUserLimit || 0) > 0 && voucherUses >= Number(voucher.perUserLimit)) {
+          return res.status(400).json({ success: false, message: 'Bạn đã sử dụng hết số lượt cho phép của voucher này.' });
+        }
       }
     }
     const shippingFee = 0;
@@ -288,6 +318,7 @@ async function createOrder(req, res) {
       ...(req.userId ? { userId: req.userId } : {})
     };
     await Order.create(newOrder);
+    if (voucherCode) await Voucher.incrementUsed(voucherCode);
 
     const missingSkus = await ProductSalesService.incrementSoldCounts(verifiedItems);
     missingSkus.forEach(sku => {
@@ -525,6 +556,7 @@ async function approveRefund(req, res) {
 module.exports = {
   getOrders,
   getAdminOrders,
+  getAdminOrdersForUser,
   getOrderById,
   createOrder,
   updateOrderStatus,

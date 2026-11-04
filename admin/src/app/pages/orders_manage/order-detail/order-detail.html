@@ -1,0 +1,116 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+
+  <main class="admin-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="back-button" (click)="goBack()">
+          <i class="bi bi-arrow-left"></i>
+          Quay lại
+        </button>
+      </div>
+
+      <div class="topbar-user">
+        <div class="user-badge">
+          <span class="user-avatar">{{ adminName.charAt(0).toUpperCase() }}</span>
+          <span class="user-name">{{ adminName }}</span>
+        </div>
+        <button type="button" class="logout-button" (click)="logout()">Đăng xuất</button>
+      </div>
+    </header>
+
+    <section class="profile-page" *ngIf="!loading && !error && order; else loadingOrError">
+      <aside class="customer-panel">
+        <div class="customer-header">
+          <div class="customer-avatar-wrap">
+            <span>{{ customerName.charAt(0).toUpperCase() }}</span>
+          </div>
+          <div class="customer-meta">
+            <h2>{{ customerName }}</h2>
+            <p>Khách hàng</p>
+          </div>
+        </div>
+
+        <div class="info-list">
+          <div class="info-item">
+            <span class="label">Email</span>
+            <span class="value">{{ customerEmail }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Số điện thoại</span>
+            <span class="value">{{ customerPhone }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Địa chỉ</span>
+            <span class="value">{{ customerAddress }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Tổng đơn hàng</span>
+            <span class="value amount">{{ formatPrice(totalOrderValue) }}</span>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button type="button" class="secondary-action">Sửa thông tin</button>
+          <button type="button" class="primary-action">Khóa tài khoản</button>
+        </div>
+      </aside>
+
+      <section class="orders-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <button type="button" class="icon-button" (click)="goBack()" aria-label="Quay lại">
+              <i class="bi bi-arrow-left-short"></i>
+            </button>
+            <div>
+              <p class="eyebrow">Khách hàng</p>
+              <h3>{{ customerName }}</h3>
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <span>Đơn hàng</span>
+            <strong>{{ recentOrderCount }}</strong>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button type="button" class="soft-button active">Tổng quan</button>
+          <button type="button" class="soft-button">Đơn hàng</button>
+          <button type="button" class="soft-button">Giao hàng</button>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-head">
+            <span>Mã đơn</span>
+            <span>Ngày đặt</span>
+            <span>Sản phẩm</span>
+            <span>Tổng tiền</span>
+          </div>
+
+          <div class="order-list" *ngFor="let orderItem of customerOrders">
+            <div class="order-row">
+              <div class="cell code">{{ orderItem.code }}</div>
+              <div class="cell date">{{ getOrderDate(orderItem) }}</div>
+              <div class="cell product">
+                <span class="product-name">{{ orderItem.items?.[0]?.name || 'Sản phẩm' }}</span>
+                <small>x{{ orderItem.items?.[0]?.quantity || 1 }}</small>
+              </div>
+              <div class="cell total">{{ formatPrice(orderItem.total) }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <ng-template #loadingOrError>
+      <div class="detail-state" *ngIf="loading">
+        <p>Đang tải thông tin khách hàng...</p>
+      </div>
+      <div class="detail-state error" *ngIf="!loading && error">
+        <p>{{ error }}</p>
+        <button type="button" class="primary-action" (click)="goBack()">Quay lại danh sách</button>
+      </div>
+    </ng-template>
+  </main>
+</div>

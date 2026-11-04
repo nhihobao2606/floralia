@@ -17,6 +17,11 @@
   gap: 16px;
 }
 
+.order-card footer {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .page-header { margin-bottom: 24px; }
 .eyebrow { margin: 0 0 6px; color: #6b7a70; font-size: 14px; }
 h1 { margin: 0; color: #143d29; font: 600 30px 'Playfair Display', Georgia, serif; }
@@ -50,7 +55,9 @@ button {
 }
 button:disabled { opacity: .6; cursor: wait; }
 .refresh-button { color: #1d5338; border: 1px solid #cfe0c8; background: #fff; }
+.detail-button { background: #eaf3ee; color: #1d5338; border: 1px solid #d2e5d9; }
 .approve-button { background: #3d7b39; }
+.status-button { background: #1d5338; }
 .message, .empty-state { padding: 16px; border-radius: 12px; background: #f5f8f2; font-size: 16px; }
 .error { color: #a4262c; background: #fff1f0; }
 .success { color: #1d5338; background: #edf6e9; }

@@ -1,0 +1,48 @@
+<div class="user-form-layout">
+  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+  <main class="user-form-main">
+    <header class="user-form-topbar">
+      <div class="breadcrumbs"><a routerLink="/users">Quản lý người dùng</a><i class="bi bi-chevron-right" aria-hidden="true"></i><strong>{{ editing ? 'Chỉnh sửa người dùng' : 'Thêm người dùng' }}</strong></div>
+      <div class="admin-account"><span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span><span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span><button type="button" class="topbar-logout" (click)="logout()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button></div>
+    </header>
+    <div class="user-form-page">
+      <a class="back-link" routerLink="/users"><i class="bi bi-arrow-left"></i> Quay lại danh sách người dùng</a>
+      <div class="page-heading"><div><h1>{{ editing ? 'Chỉnh sửa người dùng' : 'Thêm tài khoản người dùng mới' }}</h1><p>{{ editing ? 'Cập nhật thông tin và quyền truy cập tài khoản.' : 'Điền thông tin để tạo tài khoản khách hàng hoặc quản trị viên mới trên Floralia Tea.' }}</p></div></div>
+
+      <div *ngIf="error" class="form-alert error" role="alert"><i class="bi bi-exclamation-circle"></i>{{ error }}</div>
+      <div *ngIf="success" class="form-alert success" role="status"><i class="bi bi-check-circle"></i>{{ success }}</div>
+      <div *ngIf="loading" class="loading-state"><span class="spinner"></span> Đang tải thông tin người dùng...</div>
+
+      <form *ngIf="!loading" class="form-card" (ngSubmit)="save()" #userForm="ngForm">
+        <section class="form-fields">
+          <div class="form-section-title"><span class="section-icon"><i class="bi bi-person-vcard"></i></span><div><h2>Thông tin tài khoản</h2><p>Các trường có dấu * là bắt buộc.</p></div></div>
+          <label class="field"><span>Họ và tên <b>*</b></span><input name="fullName" [(ngModel)]="form.fullName" required minlength="2" maxlength="100" placeholder="VD: Nguyễn Minh Anh"></label>
+          <label class="field"><span>Địa chỉ Email <b>*</b></span><input name="email" type="email" [(ngModel)]="form.email" required [readonly]="editing" placeholder="name@example.com"><small *ngIf="editing">Email đăng nhập không thể thay đổi.</small></label>
+          <label class="field"><span>Số điện thoại <b>*</b></span><input name="phone" type="tel" [(ngModel)]="form.phone" required placeholder="09xx xxx xxx"></label>
+          <div class="field-row password-fields" *ngIf="!editing">
+            <div class="field password-field"><label for="newUserPassword">Mật khẩu <b>*</b></label><div class="password-control"><input id="newUserPassword" name="password" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="form.password" #passwordInput="ngModel" required [pattern]="passwordPattern" autocomplete="new-password" placeholder="Tạo mật khẩu đăng nhập"><button type="button" (click)="showPassword = !showPassword" [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"><i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i></button></div>
+              <small class="password-hint">Mật khẩu cần đáp ứng đủ:</small>
+              <small class="password-rule" [class.met]="passwordHasMinimumLength"><i class="bi" [ngClass]="passwordHasMinimumLength ? 'bi-check-circle-fill' : 'bi-circle'"></i> Ít nhất 8 ký tự</small>
+              <small class="password-rule" [class.met]="passwordHasLetter"><i class="bi" [ngClass]="passwordHasLetter ? 'bi-check-circle-fill' : 'bi-circle'"></i> Có ít nhất một chữ cái</small>
+              <small class="password-rule" [class.met]="passwordHasNumber"><i class="bi" [ngClass]="passwordHasNumber ? 'bi-check-circle-fill' : 'bi-circle'"></i> Có ít nhất một chữ số</small>
+              <small class="password-error" *ngIf="passwordInput.invalid && (passwordInput.touched || userForm.submitted)">Mật khẩu chưa đáp ứng đủ các yêu cầu trên.</small>
+            </div>
+            <div class="field password-field"><label for="confirmUserPassword">Xác nhận mật khẩu <b>*</b></label><div class="password-control"><input id="confirmUserPassword" name="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" [(ngModel)]="form.confirmPassword" #confirmInput="ngModel" required autocomplete="new-password" placeholder="Nhập lại mật khẩu"><button type="button" (click)="showConfirmPassword = !showConfirmPassword" [attr.aria-label]="showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"><i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i></button></div>
+              <small class="password-hint">Nhập lại chính xác mật khẩu vừa tạo.</small>
+              <small class="password-error" *ngIf="confirmInput.touched && !form.confirmPassword">Vui lòng xác nhận mật khẩu.</small>
+              <small class="password-error" *ngIf="passwordMismatch">Mật khẩu xác nhận không khớp.</small>
+            </div>
+          </div>          <label class="field"><span>Vai trò <b>*</b></span><select name="role" [(ngModel)]="form.role"><option value="customer">Khách hàng</option><option value="admin">Quản trị viên</option></select></label>
+          <div class="form-note"><i class="bi bi-shield-check"></i><span><strong>Bảo mật tài khoản</strong><small>Mật khẩu được mã hóa trước khi lưu vào hệ thống.</small></span></div>
+        </section>
+
+        <aside class="form-aside">
+          <section class="aside-card avatar-card"><h2>Ảnh đại diện</h2><p>JPG, PNG hoặc WEBP (tối đa 2 MB)</p><img *ngIf="form.avatar" class="avatar-preview" [src]="form.avatar" alt="Ảnh đại diện xem trước"><div *ngIf="!form.avatar" class="avatar-placeholder"><i class="bi bi-person"></i></div><label class="upload-button"><i class="bi bi-cloud-arrow-up"></i>{{ form.avatar ? 'Đổi ảnh' : 'Tải ảnh lên' }}<input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarSelected($event)"></label><button *ngIf="form.avatar" type="button" class="remove-avatar" (click)="form.avatar = ''">Gỡ ảnh</button></section>
+          <section class="aside-card status-card" *ngIf="!editing"><div><h2>Trạng thái tài khoản</h2><p>{{ form.status === 'active' ? 'Có thể đăng nhập sau khi tạo tài khoản.' : 'Tài khoản sẽ bị khóa ngay khi tạo.' }}</p></div><label class="switch"><input type="checkbox" name="status" [checked]="form.status === 'active'" (change)="form.status = $any($event.target).checked ? 'active' : 'blocked'"><span></span></label></section>
+          <section class="aside-tip"><span><i class="bi bi-info-lg"></i></span><div><strong>{{ editing ? 'Quyền truy cập' : 'Khởi tạo tài khoản' }}</strong><p>{{ editing ? 'Thay đổi vai trò sẽ cập nhật quyền truy cập của người dùng.' : 'Tài khoản sẽ dùng email và mật khẩu này để đăng nhập.' }}</p></div></section>
+          <div class="form-actions"><a routerLink="/users" class="cancel-button">Hủy</a><button type="submit" class="save-button" [disabled]="saving"><i class="bi" [ngClass]="saving ? 'bi-arrow-repeat' : 'bi-person-check'"></i>{{ saving ? 'Đang lưu...' : editing ? 'Lưu thay đổi' : 'Lưu người dùng' }}</button></div>
+        </aside>
+      </form>
+    </div>
+  </main>
+</div>

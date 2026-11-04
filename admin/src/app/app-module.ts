@@ -9,6 +9,10 @@ import { Articles } from './pages/articles_manage/articles/articles';
 import { ArticleEditor } from './pages/articles_manage/article-editor/article-editor';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 import { AdminOrders } from './pages/orders_manage/orders/orders';
+import { AdminOrderDetail } from './pages/orders_manage/order-detail/order-detail';
+import { AdminUsers } from './pages/users_manage/users/users';
+import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
+import { AdminUserForm } from './pages/users_manage/user-form/user-form';
 
 @NgModule({
   declarations: [App, Pagenotfound],
@@ -21,6 +25,10 @@ import { AdminOrders } from './pages/orders_manage/orders/orders';
     Articles,
     ArticleEditor,
     AdminOrders,
+    AdminOrderDetail,
+    AdminUsers,
+    AdminUserDetail,
+    AdminUserForm,
   ],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],

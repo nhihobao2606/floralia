@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
@@ -9,7 +9,7 @@ import { NgForm } from '@angular/forms';
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class Login {
+export class Login implements OnInit {
   email = '';
   password = '';
 
@@ -26,6 +26,11 @@ export class Login {
     private router: Router,
     private route: ActivatedRoute,
   ) {}
+
+  ngOnInit(): void {
+    this.notice = sessionStorage.getItem('blockedAccountNotice') || '';
+    sessionStorage.removeItem('blockedAccountNotice');
+  }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;

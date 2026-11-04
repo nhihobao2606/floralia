@@ -38,6 +38,12 @@
           <footer>
             <button
               type="button"
+              class="detail-button"
+              (click)="viewDetail(order)">
+              Xem thông tin
+            </button>
+            <button
+              type="button"
               class="approve-button"
               *ngIf="order.status === 'refund_pending'"
               [disabled]="updatingId === order.id"

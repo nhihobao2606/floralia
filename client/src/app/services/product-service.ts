@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, finalize, of, shareReplay, tap, throwError } from 'rxjs';
 import { Products } from '../classes/Products';
 
@@ -91,10 +91,12 @@ export class ProductService {
     });
   }
 
-  validateVoucher(code: string, subtotal: number): Observable<{ success: boolean; voucher: ValidatedVoucher }> {
+  validateVoucher(code: string, subtotal: number, items: Array<{ sku: string; quantity: number; variant?: string }> = []): Observable<{ success: boolean; voucher: ValidatedVoucher }> {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     return this.http.post<{ success: boolean; voucher: ValidatedVoucher }>(
       'http://localhost:3002/api/vouchers/validate',
-      { code, subtotal }
+      { code, subtotal, items },
+      { headers: new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {}) }
     );
   }
 }

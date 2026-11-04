@@ -271,7 +271,7 @@ export class CheckoutComponent implements OnInit {
     this.couponApplied = false;
     this.appliedVoucher = null;
     this.couponApplying = true;
-    this.productService.validateVoucher(code, this.subtotal).subscribe({
+    this.productService.validateVoucher(code, this.subtotal, this.items.map(item => ({ sku: item.sku, quantity: item.quantity, variant: item.variant }))).subscribe({
       next: response => {
         this.couponApplying = false;
         this.appliedVoucher = response.voucher;

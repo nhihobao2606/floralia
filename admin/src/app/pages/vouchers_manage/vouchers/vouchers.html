@@ -1,0 +1,46 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+  <main class="admin-main">
+    <header class="topbar">
+      <h1>Quản lý khuyến mãi</h1>
+      <div class="admin-account"><span class="account-avatar">{{ adminName.charAt(0).toUpperCase() }}</span><span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span><button type="button" class="logout" (click)="logout()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button></div>
+    </header>
+    <div class="vouchers-page">
+      <section class="promo-hero"><div><span class="hero-kicker"><i class="bi bi-tag-fill"></i> CHIẾN DỊCH KHUYẾN MÃI</span><h1>Tạo ưu đãi để thu hút khách hàng</h1><p>Thiết lập và quản lý các chương trình mã giảm giá, voucher kích cầu tiêu dùng trà thảo mộc tự nhiên của Floralia Tea.</p></div><a routerLink="/vouchers/new" class="hero-button"><i class="bi bi-plus-lg"></i> Tạo voucher</a></section>
+      <section class="stats-grid" aria-label="Thống kê voucher">
+        <article class="stat-card"><span class="stat-icon mint"><i class="bi bi-ticket-perforated"></i></span><small>TỔNG VOUCHER</small><strong>{{ summary.total }}</strong><span class="stat-note">Toàn bộ chiến dịch đã khởi tạo</span></article>
+        <article class="stat-card"><span class="stat-icon green"><i class="bi bi-fire"></i></span><small>ĐANG CHẠY</small><strong>{{ summary.active }} <small>đang áp dụng</small></strong><span class="stat-note">Voucher có thể dùng trên cửa hàng</span></article>
+        <article class="stat-card"><span class="stat-icon gold"><i class="bi bi-calendar-event"></i></span><small>SẮP DIỄN RA</small><strong>{{ summary.upcoming }} <small>mã sắp mở</small></strong><span class="stat-note">Lịch chạy theo thời gian thiết lập</span></article>
+        <article class="stat-card"><span class="stat-icon rose"><i class="bi bi-graph-up-arrow"></i></span><small>LƯỢT SỬ DỤNG THÁNG NÀY</small><strong>{{ summary.monthlyUsage | number }}</strong><span class="stat-note">Lượt voucher ghi nhận trong đơn hàng</span></article>
+      </section>
+
+      <section class="voucher-panel">
+        <div class="toolbar"><div class="filter-tabs">
+          <button [class.selected]="filter === 'all'" (click)="setFilter('all')">Tất cả <b>{{ summary.total }}</b></button>
+          <button [class.selected]="filter === 'active'" (click)="setFilter('active')">Đang chạy <b>{{ summary.active }}</b></button>
+          <button [class.selected]="filter === 'upcoming'" (click)="setFilter('upcoming')">Sắp diễn ra <b>{{ summary.upcoming }}</b></button>
+          <button [class.selected]="filter === 'paused'" (click)="setFilter('paused')">Tạm dừng <b>{{ summary.paused }}</b></button>
+          <button [class.selected]="filter === 'expired'" (click)="setFilter('expired')">Hết hạn <b>{{ summary.expired }}</b></button>
+        </div><label class="search"><i class="bi bi-search"></i><input [(ngModel)]="searchTerm" (ngModelChange)="currentPage = 1" placeholder="Tìm theo mã hoặc tên voucher..."></label></div>
+        <div *ngIf="error" class="notice error" role="alert"><span>{{ error }}</span><button type="button" (click)="load()" [disabled]="loading">Thử lại</button></div><div *ngIf="success" class="notice success" role="status">{{ success }}</div>
+        <div class="table-wrap"><table><thead><tr><th class="check-col"></th><th>VOUCHER / CHIẾN DỊCH</th><th>MỨC GIẢM</th><th>ĐƠN TỐI THIỂU</th><th>ĐÃ DÙNG</th><th>THỜI HẠN</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
+          <tbody>
+            <tr *ngIf="loading"><td colspan="8" class="empty-row"><span class="spinner"></span> Đang tải voucher...</td></tr>
+            <tr *ngIf="!loading && !visible.length"><td colspan="8" class="empty-row">Không tìm thấy voucher phù hợp.</td></tr>
+            <tr *ngFor="let voucher of visible" (click)="detail(voucher)" class="voucher-row">
+              <td class="check-col"><span class="code-icon" [class.fixed]="voucher.discountType === 'fixed'">{{ voucher.discountType === 'percent' ? '%' : '₫' }}</span></td>
+              <td class="campaign"><strong>{{ voucher.code }}</strong><span>{{ voucher.name }}</span><small>{{ voucher.description || 'Chương trình ưu đãi Floralia Tea' }}</small></td>
+              <td><strong>{{ discountText(voucher) }}</strong><small *ngIf="voucher.maxDiscount">Tối đa {{ money(voucher.maxDiscount) }}₫</small><small *ngIf="!voucher.maxDiscount && voucher.discountType === 'percent'">Không giới hạn</small></td>
+              <td>{{ money(voucher.minOrderValue) }}₫</td>
+              <td class="usage"><b>{{ voucher.usedCount | number }}</b><span *ngIf="voucher.usageLimit">/ {{ voucher.usageLimit | number }}</span><div *ngIf="voucher.usageLimit" class="progress"><i [style.width.%]="usagePercent(voucher)"></i></div></td>
+              <td class="date-cell"><span>{{ voucher.startDate ? (voucher.startDate | date:'dd/MM') : '—' }}<ng-container *ngIf="voucher.endDate"> - {{ voucher.endDate | date:'dd/MM/yyyy' }}</ng-container></span><small>{{ voucher.perUserLimit ? (voucher.perUserLimit + ' lượt / khách') : 'Không giới hạn lượt' }}</small></td>
+              <td><span class="status-pill" [ngClass]="voucher.status">{{ statusLabel(voucher.status) }}</span></td>
+              <td class="actions" (click)="$event.stopPropagation()"><button type="button" class="action-button" (click)="detail(voucher); $event.stopPropagation()"><i class="bi bi-eye"></i><span>Chi tiết</span></button><button type="button" class="action-button" [routerLink]="['/vouchers', voucher.id, 'edit']" (click)="$event.stopPropagation()"><i class="bi bi-pencil"></i><span>Sửa</span></button><button type="button" class="action-button" [disabled]="busyId === voucher.id" (click)="toggle(voucher, $event)">{{ voucher.status === 'paused' ? 'Kích hoạt' : 'Dừng' }}</button><button type="button" class="action-button remove" (click)="remove(voucher, $event)" aria-label="Xóa voucher"><i class="bi bi-trash"></i></button></td>
+            </tr>
+          </tbody>
+        </table></div>
+        <footer class="table-footer"><span>Hiển thị {{ filtered.length ? (currentPage - 1) * pageSize + 1 : 0 }}–{{ (currentPage - 1) * pageSize + visible.length }} trên {{ filtered.length }} voucher</span><nav class="pagination"><button (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1" aria-label="Trang trước"><i class="bi bi-chevron-left"></i></button><button *ngFor="let page of pages" [class.current]="currentPage === page" (click)="setPage(page)">{{ page }}</button><button (click)="setPage(currentPage + 1)" [disabled]="currentPage === pageCount" aria-label="Trang sau"><i class="bi bi-chevron-right"></i></button></nav></footer>
+      </section>
+    </div>
+  </main>
+</div>
