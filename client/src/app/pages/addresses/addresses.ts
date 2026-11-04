@@ -114,7 +114,7 @@ export class Addresses implements OnInit {
     this.fullName = u.fullName || '';
     this.email = u.email || '';
     this.avatar = u.avatar || '';
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   private syncStorage(u: any): void {
@@ -132,7 +132,7 @@ export class Addresses implements OnInit {
             code: province.code, name: province.name,
           }));
           this.loadingProvinces = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       },
       error: () => {
@@ -140,7 +140,7 @@ export class Addresses implements OnInit {
           this.provinces = [];
           this.loadingProvinces = false;
           this.formError = 'Không tải được danh sách tỉnh/thành. Vui lòng đóng và mở lại biểu mẫu để thử lại.';
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       }
     });
@@ -156,14 +156,14 @@ export class Addresses implements OnInit {
         this.ngZone.run(() => {
           this.wards = (data || []).map((ward: any) => ({ code: ward.code, name: ward.name }));
           this.loadingWards = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       },
       error: () => {
         this.ngZone.run(() => {
           this.wards = [];
           this.loadingWards = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       }
     });
@@ -210,7 +210,7 @@ export class Addresses implements OnInit {
             } catch (e) {}
           }
           this.loadingAddresses = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       },
       error: (err) => {
@@ -218,7 +218,7 @@ export class Addresses implements OnInit {
           this.loadingAddresses = false;
           if (err.status === 401) this.logout();
           else this.flash('err', err.error?.message || 'Không tải được danh sách địa chỉ. Vui lòng thử lại.');
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       }
     });
@@ -231,7 +231,7 @@ export class Addresses implements OnInit {
     this.editingAddressId = null;
     this.resetForm();
     this.showModal = true;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   openEditModal(addr: any): void {
@@ -255,21 +255,21 @@ export class Addresses implements OnInit {
             this.wards = (data || []).map((ward: any) => ({ code: ward.code, name: ward.name }));
             this.formWard = this.wards.find(w => w.code === addr.wardCode || w.name === addr.ward) || null;
             this.loadingWards = false;
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           });
         },
         error: () => {
           this.ngZone.run(() => {
             this.wards = [];
             this.loadingWards = false;
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           });
         }
       });
     }
 
     this.showModal = true;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   closeModal(): void {
@@ -278,7 +278,7 @@ export class Addresses implements OnInit {
     this.wardDropdownOpen = false;
     this.saving = false;
     this.formError = '';
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   resetForm(): void {
@@ -308,7 +308,7 @@ export class Addresses implements OnInit {
 
     this.formError = '';
     this.saving = true;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     const body = {
       fullName: this.formFullName.trim(),
@@ -334,14 +334,14 @@ export class Addresses implements OnInit {
               } else {
                 this.formError = res.message || 'Cập nhật thất bại.';
               }
-              this.cdr.detectChanges();
+              this.cdr.markForCheck();
             });
           },
           error: (err) => {
             this.ngZone.run(() => {
               this.saving = false;
               this.formError = err.error?.message || 'Lỗi kết nối. Vui lòng thử lại.';
-              this.cdr.detectChanges();
+              this.cdr.markForCheck();
             });
           }
         });
@@ -358,14 +358,14 @@ export class Addresses implements OnInit {
               } else {
                 this.formError = res.message || 'Thêm địa chỉ thất bại.';
               }
-              this.cdr.detectChanges();
+              this.cdr.markForCheck();
             });
           },
           error: (err) => {
             this.ngZone.run(() => {
               this.saving = false;
               this.formError = err.error?.message || 'Lỗi kết nối. Vui lòng thử lại.';
-              this.cdr.detectChanges();
+              this.cdr.markForCheck();
             });
           }
         });
@@ -392,13 +392,13 @@ export class Addresses implements OnInit {
           } else {
             this.flash('err', res.message || 'Không thể xóa địa chỉ.');
           }
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       },
       error: (err) => {
         this.ngZone.run(() => {
           this.flash('err', err.error?.message || 'Lỗi kết nối. Vui lòng thử lại.');
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       }
     });
@@ -415,13 +415,13 @@ export class Addresses implements OnInit {
           } else {
             this.flash('err', res.message || 'Không thể đặt mặc định.');
           }
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       },
       error: () => {
         this.ngZone.run(() => {
           this.flash('err', 'Lỗi kết nối. Vui lòng thử lại.');
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         });
       }
     });
@@ -430,11 +430,11 @@ export class Addresses implements OnInit {
   /* ==================== FLASH MESSAGE ==================== */
   private flash(type: 'ok' | 'err', text: string): void {
     this.msg = { type, text };
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
     if (type === 'ok') {
       setTimeout(() => {
         this.msg = { type: 'ok', text: '' };
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }, 4000);
     }
   }
@@ -460,4 +460,3 @@ export class Addresses implements OnInit {
     this.logout();
   }
 }
-

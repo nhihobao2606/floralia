@@ -92,13 +92,13 @@ export class OrderDetail implements OnInit {
 
   // --- Helpers ---
   canCancel(): boolean {
-    if (!this.order) return false;
+    if (!this.order?.userId) return false;
     const s = this.order.status;
-    return s === 'pending' || s === 'processing' || s === 'shipping';
+    return s === 'pending' || s === 'processing';
   }
 
   canReturn(): boolean {
-    if (!this.order) return false;
+    if (!this.order?.userId) return false;
     return this.order.status === 'delivered';
   }
 
@@ -108,6 +108,14 @@ export class OrderDetail implements OnInit {
 
   isRefundApproved(): boolean {
     return this.order?.status === 'refund_approved';
+  }
+
+  getReturnReason(): string {
+    if (!this.order) return '';
+    return this.order.refundReason ||
+      this.order.cancelReason ||
+      this.order.cancelReasons?.map(reason => reason.reason).join(', ') ||
+      '';
   }
 
   get currentProgressStep(): number {
@@ -230,9 +238,27 @@ export class OrderDetail implements OnInit {
       (sum, item) => sum + Number(item.total ?? item.price * item.quantity),
       0
     );
-    const discount = remainingItems.length && previousOrder.subtotal > 0
-      ? Math.min(subtotal, Math.round(previousOrder.discount * subtotal / previousOrder.subtotal))
+    const itemProductDiscount = (item: Order['items'][number]): number => Number(
+      item.productDiscount ??
+      Math.max(0, Number(item.oldPrice ?? item.price) - Number(item.salePrice ?? item.price)) * item.quantity
+    ) || 0;
+    const productDiscount = remainingItems.reduce((sum, item) => sum + itemProductDiscount(item), 0);
+    const allProductDiscount = previousOrder.items.reduce((sum, item) => sum + itemProductDiscount(item), 0);
+    const oldVoucherDiscount = Number(
+      previousOrder.voucherDiscount ?? Math.max(0, previousOrder.discount - allProductDiscount)
+    ) || 0;
+    const oldSaleSubtotal = previousOrder.items.reduce(
+      (sum, item) => sum + Number(item.salePrice ?? item.price) * item.quantity,
+      0
+    );
+    const remainingSaleSubtotal = remainingItems.reduce(
+      (sum, item) => sum + Number(item.salePrice ?? item.price) * item.quantity,
+      0
+    );
+    const voucherDiscount = remainingItems.length && oldSaleSubtotal > 0
+      ? Math.min(remainingSaleSubtotal, Math.round(oldVoucherDiscount * remainingSaleSubtotal / oldSaleSubtotal))
       : 0;
+    const discount = productDiscount + voucherDiscount;
     const optimisticOrder: Order = {
       ...previousOrder,
       items: remainingItems,
@@ -240,6 +266,8 @@ export class OrderDetail implements OnInit {
       cancelReasons,
       cancelReason: reasonSummary,
       subtotal,
+      productDiscount,
+      voucherDiscount,
       discount,
       shippingFee: remainingItems.length ? previousOrder.shippingFee : 0,
       total: subtotal - discount + (remainingItems.length ? previousOrder.shippingFee : 0),
@@ -322,14 +350,12 @@ export class OrderDetail implements OnInit {
   // --- Confirm Received ---
   confirmReceived(): void {
     if (!this.order) return;
-    if (confirm(`Xác nhận bạn đã nhận được đầy đủ sản phẩm của đơn hàng ${this.order.code}?`)) {
-      this.orderService.updateOrderStatus(this.order.id, 'completed', 'HOÀN THÀNH').subscribe({
-        next: ({ order }) => this.order = order,
-        error: (error) => {
-          this.actionError = error?.error?.message || 'Không thể xác nhận đã nhận hàng.';
-        }
-      });
-    }
+    this.orderService.updateOrderStatus(this.order.id, 'completed', 'HOÀN THÀNH').subscribe({
+      next: () => this.router.navigate(['/orders'], { queryParams: { tab: 'completed' } }),
+      error: (error) => {
+        this.actionError = error?.error?.message || 'Không thể xác nhận đã nhận hàng.';
+      }
+    });
   }
 
   reorder(): void {

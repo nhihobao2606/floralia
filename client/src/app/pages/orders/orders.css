@@ -497,6 +497,14 @@ a { text-decoration: none; color: inherit; }
   font-size: 15px;
   color: var(--leaf);
 }
+.order-notice-bar.return-reason-bar {
+  border-top: 0;
+  background: #fff8f1;
+  color: #82502d;
+}
+.order-notice-bar.return-reason-bar i {
+  color: #b87542;
+}
 
 /* Card footer */
 .card-footer-bar {

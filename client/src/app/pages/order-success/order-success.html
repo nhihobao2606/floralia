@@ -18,85 +18,12 @@
       </div>
       <h1 class="hero-title">Đặt Hàng Thành Công!</h1>
       <p class="hero-sub">Cảm ơn bạn đã lựa chọn <strong>Floralia Herbal Tea</strong>.</p>
-      <p class="hero-note">Mã đơn hàng của bạn: <strong class="order-id-highlight">{{ order.code }}</strong>. Đơn hàng đang được Floralia chuẩn bị và xử lý.</p>
+      <p class="hero-note">
+        Mã đơn hàng của bạn: <strong class="order-id-highlight">{{ order.code }}</strong>.
+        {{ order.notice || 'Đơn hàng đang được Floralia chuẩn bị và xử lý.' }}
+      </p>
     </div>
 
-    <!-- 3-COLUMNS INFO CARDS (ORDER-DETAIL STYLE) -->
-    <div class="info-grid">
-
-      <!-- Box 1: Địa chỉ gửi -->
-      <div class="info-box">
-        <h3 class="box-title">ĐỊA CHỈ GỬI</h3>
-        <div class="box-content">
-          <p class="person-name">{{ order.sender?.name || 'Floralia Herbal Tea' }}</p>
-          <p class="address-text">{{ order.sender?.address || '11A Bế Văn Đàn, Dĩ An, Bình Dương' }}</p>
-          <div class="contact-meta">
-            <span class="meta-label">EMAIL</span>
-            <span class="meta-val">{{ order.sender?.email || 'floralia@gmail.com' }}</span>
-          </div>
-          <div class="contact-meta">
-            <span class="meta-label">PHONE</span>
-            <span class="meta-val">{{ order.sender?.phone || '0901 234 567' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 2: Địa chỉ nhận -->
-      <div class="info-box">
-        <h3 class="box-title">ĐỊA CHỈ NHẬN</h3>
-        <div class="box-content">
-          <p class="person-name">{{ order.receiver?.name || 'Khách hàng' }}</p>
-          <p class="address-text">{{ order.receiver?.address || 'Địa chỉ nhận hàng' }}</p>
-          <div class="contact-meta">
-            <span class="meta-label">EMAIL</span>
-            <span class="meta-val">{{ order.receiver?.email || 'Chưa cập nhật' }}</span>
-          </div>
-          <div class="contact-meta">
-            <span class="meta-label">PHONE</span>
-            <span class="meta-val">{{ order.receiver?.phone || 'Chưa cập nhật' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 3: Thông tin thanh toán & Tổng -->
-      <div class="info-box summary-box">
-        <div class="summary-top">
-          <div class="sum-row">
-            <span class="sum-label-dim">MÃ ĐƠN HÀNG</span>
-            <strong class="sum-code">{{ order.code }}</strong>
-          </div>
-          <div class="sum-row">
-            <span class="sum-label-dim">PHƯƠNG THỨC THANH TOÁN</span>
-            <strong class="sum-val">{{ order.paymentMethod }}</strong>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="summary-middle">
-          <div class="sum-row">
-            <span class="sum-label">Tổng đơn hàng</span>
-            <span class="sum-price">{{ formatPrice(order.subtotal) }}</span>
-          </div>
-          <div class="sum-row">
-            <span class="sum-label">Giảm giá</span>
-            <span class="sum-price">{{ (order.discount || 0).toLocaleString('vi-VN') }}đ</span>
-          </div>
-          <div class="sum-row" *ngIf="order.shippingFee > 0">
-            <span class="sum-label">Phí vận chuyển</span>
-            <span class="sum-price">{{ formatPrice(order.shippingFee) }}</span>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="summary-bottom">
-          <span class="total-label">Tổng</span>
-          <strong class="total-value">{{ formatPrice(order.total) }}</strong>
-        </div>
-      </div>
-
-    </div>
 
     <!-- PROGRESS STEPPER (ORDER-DETAIL STYLE) -->
     <div class="stepper-section">
@@ -157,13 +84,13 @@
                 </div>
               </td>
               <td class="td-price">
-                <span class="unit-price">{{ (it.price || 0).toLocaleString('vi-VN') }}đ</span>
+                <span class="unit-price">{{ (it.oldPrice || it.price || 0).toLocaleString('vi-VN') }}đ</span>
               </td>
               <td class="td-qty">
                 <span class="qty-pill">x{{ it.quantity }}</span>
               </td>
               <td class="td-total">
-                <strong class="line-total">{{ ((it.total != null ? it.total : it.price * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
+                <strong class="line-total">{{ (((it.oldPrice || it.price || 0) * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
               </td>
             </tr>
           </tbody>
@@ -171,15 +98,42 @@
       </div>
     </div>
 
-    <!-- CALL TO ACTIONS -->
-    <div class="detail-bottom-actions">
-      <button type="button" class="btn-track-action" (click)="trackOrder()">
-        <i class="bi bi-box-seam"></i> Theo dõi đơn hàng
-      </button>
+    <div class="success-order-footer">
+      <section class="success-summary-card" aria-label="Tổng kết thanh toán">
+        <div class="success-summary-row">
+          <span>Tạm tính</span>
+          <span>{{ formatPrice(order.subtotal) }}</span>
+        </div>
+        <div class="success-summary-row">
+          <span>Giảm giá sản phẩm</span>
+          <span>-{{ formatPrice(order.productDiscount || 0) }}</span>
+        </div>
+        <div class="success-summary-row" *ngIf="order.voucherDiscount || (!order.productDiscount && order.discount)">
+          <span>Giảm giá voucher</span>
+          <span>-{{ formatPrice(order.voucherDiscount ?? (order.discount - (order.productDiscount || 0))) }}</span>
+        </div>
+        <div class="success-summary-row">
+          <span>Phí vận chuyển</span>
+          <span>{{ formatPrice(order.shippingFee) }}</span>
+        </div>
+        <div class="success-summary-row success-summary-total">
+          <strong>Tổng thanh toán</strong>
+          <strong>{{ formatPrice(order.total) }}</strong>
+        </div>
+      </section>
+      <p class="success-customer-note" *ngIf="order.customerNote">
+        <strong>Ghi chú đơn hàng:</strong> {{ order.customerNote }}
+      </p>
 
-      <button type="button" class="btn-shop-action" (click)="continueShopping()">
-        <i class="bi bi-shop"></i> Tiếp tục mua sắm
-      </button>
+      <div class="detail-bottom-actions">
+        <button type="button" class="btn-track-action" (click)="trackOrder()">
+          <i class="bi bi-box-seam"></i> Theo dõi đơn hàng
+        </button>
+
+        <button type="button" class="btn-shop-action" (click)="continueShopping()">
+          <i class="bi bi-shop"></i> Tiếp tục mua sắm
+        </button>
+      </div>
     </div>
 
   </div>

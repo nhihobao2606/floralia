@@ -70,11 +70,6 @@
           <p>{{ loadError }}</p>
           <button type="button" class="btn-shop-now" (click)="loadOrders()">Tải lại</button>
         </div>
-        <div class="orders-empty" *ngIf="!loading && !loadError && filteredOrders.length === 0">
-          <i class="bi bi-bag-x" aria-hidden="true"></i>
-          <p>{{ searchQuery || activeTab !== 'all' ? 'Không tìm thấy đơn hàng phù hợp.' : 'Bạn chưa có đơn hàng nào.' }}</p>
-          <a class="btn-shop-now" routerLink="/products" *ngIf="!searchQuery && activeTab === 'all'">Khám phá sản phẩm</a>
-        </div>
         <div class="orders-list" *ngIf="filteredOrders && filteredOrders.length > 0">
           <div class="order-card" *ngFor="let order of filteredOrders">
 
@@ -86,8 +81,14 @@
                 <span class="order-time">{{ order.time }} {{ order.date }}</span>
               </div>
               <div class="header-right">
-                <span class="shipping-hint" *ngIf="order.status === 'completed' || order.status === 'delivered'">
-                  <i class="bi bi-truck"></i> Giao hàng thành công
+                <span class="shipping-hint" *ngIf="order.status === 'completed'">
+                  <i class="bi bi-check2-circle"></i> Đơn hàng đã hoàn thành
+                </span>
+                <span class="shipping-hint" *ngIf="order.status === 'delivered'">
+                  <i class="bi bi-truck"></i> Đã giao, chờ bạn xác nhận
+                </span>
+                <span class="shipping-hint" *ngIf="order.status === 'processing'">
+                  <i class="bi bi-box-seam"></i> Chờ đơn vị vận chuyển lấy hàng
                 </span>
                 <span class="shipping-hint in-transit" *ngIf="order.status === 'shipping'">
                   <i class="bi bi-truck"></i> Đơn hàng đang trên đường giao
@@ -125,6 +126,10 @@
             <div class="order-notice-bar" *ngIf="order.notice">
               <i class="bi bi-check-circle-fill"></i> {{ order.notice }}
             </div>
+            <div class="order-notice-bar return-reason-bar" *ngIf="isReturnOrder(order) && getReturnReason(order)">
+              <i class="bi bi-arrow-return-left"></i>
+              <strong>Lý do trả hàng:</strong> {{ getReturnReason(order) }}
+            </div>
 
             <!-- Card Footer: Total & Actions -->
             <div class="card-footer-bar">
@@ -161,8 +166,7 @@
 
                   <!-- Shipping -->
                   <ng-container *ngSwitchCase="'shipping'">
-                    <button type="button" class="btn-action-outline" (click)="openCancelModal(order, $event)">Hủy đơn hàng</button>
-                    <button type="button" class="btn-action-outline" (click)="trackOrder(order, $event)">Theo dõi đơn hàng</button>
+                    <button type="button" class="btn-action-primary" (click)="trackOrder(order, $event)">Theo dõi đơn hàng</button>
                   </ng-container>
 
                   <!-- Completed -->
@@ -179,16 +183,19 @@
 
                   <!-- Refund Pending -->
                   <ng-container *ngSwitchCase="'refund_pending'">
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Lý do trả hàng</button>
                     <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
 
                   <!-- Refund Approved -->
                   <ng-container *ngSwitchCase="'refund_approved'">
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Lý do trả hàng</button>
                     <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
 
                   <!-- Refunded -->
                   <ng-container *ngSwitchCase="'refunded'">
+                    <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Lý do trả hàng</button>
                     <button type="button" class="btn-action-outline" (click)="contactFloralia(order, $event)">Liên hệ Floralia</button>
                     <button type="button" class="btn-action-outline" (click)="viewDetail(order, $event)">Xem chi tiết</button>
                   </ng-container>
