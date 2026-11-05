@@ -223,12 +223,7 @@ async function getAvailableVouchers(req, res) {
         const available = vouchers.flatMap(voucher => {
             const details = serializeVoucher(voucher);
             if (!details.isActive || details.status !== 'active') return [];
-            if (req.userId && voucher.audience === 'new_customer' && userOrders.length > 0) return [];
-
-            const userUses = userOrders.filter(order =>
-                String(order.voucherCode || '').toUpperCase() === String(voucher.code).toUpperCase()
-            ).length;
-            if (Number(voucher.perUserLimit || 0) > 0 && userUses >= Number(voucher.perUserLimit)) return [];
+            if (Voucher.getUserEligibilityError(voucher, userOrders, Boolean(req.userId))) return [];
 
             const discount = Voucher.calculateDiscount(voucher, subtotal, items);
             if (!discount || discount <= 0) return [];
@@ -269,13 +264,8 @@ async function validateVoucher(req, res) {
         }
         if (voucher && req.userId) {
             const userOrders = await Order.getAll({ userId: req.userId });
-            const uses = userOrders.filter(order => String(order.voucherCode || '').toUpperCase() === voucher.code.toUpperCase()).length;
-            if (voucher.audience === 'new_customer' && userOrders.length > 0) {
-                return res.status(400).json({ success: false, message: 'Voucher này chỉ dành cho khách hàng mới.' });
-            }
-            if (Number(voucher.perUserLimit || 0) > 0 && uses >= Number(voucher.perUserLimit)) {
-                return res.status(400).json({ success: false, message: 'Bạn đã sử dụng hết số lượt cho phép của voucher này.' });
-            }
+            const eligibilityError = Voucher.getUserEligibilityError(voucher, userOrders, Boolean(req.userId));
+            if (eligibilityError) return res.status(400).json({ success: false, message: eligibilityError });
         }
         const discount = Voucher.calculateDiscount(voucher, subtotal, items);
         if (discount === null || discount <= 0) {
