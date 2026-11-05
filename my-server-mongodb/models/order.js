@@ -26,6 +26,7 @@ function getIdFilter(id) {
 }
 
 function getAll(filter = {}, options = {}) {
+function getAll(filter = {}, options = {}) {
     if (!ordersCollection) return Promise.resolve([]);
     let cursor = ordersCollection.find(filter);
     if (options.sort) cursor = cursor.sort(options.sort);
@@ -39,10 +40,30 @@ function getById(id) {
     return ordersCollection.findOne(getIdFilter(id));
 }
 
+function getBySlug(slug) {
+    if (!ordersCollection) return Promise.resolve(null);
+    const identifier = String(slug).replace(/^don-hang-/, '');
+    const upperIdentifier = identifier.toUpperCase();
+    return ordersCollection.findOne({
+        $or: [
+            { slug: String(slug) },
+            { id: identifier },
+            { id: upperIdentifier },
+            { code: identifier },
+            { code: `#${identifier}` },
+            { code: upperIdentifier },
+            { code: `#${upperIdentifier}` }
+        ]
+    });
+}
+
 function create(order) {
-    if (!ordersCollection) return Promise.resolve({ insertedId: null });
+    if (!ordersCollection) {
+        throw new Error('Orders collection has not been initialized.');
+    }
     return ordersCollection.insertOne({
         ...order,
+        createdAt: order.createdAt || new Date()
         createdAt: order.createdAt || new Date()
     });
 }
@@ -87,6 +108,7 @@ module.exports = {
     getIdFilter,
     getAll,
     getById,
+    getBySlug,
     create,
     count,
     insertMany,

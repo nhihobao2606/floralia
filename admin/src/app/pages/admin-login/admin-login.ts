@@ -80,10 +80,13 @@ export class AdminLogin {
         const storage = this.rememberMe ? localStorage : sessionStorage;
         localStorage.removeItem('adminUser');
         localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminAuthSource');
         sessionStorage.removeItem('adminUser');
         sessionStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminAuthSource');
         storage.setItem('adminUser', JSON.stringify(result.user));
         storage.setItem('adminToken', result.token);
+        storage.setItem('adminAuthSource', 'interactive-login-v1');
         this.successMessage.set(`Xác thực thành công. Xin chào ${result.user.fullName || 'Quản trị viên'}!`);
         void this.router.navigate(['/orders']);
       },

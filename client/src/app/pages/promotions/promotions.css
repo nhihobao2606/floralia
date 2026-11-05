@@ -464,7 +464,10 @@
   color: #fff;
 }
 
-.sale-cart-icon:disabled,
+.sale-cart-icon:disabled {
+  color: #aab4aa;
+  cursor: not-allowed;
+}
 .sale-buy-now:disabled {
   border-color: #b9c2b9;
   background: #b9c2b9;

@@ -1,3 +1,4 @@
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 @import './app/pages/admin-login/admin-login.css';
 
 * { box-sizing: border-box; }

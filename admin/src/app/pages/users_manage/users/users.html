@@ -1,0 +1,309 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+
+  <main class="admin-main">
+    <header class="topbar">
+      <h1>Quản lý người dùng</h1>
+      <div class="admin-account">
+        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+        <span class="account-copy">
+          <strong>{{ adminName }}</strong>
+          <small>Quản trị viên</small>
+        </span>
+        <button class="topbar-logout" type="button" (click)="logout()">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          Đăng xuất
+        </button>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <section class="welcome-card">
+        <div>
+          <p class="welcome-kicker">KHÔNG GIAN QUẢN TRỊ FLORALIA</p>
+          <h2>Chào mừng trở lại, {{ adminName }}</h2>
+          <p>Hôm nay bạn muốn theo dõi hoạt động và quản lý tài khoản người dùng hiệu quả?</p>
+        </div>
+        <button class="primary-button" type="button" (click)="addUser()">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Thêm người dùng
+        </button>
+      </section>
+
+      <section class="stats-grid" aria-label="Thống kê người dùng">
+        <article class="stat-card">
+          <span class="stat-icon total-icon"><i class="bi bi-people" aria-hidden="true"></i></span>
+          <div>
+            <span class="stat-label">Tổng người dùng</span>
+            <strong>{{ summary.total }}</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon published-icon"><i class="bi bi-person-check" aria-hidden="true"></i></span>
+          <div>
+            <span class="stat-label">Đang hoạt động</span>
+            <strong>{{ summary.active }}</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon draft-icon"><i class="bi bi-person-slash" aria-hidden="true"></i></span>
+          <div>
+            <span class="stat-label">Bị khóa</span>
+            <strong>{{ summary.blocked }}</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon views-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></span>
+          <div>
+            <span class="stat-label">Quản trị viên</span>
+            <strong>{{ users.filter((user) => user.role === 'admin').length }}</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="users-card" aria-label="Danh sách người dùng">
+        <div class="list-toolbar">
+          <div class="filter-tabs" role="tablist" aria-label="Lọc người dùng">
+            <button type="button" role="tab" [attr.aria-selected]="filter === 'all'" [class.selected]="filter === 'all'" (click)="filter = 'all'">
+              Tất cả
+              <span class="tab-count">{{ summary.total }}</span>
+            </button>
+            <button type="button" role="tab" [attr.aria-selected]="filter === 'customer'" [class.selected]="filter === 'customer'" (click)="filter = 'customer'">
+              Khách hàng
+              <span class="tab-count">{{ users.filter((user) => user.role !== 'admin').length }}</span>
+            </button>
+            <button type="button" role="tab" [attr.aria-selected]="filter === 'admin'" [class.selected]="filter === 'admin'" (click)="filter = 'admin'">
+              Quản trị viên
+              <span class="tab-count">{{ users.filter((user) => user.role === 'admin').length }}</span>
+            </button>
+            <button type="button" role="tab" [attr.aria-selected]="filter === 'active'" [class.selected]="filter === 'active'" (click)="filter = 'active'">
+              Đang hoạt động
+              <span class="tab-count">{{ summary.active }}</span>
+            </button>
+            <button type="button" role="tab" [attr.aria-selected]="filter === 'blocked'" [class.selected]="filter === 'blocked'" (click)="filter = 'blocked'">
+              Bị khóa
+              <span class="tab-count">{{ summary.blocked }}</span>
+            </button>
+          </div>
+
+          <label class="search-box">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input
+              type="search"
+              [(ngModel)]="searchTerm"
+              placeholder="Tìm theo tên, email hoặc số điện thoại"
+              aria-label="Tìm kiếm người dùng">
+            <button *ngIf="searchTerm" type="button" class="clear-search" aria-label="Xóa tìm kiếm" (click)="searchTerm = ''">
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+          </label>
+        </div>
+
+        <div *ngIf="error" class="notice error-notice" role="alert">
+          <span>{{ error }}</span>
+        </div>
+        <div *ngIf="success" class="notice success-notice" role="status">
+          <span>{{ success }}</span>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Mã</th>
+                <th scope="col">Người dùng</th>
+                <th scope="col">Số điện thoại</th>
+                <th scope="col">Vai trò</th>
+                <th scope="col">Ngày tham gia</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col" class="actions-heading">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="loading && users.length === 0">
+                <td colspan="7" class="table-message"><span class="loading-spinner"></span> Đang tải dữ liệu người dùng...</td>
+              </tr>
+              <tr *ngIf="!loading && !filteredUsersList.length">
+                <td colspan="7" class="table-message empty-message">
+                  <i class="bi bi-people" aria-hidden="true"></i>
+                  <strong>Chưa có người dùng phù hợp</strong>
+                  <span>Thử đổi từ khóa hoặc trạng thái lọc.</span>
+                </td>
+              </tr>
+              <tr *ngFor="let user of paginatedUsers" (click)="openUserProfile(user)" style="cursor: pointer;">
+                <td class="user-id">{{ user.id ? user.id.slice(-6).toUpperCase() : '—' }}</td>
+                <td class="user-summary">
+                  <div class="user-identity">
+                    <div class="user-avatar-wrap" [ngClass]="{ 'blocked': user.status === 'blocked' }">
+                      <img *ngIf="getAvatarSrc(user.avatar) as avatarUrl; else initialsFallback" [src]="avatarUrl" [alt]="user.fullName || 'Avatar người dùng'" (error)="$event.target.style.display='none'" />
+                      <ng-template #initialsFallback>
+                        <span class="user-avatar" [ngClass]="{ 'blocked': user.status === 'blocked' }">{{ getInitials(user.fullName) }}</span>
+                      </ng-template>
+                    </div>
+                    <div class="user-meta">
+                      <strong>{{ user.fullName }}</strong>
+                      <span>{{ user.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="user-phone">{{ user.phone || 'Chưa cập nhật' }}</td>
+                <td>
+                  <span class="role-badge" [ngClass]="{ admin: user.role === 'admin' }">
+                    {{ user.role === 'admin' ? 'Quản trị viên' : 'Khách hàng' }}
+                  </span>
+                </td>
+                <td class="user-date">{{ user.createdAt ? (user.createdAt | date: 'dd/MM/yyyy') : '—' }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="user.status === 'blocked' ? 'status-blocked' : 'status-active'">
+                    {{ user.status === 'blocked' ? 'Bị khóa' : 'Hoạt động' }}
+                  </span>
+                </td>
+                <td class="row-actions">
+                  <button class="icon-action edit-action" type="button" (click)="$event.stopPropagation(); openUserProfile(user)" [attr.aria-label]="'Xem ' + user.fullName">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                    <span>Xem</span>
+                  </button>
+                  <button class="icon-action edit-action" type="button" (click)="$event.stopPropagation(); openEditProfile(user)" [attr.aria-label]="'Sửa ' + user.fullName">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                    <span>Sửa</span>
+                  </button>
+                  <button class="icon-action delete-action" type="button" (click)="$event.stopPropagation(); openStatusModal(user)" [attr.aria-label]="(user.status === 'blocked' ? 'Mở khóa ' : 'Khóa ') + user.fullName">
+                    <i class="bi" [ngClass]="user.status === 'blocked' ? 'bi-unlock' : 'bi-lock'" aria-hidden="true"></i>
+                    <span>{{ user.status === 'blocked' ? 'Mở khóa' : 'Khóa' }}</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="loading && users.length > 0" class="table-loading-overlay" role="status" aria-live="polite">
+            <span class="loading-spinner"></span> Đang tải dữ liệu người dùng...
+          </div>
+        </div>
+
+        <footer class="table-footer">
+          <span>Hiển thị {{ filteredUsersList.length ? ((currentPage - 1) * pageSize + 1) : 0 }}–{{ (currentPage - 1) * pageSize + paginatedUsers.length }} trên {{ filteredUsersList.length }} người dùng</span>
+          <nav class="pagination" aria-label="Phân trang người dùng">
+            <button type="button" [disabled]="currentPage === 1" aria-label="Trang trước" (click)="setPage(currentPage - 1)"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+            <button *ngFor="let page of pageNumbers" type="button" [class.current]="page === currentPage" [attr.aria-current]="page === currentPage ? 'page' : null" (click)="setPage(page)">{{ page }}</button>
+            <button type="button" [disabled]="currentPage === totalPages" aria-label="Trang tiếp" (click)="setPage(currentPage + 1)"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+          </nav>
+        </footer>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div class="modal-backdrop" *ngIf="selectedUserProfile">
+  <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="user-profile-title">
+    <button type="button" class="close-button" aria-label="Đóng" (click)="closeUserProfile()">×</button>
+    <div class="profile-header">
+      <div class="user-avatar-wrap profile-avatar" [ngClass]="{ 'blocked': selectedUserProfile.status === 'blocked' }">
+        <img *ngIf="getAvatarSrc(selectedUserProfile.avatar) as avatarUrl; else profileInitials" [src]="avatarUrl" [alt]="selectedUserProfile.fullName || 'Avatar người dùng'" />
+        <ng-template #profileInitials>
+          <span class="user-avatar large" [ngClass]="{ 'blocked': selectedUserProfile.status === 'blocked' }">{{ getInitials(selectedUserProfile.fullName) }}</span>
+        </ng-template>
+      </div>
+      <div class="profile-title-wrap">
+        <span class="profile-kicker">THÔNG TIN NGƯỜI DÙNG</span>
+        <h3 id="user-profile-title">{{ selectedUserProfile.fullName }}</h3>
+      </div>
+    </div>
+
+    <div class="profile-body" *ngIf="!editingProfile; else editProfileForm">
+      <div class="info-row">
+        <span class="label">Email</span>
+        <strong>{{ selectedUserProfile.email }}</strong>
+      </div>
+      <div class="info-row">
+        <span class="label">Số điện thoại</span>
+        <strong>{{ selectedUserProfile.phone || 'Chưa cập nhật' }}</strong>
+      </div>
+      <div class="info-row">
+        <span class="label">Vai trò</span>
+        <strong>{{ selectedUserProfile.role === 'admin' ? 'Quản trị viên' : 'Khách hàng' }}</strong>
+      </div>
+      <div class="info-row">
+        <span class="label">Ngày tham gia</span>
+        <strong>{{ selectedUserProfile.createdAt ? (selectedUserProfile.createdAt | date: 'dd/MM/yyyy') : '—' }}</strong>
+      </div>
+      <div class="info-row status-row">
+        <span class="label">Trạng thái</span>
+        <span class="status-badge" [ngClass]="selectedUserProfile.status === 'blocked' ? 'status-blocked' : 'status-active'">
+          {{ selectedUserProfile.status === 'blocked' ? 'Bị khóa' : 'Hoạt động' }}
+        </span>
+      </div>
+    </div>
+
+    <ng-template #editProfileForm>
+      <div class="profile-form">
+        <label>
+          <span>Họ và tên</span>
+          <input type="text" [(ngModel)]="profileDraft.fullName" />
+        </label>
+        <label>
+          <span>Số điện thoại</span>
+          <input type="text" [(ngModel)]="profileDraft.phone" />
+        </label>
+        <label>
+          <span>Avatar URL</span>
+          <input type="text" [(ngModel)]="profileDraft.avatar" placeholder="https://..." />
+        </label>
+      </div>
+    </ng-template>
+
+    <div class="profile-actions">
+      <button type="button" class="secondary-modal-button" (click)="editingProfile ? cancelEditProfile() : closeUserProfile()">
+        {{ editingProfile ? 'Hủy' : 'Đóng' }}
+      </button>
+      <button *ngIf="!editingProfile" type="button" class="secondary-modal-button" (click)="startEditProfile()">Sửa thông tin</button>
+      <button *ngIf="editingProfile" type="button" class="primary-modal-button" (click)="saveProfileChanges()">
+        {{ updatingId ? 'Đang lưu...' : 'Lưu thay đổi' }}
+      </button>
+      <button type="button" class="danger-modal-button" (click)="openStatusModal(selectedUserProfile); closeUserProfile();">
+        {{ selectedUserProfile.status === 'blocked' ? 'Mở khóa' : 'Khóa tài khoản' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="modalOpen">
+  <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="lock-user-title">
+    <button type="button" class="close-button" aria-label="Đóng" (click)="closeModal()">×</button>
+
+    <div class="modal-icon" aria-hidden="true">
+      <span class="bi bi-person-lock"></span>
+    </div>
+
+    <h3 id="lock-user-title">{{ action === 'block' ? 'Bạn có chắc chắn muốn khóa tài khoản này?' : 'Bạn có chắc chắn muốn mở khóa tài khoản này?' }}</h3>
+
+    <div class="modal-user" *ngIf="selectedUser">
+      <div class="user-avatar large" [ngClass]="{ 'blocked': selectedUser.status === 'blocked' }">{{ getInitials(selectedUser.fullName) }}</div>
+      <div class="user-meta">
+        <strong>{{ selectedUser.fullName }}</strong>
+        <span>{{ selectedUser.email }}</span>
+      </div>
+    </div>
+
+    <p class="modal-note">
+      {{ action === 'block' ? 'Người dùng sẽ không thể đăng nhập vào hệ thống cho đến khi bạn mở khóa lại.' : 'Người dùng sẽ có thể đăng nhập lại bình thường sau khi được mở khóa.' }}
+    </p>
+
+    <div *ngIf="error" class="modal-error" role="alert">{{ error }}</div>
+    <div *ngIf="success" class="modal-success" role="status">{{ success }}</div>
+
+    <div class="reason-row" *ngIf="action === 'block'">
+      <label for="users-lock-reason">Lý do khóa:</label>
+      <select id="users-lock-reason" [(ngModel)]="lockReason">
+        <option *ngFor="let reason of reasonOptions" [value]="reason">{{ reason }}</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="secondary-modal-button" (click)="closeModal()">Hủy</button>
+      <button type="button" class="danger-modal-button" (click)="confirmStatusChange()" [disabled]="updatingId === selectedUser?.id">
+        {{ updatingId === selectedUser?.id ? 'Đang cập nhật...' : (action === 'block' ? 'Khóa tài khoản' : 'Mở khóa tài khoản') }}
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -10,6 +10,11 @@ import { ArticleEditor } from './pages/articles_manage/article-editor/article-ed
 import { Orders } from './pages/orders_manage/orders/orders';
 import { OrderDetail } from './pages/orders_manage/order-detail/order-detail';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
+import { AdminOrders } from './pages/orders_manage/orders/orders';
+import { AdminOrderDetail } from './pages/orders_manage/order-detail/order-detail';
+import { AdminUsers } from './pages/users_manage/users/users';
+import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
+import { AdminUserForm } from './pages/users_manage/user-form/user-form';
 
 @NgModule({
   declarations: [App, Pagenotfound],
@@ -21,6 +26,11 @@ import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
     AdminLogin,
     Articles,
     ArticleEditor,
+    AdminOrders,
+    AdminOrderDetail,
+    AdminUsers,
+    AdminUserDetail,
+    AdminUserForm,
     Orders,
     OrderDetail,
   ],

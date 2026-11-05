@@ -27,6 +27,50 @@
   .favorite-toast { animation: none; }
 }
 
+.login-prompt-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(21, 43, 31, .48);
+  backdrop-filter: blur(3px);
+}
+.login-prompt-dialog {
+  width: min(420px, 100%);
+  padding: 30px;
+  border-radius: 22px;
+  background: #fff;
+  color: #263b30;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(13, 37, 22, .24);
+}
+.login-prompt-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 16px;
+  place-items: center;
+  border-radius: 18px;
+  background: #edf5ef;
+  color: #1d5338;
+  font-size: 25px;
+}
+.login-prompt-dialog h2 { margin: 0 0 10px; font-size: 20px; }
+.login-prompt-dialog p { margin: 0 0 22px; color: #718071; line-height: 1.55; }
+.login-prompt-dialog button {
+  min-width: 120px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: #1d5338;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .buy-now-backdrop {
   position: fixed;
   inset: 0;
