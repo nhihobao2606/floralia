@@ -135,14 +135,14 @@
     <div class="row g-4 justify-content-center" *ngIf="!blogsLoading() && blogs().length > 0">
       <div class="col-md-6 col-lg-4" *ngFor="let b of blogs()">
         <article class="blog-card">
-          <a [routerLink]="['/blog', b.slug]" class="blog-image">
+          <a [routerLink]="blogDetailLink(b)" class="blog-image">
             <img [src]="getBlogImg(b)" [alt]="b.title" loading="lazy" />
           </a>
           <div class="blog-content">
             <span class="blog-date"><i class="bi bi-calendar3"></i> {{ b.date }}</span>
-            <a [routerLink]="['/blog', b.slug]"><h3>{{ b.title }}</h3></a>
+            <a [routerLink]="blogDetailLink(b)"><h3>{{ b.title }}</h3></a>
             <p>{{ b.excerpt }}</p>
-            <a [routerLink]="['/blog', b.slug]" class="blog-btn">Xem thêm</a>
+            <a [routerLink]="blogDetailLink(b)" class="blog-btn">Xem thêm</a>
           </div>
         </article>
       </div>

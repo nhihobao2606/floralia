@@ -21,6 +21,7 @@ const addressRoutes = require('./routes/addressRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const adminBlogRoutes = require('./routes/adminBlogRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const adminOrderRoutes = require('./routes/adminOrderRoutes');
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -42,6 +43,7 @@ app.use('/api/addresses', addressRoutes);
 app.use('/blogs', blogRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/admin/orders', adminOrderRoutes);
 
 async function startServer() {
     if (!process.env.MONGODB_URI) {

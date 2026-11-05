@@ -66,6 +66,6 @@ export class ProductService {
 
   // Lấy chi tiết 1 sản phẩm theo Slug
   getProductBySlug(slug: string): Observable<Products> {
-    return this.http.get<Products>(`${this.apiUrl}/slug/${slug}`);
+    return this.http.get<Products>(`${this.apiUrl}/slug/${encodeURIComponent(slug)}`);
   }
 }

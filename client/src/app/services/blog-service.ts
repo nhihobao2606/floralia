@@ -45,6 +45,6 @@ export class BlogService {
   }
 
   getByIdentifier(identifier: string): Observable<Blog> {
-    return this.http.get<Blog>(`${this.apiUrl}/${identifier}`);
+    return this.http.get<Blog>(`${this.apiUrl}/${encodeURIComponent(identifier)}`);
   }
 }

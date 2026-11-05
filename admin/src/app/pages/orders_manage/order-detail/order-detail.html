@@ -1,0 +1,392 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+
+  <main class="admin-main">
+    <header class="topbar">
+      <div class="topbar-title-group">
+        <h1>Quản lý đơn hàng/Chi tiết đơn hàng</h1>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
+        </button>
+
+        <div class="admin-account">
+          <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+          <span class="account-copy">
+            <strong>{{ adminName }}</strong>
+            <small>Quản trị viên</small>
+          </span>
+          <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <!-- Back Link -->
+      <a routerLink="/orders" class="back-link">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        <span>Quay lại Quản lý đơn hàng</span>
+      </a>
+
+      <!-- Loading / Error states -->
+      <div *ngIf="loading" class="notice info-notice" role="status">
+        <span class="loading-spinner"></span> Đang tải chi tiết đơn hàng...
+      </div>
+
+      <div *ngIf="loadError" class="notice error-notice" role="alert">
+        <span>{{ loadError }}</span>
+        <button type="button" (click)="loadOrder()">Thử lại</button>
+      </div>
+
+      <div *ngIf="actionMessage" class="notice success-notice" role="status">
+        <span>{{ actionMessage }}</span>
+        <button type="button" (click)="actionMessage = ''" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+      </div>
+
+      <div *ngIf="actionError" class="notice error-notice" role="alert">
+        <span>{{ actionError }}</span>
+        <button type="button" (click)="actionError = ''" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+      </div>
+
+      <!-- Main Order View matching Image 2 -->
+      <ng-container *ngIf="order as ord">
+        <!-- Banner Card -->
+        <section class="order-header-card">
+          <div class="order-header-left">
+            <h2>Đơn hàng {{ ord.code }}</h2>
+            <span class="status-pill" [ngClass]="'status-pill-' + ord.status">
+              {{ ord.statusLabel }}
+            </span>
+          </div>
+
+          <div class="order-header-actions">
+            <button class="banner-btn btn-invoice" type="button" (click)="openInvoiceModal()">
+              In hóa đơn
+            </button>
+            <button
+              *ngIf="ord.status !== 'cancelled'"
+              class="banner-btn btn-cancel"
+              type="button"
+              (click)="requestCancelOrder()">
+              Hủy đơn hàng
+            </button>
+            <button
+              *ngIf="ord.status === 'pending'"
+              class="banner-btn btn-confirm"
+              type="button"
+              (click)="confirmOrder()">
+              Xác nhận đơn hàng
+            </button>
+            <button
+              *ngIf="ord.status === 'processing'"
+              class="banner-btn btn-shipping"
+              type="button"
+              (click)="onStatusChange('shipping')">
+              Giao hàng
+            </button>
+            <button
+              *ngIf="ord.status === 'shipping'"
+              class="banner-btn btn-delivered"
+              type="button"
+              (click)="onStatusChange('delivered')">
+              Đã giao thành công
+            </button>
+          </div>
+        </section>
+
+        <!-- 2 Columns Grid -->
+        <div class="order-detail-grid">
+          <!-- LEFT COLUMN -->
+          <div class="detail-left-col">
+            <!-- Card 1: Thông tin chung -->
+            <section class="content-card general-info-card">
+              <h3 class="card-title">Thông tin chung</h3>
+
+              <div class="info-columns-3">
+                <!-- Col 1 -->
+                <div class="info-group">
+                  <span class="info-label">Thời gian đặt hàng</span>
+                  <p class="info-value-time">{{ ord.date }} - {{ ord.time || '09:05' }}</p>
+
+                  <span class="info-label mt-3">Trạng thái đơn hàng</span>
+                  <select
+                    class="info-select"
+                    [ngModel]="ord.status"
+                    (ngModelChange)="onStatusChange($event)"
+                    aria-label="Chọn trạng thái đơn hàng">
+                    <option value="pending">Chờ xác nhận</option>
+                    <option value="processing">Đang chuẩn bị</option>
+                    <option value="shipping">Đang giao hàng</option>
+                    <option value="delivered">Đã giao</option>
+                    <option value="cancelled">Đã hủy</option>
+                  </select>
+
+                  <span class="info-label mt-3">Khách hàng</span>
+                  <select class="info-select" [disabled]="true" aria-label="Khách hàng">
+                    <option selected>{{ ord.receiver.name }} ({{ ord.receiver.customerId || '#KH102' }})</option>
+                  </select>
+                </div>
+
+                <!-- Col 2 -->
+                <div class="info-group">
+                  <span class="info-label font-bold">Thông tin thanh toán</span>
+                  <div class="payment-sub-info">
+                    <span class="sub-label">Phương thức</span>
+                    <strong class="sub-val">{{ ord.paymentMethod }}</strong>
+
+                    <span class="sub-label mt-2">Trạng thái</span>
+                    <span class="payment-badge" [ngClass]="'payment-' + ord.paymentStatus">
+                      {{ ord.paymentStatusLabel }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Col 3 -->
+                <div class="info-group">
+                  <span class="info-label font-bold">Giao nhận hàng</span>
+                  <div class="receiver-sub-info">
+                    <strong class="receiver-name">{{ ord.receiver.name }}</strong>
+                    <p class="receiver-address">{{ ord.receiver.address }}</p>
+                    <p class="receiver-phone">{{ ord.receiver.phone }}</p>
+                    <p class="receiver-email">{{ ord.receiver.email || 'thuha@email.com' }}</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Card 2: Sản phẩm trong đơn -->
+            <section class="content-card products-list-card">
+              <h3 class="card-title">Sản phẩm trong đơn</h3>
+
+              <div class="order-items-table">
+                <article *ngFor="let item of ord.items" class="order-item-row">
+                  <div class="item-thumb-box">
+                    <img [src]="item.image || '/assets/images/products/74.png'" [alt]="item.name" class="item-thumb">
+                  </div>
+                  <div class="item-meta">
+                    <h4 class="item-name">{{ item.name }}</h4>
+                    <span class="item-variant">{{ item.variant || 'Hộp 50g' }}</span>
+                  </div>
+                  <div class="item-calc">
+                    <span>{{ formatPrice(item.price) }} × {{ item.quantity }}</span>
+                  </div>
+                  <div class="item-line-total">
+                    <strong>{{ formatPrice(item.total) }}</strong>
+                  </div>
+                </article>
+              </div>
+
+              <!-- Totals breakdown -->
+              <div class="financial-summary-box">
+                <div class="fin-row">
+                  <span>Tạm tính</span>
+                  <span>{{ formatPrice(ord.subtotal) }}</span>
+                </div>
+                <div class="fin-row" *ngIf="ord.discount > 0">
+                  <span>Giảm giá</span>
+                  <span>-{{ formatPrice(ord.discount) }}</span>
+                </div>
+                <div class="fin-row">
+                  <span>Phí giao hàng</span>
+                  <span>{{ formatPrice(ord.shippingFee) }}</span>
+                </div>
+                <div class="fin-row fin-grand-total">
+                  <strong>Tổng đơn hàng</strong>
+                  <strong class="grand-total-val">{{ formatPrice(ord.total) }}</strong>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="detail-right-col">
+            <!-- Card 3: Theo dõi vận chuyển -->
+            <section class="content-card shipping-tracking-card">
+              <h3 class="card-title">Theo dõi vận chuyển</h3>
+              <p class="carrier-info">
+                Đơn vị vận chuyển: <strong>{{ ord.shippingUnit || 'Giao Hàng Nhanh' }}</strong> - Mã vận đơn: <strong>{{ ord.trackingCode || 'GHN8842' }}</strong>
+              </p>
+
+              <div class="stepper-timeline">
+                <div *ngFor="let step of ord.trackingTimeline; let isLast = last" class="timeline-step">
+                  <div class="step-indicator">
+                    <span class="step-dot" [class.step-dot-active]="step.completed"></span>
+                    <span *ngIf="!isLast" class="step-line"></span>
+                  </div>
+                  <div class="step-content">
+                    <strong class="step-title">{{ step.title }}</strong>
+                    <small class="step-time">{{ step.time }}</small>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Card 4: Ghi chú đơn hàng -->
+            <section class="content-card notes-card">
+              <h3 class="card-title">Ghi chú đơn hàng</h3>
+
+              <div class="existing-notes-list">
+                <div *ngFor="let note of ord.notes" class="order-note-item">
+                  <p class="note-text">{{ note.text }}</p>
+                  <small class="note-author">{{ note.date }} - {{ note.author }}</small>
+                </div>
+                <div *ngIf="!ord.notes || ord.notes.length === 0" class="no-notes-hint">
+                  Chưa có ghi chú nào cho đơn hàng này.
+                </div>
+              </div>
+
+              <div class="add-note-box">
+                <textarea
+                  [(ngModel)]="newNoteText"
+                  rows="3"
+                  placeholder="Thêm ghi chú..."
+                  aria-label="Thêm ghi chú mới"></textarea>
+                <button
+                  class="add-note-btn"
+                  type="button"
+                  [disabled]="!newNoteText.trim() || addingNote"
+                  (click)="submitAddNote()">
+                  {{ addingNote ? 'Đang lưu...' : 'Thêm' }}
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+  </main>
+</div>
+
+<!-- Modal: In hóa đơn -->
+<div *ngIf="invoiceModalVisible" class="modal-backdrop" (click)="closeInvoiceModal()">
+  <section class="invoice-modal-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <span class="modal-kicker">HÓA ĐƠN BÁN HÀNG</span>
+        <h2>Hóa đơn #{{ order?.code }}</h2>
+      </div>
+      <div class="modal-header-actions">
+        <button class="primary-button print-action-btn" type="button" (click)="printInvoice()">
+          <i class="bi bi-printer" aria-hidden="true"></i> In hóa đơn
+        </button>
+        <button class="modal-close" type="button" (click)="closeInvoiceModal()" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+      </div>
+    </header>
+
+    <div *ngIf="order as inv" class="invoice-printable-area">
+      <div class="invoice-brand-row">
+        <div>
+          <h3 class="invoice-store-name">Floralia Herbal Tea</h3>
+          <p>Địa chỉ: 11A Bế Văn Đàn, Dĩ An, Bình Dương</p>
+          <p>Hotline: 0901 234 567 | Email: floralia@gmail.com</p>
+        </div>
+        <div class="invoice-code-box">
+          <p class="invoice-meta-label">MÃ ĐƠN HÀNG</p>
+          <h4>{{ inv.code }}</h4>
+          <p>{{ inv.date }} {{ inv.time || '' }}</p>
+        </div>
+      </div>
+
+      <div class="invoice-divider"></div>
+
+      <div class="invoice-info-grid">
+        <div>
+          <h5>Khách hàng</h5>
+          <p><strong>{{ inv.receiver.name }}</strong></p>
+          <p>SĐT: {{ inv.receiver.phone }}</p>
+          <p>Email: {{ inv.receiver.email || '—' }}</p>
+        </div>
+        <div>
+          <h5>Địa chỉ nhận hàng</h5>
+          <p>{{ inv.receiver.address }}</p>
+        </div>
+        <div>
+          <h5>Thanh toán & Trạng thái</h5>
+          <p>Hình thức: {{ inv.paymentMethod }}</p>
+          <p>Thanh toán: {{ inv.paymentStatusLabel }}</p>
+          <p>Trạng thái đơn: {{ inv.statusLabel }}</p>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tên sản phẩm</th>
+            <th>Quy cách</th>
+            <th class="text-right">Đơn giá</th>
+            <th class="text-center">SL</th>
+            <th class="text-right">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of inv.items; let idx = index">
+            <td>{{ idx + 1 }}</td>
+            <td><strong>{{ item.name }}</strong></td>
+            <td>{{ item.variant || 'Tiêu chuẩn' }}</td>
+            <td class="text-right">{{ formatPrice(item.price) }}</td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-right">{{ formatPrice(item.total) }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="invoice-totals-box">
+        <div class="invoice-totals-row">
+          <span>Tạm tính:</span>
+          <span>{{ formatPrice(inv.subtotal) }}</span>
+        </div>
+        <div class="invoice-totals-row" *ngIf="inv.discount > 0">
+          <span>Giảm giá:</span>
+          <span>-{{ formatPrice(inv.discount) }}</span>
+        </div>
+        <div class="invoice-totals-row">
+          <span>Phí giao hàng:</span>
+          <span>{{ formatPrice(inv.shippingFee) }}</span>
+        </div>
+        <div class="invoice-totals-row invoice-grand-total">
+          <strong>Tổng thanh toán:</strong>
+          <strong>{{ formatPrice(inv.total) }}</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Modal: Xác nhận hủy đơn hàng -->
+<div *ngIf="cancelModalVisible" class="modal-backdrop" (click)="dismissCancelOrder()">
+  <section class="dialog-card" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <span class="dialog-icon"><i class="bi bi-exclamation-triangle"></i></span>
+    <h2>Xác nhận hủy đơn hàng</h2>
+    <p>Bạn có chắc chắn muốn hủy đơn hàng <strong>{{ order?.code }}</strong> không?</p>
+    <div class="dialog-actions">
+      <button class="secondary-button" type="button" [disabled]="cancellingOrder" (click)="dismissCancelOrder()">Đóng</button>
+      <button class="danger-btn" type="button" [disabled]="cancellingOrder" (click)="confirmCancelOrder()">
+        {{ cancellingOrder ? 'Đang hủy...' : 'Hủy đơn hàng' }}
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- Modal: Đăng xuất -->
+<div *ngIf="logoutConfirmationVisible" class="logout-confirm-backdrop" (click)="cancelLogoutConfirmation()">
+  <section
+    class="logout-confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="logoutConfirmOrderDetailTitle"
+    (click)="$event.stopPropagation()">
+    <span class="logout-confirm-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
+    <h2 id="logoutConfirmOrderDetailTitle">Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị Floralia không?</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="logout-cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button>
+      <button type="button" class="logout-submit-button" (click)="confirmLogout()">Đăng xuất</button>
+    </div>
+  </section>
+</div>

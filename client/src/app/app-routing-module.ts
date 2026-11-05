@@ -55,6 +55,8 @@ const routes: Routes = [
 
   // Blog & Khuyến mãi
   { path: 'blog', component: BlogComponent },
+  { path: 'blog/:categorySlug', component: BlogComponent },
+  { path: 'blog/:categorySlug/:slug', component: BlogDetailComponent },
   { path: 'blog/:slug', component: BlogDetailComponent },
   { path: 'sales', component: PromotionsComponent },
 

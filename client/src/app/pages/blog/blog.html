@@ -89,7 +89,7 @@
             [style.--i]="i">
 
             <!-- Card Image (flush with top edges like Homepage) -->
-            <a [routerLink]="['/blog', blog.slug]" class="blog-image">
+            <a [routerLink]="blogDetailLink(blog)" class="blog-image">
               <img
                 [src]="getBlogImage(blog)"
                 [alt]="blog.title"
@@ -102,13 +102,13 @@
                 <i class="bi bi-calendar3"></i> {{ blog.date }}
               </span>
 
-              <a [routerLink]="['/blog', blog.slug]">
+              <a [routerLink]="blogDetailLink(blog)">
                 <h3>{{ blog.title }}</h3>
               </a>
 
               <p>{{ blog.excerpt }}</p>
 
-              <a [routerLink]="['/blog', blog.slug]" class="blog-btn">
+              <a [routerLink]="blogDetailLink(blog)" class="blog-btn">
                 Xem thêm
               </a>
             </div>
@@ -197,7 +197,7 @@
               <div
                 class="featured-item"
                 *ngFor="let item of featuredBlogs()"
-                [routerLink]="['/blog', item.slug]">
+                [routerLink]="blogDetailLink(item)">
                 <!-- Thumbnail -->
                 <div class="featured-thumb">
                   <img [src]="getBlogImage(item)" [alt]="item.title" loading="lazy" />

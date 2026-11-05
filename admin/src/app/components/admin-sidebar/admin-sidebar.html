@@ -1,5 +1,5 @@
 <aside class="admin-sidebar">
-  <a class="sidebar-brand" routerLink="/articles" aria-label="Floralia Tea - quản trị">
+  <a class="sidebar-brand" routerLink="/orders" aria-label="Floralia Tea - quản trị">
     <img src="/assets/logo.png" alt="Floralia Tea">
   </a>
 
@@ -7,15 +7,16 @@
     <a
       *ngFor="let item of menu"
       class="sidebar-link"
-      [class.active]="!item.disabled"
       [class.disabled]="item.disabled"
-      [routerLink]="item.disabled ? null : '/articles'"
+      [routerLink]="item.disabled ? null : item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
       [attr.aria-label]="item.label"
       [attr.aria-disabled]="item.disabled"
       [attr.title]="item.disabled ? 'Mục này sẽ được triển khai sau' : null">
       <i [ngClass]="['bi', item.icon]" aria-hidden="true"></i>
-      <span>{{ item.label }}</span>
+      <span class="sidebar-label">{{ item.label }}</span>
+      <span *ngIf="item.badge" class="sidebar-badge">{{ item.badge }}</span>
     </a>
   </nav>
-
 </aside>

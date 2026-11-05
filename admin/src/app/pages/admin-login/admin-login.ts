@@ -85,7 +85,7 @@ export class AdminLogin {
         storage.setItem('adminUser', JSON.stringify(result.user));
         storage.setItem('adminToken', result.token);
         this.successMessage.set(`Xác thực thành công. Xin chào ${result.user.fullName || 'Quản trị viên'}!`);
-        void this.router.navigate(['/articles']);
+        void this.router.navigate(['/orders']);
       },
       error: (error: { status?: number; error?: { message?: string } }) => {
         this.errorMessage.set(error.status === 0

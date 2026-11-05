@@ -6,6 +6,7 @@ import { ProductNavigationService } from '../../services/product-navigation-serv
 import { BlogService } from '../../services/blog-service';
 import { Products } from '../../classes/Products';
 import { Blog } from '../../classes/Blog';
+import { blogDetailLink } from '../../classes/blog-url';
 import { CartService } from '../../services/cart-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { BuyNowService } from '../../services/buy-now-service';
@@ -73,6 +74,10 @@ export class Homepage implements OnInit {
 
   blogs = signal<Blog[]>([]);
   blogsLoading = signal(true);
+
+  blogDetailLink(blog: Blog): string[] {
+    return blogDetailLink(blog);
+  }
 
   constructor(
     private productService: ProductService,

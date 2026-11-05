@@ -142,6 +142,57 @@ async function createProductReview(req, res) {
     }
 }
 
+// GET /products/slug/:slug
+async function getProductBySlug(req, res) {
+    const slug = String(req.params.slug || '').trim();
+    if (!slug) {
+        return res.status(400).json({
+            message: 'Slug sản phẩm không hợp lệ'
+        });
+    }
+
+    try {
+        const product = await Product.getBySlug(slug);
+        if (!product) {
+            return res.status(404).json({
+                message: 'Không tìm thấy sản phẩm'
+            });
+        }
+
+        const thumbnail = product.thumbnail;
+        let asset = null;
+
+        if (thumbnail !== undefined && thumbnail !== null) {
+            const thumbnailString = String(thumbnail);
+
+            if (ObjectId.isValid(thumbnailString)) {
+                asset = await Product.getAssetById(thumbnailString);
+            }
+
+            if (!asset) {
+                asset = await Product.getByAssetId(thumbnailString);
+            }
+
+            if (!asset) {
+                asset = await Product.getByFileName(thumbnailString);
+            }
+        }
+
+        return res.json({
+            ...product,
+            imageUrl: thumbnail
+                ? `/products/image/${encodeURIComponent(String(thumbnail))}`
+                : null
+        });
+    } catch (error) {
+        console.error('Lỗi lấy chi tiết sản phẩm theo slug:', error);
+
+        return res.status(500).json({
+            message: 'Không thể lấy chi tiết sản phẩm'
+        });
+    }
+}
+
 // GET /products/:id
 async function getProductById(req, res) {
     try {
@@ -199,6 +250,7 @@ async function getProductById(req, res) {
 module.exports = {
     getProducts,
     getProductById,
+    getProductBySlug,
     getProductImage,
     getProductReviews,
     createProductReview

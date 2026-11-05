@@ -137,16 +137,16 @@
           <div class="row g-4">
             <div class="col-md-6" *ngFor="let rel of relatedBlogs()">
               <article class="blog-card">
-                <a [routerLink]="['/blog', rel.slug]" class="blog-image">
+                <a [routerLink]="blogDetailLink(rel)" class="blog-image">
                   <img [src]="getBlogImage(rel)" [alt]="rel.title" />
                 </a>
                 <div class="blog-content">
                   <span class="blog-date"><i class="bi bi-calendar3"></i> {{ rel.date }}</span>
-                  <a [routerLink]="['/blog', rel.slug]">
+                  <a [routerLink]="blogDetailLink(rel)">
                     <h3>{{ rel.title }}</h3>
                   </a>
                   <p>{{ rel.excerpt }}</p>
-                  <a [routerLink]="['/blog', rel.slug]" class="blog-btn">Xem thêm</a>
+                  <a [routerLink]="blogDetailLink(rel)" class="blog-btn">Xem thêm</a>
                 </div>
               </article>
             </div>
@@ -175,7 +175,7 @@
               <div
                 class="featured-item"
                 *ngFor="let item of featuredBlogs()"
-                [routerLink]="['/blog', item.slug]">
+                [routerLink]="blogDetailLink(item)">
                 <!-- Thumbnail -->
                 <div class="featured-thumb">
                   <img [src]="getBlogImage(item)" [alt]="item.title" loading="lazy" />

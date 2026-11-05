@@ -1,5 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Blog } from '../../classes/Blog';
+import { blogDetailLink } from '../../classes/blog-url';
 import { BlogService } from '../../services/blog-service';
 
 @Component({
@@ -37,11 +39,20 @@ export class BlogComponent implements OnInit {
     { label: 'VĂN HÓA TRÀ', slug: 'van-hoa-tra' },
   ];
 
-  constructor(private blogService: BlogService) {}
+  constructor(
+    private blogService: BlogService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadFeatured();
-    this.loadBlogs();
+    this.route.paramMap.subscribe(params => {
+      const categorySlug = params.get('categorySlug') || 'all';
+      this.selectedCategory.set(categorySlug);
+      this.currentPage.set(1);
+      this.loadBlogs();
+    });
   }
 
   loadBlogs(): void {
@@ -108,9 +119,14 @@ export class BlogComponent implements OnInit {
   }
 
   setCategory(slug: string): void {
-    this.selectedCategory.set(slug);
-    this.currentPage.set(1);
-    this.loadBlogs();
+    const route = slug === 'all' ? ['/blog'] : ['/blog', slug];
+    if (this.selectedCategory() === slug) {
+      this.currentPage.set(1);
+      this.loadBlogs();
+      return;
+    }
+
+    void this.router.navigate(route);
   }
 
   onSearchChange(text: string): void {
@@ -152,5 +168,9 @@ export class BlogComponent implements OnInit {
       return blog.image;
     }
     return '/assets/images/bl1.jpg';
+  }
+
+  blogDetailLink(blog: Blog): string[] {
+    return blogDetailLink(blog);
   }
 }

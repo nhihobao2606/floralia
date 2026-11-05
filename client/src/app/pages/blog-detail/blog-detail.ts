@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Blog } from '../../classes/Blog';
+import { blogDetailLink } from '../../classes/blog-url';
 import { BlogService } from '../../services/blog-service';
 
 @Component({
@@ -106,6 +107,10 @@ export class BlogDetailComponent implements OnInit {
       return `data:${mime};base64,${b.imageData}`;
     }
     return b.image || '/assets/images/bl1.jpg';
+  }
+
+  blogDetailLink(blog: Blog): string[] {
+    return blogDetailLink(blog);
   }
 
   toggleSidebar(): void {

@@ -1,0 +1,151 @@
+:host { display: block; min-height: 100vh; background: #f3f6f2; color: #233b30; }
+.admin-layout { display: flex; min-height: 100vh; }
+.admin-main { min-width: 0; flex: 1; }
+
+/* Topbar */
+.topbar { position: sticky; z-index: 10; top: 0; display: flex; height: 58px; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 1px solid #e8eee8; background: rgba(255,255,255,.97); }
+.topbar h1 { margin: 0; color: #244b38; font-size: 16px; font-weight: 700; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+
+.topbar-bell { position: relative; display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #e2e8e1; border-radius: 50%; background: #fff; color: #4b6154; font-size: 14px; cursor: pointer; }
+.topbar-bell:hover { background: #f0f5ef; color: #18543b; }
+.bell-badge { position: absolute; top: -3px; right: -3px; display: grid; width: 16px; height: 16px; place-items: center; border-radius: 50%; background: #c54238; color: #fff; font-size: 9px; font-weight: 700; }
+
+.admin-account { display: flex; align-items: center; gap: 10px; }
+.account-avatar { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: #184f39; color: white; font-size: 13px; font-weight: 600; }
+.account-copy { display: grid; gap: 2px; }
+.account-copy strong { color: #25372e; font-size: 12px; font-weight: 600; }
+.account-copy small { color: #7e8d82; font-size: 10px; }
+
+.topbar-logout { display: flex; align-items: center; gap: 6px; margin-left: 8px; padding: 7px 12px; border: 1px solid #e4e9e3; border-radius: 18px; background: white; color: #b24b47; font-size: 11px; cursor: pointer; }
+.topbar-logout:hover { border-color: #e1b4b1; background: #fff8f7; }
+
+/* Page Content */
+.page-content { width: min(1320px, 100%); margin: 0 auto; padding: 18px 30px 40px; }
+
+/* Back Link */
+.back-link { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; color: #415949; font-size: 13px; font-weight: 500; text-decoration: none; transition: color .18s; }
+.back-link:hover { color: #18543b; }
+.back-link i { font-size: 14px; }
+
+/* Order Header Card */
+.order-header-card { display: flex; min-height: 84px; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 26px; border-radius: 12px; background: linear-gradient(110deg, #dce8dc, #b8cdbb); margin-bottom: 18px; }
+.order-header-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.order-header-left h2 { margin: 0; color: #1c4d36; font-size: 24px; font-weight: 700; }
+
+.status-pill { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+.status-pill-pending { background: #fef4e5; color: #a9751e; }
+.status-pill-processing { background: #edf4fb; color: #2a61af; }
+.status-pill-shipping { background: #dcd3eb; color: #6b3ba7; }
+.status-pill-delivered { background: #e2f2e5; color: #287440; }
+.status-pill-cancelled { background: #fce8e6; color: #b43e37; }
+
+.order-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.banner-btn { display: inline-flex; min-height: 36px; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid transparent; border-radius: 20px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .18s; }
+.btn-invoice { background: #fff; border-color: #c9d8cc; color: #3b5042; }
+.btn-invoice:hover { background: #f5f8f4; border-color: #a4bea8; color: #18543b; }
+.btn-cancel { background: #fff; border-color: #f0cfcb; color: #af413a; }
+.btn-cancel:hover { background: #fff5f4; border-color: #d8817a; }
+.btn-confirm { background: #18543b; color: #fff; }
+.btn-confirm:hover { background: #26724b; }
+.btn-shipping { background: #6838a5; color: #fff; }
+.btn-shipping:hover { background: #54278c; }
+.btn-delivered { background: #247543; color: #fff; }
+.btn-delivered:hover { background: #1b5b33; }
+
+/* 2 Columns Grid */
+.order-detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; align-items: start; }
+.detail-left-col, .detail-right-col { display: grid; gap: 18px; }
+
+/* General Content Card */
+.content-card { padding: 22px 24px; border: 1px solid #e7eee7; border-radius: 12px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.02); }
+.card-title { margin: 0 0 16px; color: #214d37; font-size: 16px; font-weight: 700; }
+
+/* Thông tin chung */
+.info-columns-3 { display: grid; grid-template-columns: 1.2fr 1fr 1.3fr; gap: 20px; }
+.info-group { display: flex; flex-direction: column; }
+.info-label { color: #6e8073; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px; }
+.font-bold { font-weight: 700; }
+.mt-3 { margin-top: 14px; }
+.mt-2 { margin-top: 8px; }
+
+.info-value-time { margin: 0; color: #263c2f; font-size: 13px; font-weight: 500; }
+.info-select { width: 100%; height: 34px; padding: 0 10px; border: 1px solid #dbe3da; border-radius: 8px; background: #fdfefd; color: #293f32; font: inherit; font-size: 12px; outline: 0; cursor: pointer; }
+.info-select:focus { border-color: #6aa374; box-shadow: 0 0 0 3px rgba(67,129,83,.09); }
+
+.payment-sub-info { display: flex; flex-direction: column; gap: 4px; }
+.sub-label { color: #829286; font-size: 11px; }
+.sub-val { color: #223a2c; font-size: 13px; }
+
+.payment-badge { display: inline-block; align-self: flex-start; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+.payment-unpaid { background: #fef4e5; color: #a9751e; }
+.payment-paid { background: #e8f5ec; color: #2d7345; }
+.payment-refunded { background: #fdeeee; color: #bf453c; }
+
+.receiver-sub-info { display: grid; gap: 3px; font-size: 13px; color: #43574a; }
+.receiver-name { color: #1c3525; font-size: 14px; font-weight: 700; }
+.receiver-address { margin: 0; color: #516457; line-height: 1.45; }
+.receiver-phone { margin: 0; color: #294031; font-weight: 500; }
+.receiver-email { margin: 0; color: #76877b; font-size: 12px; }
+
+/* Sản phẩm trong đơn */
+.order-items-table { display: grid; gap: 12px; margin-bottom: 20px; }
+.order-item-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid #edf2ec; border-radius: 10px; background: #fafcfa; }
+.item-thumb-box { width: 54px; height: 54px; flex: 0 0 54px; border-radius: 8px; overflow: hidden; background: #eef3ed; border: 1px solid #e1e8df; }
+.item-thumb { width: 100%; height: 100%; object-fit: cover; }
+.item-meta { flex: 1; min-width: 0; }
+.item-name { margin: 0 0 3px; color: #1f3b2b; font-size: 14px; font-weight: 600; }
+.item-variant { color: #7b8c80; font-size: 12px; }
+.item-calc { color: #586c5e; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.item-line-total { min-width: 90px; text-align: right; color: #1a4d35; font-size: 14px; font-weight: 700; }
+
+.financial-summary-box { width: 320px; margin-left: auto; padding-top: 10px; border-top: 1px solid #e8efe7; }
+.fin-row { display: flex; justify-content: space-between; padding: 5px 0; color: #5f7264; font-size: 13px; }
+.fin-grand-total { border-top: 1.5px solid #18543b; padding-top: 10px; margin-top: 6px; color: #18543b; font-size: 16px; }
+.grand-total-val { font-size: 20px; font-weight: 700; }
+
+/* Theo dõi vận chuyển */
+.carrier-info { margin: 0 0 18px; color: #566c5d; font-size: 12px; line-height: 1.45; }
+.carrier-info strong { color: #1f4f37; }
+
+.stepper-timeline { display: flex; flex-direction: column; }
+.timeline-step { display: flex; gap: 14px; }
+.step-indicator { display: flex; flex-direction: column; align-items: center; width: 16px; }
+.step-dot { width: 14px; height: 14px; border-radius: 50%; background: #cfded1; border: 2px solid #fff; box-shadow: 0 0 0 1px #cbd9cd; margin-top: 2px; }
+.step-dot-active { background: #267e4b; box-shadow: 0 0 0 2px #d2ebd9; }
+.step-line { width: 2px; flex: 1; min-height: 34px; background: #267e4b; margin: 4px 0; }
+.timeline-step:last-child .step-line { display: none; }
+
+.step-content { padding-bottom: 20px; }
+.step-title { display: block; color: #223d2e; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.step-time { color: #7f9083; font-size: 11px; }
+
+/* Ghi chú đơn hàng */
+.existing-notes-list { display: grid; gap: 10px; margin-bottom: 16px; }
+.order-note-item { padding: 12px 14px; border: 1px solid #dcebdf; border-radius: 8px; background: #f2f8f3; }
+.note-text { margin: 0 0 5px; color: #284433; font-size: 13px; line-height: 1.45; }
+.note-author { color: #6a8070; font-size: 11px; }
+.no-notes-hint { color: #8e9e92; font-size: 12px; font-style: italic; }
+
+.add-note-box { display: flex; flex-direction: column; gap: 8px; }
+.add-note-box textarea { width: 100%; padding: 10px 12px; border: 1px solid #dce4da; border-radius: 8px; outline: 0; font: inherit; font-size: 12px; resize: vertical; min-height: 70px; }
+.add-note-box textarea:focus { border-color: #6aa374; box-shadow: 0 0 0 3px rgba(67,129,83,.09); }
+.add-note-btn { align-self: flex-start; padding: 7px 18px; border: 1px solid #c9d8cb; border-radius: 16px; background: #fff; color: #2b573d; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .16s; }
+.add-note-btn:hover:not(:disabled) { background: #18543b; border-color: #18543b; color: #fff; }
+.add-note-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Dialog cancel */
+.dialog-card { width: min(440px, 100%); padding: 26px; border-radius: 14px; background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center; }
+.dialog-icon { display: grid; width: 50px; height: 50px; margin: 0 auto 12px; place-items: center; border-radius: 50%; background: #fbebea; color: #b73e37; font-size: 24px; }
+.dialog-card h2 { margin: 0 0 8px; color: #233e30; font-size: 18px; }
+.dialog-card p { margin: 0 0 20px; color: #617366; font-size: 13px; line-height: 1.5; }
+.dialog-actions { display: flex; justify-content: center; gap: 10px; }
+.danger-btn { padding: 0 16px; min-height: 38px; border: 0; border-radius: 20px; background: #b73e37; color: #fff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.danger-btn:hover:not(:disabled) { background: #9d322c; }
+
+/* Responsive */
+@media (max-width: 950px) {
+  .order-detail-grid { grid-template-columns: 1fr; }
+  .info-columns-3 { grid-template-columns: 1fr; gap: 14px; }
+  .financial-summary-box { width: 100%; }
+}

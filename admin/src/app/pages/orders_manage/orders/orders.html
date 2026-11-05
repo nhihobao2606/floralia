@@ -1,0 +1,599 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+
+  <main class="admin-main">
+    <header class="topbar">
+      <h1>Quản lý đơn hàng</h1>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
+        </button>
+
+        <div class="admin-account">
+          <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+          <span class="account-copy">
+            <strong>{{ adminName }}</strong>
+            <small>Quản trị viên</small>
+          </span>
+          <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <!-- Welcome Banner -->
+      <section class="welcome-card">
+        <div class="welcome-info">
+          <h2>Chào mừng trở lại, {{ adminName }}</h2>
+          <p>Quản lý đơn hàng: Theo dõi chi tiết thông tin các đơn hàng và tình trạng xử lý đơn hàng trên hệ thống.</p>
+        </div>
+        <div class="welcome-actions">
+          <button class="export-button" type="button" (click)="exportList()">
+            <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
+            Xuất danh sách
+          </button>
+          <button class="primary-button create-button" type="button" (click)="openCreateModal()">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            Tạo đơn hàng
+          </button>
+        </div>
+      </section>
+
+      <!-- 5 Metric Cards matching Image 1 -->
+      <section class="metric-grid" aria-label="Thống kê trạng thái đơn hàng">
+        <article
+          class="metric-card"
+          [class.active-card]="activeStatusFilter === 'pending'"
+          (click)="filterByStatus('pending')">
+          <span class="metric-label">CHỜ XÁC NHẬN</span>
+          <strong class="metric-value">{{ stats.pending }}</strong>
+        </article>
+
+        <article
+          class="metric-card"
+          [class.active-card]="activeStatusFilter === 'processing'"
+          (click)="filterByStatus('processing')">
+          <span class="metric-label">CHỜ LẤY HÀNG</span>
+          <strong class="metric-value">{{ stats.processing }}</strong>
+        </article>
+
+        <article
+          class="metric-card"
+          [class.active-card]="activeStatusFilter === 'shipping'"
+          (click)="filterByStatus('shipping')">
+          <span class="metric-label">ĐANG GIAO HÀNG</span>
+          <strong class="metric-value">{{ stats.shipping }}</strong>
+        </article>
+
+        <article
+          class="metric-card"
+          [class.active-card]="activeStatusFilter === 'delivered'"
+          (click)="filterByStatus('delivered')">
+          <span class="metric-label">ĐÃ GIAO</span>
+          <strong class="metric-value">{{ stats.delivered }}</strong>
+        </article>
+
+        <article
+          class="metric-card"
+          [class.active-card]="activeStatusFilter === 'cancelled'"
+          (click)="filterByStatus('cancelled')">
+          <span class="metric-label">ĐÃ HỦY</span>
+          <strong class="metric-value">{{ stats.cancelled }}</strong>
+        </article>
+      </section>
+
+      <!-- Orders Card & Filter Toolbar -->
+      <section class="orders-card" aria-label="Danh sách đơn hàng">
+        <div class="list-toolbar">
+          <div class="toolbar-left">
+            <span class="total-orders-count">Tổng số đơn hàng: <strong>{{ total }}</strong></span>
+            <button
+              class="danger-action-btn"
+              type="button"
+              [disabled]="selectedOrderIds.size === 0"
+              (click)="requestDeleteSelected()">
+              <i class="bi bi-trash3" aria-hidden="true"></i>
+              Xóa ({{ selectedOrderIds.size }})
+            </button>
+            <button class="reset-action-btn" type="button" (click)="resetFilters()">
+              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+              Đặt lại
+            </button>
+          </div>
+
+          <div class="toolbar-right">
+            <select
+              class="toolbar-select"
+              [ngModel]="activeStatusFilter"
+              (ngModelChange)="onStatusFilterChange($event)"
+              aria-label="Lọc theo trạng thái">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="pending">Chờ xác nhận</option>
+              <option value="processing">Chờ lấy hàng</option>
+              <option value="shipping">Đang giao hàng</option>
+              <option value="delivered">Đã giao</option>
+              <option value="cancelled">Đã hủy</option>
+            </select>
+
+            <select
+              class="toolbar-select"
+              [ngModel]="activePaymentFilter"
+              (ngModelChange)="onPaymentFilterChange($event)"
+              aria-label="Lọc theo thanh toán">
+              <option value="all">Tất cả thanh toán</option>
+              <option value="unpaid">Chưa thanh toán</option>
+              <option value="paid">Đã thanh toán</option>
+              <option value="refunded">Hoàn tiền</option>
+            </select>
+
+            <label class="search-box">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              <input
+                type="search"
+                [value]="searchText"
+                (input)="onSearchInput($any($event.target).value)"
+                placeholder="Tìm mã đơn, tên khách, SĐT..."
+                aria-label="Tìm kiếm đơn hàng">
+              <button
+                *ngIf="searchText"
+                type="button"
+                class="clear-search"
+                aria-label="Xóa tìm kiếm"
+                (click)="onSearchInput('')">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+            </label>
+          </div>
+        </div>
+
+        <!-- Notices -->
+        <div *ngIf="actionMessage" class="notice success-notice" role="status">
+          <span>{{ actionMessage }}</span>
+          <button type="button" (click)="actionMessage = ''" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div *ngIf="loadError" class="notice error-notice" role="alert">
+          <span>{{ loadError }}</span>
+          <button type="button" (click)="loadOrders()">Thử lại</button>
+        </div>
+
+        <div *ngIf="actionError" class="notice error-notice" role="alert">
+          <span>{{ actionError }}</span>
+          <button type="button" (click)="actionError = ''" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col" class="th-checkbox">
+                  <input
+                    type="checkbox"
+                    [checked]="isAllSelected()"
+                    (change)="toggleSelectAll($event)"
+                    aria-label="Chọn tất cả đơn hàng">
+                </th>
+                <th scope="col">Đơn hàng</th>
+                <th scope="col">Ngày đặt</th>
+                <th scope="col">Khách hàng</th>
+                <th scope="col">Sản phẩm</th>
+                <th scope="col" class="text-center">SL</th>
+                <th scope="col">Tổng tiền</th>
+                <th scope="col">Thanh toán</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col" class="text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="loading && orders.length === 0">
+                <td colspan="10" class="table-message">
+                  <span class="loading-spinner"></span> Đang tải dữ liệu từ máy chủ...
+                </td>
+              </tr>
+
+              <tr *ngIf="!loading && !loadError && orders.length === 0">
+                <td colspan="10" class="table-message empty-message">
+                  <i class="bi bi-receipt" aria-hidden="true"></i>
+                  <strong>Không tìm thấy đơn hàng nào</strong>
+                  <span>Hãy thử thay đổi điều kiện lọc hoặc từ khóa tìm kiếm.</span>
+                </td>
+              </tr>
+
+              <tr *ngFor="let order of orders" [class.row-selected]="isSelected(order)">
+                <td class="td-checkbox">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(order)"
+                    (change)="toggleSelect(order)"
+                    [attr.aria-label]="'Chọn ' + order.code">
+                </td>
+
+                <td class="order-code-cell">
+                  <a [routerLink]="['/orders', order.id]" class="order-code-link">
+                    {{ order.code }}
+                  </a>
+                </td>
+
+                <td class="order-date-cell">
+                  <div class="date-main">{{ order.date }}</div>
+                  <small *ngIf="order.time" class="date-sub">{{ order.time }}</small>
+                </td>
+
+                <td class="order-customer-cell">
+                  <strong>{{ order.receiver.name }}</strong>
+                  <span class="customer-phone">{{ order.receiver.phone }}</span>
+                  <small class="customer-address">{{ order.receiver.address }}</small>
+                </td>
+
+                <td class="order-products-cell">
+                  <div *ngFor="let item of order.items" class="product-line">
+                    {{ item.name }}
+                  </div>
+                </td>
+
+                <td class="order-quantity-cell text-center">
+                  {{ getItemsQuantities(order.items) }}
+                </td>
+
+                <td class="order-total-cell">
+                  <strong>{{ formatPrice(order.total) }}</strong>
+                </td>
+
+                <td class="order-payment-cell">
+                  <span class="payment-method-text">{{ order.paymentMethod }}</span>
+                  <span class="payment-badge" [ngClass]="'payment-' + order.paymentStatus">
+                    {{ order.paymentStatusLabel }}
+                  </span>
+                </td>
+
+                <td class="order-status-cell">
+                  <select
+                    class="status-select"
+                    [ngClass]="'status-select-' + order.status"
+                    [ngModel]="order.status"
+                    (ngModelChange)="onQuickStatusChange(order, $event)"
+                    [attr.aria-label]="'Trạng thái đơn hàng ' + order.code">
+                    <option value="pending">Chờ xác nhận</option>
+                    <option value="processing">Đang chuẩn bị</option>
+                    <option value="shipping">Đang giao hàng</option>
+                    <option value="delivered">Đã giao</option>
+                    <option value="cancelled">Đã hủy</option>
+                  </select>
+                </td>
+
+                <td class="order-actions-cell text-center">
+                  <div class="action-buttons-group">
+                    <button
+                      *ngIf="order.status === 'pending'"
+                      class="row-action-link action-confirm"
+                      type="button"
+                      (click)="confirmOrder(order)">
+                      Xác nhận
+                    </button>
+
+                    <button
+                      *ngIf="order.status === 'processing' || order.status === 'delivered' || order.status === 'cancelled'"
+                      class="row-action-link action-invoice"
+                      type="button"
+                      (click)="printInvoice(order)">
+                      In hóa đơn
+                    </button>
+
+                    <a
+                      *ngIf="order.status === 'shipping'"
+                      [routerLink]="['/orders', order.id]"
+                      class="row-action-link action-track">
+                      Theo dõi
+                    </a>
+
+                    <a
+                      [routerLink]="['/orders', order.id]"
+                      class="icon-detail-btn"
+                      title="Xem chi tiết đơn hàng"
+                      [attr.aria-label]="'Chi tiết ' + order.code">
+                      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div *ngIf="loading && orders.length > 0" class="table-loading-overlay" role="status" aria-live="polite">
+            <span class="loading-spinner"></span> Đang tải dữ liệu từ máy chủ...
+          </div>
+        </div>
+
+        <!-- Footer Pagination -->
+        <footer class="table-footer">
+          <span>Hiển thị {{ firstVisibleRow }}–{{ lastVisibleRow }} trong {{ total }} đơn hàng</span>
+          <nav class="pagination" aria-label="Phân trang đơn hàng">
+            <button
+              type="button"
+              [disabled]="currentPage <= 1 || loading"
+              (click)="goToPage(currentPage - 1)"
+              aria-label="Trang trước">
+              <i class="bi bi-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button
+              *ngFor="let page of pages"
+              type="button"
+              [class.current]="currentPage === page"
+              [attr.aria-current]="currentPage === page ? 'page' : null"
+              [disabled]="loading"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+            <button
+              type="button"
+              [disabled]="currentPage >= totalPages || loading"
+              (click)="goToPage(currentPage + 1)"
+              aria-label="Trang tiếp">
+              <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </button>
+          </nav>
+        </footer>
+      </section>
+    </section>
+  </main>
+</div>
+
+<!-- Modal: Tạo đơn hàng -->
+<div *ngIf="createModalVisible" class="modal-backdrop" (click)="closeCreateModal()">
+  <section class="order-modal-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <span class="modal-kicker">QUẢN LÝ ĐƠN HÀNG FLORALIA</span>
+        <h2>Tạo đơn hàng mới</h2>
+      </div>
+      <button class="modal-close" type="button" (click)="closeCreateModal()" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+    </header>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <label class="form-field full-field">
+          <span>Họ và tên người nhận <b>*</b></span>
+          <input type="text" [(ngModel)]="createForm.customerName" placeholder="Ví dụ: Nguyễn Văn A">
+        </label>
+
+        <label class="form-field">
+          <span>Số điện thoại <b>*</b></span>
+          <input type="tel" [(ngModel)]="createForm.customerPhone" placeholder="Ví dụ: 0912 345 678">
+        </label>
+
+        <label class="form-field">
+          <span>Email khách hàng</span>
+          <input type="email" [(ngModel)]="createForm.customerEmail" placeholder="khachhang@email.com">
+        </label>
+
+        <label class="form-field full-field">
+          <span>Địa chỉ giao hàng <b>*</b></span>
+          <input type="text" [(ngModel)]="createForm.customerAddress" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, TP">
+        </label>
+
+        <label class="form-field">
+          <span>Sản phẩm</span>
+          <select [(ngModel)]="createForm.productName">
+            <option value="Lục Mễ Trà – Trà Xanh Gạo Lứt Rang">Lục Mễ Trà – Trà Xanh Gạo Lứt Rang</option>
+            <option value="Lam hoa trà – Trà Hoa Đậu Biếc">Lam hoa trà – Trà Hoa Đậu Biếc</option>
+            <option value="Huyết Ngọc Trà – Trà Bổ Huyết Dưỡng Nhan">Huyết Ngọc Trà – Trà Bổ Huyết Dưỡng Nhan</option>
+            <option value="Hồng Nhãn Trà – Trà Kỷ Tử">Hồng Nhãn Trà – Trà Kỷ Tử</option>
+            <option value="Trà hoa cúc thảo mộc">Trà hoa cúc thảo mộc</option>
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span>Phân loại / Quy cách</span>
+          <input type="text" [(ngModel)]="createForm.productVariant" placeholder="Ví dụ: Hộp 100g, Túi zip 200g">
+        </label>
+
+        <label class="form-field">
+          <span>Đơn giá (VND)</span>
+          <input type="number" [(ngModel)]="createForm.productPrice" min="0" step="5000">
+        </label>
+
+        <label class="form-field">
+          <span>Số lượng</span>
+          <input type="number" [(ngModel)]="createForm.productQuantity" min="1">
+        </label>
+
+        <label class="form-field">
+          <span>Phương thức thanh toán</span>
+          <select [(ngModel)]="createForm.paymentMethod">
+            <option value="COD">COD (Thanh toán khi nhận hàng)</option>
+            <option value="Chuyển khoản">Chuyển khoản ngân hàng</option>
+            <option value="VNPay">Cổng thanh toán VNPay</option>
+          </select>
+        </label>
+
+        <label class="form-field">
+          <span>Trạng thái thanh toán</span>
+          <select [(ngModel)]="createForm.paymentStatus">
+            <option value="unpaid">Chưa thanh toán</option>
+            <option value="paid">Đã thanh toán</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="order-total-preview">
+        <span>Tổng thanh toán:</span>
+        <strong>{{ formatPrice(createForm.productPrice * createForm.productQuantity) }}</strong>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <button class="secondary-button" type="button" [disabled]="creatingOrder" (click)="closeCreateModal()">Hủy</button>
+      <button class="primary-button" type="button" [disabled]="creatingOrder" (click)="submitCreateOrder()">
+        <span *ngIf="creatingOrder" class="loading-spinner"></span>
+        {{ creatingOrder ? 'Đang tạo...' : 'Xác nhận tạo đơn' }}
+      </button>
+    </footer>
+  </section>
+</div>
+
+<!-- Modal: In hóa đơn -->
+<div *ngIf="invoiceOrder as inv" class="modal-backdrop" (click)="closeInvoice()">
+  <section class="invoice-modal-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <span class="modal-kicker">HÓA ĐƠN BÁN HÀNG</span>
+        <h2>Hóa đơn #{{ inv.code }}</h2>
+      </div>
+      <div class="modal-header-actions">
+        <button class="primary-button print-action-btn" type="button" (click)="printCurrentInvoice()">
+          <i class="bi bi-printer" aria-hidden="true"></i> In hóa đơn
+        </button>
+        <button class="modal-close" type="button" (click)="closeInvoice()" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
+      </div>
+    </header>
+
+    <div class="invoice-printable-area">
+      <div class="invoice-brand-row">
+        <div>
+          <h3 class="invoice-store-name">Floralia Herbal Tea</h3>
+          <p>Địa chỉ: 11A Bế Văn Đàn, Dĩ An, Bình Dương</p>
+          <p>Hotline: 0901 234 567 | Email: floralia@gmail.com</p>
+        </div>
+        <div class="invoice-code-box">
+          <p class="invoice-meta-label">MÃ ĐƠN HÀNG</p>
+          <h4>{{ inv.code }}</h4>
+          <p>{{ inv.date }} {{ inv.time || '' }}</p>
+        </div>
+      </div>
+
+      <div class="invoice-divider"></div>
+
+      <div class="invoice-info-grid">
+        <div>
+          <h5>Khách hàng</h5>
+          <p><strong>{{ inv.receiver.name }}</strong></p>
+          <p>SĐT: {{ inv.receiver.phone }}</p>
+          <p>Email: {{ inv.receiver.email || '—' }}</p>
+        </div>
+        <div>
+          <h5>Địa chỉ nhận hàng</h5>
+          <p>{{ inv.receiver.address }}</p>
+        </div>
+        <div>
+          <h5>Thanh toán & Trạng thái</h5>
+          <p>Hình thức: {{ inv.paymentMethod }}</p>
+          <p>Thanh toán: {{ inv.paymentStatusLabel }}</p>
+          <p>Trạng thái đơn: {{ inv.statusLabel }}</p>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tên sản phẩm</th>
+            <th>Quy cách</th>
+            <th class="text-right">Đơn giá</th>
+            <th class="text-center">SL</th>
+            <th class="text-right">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of inv.items; let idx = index">
+            <td>{{ idx + 1 }}</td>
+            <td><strong>{{ item.name }}</strong></td>
+            <td>{{ item.variant || 'Tiêu chuẩn' }}</td>
+            <td class="text-right">{{ formatPrice(item.price) }}</td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-right">{{ formatPrice(item.total) }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="invoice-totals-box">
+        <div class="invoice-totals-row">
+          <span>Tạm tính:</span>
+          <span>{{ formatPrice(inv.subtotal) }}</span>
+        </div>
+        <div class="invoice-totals-row" *ngIf="inv.discount > 0">
+          <span>Giảm giá:</span>
+          <span>-{{ formatPrice(inv.discount) }}</span>
+        </div>
+        <div class="invoice-totals-row">
+          <span>Phí giao hàng:</span>
+          <span>{{ formatPrice(inv.shippingFee) }}</span>
+        </div>
+        <div class="invoice-totals-row invoice-grand-total">
+          <strong>Tổng thanh toán:</strong>
+          <strong>{{ formatPrice(inv.total) }}</strong>
+        </div>
+      </div>
+
+      <div class="invoice-footer-notes">
+        <p>Cảm ơn quý khách đã tin dùng sản phẩm trà thảo mộc tại Floralia Tea!</p>
+        <p>Mọi thắc mắc xin vui lòng liên hệ hotline hoặc trang web floralia.vn</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Modal: Xác nhận xóa đơn hàng -->
+<div *ngIf="pendingDeleteOrders.length > 0" class="delete-confirm-backdrop" (click)="cancelDelete()">
+  <section
+    class="delete-confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="deleteOrdersTitle"
+    (click)="$event.stopPropagation()">
+    <span class="delete-confirm-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
+    <h2 id="deleteOrdersTitle">Bạn có chắc chắn muốn xóa {{ pendingDeleteOrders.length }} đơn hàng đã chọn?</h2>
+    <p class="delete-confirm-description">
+      Hành động này không thể hoàn tác. Dữ liệu đơn hàng sẽ bị xóa vĩnh viễn khỏi hệ thống MongoDB.
+    </p>
+
+    <div class="delete-order-preview-list">
+      <div *ngFor="let ord of pendingDeleteOrders.slice(0, 3)" class="delete-order-item">
+        <strong>{{ ord.code }}</strong> - {{ ord.receiver.name }} ({{ formatPrice(ord.total) }})
+      </div>
+      <small *ngIf="pendingDeleteOrders.length > 3">Và thêm {{ pendingDeleteOrders.length - 3 }} đơn hàng khác...</small>
+    </div>
+
+    <label class="delete-acknowledgement">
+      <input type="checkbox" [(ngModel)]="deleteAcknowledged" [disabled]="deletingOrders">
+      <span class="delete-checkbox"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+      <span>Tôi hiểu và muốn xóa các đơn hàng này</span>
+    </label>
+
+    <p *ngIf="deleteError" class="delete-confirm-error" role="alert">{{ deleteError }}</p>
+
+    <div class="delete-confirm-actions">
+      <button type="button" class="delete-cancel-button" [disabled]="deletingOrders" (click)="cancelDelete()">Hủy</button>
+      <button
+        type="button"
+        class="delete-submit-button"
+        [disabled]="!deleteAcknowledged || deletingOrders"
+        (click)="confirmDelete()">
+        <i *ngIf="!deletingOrders" class="bi bi-trash3" aria-hidden="true"></i>
+        <span>{{ deletingOrders ? 'Đang xóa...' : 'Xóa đơn hàng' }}</span>
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- Modal: Đăng xuất -->
+<div *ngIf="logoutConfirmationVisible" class="logout-confirm-backdrop" (click)="cancelLogoutConfirmation()">
+  <section
+    class="logout-confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="logoutConfirmOrdersTitle"
+    (click)="$event.stopPropagation()">
+    <span class="logout-confirm-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
+    <h2 id="logoutConfirmOrdersTitle">Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị Floralia không?</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="logout-cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button>
+      <button type="button" class="logout-submit-button" (click)="confirmLogout()">Đăng xuất</button>
+    </div>
+  </section>
+</div>

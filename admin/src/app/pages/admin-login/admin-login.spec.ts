@@ -31,7 +31,7 @@ describe('AdminLogin', () => {
     Object.defineProperty(window, 'sessionStorage', { configurable: true, value: sessionStorageMock });
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [provideRouter([{ path: 'articles', children: [] }])],
+      providers: [provideRouter([{ path: 'orders', children: [] }, { path: 'articles', children: [] }])],
     }).compileComponents();
     component = new AdminLogin(TestBed.inject(HttpClient), TestBed.inject(Router));
     httpTestingController = TestBed.inject(HttpTestingController);
