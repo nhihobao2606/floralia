@@ -237,11 +237,7 @@ export class Categories implements OnInit, OnDestroy {
     });
 
     this.total = filtered.length;
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = this.totalPages;
-    }
-    const start = (this.currentPage - 1) * this.pageSize;
-    this.categories = filtered.slice(start, start + this.pageSize);
+    this.categories = filtered;
   }
 
   requestToggleVisibility(event: Event, category: AdminCategory): void {

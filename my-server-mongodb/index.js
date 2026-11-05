@@ -13,6 +13,7 @@ const User = require('./models/user');
 const Product = require('./models/product');
 const Blog = require('./models/blog');
 const Order = require('./models/order');
+const Voucher = require('./models/voucher');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -24,6 +25,7 @@ const adminBlogRoutes = require('./routes/adminBlogRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminProductRoutes = require('./routes/adminProductRoutes');
 const AdminProduct = require('./models/adminProduct');
+const voucherRoutes = require('./routes/voucherRoutes');
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -47,6 +49,7 @@ app.use('/blogs', blogRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
 app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/vouchers', voucherRoutes);
 
 async function startServer() {
     if (!process.env.MONGODB_URI) {
@@ -72,14 +75,15 @@ async function startServer() {
         Blog.setCollection(db.collection('Blogs'));
 
         Order.setCollection(db.collection('Orders'));
-        const orderCount = await Order.count();
-        if (orderCount === 0) {
-            const { initialOrders } = require('./controllers/orderController');
-            await Order.insertMany(initialOrders);
-            console.log('Đã nạp dữ liệu đơn hàng mẫu vào MongoDB: FloraliaTea.Orders');
-        }
+        Voucher.setCollection(db.collection('Vouchers'));
 
         await db.collection('Users').createIndex({ email: 1 }, { unique: true });
+        await db.collection('Orders').createIndex({ id: 1 });
+        await db.collection('Orders').createIndex({ code: 1 });
+        await db.collection('Orders').createIndex({ userId: 1, createdAt: -1 });
+        await db.collection('Orders').createIndex({ userId: 1, status: 1, createdAt: -1 });
+        await db.collection('Orders').createIndex({ createdAt: -1 });
+        await db.collection('Orders').createIndex({ status: 1, createdAt: -1 });
         await db.collection('ProductAssets').createIndex({ assetId: 1 });
         await db.collection('ProductAssets').createIndex({ originalFileName: 1 });
         await db.command({ ping: 1 });

@@ -175,7 +175,7 @@ async function buildProduct(body, existing = null) {
         product.stock = variants.reduce((sum, variant) => sum + variant.stock, 0);
     }
 
-    const uploadedImages = await AdminProduct.insertImages(parseImages(body));
+    const uploadedImages = await AdminProduct.insertImages(parseImages(body), sku);
     const keptImages = Array.isArray(body.images)
         ? body.images.map(image => String(image || '').trim()).filter(Boolean)
         : (existing ? (Array.isArray(existing.images) ? existing.images : (existing.thumbnail ? [existing.thumbnail] : [])) : []);

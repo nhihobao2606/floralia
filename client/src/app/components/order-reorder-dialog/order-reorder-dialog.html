@@ -1,0 +1,95 @@
+<div
+  class="reorder-backdrop"
+  *ngIf="items?.length"
+  (click)="closed.emit()"
+  (keydown.escape)="closed.emit()">
+  <section
+    class="reorder-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reorder-dialog-title"
+    (click)="$event.stopPropagation()">
+    <button type="button" class="reorder-close" aria-label="Đóng" (click)="closed.emit()">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+    <header class="reorder-header">
+      <p class="reorder-eyebrow">MUA NGAY</p>
+    </header>
+
+    <div class="reorder-loading" *ngIf="loading" role="status">
+      <i class="bi bi-arrow-repeat reorder-spinner" aria-hidden="true"></i>
+      Đang tải phân loại sản phẩm...
+    </div>
+    <div class="reorder-error" *ngIf="error" role="alert">
+      <span>{{ error }}</span>
+      <button type="button" (click)="loadProducts()">Thử lại</button>
+    </div>
+
+    <div class="reorder-items" *ngIf="!loading && !error">
+      <article class="reorder-item" *ngFor="let selection of selections">
+        <div class="reorder-item-content">
+          <div class="reorder-product">
+            <img
+              class="reorder-image"
+              [src]="selection.item.image || selection.product?.thumbnail || '/assets/images/no-image.svg'"
+              [alt]="selection.item.name"
+              (error)="$any($event.target).src = '/assets/images/no-image.svg'">
+            <div>
+              <h3 class="reorder-product-name">{{ selection.item.name }}</h3>
+              <strong class="reorder-product-price">{{ priceFor(selection) | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
+            </div>
+          </div>
+          <ng-container *ngIf="selection.product?.variants?.length; else noVariants">
+            <div class="reorder-variants">
+              <h3>Phân loại</h3>
+              <div class="reorder-variant-options">
+                <button
+                  type="button"
+                  *ngFor="let variant of selection.product?.variants"
+                  class="reorder-variant"
+                  [class.selected]="selection.variant?.sku === variant.sku"
+                  [disabled]="variant.stock < 1"
+                  [attr.aria-pressed]="selection.variant?.sku === variant.sku"
+                  (click)="selectVariant(selection, variant)">
+                  {{ variant.label }}
+                  <small *ngIf="variant.stock < 1">Hết hàng</small>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #noVariants>
+            <p class="reorder-no-variants" *ngIf="!selection.product">Giữ nguyên phân loại trong đơn hàng cũ.</p>
+          </ng-template>
+          <div class="reorder-item-footer">
+            <div class="reorder-quantity" aria-label="Số lượng">
+              <button
+                type="button"
+                aria-label="Giảm số lượng"
+                [disabled]="selection.quantity <= 1"
+                (click)="changeQuantity(selection, -1)">−</button>
+              <span aria-live="polite">{{ selection.quantity }}</span>
+              <button
+                type="button"
+                aria-label="Tăng số lượng"
+                [disabled]="selection.quantity >= stockFor(selection)"
+                (click)="changeQuantity(selection, 1)">+</button>
+            </div>
+            <span class="reorder-stock" *ngIf="selection.product && stockFor(selection) > 0">
+              Còn {{ stockFor(selection) }} sản phẩm
+            </span>
+            <span class="reorder-stock out-of-stock" *ngIf="selection.product && stockFor(selection) < 1">
+              Tạm hết hàng
+            </span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <footer class="reorder-actions">
+        <button type="button" class="reorder-continue" [disabled]="!canContinue()" (click)="continueToCheckout()">
+        <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+        Tiếp tục thanh toán
+      </button>
+    </footer>
+  </section>
+</div>

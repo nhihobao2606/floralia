@@ -1,141 +1,135 @@
+<div class="order-load-state order-load-error" *ngIf="!loading && !order" role="alert">
+  {{ pageError || 'Không tìm thấy đơn hàng.' }}
+  <button type="button" (click)="continueShopping()">Quay lại mua sắm</button>
+</div>
 <div class="order-success-page" *ngIf="order">
-
-  <!-- TOP TEA BANNER -->
-  <div class="top-banner-wrap">
-    <img src="/assets/images/tea-banner.png" alt="Floralia Herbal Tea" class="banner-img">
-  </div>
-
   <div class="container success-container">
 
-    <!-- HERO HEADER -->
-    <div class="hero-header">
-      <h1 class="hero-title">Đặt Hàng Thành Công!</h1>
+    <header class="hero-header">
+      <p class="success-eyebrow">FLORALIA HERBAL TEA</p>
+      <h1 class="hero-title">
+        <span class="success-icon-badge"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+        Đặt hàng thành công
+      </h1>
       <p class="hero-sub">Cảm ơn bạn đã lựa chọn <strong>Floralia Herbal Tea</strong>.</p>
-      <p class="hero-note">Đơn hàng của bạn đã được ghi nhận và đang được xử lý.</p>
+      <p class="hero-note">
+        Mã đơn hàng của bạn: <strong class="order-id-highlight">{{ order.code }}</strong>.
+        {{ order.notice || 'Đơn hàng đang được Floralia chuẩn bị và xử lý.' }}
+      </p>
+    </header>
+
+
+    <!-- PROGRESS STEPPER (ORDER-DETAIL STYLE) -->
+    <div class="stepper-section">
+      <div class="stepper-wrap" (click)="trackOrder()" style="cursor: pointer;" title="Bấm vào để theo dõi chi tiết đơn hàng">
+
+        <ng-container *ngFor="let label of progressSteps; let i = index">
+          <div class="step-item"
+            [class.completed]="isProgressStepCompleted(i + 1)"
+            [class.active]="i + 1 === currentProgressStep && order.status !== 'completed'">
+            <div class="step-circle">
+              <i class="bi bi-check-lg" *ngIf="isProgressStepCompleted(i + 1)"></i>
+              <span *ngIf="!isProgressStepCompleted(i + 1)">{{ formatStepNumber(i + 1) }}</span>
+            </div>
+            <span class="step-label">{{ label }}</span>
+          </div>
+          <div class="step-line" *ngIf="i < progressSteps.length - 1"
+            [class.filled]="isProgressStepCompleted(i + 1)"></div>
+        </ng-container>
+
+      </div>
     </div>
 
-    <!-- ORDER SECTION -->
-    <section class="order-section">
-      <h2 class="section-title">ĐƠN HÀNG</h2>
+    <!-- PRODUCTS TABLE (CART/ORDER-DETAIL STYLE) -->
+    <div class="products-cart-card">
+      <div class="cart-panel-header">
+        <h2 class="cart-panel-title">
+          <i class="bi bi-bag-check"></i> Sản phẩm trong đơn hàng
+        </h2>
+        <span class="cart-panel-count">{{ order.items?.length || 0 }} sản phẩm</span>
+      </div>
 
-      <div class="order-grid">
-
-        <!-- Products table -->
-        <div class="table-wrap">
-          <table class="order-table">
-            <thead>
-              <tr>
-                <th class="th-prod">SẢN PHẨM</th>
-                <th class="th-price">GIÁ</th>
-                <th class="th-qty">SỐ LƯỢNG</th>
-                <th class="th-total">TỔNG</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let it of order.items">
-                <td class="td-prod">
-                  <div class="prod-info-cell">
+      <div class="cart-table-container">
+        <table class="detail-cart-table">
+          <thead>
+            <tr>
+              <th class="th-product">SẢN PHẨM</th>
+              <th class="th-price">ĐƠN GIÁ</th>
+              <th class="th-qty">SỐ LƯỢNG</th>
+              <th class="th-total">THÀNH TIỀN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let it of order.items">
+              <td class="td-product">
+                <div class="cart-item-row">
+                  <button type="button" class="product-image-link"
+                    [attr.aria-label]="'Xem chi tiết ' + it.name" (click)="openProduct(it)">
+                    <span class="cart-item-img-box">
                     <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'">
-                    <span class="prod-title">{{ it.name }}</span>
+                    </span>
+                  </button>
+                  <div class="cart-item-info">
+                    <button type="button" class="product-name-link" (click)="openProduct(it)">{{ it.name }}</button>
+                    <span class="cart-variant-badge" *ngIf="it.variant">
+                      <i class="bi bi-tag-fill"></i> {{ it.variant }}
+                    </span>
                   </div>
-                </td>
-                <td class="td-price">{{ formatPrice(it.price) }}</td>
-                <td class="td-qty">x{{ it.quantity }}</td>
-                <td class="td-total">{{ formatPrice(it.total || it.price * it.quantity) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Summary box -->
-        <div class="summary-box">
-          <h3 class="sum-box-title">Tổng đơn hàng</h3>
-          <div class="sum-row">
-            <span class="sum-lbl">Tổng:</span>
-            <span class="sum-val">{{ formatPrice(order.subtotal) }}</span>
-          </div>
-          <div class="sum-row">
-            <span class="sum-lbl">Giảm giá</span>
-            <span class="sum-val">{{ (order.discount || 0).toLocaleString('vi-VN') }}</span>
-          </div>
-          <div class="sum-row">
-            <span class="sum-lbl">Phí vận chuyển</span>
-            <span class="sum-val">{{ order.shippingFee === 0 ? 'Free' : formatPrice(order.shippingFee) }}</span>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="sum-row total-row">
-            <span class="sum-lbl-total">Tổng</span>
-            <strong class="sum-val-total">{{ formatPrice(order.total) }}</strong>
-          </div>
-        </div>
-
+                </div>
+              </td>
+              <td class="td-price">
+                <span class="unit-old-price" *ngIf="it.oldPrice && it.oldPrice > (it.salePrice ?? it.price)">{{ it.oldPrice.toLocaleString('vi-VN') }}đ</span>
+                <span class="unit-price">{{ (it.salePrice ?? it.price ?? it.oldPrice ?? 0).toLocaleString('vi-VN') }}đ</span>
+              </td>
+              <td class="td-qty">
+                <span class="qty-pill">x{{ it.quantity }}</span>
+              </td>
+              <td class="td-total">
+                <strong class="line-total">{{ (((it.salePrice ?? it.price ?? it.oldPrice ?? 0) * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      <!-- Order code banner -->
-      <div class="order-code-box">
-        <p class="code-line">
-          Mã đơn hàng của bạn : <strong class="order-id-highlight">{{ order.code }}</strong>
-        </p>
-        <p class="code-sub">Vui lòng lưu lại mã đơn hàng để tiện theo dõi trạng thái.</p>
-      </div>
-
-      <!-- Stepper timeline -->
-      <div class="stepper-wrap" (click)="trackOrder()" style="cursor: pointer;" title="Bấm vào để theo dõi chi tiết đơn hàng">
-        <!-- 01 -->
-        <div class="step-item" [class.completed]="order.step >= 1" [class.active]="order.step === 1">
-          <div class="step-circle">
-            <i class="bi bi-check-lg" *ngIf="order.step >= 1"></i>
-            <span *ngIf="order.step < 1">01</span>
-          </div>
-          <span class="step-label">Nhận đơn</span>
+    <div class="success-order-footer">
+      <section class="success-summary-card" aria-label="Tổng kết thanh toán">
+        <div class="success-summary-row">
+          <span>Tạm tính</span>
+          <span>{{ formatPrice(order.subtotal) }}</span>
         </div>
-
-        <div class="step-line" [class.filled]="order.step >= 2"></div>
-
-        <!-- 02 -->
-        <div class="step-item" [class.completed]="order.step > 2" [class.active]="order.step >= 2">
-          <div class="step-circle">
-            <i class="bi bi-check-lg" *ngIf="order.step > 2"></i>
-            <span *ngIf="order.step <= 2">02</span>
-          </div>
-          <span class="step-label">Đang xử lý</span>
+        <div class="success-summary-row">
+          <span>Giảm giá sản phẩm</span>
+          <span class="success-summary-discount">-{{ formatPrice(order.productDiscount ?? order.discount ?? 0) }}</span>
         </div>
-
-        <div class="step-line" [class.filled]="order.step >= 3"></div>
-
-        <!-- 03 -->
-        <div class="step-item" [class.completed]="order.step > 3" [class.active]="order.step === 3">
-          <div class="step-circle">
-            <i class="bi bi-check-lg" *ngIf="order.step > 3"></i>
-            <span *ngIf="order.step <= 3">03</span>
-          </div>
-          <span class="step-label">Đang trên đường giao</span>
+        <div class="success-summary-row" *ngIf="(order.voucherDiscount ?? 0) > 0">
+          <span>Giảm giá voucher <small *ngIf="order.voucherCode">{{ order.voucherCode }}</small></span>
+          <span>-{{ formatPrice(order.voucherDiscount ?? 0) }}</span>
         </div>
-
-        <div class="step-line" [class.filled]="order.step >= 4"></div>
-
-        <!-- 04 -->
-        <div class="step-item" [class.completed]="order.step >= 4" [class.active]="order.step === 4">
-          <div class="step-circle">
-            <span>04</span>
-          </div>
-          <span class="step-label">Đã giao</span>
+        <div class="success-summary-row">
+          <span>Phí vận chuyển</span>
+          <span>{{ formatPrice(order.shippingFee) }}</span>
         </div>
-      </div>
+        <div class="success-summary-row success-summary-total">
+          <strong>Tổng thanh toán</strong>
+          <strong>{{ formatPrice(order.total) }}</strong>
+        </div>
+      </section>
+      <p class="success-customer-note" *ngIf="order.customerNote">
+        <strong>Ghi chú đơn hàng:</strong> {{ order.customerNote }}
+      </p>
 
-      <!-- Call to actions -->
-      <div class="cta-actions">
-        <button type="button" class="btn-track" (click)="trackOrder()">
-          Theo dõi đơn hàng
+      <div class="detail-bottom-actions">
+        <button type="button" class="btn-track-action" (click)="trackOrder()">
+          <i class="bi bi-box-seam"></i> Theo dõi đơn hàng
         </button>
-        <button type="button" class="btn-shop" (click)="continueShopping()">
-          Tiếp tục mua sắm
+
+        <button type="button" class="btn-shop-action" (click)="continueShopping()">
+          <i class="bi bi-shop"></i> Tiếp tục mua sắm
         </button>
       </div>
-
-    </section>
+    </div>
 
   </div>
 </div>

@@ -3,6 +3,8 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WishlistService } from './services/wishlist-service';
 import { BuyNowService } from './services/buy-now-service';
+import { HttpClient } from '@angular/common/http';
+import { EMPTY, catchError, filter, interval, startWith, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +21,7 @@ export class App implements OnInit, OnDestroy {
     private router: Router,
     readonly wishlistService: WishlistService,
     readonly buyNowService: BuyNowService,
+    private readonly http: HttpClient,
   ) {}
 
   ngOnInit(): void {
@@ -31,6 +34,13 @@ export class App implements OnInit, OnDestroy {
         }
       })
     );
+
+    // Detect an account blocked from another admin session while this client stays open.
+    this.subs.add(interval(15000).pipe(
+      startWith(0),
+      filter(() => !!(localStorage.getItem('token') || sessionStorage.getItem('token'))),
+      switchMap(() => this.http.get('http://localhost:3002/api/users/me').pipe(catchError(() => EMPTY))),
+    ).subscribe());
   }
 
   ngOnDestroy(): void {

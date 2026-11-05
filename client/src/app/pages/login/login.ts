@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
@@ -9,7 +9,7 @@ import { NgForm } from '@angular/forms';
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class Login {
+export class Login implements OnInit {
   email = '';
   password = '';
 
@@ -26,6 +26,11 @@ export class Login {
     private router: Router,
     private route: ActivatedRoute,
   ) {}
+
+  ngOnInit(): void {
+    this.notice = sessionStorage.getItem('blockedAccountNotice') || '';
+    sessionStorage.removeItem('blockedAccountNotice');
+  }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -62,29 +67,6 @@ export class Login {
           storage.setItem('currentUser', JSON.stringify(user));
           
           storage.setItem('token', result.token);
-
-          // Gộp giỏ hàng khách với giỏ hàng của người dùng.
-          const guestCart = JSON.parse(localStorage.getItem('cart_guest') || '[]');
-
-          if (guestCart.length > 0) {
-            const userKey = `cart_user_${user.email || user.id}`;
-            const userCart = JSON.parse(localStorage.getItem(userKey) || '[]');
-
-            guestCart.forEach((guestItem: any) => {
-              const existingItem = userCart.find(
-                (item: any) => item.id === guestItem.id
-              );
-
-              if (existingItem) {
-                existingItem.quantity += guestItem.quantity;
-              } else {
-                userCart.push(guestItem);
-              }
-            });
-
-            localStorage.setItem(userKey, JSON.stringify(userCart));
-            localStorage.removeItem('cart_guest');
-          }
 
           // Báo hiệu cập nhật người dùng và giỏ hàng ngay lập tức trên giao diện
           window.dispatchEvent(new Event('auth-changed'));

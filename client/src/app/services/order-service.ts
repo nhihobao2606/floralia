@@ -1,17 +1,25 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of, timeout } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 export interface OrderItem {
   sku: string;
+  slug?: string;
   name: string;
   image: string;
   variant?: string;
   price: number;
   oldPrice?: number;
+  salePrice?: number;
+  productDiscount?: number;
   quantity: number;
   total: number;
+}
+
+export interface CancelReason {
+  reason: string;
+  detail?: string;
 }
 
 export interface OrderAddress {
@@ -24,18 +32,44 @@ export interface OrderAddress {
 export interface Order {
   id: string;
   code: string;
+  slug?: string;
   date: string;
   time?: string;
-  status: 'pending' | 'shipping' | 'waiting' | 'completed' | 'delivered' | 'cancelled' | 'refunded' | 'processing';
+  createdAt?: string;
+  status: 'pending' | 'shipping' | 'waiting' | 'completed' | 'delivered' | 'cancelled' | 'refunded' | 'processing' | 'refund_pending' | 'refund_approved';
   statusLabel: string;
-  step: number; // 1: Nhận đơn, 2: Đang xử lý, 3: Đang trên đường giao, 4: Đã giao
+  step: number; // 1: Đã ghi nhận, 2: Chờ xác nhận, 3: Chờ lấy hàng, 4: Đang giao, 5: Đã giao
+  paymentStatus?: string;
+  paymentStatusLabel?: string;
+  trackingTimeline?: Array<{
+    status: Order['status'];
+    statusLabel: string;
+    notice: string;
+    createdAt: string;
+  }>;
+  notes?: string[];
   notice?: string;
+  customerNote?: string;
+  cancelReason?: string;
+  cancelReasons?: CancelReason[];
+  voucherCode?: string;
+  cancelledItems?: Array<OrderItem & {
+    cancelReason: string;
+    cancelReasons?: CancelReason[];
+    cancelledAt?: string;
+  }>;
+  refundReason?: string;
+  refundNote?: string;
+  refundImages?: string[];
+  userId?: string;
   paymentMethod: string;
   sender?: OrderAddress;
   receiver?: OrderAddress;
   items: OrderItem[];
   subtotal: number;
   discount: number;
+  productDiscount?: number;
+  voucherDiscount?: number;
   shippingFee: number;
   total: number;
   refundAmount?: number;
@@ -43,488 +77,221 @@ export interface Order {
 
 export const GUEST_TRACKED_ORDER_KEY = 'floralia_guest_tracked_order_id';
 
+export function getOrderSlug(order: Pick<Order, 'id' | 'code' | 'slug'>): string {
+  if (order.slug) return order.slug;
+  const identifier = (order.code || order.id).replace(/^#/, '');
+  const slug = identifier
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  return `don-hang-${slug || order.id.toLowerCase()}`;
+}
+
+export function parseOrderTimestamp(order: Partial<Order> & { createdAt?: string | Date }): number {
+  if (order.createdAt) {
+    const t = new Date(order.createdAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (order.date) {
+    const parts = String(order.date).split('/');
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+      let hours = 0;
+      let minutes = 0;
+      let seconds = 0;
+      if (order.time) {
+        const timeParts = String(order.time).split(':');
+        hours = parseInt(timeParts[0], 10) || 0;
+        minutes = parseInt(timeParts[1], 10) || 0;
+        seconds = parseInt(timeParts[2], 10) || 0;
+      }
+      const t = new Date(year, month, day, hours, minutes, seconds).getTime();
+      if (!isNaN(t)) return t;
+    }
+    const directTime = new Date(order.date).getTime();
+    if (!isNaN(directTime)) return directTime;
+  }
+  return 0;
+}
+
+export function sortOrdersNewestFirst(orders: Order[]): Order[] {
+  if (!Array.isArray(orders)) return [];
+  return [...orders].sort((a, b) => {
+    const diff = parseOrderTimestamp(b) - parseOrderTimestamp(a);
+    if (diff !== 0) return diff;
+    return String(b.id || '').localeCompare(String(a.id || ''));
+  });
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
   private readonly apiUrl = 'http://localhost:3002/api/orders';
-
-  private defaultOrders: Order[] = [
-    {
-      id: '4152',
-      code: '#4152',
-      date: '4/6/2026',
-      time: '09:15:20',
-      status: 'processing',
-      statusLabel: 'ĐANG XỬ LÝ',
-      step: 2,
-      paymentMethod: 'Paypal',
-      sender: {
-        name: 'Hà Anh',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'Haanh.BD@gmail.com',
-        phone: '(671) 555-0110'
-      },
-      receiver: {
-        name: 'Minh Trần',
-        address: '12C, Võ Thị Sáu, Hà Tĩnh',
-        email: 'MinhTran.thuu@gmail.com',
-        phone: '(671) 555-0110'
-      },
-      items: [
-        {
-          sku: 'TTM004',
-          name: 'Lục Mễ Trà – Trà Xanh Gạo Lứt Rang',
-          image: '/assets/images/products/74.png',
-          variant: 'Hộp 200g',
-          price: 200000,
-          quantity: 1,
-          total: 200000
-        },
-        {
-          sku: 'TTM010',
-          name: 'Lam Diệp Trà – Trà Hắc Kỷ Tử',
-          image: '/assets/images/products/34.png',
-          variant: 'Hộp 100g',
-          price: 250000,
-          quantity: 1,
-          total: 250000
-        },
-        {
-          sku: 'TTM021',
-          name: 'Huyết Ngọc Trà ~ Trà Bổ Huyết Dưỡng Nhan',
-          image: '/assets/images/products/79.png',
-          variant: 'Hộp 200g',
-          price: 250000,
-          quantity: 1,
-          total: 250000
-        }
-      ],
-      subtotal: 700000,
-      discount: 155000,
-      shippingFee: 0,
-      total: 545000
-    },
-    {
-      id: '5028',
-      code: '#5028',
-      date: '15/10/2026',
-      time: '21:30:08',
-      status: 'delivered',
-      statusLabel: 'ĐÃ GIAO',
-      step: 4,
-      notice: 'Giao hàng thành công vào 17/10/2026',
-      paymentMethod: 'COD',
-      sender: {
-        name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'floralia@gmail.com',
-        phone: '0901 234 567'
-      },
-      receiver: {
-        name: 'Hồ Bảo Nhi',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'hobaonhi400@gmail.com',
-        phone: '0901 234 567'
-      },
-      items: [
-        {
-          sku: 'TTM012',
-          name: 'Hồng Nhãn Trà - Trà Kỷ Tử',
-          image: '/assets/images/products/49.png',
-          variant: 'Phân loại hàng: Túi zip 500g',
-          price: 350000,
-          quantity: 1,
-          total: 350000
-        }
-      ],
-      subtotal: 350000,
-      discount: 0,
-      shippingFee: 0,
-      total: 350000
-    },
-    {
-      id: '5027',
-      code: '#5028',
-      date: '15/10/2026',
-      time: '21:30:08',
-      status: 'pending',
-      statusLabel: 'CHỜ XÁC NHẬN',
-      step: 1,
-      paymentMethod: 'Chuyển khoản',
-      sender: {
-        name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'floralia@gmail.com',
-        phone: '0901 234 567'
-      },
-      receiver: {
-        name: 'Hồ Bảo Nhi',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'hobaonhi400@gmail.com',
-        phone: '0901 234 567'
-      },
-      items: [
-        {
-          sku: 'HQ020',
-          name: 'Set Quà Tặng Trà Hoa Hồng',
-          image: '/assets/images/products/131.png',
-          variant: '',
-          price: 632000,
-          quantity: 1,
-          total: 632000
-        }
-      ],
-      subtotal: 632000,
-      discount: 0,
-      shippingFee: 18000,
-      total: 650000
-    },
-    {
-      id: '3933',
-      code: '#3933',
-      date: '14/10/2026',
-      time: '23:01:06',
-      status: 'completed',
-      statusLabel: 'HOÀN THÀNH',
-      step: 4,
-      notice: 'Giao hàng thành công',
-      paymentMethod: 'COD',
-      sender: {
-        name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'floralia@gmail.com',
-        phone: '0901 234 567'
-      },
-      receiver: {
-        name: 'Hồ Bảo Nhi',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'hobaonhi400@gmail.com',
-        phone: '0901 234 567'
-      },
-      items: [
-        {
-          sku: 'TTM001',
-          name: 'Lam Hoa Trà - Trà Hoa Đậu Biếc',
-          image: '/assets/images/products/82.png',
-          variant: 'Phân loại hàng: Hộp 100g',
-          price: 150000,
-          oldPrice: 200000,
-          quantity: 2,
-          total: 300000
-        },
-        {
-          sku: 'TTM009',
-          name: 'Ngọc Lan Trà – Trà Hoa Bạch Nhài',
-          image: '/assets/images/products/85.png',
-          variant: 'Phân loại hàng: Hộp 10 gói',
-          price: 78000,
-          quantity: 1,
-          total: 78000
-        }
-      ],
-      subtotal: 378000,
-      discount: 142000,
-      shippingFee: 0,
-      total: 236000
-    },
-    {
-      id: '5045',
-      code: '#5045',
-      date: '13/10/2026',
-      time: '10:05:30',
-      status: 'shipping',
-      statusLabel: 'ĐANG VẬN CHUYỂN',
-      step: 3,
-      notice: 'Đơn hàng đang trên đường giao',
-      paymentMethod: 'COD',
-      sender: {
-        name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'floralia@gmail.com',
-        phone: '0901 234 567'
-      },
-      receiver: {
-        name: 'Hồ Bảo Nhi',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'hobaonhi400@gmail.com',
-        phone: '0901 234 567'
-      },
-      items: [
-        {
-          sku: 'TTM005',
-          name: 'Ngũ Linh Thang – Nhân Sâm Ngũ Bảo Trà Nam',
-          image: '/assets/images/products/19.png',
-          variant: 'Phân loại hàng: Túi 200g',
-          price: 150000,
-          oldPrice: 165000,
-          quantity: 1,
-          total: 150000
-        }
-      ],
-      subtotal: 165000,
-      discount: 15000,
-      shippingFee: 0,
-      total: 150000
-    },
-    {
-      id: '5026',
-      code: '#5026',
-      date: '13/10/2026',
-      time: '10:05:30',
-      status: 'cancelled',
-      statusLabel: 'ĐÃ HỦY',
-      step: 0,
-      paymentMethod: 'COD',
-      sender: {
-        name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'floralia@gmail.com',
-        phone: '0901 234 567'
-      },
-      receiver: {
-        name: 'Hồ Bảo Nhi',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'hobaonhi400@gmail.com',
-        phone: '0901 234 567'
-      },
-      items: [
-        {
-          sku: 'AT021',
-          name: 'Set Ấm Trà Tử Sa Cá Chép + Lục Mễ Trà',
-          image: '/assets/images/products/94.png',
-          variant: '',
-          price: 950000,
-          oldPrice: 1200000,
-          quantity: 1,
-          total: 950000
-        }
-      ],
-      subtotal: 1200000,
-      discount: 250000,
-      shippingFee: 0,
-      total: 950000
-    },
-    {
-      id: '5010',
-      code: '#5010',
-      date: '11/10/2026',
-      time: '15:25:09',
-      status: 'refunded',
-      statusLabel: 'ĐÃ HOÀN TIỀN',
-      step: 0,
-      paymentMethod: 'Chuyển khoản',
-      sender: {
-        name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'floralia@gmail.com',
-        phone: '0901 234 567'
-      },
-      receiver: {
-        name: 'Hồ Bảo Nhi',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'hobaonhi400@gmail.com',
-        phone: '0901 234 567'
-      },
-      items: [
-        {
-          sku: 'TTM005',
-          name: 'Ngũ Linh Thang – Nhân Sâm Ngũ Bảo Trà Nam',
-          image: '/assets/images/products/19.png',
-          variant: 'Phân loại hàng: Túi 200g',
-          price: 150000,
-          oldPrice: 165000,
-          quantity: 1,
-          total: 150000
-        }
-      ],
-      subtotal: 165000,
-      discount: 15000,
-      shippingFee: 0,
-      total: 150000,
-      refundAmount: 150000
-    }
-  ];
+  private ordersCache: Order[] = [];
+  private ordersCacheOwner: string | null = null;
+  private readonly orderListCache = new Map<string, { orders: Order[]; expiresAt: number }>();
+  private readonly orderListCacheTtlMs = 15_000;
 
   constructor(private http: HttpClient) {
-    try {
-      const stored = localStorage.getItem('floralia_orders');
-      if (stored) {
-        const parsed: Order[] = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          for (let i = parsed.length - 1; i >= 0; i--) {
-            const item = parsed[i];
-            if (!this.defaultOrders.some(d => d.id === item.id)) {
-              this.defaultOrders.unshift(item);
-            }
-          }
-        }
-      }
-    } catch (e) {}
+    localStorage.removeItem('floralia_orders');
   }
 
   getOrders(status?: string, query?: string): Observable<Order[]> {
+    const owner = this.currentUserKey();
+    const cacheKey = JSON.stringify([owner, status || 'all', (query || '').trim()]);
+    const cached = this.orderListCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return of([...cached.orders]);
+    }
+
     return this.http.get<{ success: boolean; orders: Order[] }>(this.apiUrl, {
       params: {
         ...(status && status !== 'all' ? { status } : {}),
         ...(query ? { q: query } : {})
-      }
+      },
+      headers: this.authHeaders()
     }).pipe(
       map(res => {
-        if (res.orders && res.orders.length > 0) {
-          this.defaultOrders = res.orders;
-          try {
-            localStorage.setItem('floralia_orders', JSON.stringify(res.orders));
-          } catch (e) {}
+        const orders = res.orders || [];
+        this.orderListCache.set(cacheKey, { orders, expiresAt: Date.now() + this.orderListCacheTtlMs });
+        if (this.orderListCache.size > 30) {
+          const oldestKey = this.orderListCache.keys().next().value;
+          if (oldestKey) this.orderListCache.delete(oldestKey);
         }
-        return res.orders;
-      }),
-      catchError(() => {
-        let list = [...this.defaultOrders];
-        if (status && status !== 'all') {
-          list = list.filter(o => {
-            if (status === 'waiting') return o.status === 'shipping';
-            return o.status === status;
-          });
-        }
-        if (query) {
-          const q = query.trim().toLowerCase();
-          list = list.filter(o =>
-            o.id.toLowerCase().includes(q) ||
-            o.code.toLowerCase().includes(q) ||
-            o.items.some(i => i.name.toLowerCase().includes(q))
-          );
-        }
-        return of(list);
+        this.ordersCache = orders;
+        this.ordersCacheOwner = owner;
+        return this.ordersCache;
       })
     );
   }
 
-  getOrderByIdSync(id: string): Order {
-    if (!id) return this.defaultOrders[0];
+  getOrderByIdSync(id: string): Order | null {
+    if (!id) return null;
     const cleanId = id.startsWith('#') ? id.substring(1) : id;
+    const cachedOrder = this.ordersCacheOwner === this.currentUserKey()
+      ? this.ordersCache.find(order =>
+        order.id === cleanId || order.id === id || order.code === id || order.code === `#${cleanId}` || order.slug === id
+      )
+      : null;
+    if (cachedOrder) return cachedOrder;
 
-    const found = this.defaultOrders.find(o =>
-      o.id === cleanId ||
-      o.id === id ||
-      o.code === id ||
-      o.code === ('#' + cleanId)
-    );
-    if (found) return found;
-
-    try {
-      const stored = localStorage.getItem('floralia_orders');
-      if (stored) {
-        const parsed: Order[] = JSON.parse(stored);
-        const storedFound = parsed.find(o =>
-          o.id === cleanId ||
-          o.id === id ||
-          o.code === id ||
-          o.code === ('#' + cleanId)
-        );
-        if (storedFound) {
-          this.defaultOrders.unshift(storedFound);
-          return storedFound;
-        }
+    for (const lookupId of new Set([id, cleanId])) {
+      try {
+        const raw = sessionStorage.getItem(this.orderDetailCacheKey(lookupId));
+        if (!raw) continue;
+        const order = JSON.parse(raw) as Order;
+        if (order && typeof order.id === 'string' && Array.isArray(order.items)) return order;
+        sessionStorage.removeItem(this.orderDetailCacheKey(lookupId));
+      } catch (error) {
+        console.warn('Không thể đọc bộ nhớ tạm chi tiết đơn hàng:', error);
       }
-    } catch (e) {}
-
-    return this.defaultOrders[0];
-  }
-
-  saveOrderLocal(orderData: Partial<Order>): Order {
-    const id = orderData.id || String(Math.floor(1000 + Math.random() * 9000));
-    const newOrder: Order = {
-      id,
-      code: orderData.code || ('#' + id),
-      date: orderData.date || new Date().toLocaleDateString('vi-VN'),
-      time: orderData.time || new Date().toLocaleTimeString('vi-VN'),
-      status: orderData.status || 'processing',
-      statusLabel: orderData.statusLabel || 'ĐANG XỬ LÝ',
-      step: orderData.step || 2,
-      paymentMethod: orderData.paymentMethod || 'Paypal',
-      sender: orderData.sender || {
-        name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
-        email: 'floralia@gmail.com',
-        phone: '0901 234 567'
-      },
-      receiver: orderData.receiver || {
-        name: 'Minh Trần',
-        address: '12C, Võ Thị Sáu, Hà Tĩnh',
-        email: 'MinhTran.thuu@gmail.com',
-        phone: '(671) 555-0110'
-      },
-      items: orderData.items || [],
-      subtotal: orderData.subtotal ?? 0,
-      discount: orderData.discount ?? 0,
-      shippingFee: orderData.shippingFee ?? 0,
-      total: orderData.total ?? 0
-    };
-
-    const idx = this.defaultOrders.findIndex(o => o.id === id || o.code === ('#' + id));
-    if (idx >= 0) {
-      this.defaultOrders[idx] = newOrder;
-    } else {
-      this.defaultOrders.unshift(newOrder);
     }
 
-    try {
-      localStorage.setItem('floralia_orders', JSON.stringify(this.defaultOrders));
-    } catch (e) {}
+    return null;
+  }
 
-    return newOrder;
+  saveOrderLocal(order: Order): Order {
+    this.orderListCache.clear();
+    const owner = this.currentUserKey();
+    if (this.ordersCacheOwner !== owner) {
+      this.ordersCache = [];
+      this.ordersCacheOwner = owner;
+    }
+    const index = this.ordersCache.findIndex(existing => existing.id === order.id);
+    if (index >= 0) {
+      this.ordersCache[index] = order;
+    } else {
+      this.ordersCache.unshift(order);
+    }
+    this.ordersCache = sortOrdersNewestFirst(this.ordersCache);
+    this.cacheOrderDetail(order);
+    return order;
   }
 
   getOrderById(id: string): Observable<Order | null> {
     const cleanId = id.startsWith('#') ? id.substring(1) : id;
-    return this.http.get<{ success: boolean; order: Order }>(`${this.apiUrl}/${cleanId}`).pipe(
-      map(res => {
-        if (res.order) {
-          this.saveOrderLocal(res.order);
-        }
-        return res.order;
-      }),
-      catchError(() => {
-        const found = this.getOrderByIdSync(cleanId);
-        return of(found);
-      })
+    return this.http.get<{ success: boolean; order: Order }>(`${this.apiUrl}/${encodeURIComponent(cleanId)}`, {
+      headers: this.authHeaders()
+    }).pipe(
+      map(res => res.order ? this.saveOrderLocal(res.order) : null)
     );
   }
 
   getDefaultOrders(): Order[] {
-    return JSON.parse(JSON.stringify(this.defaultOrders));
+    return this.ordersCacheOwner === this.currentUserKey() ? [...this.ordersCache] : [];
   }
 
   createOrder(orderData: Partial<Order>): Observable<{ success: boolean; order: Order; persisted: boolean }> {
-    return this.http.post<{ success: boolean; order: Order }>(this.apiUrl, orderData).pipe(
+    return this.http.post<{ success: boolean; order: Order }>(this.apiUrl, orderData, {
+      headers: this.authHeaders()
+    }).pipe(
+      timeout({ first: 20_000 }),
       map(res => {
-        if (res.order) {
-          this.saveOrderLocal(res.order);
-        }
+        if (res.order) this.saveOrderLocal(res.order);
         return { ...res, persisted: true };
-      }),
-      catchError(() => {
-        const local = this.saveOrderLocal(orderData);
-        return of({ success: true, order: local, persisted: false });
       })
     );
   }
 
-  updateOrderStatus(id: string, status: Order['status'], statusLabel: string): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/${id}`, { status, statusLabel }).pipe(
-      catchError(() => {
-        const found = this.defaultOrders.find(o => o.id === id || o.code === `#${id}`);
-        if (found) {
-          found.status = status;
-          found.statusLabel = statusLabel;
-        }
-        return of({ success: true });
+  updateOrderStatus(
+    id: string,
+    status: Order['status'],
+    statusLabel: string,
+    details: Partial<Order> = {}
+  ): Observable<{ success: boolean; order: Order }> {
+    return this.http.patch<{ success: boolean; order: Order }>(
+      `${this.apiUrl}/${encodeURIComponent(id)}`,
+      { status, statusLabel, ...details },
+      { headers: this.authHeaders() }
+    ).pipe(
+      tap(res => {
+        if (res.order) this.saveOrderLocal(res.order);
       })
     );
+  }
+
+  private currentUserKey(): string {
+    const rawUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+    if (rawUser) {
+      try {
+        const user = JSON.parse(rawUser);
+        const identity = user.id || user._id || user.email;
+        if (identity) return String(identity).toLowerCase();
+      } catch {
+        return localStorage.getItem('token') || sessionStorage.getItem('token') || 'anonymous';
+      }
+    }
+    return localStorage.getItem('token') || sessionStorage.getItem('token') || 'anonymous';
+  }
+
+  private orderDetailCacheKey(id: string): string {
+    return `floralia_order_detail_${encodeURIComponent(this.currentUserKey())}_${encodeURIComponent(id)}`;
+  }
+
+  private cacheOrderDetail(order: Order): void {
+    const identifiers = new Set([order.id, order.code, order.code?.replace(/^#/, ''), order.slug]);
+    for (const id of identifiers) {
+      if (!id) continue;
+      try {
+        sessionStorage.setItem(this.orderDetailCacheKey(id), JSON.stringify(order));
+      } catch (error) {
+        console.warn('Không thể lưu bộ nhớ tạm chi tiết đơn hàng:', error);
+        return;
+      }
+    }
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
   }
 
   formatPrice(num: number): string {
-    return (num || 0).toLocaleString('vi-VN') + 'đ';
+    return (num || 0).toLocaleString('vi-VN') + '?';
   }
 }

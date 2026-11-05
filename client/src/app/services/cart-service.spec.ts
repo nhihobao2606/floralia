@@ -101,6 +101,27 @@ describe('CartService', () => {
     expect(service.getCart()).toEqual([]);
   });
 
+  it('removes only the items passed to removeItems', () => {
+    service.addProduct(
+      { _id: 'product-1', name: 'Trà thứ nhất', stock: 4 },
+      null,
+      1,
+      '/assets/tea-1.jpg',
+    );
+    service.addProduct(
+      { _id: 'product-2', name: 'Trà thứ hai', stock: 4 },
+      null,
+      1,
+      '/assets/tea-2.jpg',
+    );
+    const [selectedItem] = service.getCart();
+
+    service.removeItems([selectedItem]);
+
+    expect(service.getCart()).toHaveLength(1);
+    expect(service.getCart()[0].productId).toBe('product-2');
+  });
+
   it('changes a cart item variant and updates its price and quantity cap', () => {
     service.addProduct(
       {

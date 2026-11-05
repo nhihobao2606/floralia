@@ -1,0 +1,261 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+
+  <main class="admin-main">
+    <header class="topbar">
+      <div class="breadcrumbs" aria-label="Điều hướng">
+        <button type="button" (click)="goBack()">Quản lý người dùng</button>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <strong>Chi tiết người dùng</strong>
+      </div>
+
+      <div class="admin-account">
+        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+        <span class="account-copy">
+          <strong>{{ adminName }}</strong>
+          <small>Quản trị viên</small>
+        </span>
+        <button class="topbar-logout" type="button" (click)="logout()">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          Đăng xuất
+        </button>
+      </div>
+    </header>
+
+    <section class="customer-page">
+      <button type="button" class="detail-back-link" (click)="goBack()">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        Quay lại danh sách người dùng
+      </button>
+
+    @if (!loading && !error && user) {
+        <div class="page-title-row">
+          <div class="page-title-wrap">
+            <h1>Hồ sơ người dùng: {{ user.fullName }}</h1>
+            <span class="id-pill">#{{ user.id }}</span>
+          </div>
+
+          <div class="summary-card-group">
+            <div class="summary-card">
+              <div class="summary-icon bag-icon">
+                <i class="bi bi-bag"></i>
+              </div>
+              <div class="summary-text">
+                <span>Tổng đơn hàng</span>
+                <strong>{{ userOrders.length }} đơn</strong>
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-icon value-icon">
+                <i class="bi bi-currency-dollar"></i>
+              </div>
+              <div class="summary-text">
+                <span>Tổng giá trị</span>
+                <strong>{{ formatCurrency(calculatedTotalSpent) }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-shell">
+          <aside class="profile-panel">
+            <div class="profile-top">
+              <div class="avatar-wrap">
+                <img *ngIf="user.avatar" class="avatar-circle" [src]="user.avatar" [alt]="user.fullName" />
+                <div *ngIf="!user.avatar" class="avatar-circle">{{ initials }}</div>
+                <span class="verified-badge"><i class="bi bi-check-lg"></i></span>
+              </div>
+
+              <div class="profile-meta">
+                <h2>{{ user.fullName }}</h2>
+                <p>Khách hàng từ TP. Hồ Chí Minh</p>
+                <span class="status-pill">
+                  <i class="bi bi-circle-fill"></i>
+                  {{ user.status === 'blocked' ? 'Bị khóa' : 'Hoạt động' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="info-list">
+              <div class="info-row">
+                <span class="label"><i class="bi bi-envelope"></i> Email</span>
+                <strong>{{ user.email || 'Chưa cập nhật' }}</strong>
+              </div>
+              <div class="info-row">
+                <span class="label"><i class="bi bi-telephone"></i> Số điện thoại</span>
+                <strong>{{ user.phone || 'Chưa cập nhật' }}</strong>
+              </div>
+              <div class="info-row">
+                <span class="label"><i class="bi bi-calendar3"></i> Ngày tham gia</span>
+                <strong>{{ formatDate(user.createdAt) }}</strong>
+              </div>
+              <div class="info-row">
+                <span class="label"><i class="bi bi-wallet2"></i> Tổng chi tiêu</span>
+                <strong class="value-strong">{{ formatCurrency(calculatedTotalSpent) }}</strong>
+              </div>
+            </div>
+
+            <div class="favorite-section">
+              <div class="favorite-header">
+                <i class="bi bi-leaf"></i>
+                <span>Loại trà yêu thích</span>
+              </div>
+
+              <div class="tag-list">
+                @for (tea of favoriteTeas; track tea) {
+                  <span class="tag">{{ tea }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button type="button" class="secondary-action" (click)="editUser()">
+                <i class="bi bi-pencil-square"></i>
+                Sửa thông tin
+              </button>
+              <button type="button" class="danger-action" (click)="openLockModal()">
+                <i class="bi" [ngClass]="user.status === 'blocked' ? 'bi-unlock' : 'bi-lock'"></i>
+                {{ user.status === 'blocked' ? 'Mở khóa tài khoản' : 'Khóa tài khoản' }}
+              </button>
+            </div>
+            <p *ngIf="statusMessage" class="status-message" [class.error]="statusMessageType === 'error'" [class.pending]="statusMessageType === 'pending'" [attr.role]="statusMessageType === 'error' ? 'alert' : 'status'">{{ statusMessage }}</p>
+          </aside>
+
+          <section class="orders-panel">
+            <div class="tabs-row">
+              <button type="button" class="tab-button active" (click)="toggleTab('orders')">
+                Lịch sử đơn hàng ({{ userOrders.length }})
+              </button>
+              <button type="button" class="tab-button" (click)="toggleTab('vouchers')">
+                Voucher đã dùng ({{ usedVoucherCodes.length }})
+              </button>
+
+              <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" [value]="searchTerm" (input)="onSearchChange($any($event.target).value)" placeholder="Tìm theo mã đơn..." />
+              </div>
+            </div>
+
+            @if (activeTab === 'orders') {
+              <p *ngIf="ordersLoading" class="orders-loading" role="status">Đang tải lịch sử đơn hàng...</p>
+              <p *ngIf="ordersError" class="orders-error" role="alert">{{ ordersError }}</p>
+              <button *ngIf="ordersError && !ordersLoading" type="button" class="retry-orders-button" (click)="retryUserOrders()">Thử tải lại lịch sử đơn hàng</button>
+              <div class="table-shell">
+                <div class="table-header-row">
+                  <span>MÃ ĐƠN</span>
+                  <span>NGÀY ĐẶT</span>
+                  <span>SẢN PHẨM</span>
+                  <span>TỔNG TIỀN</span>
+                </div>
+
+                @for (order of paginatedOrders; track order.id) {
+                  <div class="table-row">
+                    <div class="cell code-cell">{{ order.id }}</div>
+                    <div class="cell date-cell">{{ order.date }}</div>
+                    <div class="cell product-cell">
+                      <span class="product-thumb {{ order.accent }}"></span>
+                      <div class="product-copy">
+                        <span>{{ order.title }}</span>
+                        <small>{{ order.subtitle }}</small>
+                      </div>
+                    </div>
+                    <div class="cell total-cell">{{ formatCurrency(order.total) }}</div>
+                  </div>
+                }
+                <div *ngIf="!ordersLoading && !paginatedOrders.length" class="voucher-empty">
+                  <span>Chưa có đơn hàng phù hợp.</span>
+                </div>
+              </div>
+
+              <div class="pagination-row">
+                <span>Hiển thị 1 – {{ paginatedOrders.length }} của {{ filteredOrders.length }} đơn hàng</span>
+                <div class="pagination-controls">
+                  <button type="button" class="page-arrow" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">&#8249;</button>
+
+                  @for (page of pageNumbers; track page) {
+                    <button
+                      type="button"
+                      class="page-number"
+                      [class.active]="page === currentPage"
+                      (click)="setPage(page)">
+                      {{ page }}
+                    </button>
+                  }
+
+                  <button type="button" class="page-arrow" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">&#8250;</button>
+                </div>
+              </div>
+            } @else {
+              <div class="voucher-empty">
+                @if (usedVoucherCodes.length) {
+                  <div class="tag-list">
+                    @for (code of usedVoucherCodes; track code) { <span class="tag">{{ code }}</span> }
+                  </div>
+                } @else {
+                  <span>Chưa ghi nhận voucher đã dùng.</span>
+                }
+              </div>
+            }
+          </section>
+        </div>
+    } @else {
+      <div class="detail-state">
+        <p>{{ error || 'Đang tải thông tin người dùng...' }}</p>
+        @if (error) {
+          <button type="button" class="primary-action" (click)="goBack()">Quay lại danh sách</button>
+        }
+      </div>
+    }
+    </section>
+  </main>
+</div>
+
+@if (showLockModal) {
+  <div class="modal-backdrop" (click)="closeLockModal()">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="lock-account-title" (click)="$event.stopPropagation()">
+      <button type="button" class="close-modal" aria-label="Đóng" (click)="closeLockModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+
+      <div class="modal-icon-wrap">
+        <div class="modal-icon"><i class="bi bi-lock-fill"></i></div>
+      </div>
+
+      <h3 id="lock-account-title">{{ user?.status === 'blocked' ? 'Bạn có chắc chắn muốn mở khóa tài khoản này?' : 'Bạn có chắc chắn muốn khóa tài khoản này?' }}</h3>
+
+      <div class="modal-user-card">
+        <div class="modal-avatar">{{ initials }}</div>
+        <div class="modal-user-copy">
+          <strong>{{ user?.fullName }}</strong>
+          <span>{{ user?.email }}</span>
+        </div>
+      </div>
+
+      <p class="modal-note">
+        {{ user?.status === 'blocked' ? 'Người dùng sẽ có thể đăng nhập và sử dụng voucher trở lại sau khi được mở khóa.' : 'Người dùng sẽ không thể đăng nhập hoặc sử dụng voucher cho đến khi tài khoản được mở khóa.' }}
+      </p>
+
+      <div class="reason-row">
+        <label for="lock-reason">Lý do {{ user?.status === 'blocked' ? 'mở khóa' : 'khóa' }}:</label>
+        <select id="lock-reason" [(ngModel)]="lockReason" [disabled]="user?.status === 'blocked'">
+          @for (reason of reasonOptions; track reason) {
+            <option [value]="reason">{{ reason }}</option>
+          }
+        </select>
+      </div>
+
+      <p *ngIf="statusMessage" class="modal-status-message" [class.error]="statusMessageType === 'error'" [class.success]="statusMessageType === 'success'" role="status">{{ statusMessage }}</p>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeLockModal()">Hủy</button>
+        <button type="button" class="confirm-button" (click)="confirmLock()" [disabled]="updatingStatus">
+          <i class="bi bi-lock-fill"></i>
+          {{ updatingStatus ? 'Đang cập nhật...' : (user?.status === 'blocked' ? 'Mở khóa tài khoản' : 'Khóa tài khoản') }}
+        </button>
+      </div>
+
+      <div class="modal-caption">Hành động này sẽ được ghi vào nhật ký kiểm toán quản trị viên.</div>
+    </div>
+  </div>
+}

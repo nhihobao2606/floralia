@@ -14,9 +14,12 @@ function getIdFilter(id) {
     return { $or: conditions };
 }
 
-function getAll(filter = {}) {
+function getAll(filter = {}, options = {}) {
     if (!ordersCollection) return Promise.resolve([]);
-    return ordersCollection.find(filter).toArray();
+    let cursor = ordersCollection.find(filter);
+    if (options.sort) cursor = cursor.sort(options.sort);
+    if (options.limit) cursor = cursor.limit(options.limit);
+    return cursor.toArray();
 }
 
 function getById(id) {
@@ -24,22 +27,36 @@ function getById(id) {
     return ordersCollection.findOne(getIdFilter(id));
 }
 
+function getBySlug(slug) {
+    if (!ordersCollection) return Promise.resolve(null);
+    const identifier = String(slug).replace(/^don-hang-/, '');
+    const upperIdentifier = identifier.toUpperCase();
+    return ordersCollection.findOne({
+        $or: [
+            { slug: String(slug) },
+            { id: identifier },
+            { id: upperIdentifier },
+            { code: identifier },
+            { code: `#${identifier}` },
+            { code: upperIdentifier },
+            { code: `#${upperIdentifier}` }
+        ]
+    });
+}
+
 function create(order) {
-    if (!ordersCollection) return Promise.resolve({ insertedId: null });
+    if (!ordersCollection) {
+        throw new Error('Orders collection has not been initialized.');
+    }
     return ordersCollection.insertOne({
         ...order,
-        createdAt: new Date()
+        createdAt: order.createdAt || new Date()
     });
 }
 
 function count() {
     if (!ordersCollection) return Promise.resolve(0);
     return ordersCollection.countDocuments();
-}
-
-function insertMany(orders) {
-    if (!ordersCollection) return Promise.resolve();
-    return ordersCollection.insertMany(orders);
 }
 
 function findOneAndUpdate(filter, update, options = {}) {
@@ -51,8 +68,8 @@ module.exports = {
     setCollection,
     getAll,
     getById,
+    getBySlug,
     create,
     count,
-    insertMany,
     findOneAndUpdate
 };

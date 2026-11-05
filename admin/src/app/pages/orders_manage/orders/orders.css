@@ -1,0 +1,68 @@
+.admin-layout { display: flex; min-height: 100vh; background: #f3f6f2; }
+.admin-main { min-width: 0; flex: 1; }
+.topbar { position: sticky; z-index: 5; top: 0; display: flex; min-height: 64px; align-items: center; justify-content: space-between; padding: 0 30px; border-bottom: 1px solid #e8eee8; background: rgba(255,255,255,.97); }
+.topbar h1 { margin: 0; color: #244b38; font: 600 18px 'Playfair Display', Georgia, serif; }
+.admin-orders {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px;
+  color: #2f3a33;
+  font-family: Roboto, sans-serif;
+}
+
+.page-header, .order-heading, .order-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.order-card footer {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.page-header { margin-bottom: 24px; }
+.eyebrow { margin: 0 0 6px; color: #6b7a70; font-size: 14px; }
+h1 { margin: 0; color: #143d29; font: 600 30px 'Playfair Display', Georgia, serif; }
+
+.orders-list { display: grid; gap: 16px; }
+.order-card {
+  padding: 22px;
+  border: 1px solid #e1e9de;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 26px rgba(29, 83, 56, .07);
+}
+.order-heading > div { display: grid; gap: 5px; }
+.order-heading strong { color: #1d5338; font-size: 17px; }
+.order-heading span, .address, .payment { color: #647568; font-size: 15px; }
+.status { color: #1d5338 !important; font-weight: 700; }
+.items { padding-left: 20px; font-size: 15px; line-height: 1.7; }
+.refund-details { margin: 16px 0; padding: 16px; border-radius: 14px; background: #f5f8f2; }
+.refund-details p { margin: 8px 0; }
+.proof-images { display: flex; flex-wrap: wrap; gap: 8px; }
+.proof-images img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; }
+button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 24px;
+  color: #fff;
+  background: #1d5338;
+  font: inherit;
+  cursor: pointer;
+}
+button:disabled { opacity: .6; cursor: wait; }
+.refresh-button { color: #1d5338; border: 1px solid #cfe0c8; background: #fff; }
+.detail-button { background: #eaf3ee; color: #1d5338; border: 1px solid #d2e5d9; }
+.approve-button { background: #3d7b39; }
+.status-button { background: #1d5338; }
+.message, .empty-state { padding: 16px; border-radius: 12px; background: #f5f8f2; font-size: 16px; }
+.error { color: #a4262c; background: #fff1f0; }
+.success { color: #1d5338; background: #edf6e9; }
+
+@media (max-width: 640px) {
+  .admin-orders { padding: 20px 14px; }
+  .order-heading { align-items: flex-start; flex-direction: column; }
+}

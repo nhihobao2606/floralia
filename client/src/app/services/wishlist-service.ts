@@ -1,14 +1,14 @@
 import { Injectable, signal } from '@angular/core';
-import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class WishlistService {
   private readonly storedIds = signal<ReadonlySet<string>>(new Set(this.readStoredIds()));
   readonly ids = this.storedIds.asReadonly();
   readonly toastMessage = signal('');
+  readonly loginPromptVisible = signal(false);
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
 
-  constructor(private readonly router: Router) {
+  constructor() {
     if (typeof window !== 'undefined') {
       window.addEventListener('wishlist-updated', this.syncFromStorage);
       window.addEventListener('storage', this.syncFromStorage);
@@ -57,10 +57,11 @@ export class WishlistService {
   }
 
   promptLogin(): void {
-    if (typeof window !== 'undefined') {
-      window.alert('Vui lòng đăng nhập để lưu và xem sản phẩm yêu thích.');
-    }
-    void this.router.navigate(['/login']);
+    this.loginPromptVisible.set(true);
+  }
+
+  closeLoginPrompt(): void {
+    this.loginPromptVisible.set(false);
   }
 
   private showAddedToast(): void {

@@ -40,12 +40,29 @@ function update(id, data) {
     );
 }
 
+function updateStatus(id, data, historyEntry) {
+    const filter = { ...getIdFilter(id), role: { $ne: 'admin' } };
+    return usersCollection.findOneAndUpdate(
+        filter,
+        { $set: { ...data, updatedAt: new Date() }, $push: { statusHistory: historyEntry } },
+        { returnDocument: 'after' }
+    );
+}
+
 function updatePassword(id, hashedPassword) {
     const filter = getIdFilter(id);
     return usersCollection.updateOne(
         filter,
         { $set: { password: hashedPassword, updatedAt: new Date() } }
     );
+}
+
+function list(filter = {}, sort = { createdAt: -1 }) {
+    return usersCollection.find(filter).sort(sort).toArray();
+}
+
+function getAllUsers() {
+    return list({}, { createdAt: -1 });
 }
 
 function setPasswordResetToken(email, tokenHash, expiresAt) {
@@ -79,7 +96,10 @@ module.exports = {
     create,
     getById,
     update,
+    updateStatus,
     updatePassword,
+    list,
+    getAllUsers,
     setPasswordResetToken,
     clearPasswordResetToken,
     updatePasswordWithResetToken

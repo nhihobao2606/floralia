@@ -1,5 +1,5 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject, catchError, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
 import { Products } from '../classes/Products';
 
@@ -20,6 +20,32 @@ export interface PublicBenefitItem {
 export interface PublicCategoriesResponse {
   mainCategories: PublicCategoryItem[];
   benefits: PublicBenefitItem[];
+}
+
+export interface CheckoutProduct {
+  sku: string;
+  name: string;
+  imageUrl: string | null;
+  variant: string;
+  price: number;
+  oldPrice: number;
+  stock: number;
+  productDiscount: number;
+}
+
+export interface ValidatedVoucher {
+  code: string;
+  discount: number;
+}
+
+export interface AvailableVoucher extends ValidatedVoucher {
+  name: string;
+  description: string;
+  discountType: 'fixed' | 'percent';
+  discountValue: number;
+  maxDiscount: number | null;
+  minOrderValue: number;
+  endDate: string | null;
 }
 
 @Injectable({
@@ -137,7 +163,31 @@ export class ProductService implements OnDestroy {
 
   // Lấy chi tiết 1 sản phẩm theo Slug
   getProductBySlug(slug: string): Observable<Products> {
-    return this.http.get<Products>(`${this.apiUrl}/slug/${slug}`);
+    return this.http.get<Products>(`${this.apiUrl}/slug/${encodeURIComponent(slug)}`);
+  }
+
+  getProductBySku(sku: string, variant?: string): Observable<CheckoutProduct> {
+    return this.http.get<CheckoutProduct>(`${this.apiUrl}/sku/${encodeURIComponent(sku)}`, {
+      params: variant ? { variant } : {}
+    });
+  }
+
+  getAvailableVouchers(subtotal: number, items: Array<{ sku: string; quantity: number; variant?: string }> = []): Observable<{ success: boolean; vouchers: AvailableVoucher[] }> {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return this.http.post<{ success: boolean; vouchers: AvailableVoucher[] }>(
+      'http://localhost:3002/api/vouchers/available',
+      { subtotal, items },
+      { headers: new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {}) }
+    );
+  }
+
+  validateVoucher(code: string, subtotal: number, items: Array<{ sku: string; quantity: number; variant?: string }> = []): Observable<{ success: boolean; voucher: ValidatedVoucher }> {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return this.http.post<{ success: boolean; voucher: ValidatedVoucher }>(
+      'http://localhost:3002/api/vouchers/validate',
+      { code, subtotal, items },
+      { headers: new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {}) }
+    );
   }
 
   getCategories(): Observable<PublicCategoriesResponse> {

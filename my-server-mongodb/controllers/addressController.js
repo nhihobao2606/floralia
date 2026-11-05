@@ -64,11 +64,15 @@ async function addAddress(req, res) {
       return res.status(400).json({ success: false, message: 'Mỗi tài khoản chỉ được lưu tối đa 10 địa chỉ.' });
     }
 
-    if (!(await wardBelongsToProvince(wardCode, provinceCode))) {
-      return res.status(400).json({
-        success: false,
-        message: 'Phường/xã không thuộc tỉnh/thành phố đã chọn. Vui lòng chọn lại địa chỉ hành chính.'
-      });
+    // Chỉ validate ward/province khi có wardCode và provinceCode (từ form địa chỉ chuẩn)
+    // Khi lưu nhanh từ trang thanh toán (không có code) thì bỏ qua bước này
+    if (wardCode && provinceCode) {
+      if (!(await wardBelongsToProvince(wardCode, provinceCode))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phường/xã không thuộc tỉnh/thành phố đã chọn. Vui lòng chọn lại địa chỉ hành chính.'
+        });
+      }
     }
 
     const newAddress = {
@@ -111,11 +115,15 @@ async function updateAddress(req, res) {
       return res.status(400).json({ success: false, message: 'Số điện thoại không hợp lệ.' });
     }
 
-    if (!(await wardBelongsToProvince(wardCode, provinceCode))) {
-      return res.status(400).json({
-        success: false,
-        message: 'Phường/xã không thuộc tỉnh/thành phố đã chọn. Vui lòng chọn lại địa chỉ hành chính.'
-      });
+    // Chỉ validate ward/province khi có wardCode và provinceCode (từ form địa chỉ chuẩn)
+    // Khi lưu nhanh từ trang thanh toán (không có code) thì bỏ qua bước này
+    if (wardCode && provinceCode) {
+      if (!(await wardBelongsToProvince(wardCode, provinceCode))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Phường/xã không thuộc tỉnh/thành phố đã chọn. Vui lòng chọn lại địa chỉ hành chính.'
+        });
+      }
     }
 
     const user = await User.getById(req.userId);

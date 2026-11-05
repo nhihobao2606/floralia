@@ -1,8 +1,6 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Router } from '@angular/router';
-import { inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-admin-sidebar',
@@ -21,14 +19,14 @@ export class AdminSidebar {
   }
 
   readonly menu = [
-    { label: 'Tổng quan', icon: 'bi-grid-1x2', disabled: true },
-    { label: 'Quản lý đơn hàng', icon: 'bi-receipt', disabled: true },
-    { label: 'Quản lý sản phẩm', icon: 'bi-box-seam', disabled: true },
-    { label: 'Quản lý danh mục', icon: 'bi-tags', disabled: true },
-    { label: 'Quản lý tồn kho', icon: 'bi-layers', disabled: true },
-    { label: 'Quản lý người dùng', icon: 'bi-person', disabled: true },
-    { label: 'Quản lý bài viết Blog', icon: 'bi-journal-text', disabled: false },
-    { label: 'Quản lý khuyến mãi', icon: 'bi-tag', disabled: true },
+    { label: 'Tổng quan', icon: 'bi-grid-1x2', disabled: true, route: '' },
+    { label: 'Quản lý đơn hàng', icon: 'bi-receipt', disabled: false, route: '/orders' },
+    { label: 'Quản lý sản phẩm', icon: 'bi-box-seam', disabled: true, route: '' },
+    { label: 'Quản lý danh mục', icon: 'bi-tags', disabled: true, route: '' },
+    { label: 'Quản lý tồn kho', icon: 'bi-layers', disabled: true, route: '' },
+    { label: 'Quản lý người dùng', icon: 'bi-person', disabled: false, route: '/users' },
+    { label: 'Quản lý bài viết Blog', icon: 'bi-journal-text', disabled: false, route: '/articles' },
+    { label: 'Quản lý khuyến mãi', icon: 'bi-tag', disabled: false, route: '/vouchers' },
   ];
 
   requestLogout(): void {
