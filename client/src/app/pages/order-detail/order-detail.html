@@ -79,7 +79,13 @@
           </div>
           <div class="sum-row">
             <span class="sum-label">Giảm giá sản phẩm</span>
-            <span class="sum-price">-{{ (order.productDiscount || order.discount || 0).toLocaleString('vi-VN') }}đ</span>
+            <span class="sum-price sum-discount">-{{ (order.productDiscount ?? order.discount ?? 0).toLocaleString('vi-VN') }}đ</span>
+          </div>
+          <div class="sum-row" *ngIf="(order.voucherDiscount ?? 0) > 0">
+            <span class="sum-label">
+              Giảm giá voucher <small class="voucher-code-label" *ngIf="order.voucherCode">{{ order.voucherCode }}</small>
+            </span>
+            <span class="sum-price sum-discount">-{{ (order.voucherDiscount ?? 0).toLocaleString('vi-VN') }}đ</span>
           </div>
           <div class="sum-row" *ngIf="order.shippingFee > 0">
             <span class="sum-label">Phí vận chuyển</span>

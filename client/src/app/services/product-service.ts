@@ -19,6 +19,16 @@ export interface ValidatedVoucher {
   discount: number;
 }
 
+export interface AvailableVoucher extends ValidatedVoucher {
+  name: string;
+  description: string;
+  discountType: 'fixed' | 'percent';
+  discountValue: number;
+  maxDiscount: number | null;
+  minOrderValue: number;
+  endDate: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -89,6 +99,15 @@ export class ProductService {
     return this.http.get<CheckoutProduct>(`${this.apiUrl}/sku/${encodeURIComponent(sku)}`, {
       params: variant ? { variant } : {}
     });
+  }
+
+  getAvailableVouchers(subtotal: number, items: Array<{ sku: string; quantity: number; variant?: string }> = []): Observable<{ success: boolean; vouchers: AvailableVoucher[] }> {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return this.http.post<{ success: boolean; vouchers: AvailableVoucher[] }>(
+      'http://localhost:3002/api/vouchers/available',
+      { subtotal, items },
+      { headers: new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {}) }
+    );
   }
 
   validateVoucher(code: string, subtotal: number, items: Array<{ sku: string; quantity: number; variant?: string }> = []): Observable<{ success: boolean; voucher: ValidatedVoucher }> {

@@ -1,5 +1,6 @@
 const express = require('express');
 const {
+    getAvailableVouchers,
     validateVoucher,
     getAdminVouchers,
     getAdminVoucher,
@@ -11,6 +12,7 @@ const {
 const { optionalAuth, requireAuth, requireAdmin } = require('../controllers/authController');
 
 const router = express.Router();
+router.post('/available', optionalAuth, getAvailableVouchers);
 router.post('/validate', optionalAuth, validateVoucher);
 router.get('/admin', requireAuth, requireAdmin, getAdminVouchers);
 router.post('/admin', requireAuth, requireAdmin, createAdminVoucher);

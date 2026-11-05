@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GUEST_TRACKED_ORDER_KEY, getOrderSlug, OrderService, Order } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
-import { CheckoutProduct, ProductService } from '../../services/product-service';
+import { AvailableVoucher, CheckoutProduct, ProductService, ValidatedVoucher } from '../../services/product-service';
 import { forkJoin } from 'rxjs';
 
 interface CheckoutItem {
@@ -66,6 +66,16 @@ export class CheckoutComponent implements OnInit {
   copiedText = false;
 
   paymentMethod = 'cod';
+
+  couponCode = '';
+  couponMessage = '';
+  couponApplied = false;
+  couponApplying = false;
+  appliedVoucher: ValidatedVoucher | null = null;
+  showVoucherModal = false;
+  availableVouchers: AvailableVoucher[] = [];
+  voucherListLoading = false;
+  voucherListError = '';
 
   items: CheckoutItem[] = [];
   checkoutItemsError = '';
@@ -539,21 +549,74 @@ export class CheckoutComponent implements OnInit {
     this.couponApplied = false;
     this.appliedVoucher = null;
     this.couponApplying = true;
-    this.productService.validateVoucher(code, this.saleSubtotal).subscribe({
+    this.productService.validateVoucher(code, this.saleSubtotal, this.getVoucherItems()).subscribe({
       next: response => {
-        this.couponApplying = false;
-        this.appliedVoucher = response.voucher;
-        this.couponCode = response.voucher.code;
-        this.couponApplied = true;
-        this.couponMessage = `✓ Áp dụng mã "${response.voucher.code}" thành công!`;
+        this.ngZone.run(() => {
+          this.couponApplying = false;
+          this.appliedVoucher = response.voucher;
+          this.couponCode = response.voucher.code;
+          this.couponApplied = true;
+          this.couponMessage = `✓ Áp dụng mã "${response.voucher.code}" thành công!`;
+          this.showVoucherModal = false;
+          this.cdr.markForCheck();
+        });
       },
       error: error => {
-        this.couponApplying = false;
-        this.appliedVoucher = null;
-        this.couponApplied = false;
-        this.couponMessage = error?.error?.message || 'Không thể xác thực voucher. Vui lòng thử lại.';
+        this.ngZone.run(() => {
+          this.couponApplying = false;
+          this.appliedVoucher = null;
+          this.couponApplied = false;
+          this.couponMessage = error?.error?.message || 'Không thể xác thực voucher. Vui lòng thử lại.';
+          this.cdr.markForCheck();
+        });
       }
     });
+  }
+
+  openVoucherModal(): void {
+    this.showVoucherModal = true;
+    this.voucherListLoading = true;
+    this.voucherListError = '';
+    this.productService.getAvailableVouchers(this.saleSubtotal, this.getVoucherItems()).subscribe({
+      next: response => {
+        this.ngZone.run(() => {
+          this.availableVouchers = response.vouchers || [];
+          this.voucherListLoading = false;
+          this.cdr.markForCheck();
+        });
+      },
+      error: error => {
+        this.ngZone.run(() => {
+          this.availableVouchers = [];
+          this.voucherListLoading = false;
+          this.voucherListError = error?.error?.message || 'Không thể tải voucher lúc này.';
+          this.cdr.markForCheck();
+        });
+      }
+    });
+  }
+
+  applyAvailableVoucher(voucher: AvailableVoucher): void {
+    this.couponCode = voucher.code;
+    this.applyCoupon();
+  }
+
+  private getVoucherItems(): Array<{ sku: string; quantity: number; variant?: string }> {
+    return this.items.map(item => ({ sku: item.sku, quantity: item.quantity, variant: item.variant }));
+  }
+
+  voucherDiscountLabel(voucher: AvailableVoucher): string {
+    if (voucher.discountType === 'percent') {
+      const cap = voucher.maxDiscount ? `, tối đa ${this.formatPrice(voucher.maxDiscount)}` : '';
+      return `Giảm ${voucher.discountValue}%${cap}`;
+    }
+    return `Giảm ${this.formatPrice(voucher.discountValue)}`;
+  }
+
+  formatVoucherDate(value: string | null): string {
+    if (!value) return '';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('vi-VN');
   }
 
   removeCoupon(): void {
@@ -571,6 +634,16 @@ export class CheckoutComponent implements OnInit {
     return this.items.reduce((sum, item) => sum + (item.productDiscount || 0), 0);
   }
 
+  get saleSubtotal(): number {
+    return Math.max(0, this.subtotal - this.productDiscount);
+  }
+
+  get voucherDiscount(): number {
+    return this.couponApplied && this.appliedVoucher
+      ? Math.min(this.saleSubtotal, Math.max(0, this.appliedVoucher.discount))
+      : 0;
+  }
+
   get discount(): number {
     return Math.min(this.subtotal, this.productDiscount);
   }
@@ -578,7 +651,7 @@ export class CheckoutComponent implements OnInit {
   readonly shippingFee = 30_000;
 
   get total(): number {
-    const computed = this.subtotal - this.discount + this.shippingFee;
+    const computed = this.subtotal - this.discount - this.voucherDiscount + this.shippingFee;
     return computed > 0 ? computed : 0;
   }
 
@@ -654,6 +727,7 @@ export class CheckoutComponent implements OnInit {
         total: item.total || item.price * item.quantity
       })),
       notice: 'Đơn hàng đang chờ cửa hàng xác nhận',
+      ...(this.couponApplied && this.appliedVoucher ? { voucherCode: this.appliedVoucher.code } : {}),
       ...(this.note.trim() ? { customerNote: this.note.trim() } : {}),
       shippingFee: this.shippingFee
     };
@@ -678,20 +752,11 @@ export class CheckoutComponent implements OnInit {
         : this.http.post<any>('http://localhost:3002/api/addresses', addressData, { headers });
 
       request.subscribe({
-        next: response => {
-          if (!response.success || !response.address) {
-            this.isSubmitting = false;
-            this.submitError = response.message || 'Không thể lưu địa chỉ nhận hàng.';
-            return;
-          }
-          this.applyAddress(response.address);
-          submit();
-        },
         error: error => {
-          this.isSubmitting = false;
-          this.submitError = error?.error?.message || 'Không thể lưu địa chỉ vào tài khoản. Vui lòng thử lại.';
+          console.warn('Không thể lưu địa chỉ nhận hàng vào tài khoản:', error);
         }
       });
+      submit();
       return;
     }
 
@@ -701,23 +766,32 @@ export class CheckoutComponent implements OnInit {
   private submitOrder(orderData: Partial<Order>): void {
     this.orderService.createOrder(orderData).subscribe({
       next: response => {
-        if (!response.order?.id) {
-          this.isSubmitting = false;
-          this.submitError = 'Máy chủ chưa trả về mã đơn hàng đã lưu. Vui lòng kiểm tra đơn hàng trước khi thử lại.';
-          return;
-        }
-        if (response.persisted) this.productService.invalidateCache();
-        sessionStorage.removeItem('checkout_items');
-        sessionStorage.removeItem('checkout_shipping_fee');
-        this.cartService.clearCart();
-        const targetId = response.order.id;
-        localStorage.setItem(GUEST_TRACKED_ORDER_KEY, targetId);
-        window.dispatchEvent(new Event('guest-order-tracked'));
-        this.router.navigate(['/order-success', getOrderSlug(response.order)]);
+        this.ngZone.run(() => {
+          if (!response.order?.id) {
+            this.isSubmitting = false;
+            this.submitError = 'Máy chủ chưa trả về mã đơn hàng đã lưu. Vui lòng kiểm tra đơn hàng trước khi thử lại.';
+            this.cdr.markForCheck();
+            return;
+          }
+          if (response.persisted) this.productService.invalidateCache();
+          sessionStorage.removeItem('checkout_items');
+          sessionStorage.removeItem('checkout_shipping_fee');
+          this.cartService.clearCart();
+          const targetId = response.order.id;
+          localStorage.setItem(GUEST_TRACKED_ORDER_KEY, targetId);
+          window.dispatchEvent(new Event('guest-order-tracked'));
+          this.router.navigate(['/order-success', getOrderSlug(response.order)]);
+          this.cdr.markForCheck();
+        });
       },
       error: error => {
-        this.isSubmitting = false;
-        this.submitError = error?.error?.message || 'Không thể tạo đơn hàng. Vui lòng thử lại sau.';
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          this.submitError = error?.name === 'TimeoutError'
+            ? 'Máy chủ chưa xác nhận đơn hàng sau 20 giây. Hãy kiểm tra mục Đơn hàng của tôi trước khi thử lại để tránh tạo trùng.'
+            : error?.error?.message || 'Không thể tạo đơn hàng. Vui lòng thử lại sau.';
+          this.cdr.markForCheck();
+        });
       }
     });
   }

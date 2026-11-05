@@ -124,6 +124,14 @@
   padding: 8px 0;
   color: var(--ink);
 }
+.success-summary-row small {
+  margin-left: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.success-summary-discount {
+  color: #c9475a;
+}
 .success-summary-total {
   margin-top: 8px;
   padding-top: 16px;

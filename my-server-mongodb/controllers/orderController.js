@@ -1,6 +1,8 @@
 const Order = require('../models/order');
 const Product = require('../models/product');
 const ProductSalesService = require('../models/product-sales-service');
+const User = require('../models/user');
+const Voucher = require('../models/voucher');
 const { randomBytes } = require('crypto');
 const { ObjectId } = require('mongodb');
 
@@ -8,24 +10,12 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-async function getOrdersForUser(userId, status, query) {
-  const filters = [{
-    $or: [
-      { userId: String(userId) },
-      { userId: { $exists: false } },
-      { userId: null },
-      { userId: '' }
-    ]
-  }];
-
-<<<<<<< HEAD
-  // Match by receiver email as well as userId. Older orders can contain a
-  // legacy/mismatched userId, so restricting email matching to orders without
-  // userId hides valid history from the admin user detail page.
-  const emailOrderFilter = user.email
+async function getOrdersForUser(userId, status, query, userEmail) {
+  const filters = [];
+  const emailOrderFilter = userEmail
     ? {
         'receiver.email': {
-          $regex: `^${escapeRegex(String(user.email).trim())}$`,
+          $regex: `^${escapeRegex(String(userEmail).trim())}$`,
           $options: 'i'
         }
       }
@@ -34,10 +24,15 @@ async function getOrdersForUser(userId, status, query) {
   if (typeof userId === 'string' && ObjectId.isValid(userId) && userId.length === 24) {
     userIdMatches.push({ userId: new ObjectId(userId) });
   }
-  const filter = emailOrderFilter
-    ? { $or: [...userIdMatches, emailOrderFilter] }
-    : { $or: userIdMatches };
-=======
+  const orderOwnerMatches = [
+    ...userIdMatches,
+    { userId: { $exists: false } },
+    { userId: null },
+    { userId: '' }
+  ];
+  if (emailOrderFilter) {
+    orderOwnerMatches.push(emailOrderFilter);
+  }
   if (status && status !== 'all') {
     const statuses = status === 'shipping'
       ? ['shipping', 'delivered', 'waiting']
@@ -48,7 +43,6 @@ async function getOrdersForUser(userId, status, query) {
           : [status];
     filters.push({ status: { $in: statuses } });
   }
->>>>>>> d8b712c2e3626c761721e9c750ba391fbee365bf
 
   const search = String(query || '').trim();
   if (search) {
@@ -63,7 +57,7 @@ async function getOrdersForUser(userId, status, query) {
   }
 
   return Order.getAll(
-    { $and: filters },
+    { $and: [{ $or: orderOwnerMatches }, ...filters] },
     { sort: { createdAt: -1 } }
   );
 }
@@ -159,7 +153,12 @@ async function getAdminOrdersForUser(req, res) {
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
     }
-    const orders = sortOrdersNewestFirst(await getOrdersForUser(user._id?.toString() || String(user.id)));
+    const orders = sortOrdersNewestFirst(await getOrdersForUser(
+      user._id?.toString() || String(user.id),
+      undefined,
+      undefined,
+      user.email
+    ));
     return res.json({ success: true, orders });
   } catch (err) {
     console.error('Lỗi lấy lịch sử đơn hàng người dùng:', err);
@@ -225,9 +224,11 @@ async function createOrder(req, res) {
       });
     }
 
+    const orderItems = [...itemsBySku.values()];
+    const products = await Promise.all(orderItems.map(item => Product.getBySku(item.sku)));
     const verifiedItems = [];
-    for (const item of itemsBySku.values()) {
-      const product = await Product.getBySku(item.sku);
+    for (const [index, item] of orderItems.entries()) {
+      const product = products[index];
       if (!product) {
         return res.status(400).json({
           success: false,
@@ -287,7 +288,11 @@ async function createOrder(req, res) {
     let voucherDiscount = 0;
     if (voucherCode) {
       const voucher = await Voucher.getByCode(voucherCode);
-      voucherDiscount = Voucher.calculateDiscount(voucher, saleSubtotal);
+      const voucherItems = verifiedItems.map(item => ({
+        ...item,
+        total: (Number(item.salePrice) || 0) * item.quantity
+      }));
+      voucherDiscount = Voucher.calculateDiscount(voucher, saleSubtotal, voucherItems);
       if (voucherDiscount === null || voucherDiscount <= 0) {
         return res.status(400).json({
           success: false,
@@ -313,6 +318,7 @@ async function createOrder(req, res) {
       paymentStatus: 'unpaid',
       paymentStatusLabel: 'Chưa thanh toán',
       paymentMethod: String(body.paymentMethod || 'Thanh toán khi nhận hàng (COD)'),
+      ...(voucherCode ? { voucherCode, voucherDiscount } : {}),
       sender: body.sender || {},
       receiver: {
         name: receiver.name.trim(),
@@ -340,14 +346,19 @@ async function createOrder(req, res) {
       ...(req.userId ? { userId: String(req.userId) } : {})
     };
     await Order.create(newOrder);
-    if (voucherCode) await Voucher.incrementUsed(voucherCode);
-
-    const missingSkus = await ProductSalesService.incrementSoldCounts(verifiedItems);
-    missingSkus.forEach(sku => {
-      console.error(`Không tìm thấy sản phẩm SKU "${sku}" để cập nhật số lượng đã bán.`);
-    });
-
     res.json({ success: true, order: newOrder });
+
+    const postSaveUpdates = [ProductSalesService.incrementSoldCounts(verifiedItems)];
+    if (voucherCode) postSaveUpdates.push(Voucher.incrementUsed(voucherCode));
+    Promise.all(postSaveUpdates)
+      .then(([missingSkus]) => {
+        missingSkus.forEach(sku => {
+          console.error(`Không tìm thấy sản phẩm SKU "${sku}" để cập nhật số lượng đã bán.`);
+        });
+      })
+      .catch(error => {
+        console.error('Không thể cập nhật thống kê sau khi lưu đơn hàng:', error);
+      });
   } catch (err) {
     console.error('Lỗi khi lưu đơn hàng hoặc cập nhật số lượng đã bán:', err);
     res.status(500).json({ success: false, message: 'Lỗi server khi tạo đơn hàng.' });

@@ -180,6 +180,77 @@ async function deleteAdminVoucher(req, res) {
     }
 }
 
+async function getVoucherItems(requestedItems) {
+    const items = [];
+    for (const requestedItem of requestedItems) {
+        if (!requestedItem || typeof requestedItem !== 'object') continue;
+        const quantity = Number(requestedItem.quantity);
+        if (!requestedItem.sku || !Number.isInteger(quantity) || quantity <= 0) continue;
+        const product = await Product.getBySku(String(requestedItem.sku));
+        if (!product) continue;
+        const variants = Array.isArray(product.variants) ? product.variants : [];
+        const variant = variants.find(candidate => candidate.sku === requestedItem.sku) ||
+            (product.sku === requestedItem.sku && requestedItem.variant
+                ? variants.find(candidate => candidate.label === requestedItem.variant)
+                : null);
+        const price = Number(variant?.price ?? product.price);
+        if (!Number.isFinite(price) || price < 0) continue;
+        items.push({
+            sku: requestedItem.sku,
+            slug: product.slug || '',
+            productId: product._id?.toString() || '',
+            category: product.category || '',
+            categorySlug: product.categorySlug || '',
+            total: price * quantity,
+        });
+    }
+    return items;
+}
+
+async function getAvailableVouchers(req, res) {
+    const subtotal = Number(req.body?.subtotal);
+    const requestedItems = Array.isArray(req.body?.items) ? req.body.items : [];
+    if (!Number.isFinite(subtotal) || subtotal <= 0) {
+        return res.status(400).json({ success: false, message: 'Giá trị đơn hàng không hợp lệ.' });
+    }
+
+    try {
+        const [vouchers, items, userOrders] = await Promise.all([
+            Voucher.getAll(),
+            getVoucherItems(requestedItems),
+            req.userId ? Order.getAll({ userId: String(req.userId) }) : Promise.resolve([])
+        ]);
+        const available = vouchers.flatMap(voucher => {
+            const details = serializeVoucher(voucher);
+            if (!details.isActive || details.status !== 'active') return [];
+            if (req.userId && voucher.audience === 'new_customer' && userOrders.length > 0) return [];
+
+            const userUses = userOrders.filter(order =>
+                String(order.voucherCode || '').toUpperCase() === String(voucher.code).toUpperCase()
+            ).length;
+            if (Number(voucher.perUserLimit || 0) > 0 && userUses >= Number(voucher.perUserLimit)) return [];
+
+            const discount = Voucher.calculateDiscount(voucher, subtotal, items);
+            if (!discount || discount <= 0) return [];
+            return [{
+                code: voucher.code,
+                name: voucher.name,
+                description: voucher.description || '',
+                discountType: details.discountType,
+                discountValue: details.discountValue,
+                maxDiscount: details.maxDiscount,
+                minOrderValue: details.minOrderValue,
+                endDate: details.endDate,
+                discount
+            }];
+        });
+        return res.json({ success: true, vouchers: available });
+    } catch (error) {
+        console.error('Lỗi lấy danh sách voucher áp dụng:', error);
+        return res.status(500).json({ success: false, message: 'Không thể tải danh sách voucher.' });
+    }
+}
+
 async function validateVoucher(req, res) {
     const code = typeof req.body?.code === 'string' ? req.body.code.trim() : '';
     const subtotal = Number(req.body?.subtotal);
@@ -194,25 +265,7 @@ async function validateVoucher(req, res) {
             if (!Array.isArray(req.body?.items) || req.body.items.length === 0) {
                 return res.status(400).json({ success: false, message: 'Vui lòng tải lại giỏ hàng để kiểm tra phạm vi voucher.' });
             }
-            for (const requestedItem of req.body.items) {
-                const quantity = Number(requestedItem.quantity);
-                if (!requestedItem.sku || !Number.isInteger(quantity) || quantity <= 0) continue;
-                const product = await Product.getBySku(String(requestedItem.sku));
-                if (!product) continue;
-                const variants = Array.isArray(product.variants) ? product.variants : [];
-                const variant = variants.find(candidate => candidate.sku === requestedItem.sku) ||
-                    (product.sku === requestedItem.sku && requestedItem.variant ? variants.find(candidate => candidate.label === requestedItem.variant) : null);
-                const price = Number(variant?.price ?? product.price);
-                if (!Number.isFinite(price) || price < 0) continue;
-                items.push({
-                    sku: requestedItem.sku,
-                    slug: product.slug || '',
-                    productId: product._id?.toString() || '',
-                    category: product.category || '',
-                    categorySlug: product.categorySlug || '',
-                    total: price * quantity,
-                });
-            }
+            items.push(...await getVoucherItems(req.body.items));
         }
         if (voucher && req.userId) {
             const userOrders = await Order.getAll({ userId: req.userId });
@@ -243,6 +296,7 @@ async function validateVoucher(req, res) {
 }
 
 module.exports = {
+    getAvailableVouchers,
     validateVoucher,
     getAdminVouchers,
     getAdminVoucher,

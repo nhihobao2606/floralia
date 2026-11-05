@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timeout } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 export interface OrderItem {
@@ -230,6 +230,7 @@ export class OrderService {
     return this.http.post<{ success: boolean; order: Order }>(this.apiUrl, orderData, {
       headers: this.authHeaders()
     }).pipe(
+      timeout({ first: 20_000 }),
       map(res => {
         if (res.order) this.saveOrderLocal(res.order);
         return { ...res, persisted: true };

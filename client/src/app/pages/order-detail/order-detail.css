@@ -241,11 +241,19 @@ button, input, textarea, select { font: inherit; }
   font-size: 14px;
   color: var(--muted);
 }
+.voucher-code-label {
+  margin-left: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
 .sum-price {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
   white-space: nowrap;
+}
+.sum-discount {
+  color: #c9475a;
 }
 
 .summary-bottom {

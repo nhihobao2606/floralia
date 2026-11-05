@@ -546,6 +546,103 @@
   color: #c9475a !important;
 }
 
+.checkout-voucher-tools {
+  display: grid;
+  gap: 12px;
+}
+.checkout-voucher-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.checkout-voucher-form input {
+  min-width: 0;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #d6ddd8;
+  border-radius: 8px;
+  color: var(--ink);
+  font: inherit;
+}
+.checkout-voucher-form input:focus {
+  outline: 2px solid rgba(29, 83, 56, .18);
+  border-color: var(--matcha);
+}
+.checkout-voucher-form button {
+  min-width: 100px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--matcha);
+  color: #fff;
+  font: 600 15px 'Roboto', sans-serif;
+  cursor: pointer;
+}
+.checkout-voucher-form button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+.checkout-voucher-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 1px dashed #d99a57;
+  border-radius: 8px;
+  background: #fff;
+  color: #95652c;
+  text-align: left;
+  font: 500 14px 'Roboto', sans-serif;
+  cursor: pointer;
+}
+.checkout-voucher-trigger span {
+  flex: 1;
+}
+.checkout-voucher-trigger:hover {
+  background: #fffaf3;
+  border-color: #bf7f38;
+}
+.checkout-voucher-trigger .bi-ticket-perforated {
+  font-size: 17px;
+}
+.checkout-voucher-message {
+  margin: -4px 0 0;
+  color: #277147;
+  font-size: 13px;
+}
+.checkout-voucher-message.error {
+  color: #b04e58;
+}
+.price-row .label small {
+  margin-left: 5px;
+  color: #6f8375;
+  font-size: 12px;
+}
+.voucher-label {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.voucher-saving {
+  text-align: right;
+}
+.remove-voucher-button {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8a9a8f;
+  cursor: pointer;
+  place-items: center;
+}
+.remove-voucher-button:hover {
+  color: #b04e58;
+}
+
 .breakdown-divider {
   height: 1px;
   background: #eef2ec;
@@ -906,6 +1003,93 @@
   padding: 20px 24px;
   overflow-y: auto;
   max-height: 60vh;
+}
+.voucher-picker-modal {
+  max-width: 640px;
+}
+.voucher-picker-subtitle {
+  margin: 0 0 16px;
+  color: #66776c;
+  font-size: 14px;
+}
+.available-vouchers {
+  display: grid;
+  gap: 10px;
+}
+.available-voucher {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e2e9e3;
+  border-radius: 8px;
+}
+.available-voucher-icon {
+  display: grid;
+  width: 36px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf5ee;
+  color: var(--matcha);
+}
+.available-voucher-info {
+  min-width: 0;
+}
+.available-voucher-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.available-voucher-heading strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+.available-voucher-heading span {
+  flex: 0 0 auto;
+  color: #b24e4e;
+  font-size: 12px;
+  font-weight: 700;
+}
+.available-voucher-info p {
+  margin: 5px 0;
+  color: #68796e;
+  font-size: 12px;
+}
+.available-voucher-info small {
+  display: block;
+  margin-top: 3px;
+  color: #78877d;
+  font-size: 11px;
+}
+.available-voucher-apply {
+  padding: 8px 12px;
+  border: 1px solid var(--matcha);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--matcha);
+  font: 600 12px 'Roboto', sans-serif;
+  cursor: pointer;
+}
+.available-voucher-apply:hover:not(:disabled) {
+  background: var(--matcha);
+  color: #fff;
+}
+.available-voucher-apply:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+.voucher-list-state {
+  margin: 0;
+  padding: 24px 12px;
+  color: #718177;
+  text-align: center;
+  font-size: 14px;
+}
+.voucher-list-state.error {
+  color: #b04e58;
 }
 
 /* Address Picker in Modal */
@@ -1409,6 +1593,29 @@
 
   .checkout-container {
     width: calc(100% - 28px);
+  }
+
+  .checkout-voucher-form {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .checkout-voucher-form button {
+    min-width: 84px;
+    padding: 0 10px;
+  }
+  .available-voucher {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+  .available-voucher-icon {
+    width: 32px;
+  }
+  .available-voucher-apply {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .available-voucher-heading {
+    flex-direction: column;
+    gap: 3px;
   }
 
   .checkout-eyebrow {

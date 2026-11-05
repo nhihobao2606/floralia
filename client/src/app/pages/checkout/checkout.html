@@ -149,13 +149,41 @@
 
           <!-- Pricing breakdown -->
           <div class="pricing-breakdown">
-            <div class="price-row">
+            <div class="checkout-voucher-tools">
+              <form class="checkout-voucher-form" (ngSubmit)="applyCoupon()">
+                <input type="text" name="couponCode" [(ngModel)]="couponCode" placeholder="Mã giảm giá"
+                  aria-label="Mã giảm giá" maxlength="24" autocomplete="off">
+                <button type="submit" [disabled]="couponApplying || !couponCode.trim()">
+                  {{ couponApplying ? 'Đang áp dụng…' : 'Áp dụng' }}
+                </button>
+              </form>
+              <button type="button" class="checkout-voucher-trigger" (click)="openVoucherModal()">
+                <i class="bi bi-ticket-perforated"></i>
+                <span>Voucher của Floralia Herbal Tea</span>
+                <i class="bi bi-chevron-right"></i>
+              </button>
+              <p class="checkout-voucher-message" [class.error]="!couponApplied" *ngIf="couponMessage" role="status">
+                {{ couponMessage }}
+              </p>
+            </div>
+            <div class="price-row subtotal-row">
               <span class="label">Tạm tính:</span>
               <span class="val">{{ formatPrice(subtotal) }}</span>
             </div>
             <div class="price-row">
               <span class="label">Giảm giá sản phẩm:</span>
               <span class="val discount-val">-{{ productDiscount.toLocaleString('vi-VN') }}đ</span>
+            </div>
+            <div class="price-row" *ngIf="couponApplied">
+              <span class="label voucher-label">
+                Giảm giá voucher <small>{{ appliedVoucher?.code }}</small>
+                <button type="button" class="remove-voucher-button" (click)="removeCoupon()" aria-label="Bỏ voucher" title="Bỏ voucher">
+                  <i class="bi bi-x-circle"></i>
+                </button>
+              </span>
+              <span class="val discount-val voucher-saving">
+                -{{ formatPrice(voucherDiscount) }}
+              </span>
             </div>
             <div class="price-row">
               <span class="label">Phí vận chuyển:</span>
@@ -381,6 +409,49 @@
           </button>
         </div>
       </form>
+    </section>
+  </div>
+
+  <!-- ================= MODAL HIỂN THỊ MÃ QR THANH TOÁN ================= -->
+  <div class="modal-backdrop" *ngIf="showVoucherModal" (click)="showVoucherModal = false">
+    <section class="modal-dialog-card voucher-picker-modal" role="dialog" aria-modal="true"
+      aria-labelledby="checkout-voucher-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="checkout-voucher-title">
+          <i class="bi bi-ticket-perforated"></i> Voucher có thể áp dụng
+        </h3>
+        <button type="button" class="btn-close-modal" (click)="showVoucherModal = false" aria-label="Đóng danh sách voucher">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body voucher-picker-body">
+        <p class="voucher-picker-subtitle">Chọn một ưu đãi phù hợp với đơn hàng của bạn.</p>
+        <p class="voucher-list-state" *ngIf="voucherListLoading" role="status">
+          <i class="bi bi-arrow-repeat"></i> Đang tải voucher...
+        </p>
+        <p class="voucher-list-state error" *ngIf="!voucherListLoading && voucherListError" role="alert">
+          {{ voucherListError }}
+        </p>
+        <div class="available-vouchers" *ngIf="!voucherListLoading && availableVouchers.length">
+          <article class="available-voucher" *ngFor="let voucher of availableVouchers">
+            <div class="available-voucher-icon"><i class="bi bi-tag-fill"></i></div>
+            <div class="available-voucher-info">
+              <div class="available-voucher-heading">
+                <strong>{{ voucher.name || voucher.code }}</strong>
+                <span>{{ voucherDiscountLabel(voucher) }}</span>
+              </div>
+              <p *ngIf="voucher.description">{{ voucher.description }}</p>
+              <small *ngIf="voucher.minOrderValue > 0">Đơn tối thiểu {{ formatPrice(voucher.minOrderValue) }}</small>
+              <small *ngIf="voucher.endDate">Hạn dùng đến {{ formatVoucherDate(voucher.endDate) }}</small>
+            </div>
+            <button type="button" class="available-voucher-apply" (click)="applyAvailableVoucher(voucher)"
+              [disabled]="couponApplying">Dùng mã</button>
+          </article>
+        </div>
+        <p class="voucher-list-state" *ngIf="!voucherListLoading && !voucherListError && !availableVouchers.length">
+          Hiện chưa có voucher phù hợp với đơn hàng này.
+        </p>
+      </div>
     </section>
   </div>
 
