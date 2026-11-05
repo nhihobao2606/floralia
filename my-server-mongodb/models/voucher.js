@@ -82,12 +82,14 @@ function calculateDiscount(voucher, subtotal, items = []) {
     const minimumOrder = Number(voucher.minOrderValue ?? voucher.minimumOrder ?? 0);
     if (!Number.isFinite(minimumOrder) || subtotal < minimumOrder) return null;
 
+    const rawScope = String(voucher.scope || 'all').toLowerCase();
+    const scope = rawScope === 'category' ? 'categories' : rawScope === 'product' ? 'products' : rawScope;
     let eligibleSubtotal = subtotal;
-    if (voucher.scope === 'categories') {
+    if (scope === 'categories') {
         const categories = new Set((voucher.categories || []).map(value => String(value).toLowerCase()));
         eligibleSubtotal = items.filter(item => categories.has(String(item.category || '').toLowerCase()) || categories.has(String(item.categorySlug || '').toLowerCase()))
             .reduce((sum, item) => sum + Number(item.total || 0), 0);
-    } else if (voucher.scope === 'products') {
+    } else if (scope === 'products') {
         const products = new Set((voucher.productIds || []).map(String));
         eligibleSubtotal = items.filter(item => products.has(String(item.sku)) || products.has(String(item.slug)) || products.has(String(item.productId)))
             .reduce((sum, item) => sum + Number(item.total || 0), 0);
@@ -113,4 +115,35 @@ function calculateDiscount(voucher, subtotal, items = []) {
     return Math.min(eligibleSubtotal, discount);
 }
 
-module.exports = { setCollection, getByCode, getAll, getById, create, update, remove, incrementUsed, calculateDiscount };
+function getUserEligibilityError(voucher, userOrders = [], isAuthenticated = false) {
+    const perUserLimit = Number(voucher?.perUserLimit || 0);
+    if (!isAuthenticated && (voucher?.audience === 'new_customer' || perUserLimit > 0)) {
+        return 'Vui lòng đăng nhập để sử dụng voucher này.';
+    }
+
+    if (voucher?.audience === 'new_customer' && userOrders.length > 0) {
+        return 'Voucher này chỉ dành cho khách hàng mới.';
+    }
+
+    if (perUserLimit > 0) {
+        const uses = userOrders.filter(order =>
+            String(order.voucherCode || '').toUpperCase() === String(voucher.code || '').toUpperCase()
+        ).length;
+        if (uses >= perUserLimit) return 'Bạn đã sử dụng hết số lượt cho phép của voucher này.';
+    }
+
+    return null;
+}
+
+module.exports = {
+    setCollection,
+    getByCode,
+    getAll,
+    getById,
+    create,
+    update,
+    remove,
+    incrementUsed,
+    calculateDiscount,
+    getUserEligibilityError
+};
