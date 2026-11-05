@@ -1,4 +1,6 @@
 const Order = require('../models/order');
+const ProductSalesService = require('../models/product-sales-service');
+const AdminProduct = require('../models/adminProduct');
 
 const initialOrders = [
   {
@@ -345,6 +347,21 @@ async function getOrderById(req, res) {
 
 // POST /api/orders
 async function createOrder(req, res) {
+  const items = req.body.items;
+  if (
+    !Array.isArray(items) ||
+    items.length === 0 ||
+    items.some(item =>
+      !item ||
+      typeof item.sku !== 'string' ||
+      !item.sku.trim() ||
+      !Number.isSafeInteger(item.quantity) ||
+      item.quantity < 1
+    )
+  ) {
+    return res.status(400).json({ success: false, message: 'Thông tin sản phẩm trong đơn hàng không hợp lệ.' });
+  }
+
   try {
     const id = req.body.id || String(Math.floor(1000 + Math.random() * 9000));
     const newOrder = {
@@ -358,8 +375,16 @@ async function createOrder(req, res) {
       ...req.body
     };
     await Order.create(newOrder);
+
+    const missingSkus = await ProductSalesService.incrementSoldCounts(items);
+    missingSkus.forEach(sku => {
+      console.error(`Không tìm thấy sản phẩm SKU "${sku}" để cập nhật số lượng đã bán.`);
+    });
+    AdminProduct.notifyProductChanged('sold');
+
     res.json({ success: true, order: newOrder });
   } catch (err) {
+    console.error('Lỗi khi lưu đơn hàng hoặc cập nhật số lượng đã bán:', err);
     res.status(500).json({ success: false, message: 'Lỗi server khi tạo đơn hàng.' });
   }
 }

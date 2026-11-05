@@ -41,6 +41,8 @@ export interface Order {
   refundAmount?: number;
 }
 
+export const GUEST_TRACKED_ORDER_KEY = 'floralia_guest_tracked_order_id';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -494,17 +496,17 @@ export class OrderService {
     return JSON.parse(JSON.stringify(this.defaultOrders));
   }
 
-  createOrder(orderData: Partial<Order>): Observable<{ success: boolean; order: Order }> {
+  createOrder(orderData: Partial<Order>): Observable<{ success: boolean; order: Order; persisted: boolean }> {
     return this.http.post<{ success: boolean; order: Order }>(this.apiUrl, orderData).pipe(
       map(res => {
         if (res.order) {
           this.saveOrderLocal(res.order);
         }
-        return res;
+        return { ...res, persisted: true };
       }),
       catchError(() => {
         const local = this.saveOrderLocal(orderData);
-        return of({ success: true, order: local });
+        return of({ success: true, order: local, persisted: false });
       })
     );
   }

@@ -48,6 +48,30 @@ function updatePassword(id, hashedPassword) {
     );
 }
 
+function setPasswordResetToken(email, tokenHash, expiresAt) {
+    return usersCollection.updateOne(
+        { email },
+        { $set: { passwordResetTokenHash: tokenHash, passwordResetExpiresAt: expiresAt } }
+    );
+}
+
+function clearPasswordResetToken(tokenHash) {
+    return usersCollection.updateOne(
+        { passwordResetTokenHash: tokenHash },
+        { $unset: { passwordResetTokenHash: '', passwordResetExpiresAt: '' } }
+    );
+}
+
+function updatePasswordWithResetToken(tokenHash, now, hashedPassword) {
+    return usersCollection.updateOne(
+        { passwordResetTokenHash: tokenHash, passwordResetExpiresAt: { $gt: now } },
+        {
+            $set: { password: hashedPassword, updatedAt: now },
+            $unset: { passwordResetTokenHash: '', passwordResetExpiresAt: '' }
+        }
+    );
+}
+
 module.exports = {
     setCollection,
     findByEmail,
@@ -55,5 +79,8 @@ module.exports = {
     create,
     getById,
     update,
-    updatePassword
+    updatePassword,
+    setPasswordResetToken,
+    clearPasswordResetToken,
+    updatePasswordWithResetToken
 };

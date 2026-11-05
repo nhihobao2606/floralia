@@ -5,6 +5,7 @@ import { ProductNavigationService } from '../../services/product-navigation-serv
 import { ProductService } from '../../services/product-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { CartService } from '../../services/cart-service';
+import { BuyNowService } from '../../services/buy-now-service';
 
 @Component({
   selector: 'app-wishlist-page',
@@ -13,9 +14,11 @@ import { CartService } from '../../services/cart-service';
   styleUrl: './wishlist-page.css',
 })
 export class WishlistPage implements OnInit {
+  showLogoutConfirm = false;
   products = signal<Products[]>([]);
   loading = signal(true);
   errorMessage = signal('');
+  removeMessage = signal('');
   user: any = null;
   avatar = '';
 
@@ -25,6 +28,7 @@ export class WishlistPage implements OnInit {
     readonly productNavigation: ProductNavigationService,
     private readonly cartService: CartService,
     private readonly router: Router,
+    readonly buyNowService: BuyNowService,
   ) {}
 
   ngOnInit(): void {
@@ -64,7 +68,12 @@ export class WishlistPage implements OnInit {
     return name ? name.split(/\s+/).at(-1)!.charAt(0).toUpperCase() : 'F';
   }
 
-  logout(): void {
+  requestLogout(): void {
+    this.showLogoutConfirm = true;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
     ['currentUser', 'token'].forEach((key) => {
       localStorage.removeItem(key);
       sessionStorage.removeItem(key);
@@ -77,6 +86,8 @@ export class WishlistPage implements OnInit {
   remove(product: Products): void {
     this.wishlistService.remove(product);
     this.products.update((items) => items.filter((item) => item !== product));
+    this.removeMessage.set('Đã xóa sản phẩm khỏi danh sách yêu thích thành công!');
+    window.setTimeout(() => this.removeMessage.set(''), 5000);
   }
 
   getProductImage(product: Products): string {
@@ -135,6 +146,10 @@ export class WishlistPage implements OnInit {
       ?? product.variants?.find((option) => option.stock > 0)
       ?? null;
     this.cartService.addProduct(product, variant, 1, this.getProductImage(product));
+  }
+
+  buyNow(product: Products): void {
+    this.buyNowService.open(product, this.getProductImage(product));
   }
 
   onImageError(event: Event): void {

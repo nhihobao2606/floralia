@@ -35,11 +35,20 @@ export class Header implements OnInit, OnDestroy {
   private variantPickerRequestId = 0;
   user: any = null;
   userOpen = false;
+  showLogoutConfirm = false;
+  itemPendingRemoval: CartItem | null = null;
 
   // Giao diện
   scrolled = false;
   showFloat = false;
   showInvite = false;
+  headerCategories = [
+    { name: 'Trà thảo mộc', slug: 'tra-thao-moc' },
+    { name: 'Trà thảo mộc mix', slug: 'tra-thao-moc-mix' },
+    { name: 'Đồ uống kèm trà', slug: 'do-uong-kem-tra' },
+    { name: 'Ấm trà', slug: 'am-tra' },
+    { name: 'Set quà tặng', slug: 'set-qua-tang' },
+  ];
 
   private subs = new Subscription();
   private timers: any[] = [];
@@ -54,6 +63,8 @@ export class Header implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadUser();
     this.loadCart();
+    this.loadHeaderCategories();
+    this.subs.add(this.productService.productsChanges$.subscribe(() => this.loadHeaderCategories()));
     this.onScroll();
 
     this.subs.add(
@@ -64,6 +75,7 @@ export class Header implements OnInit, OnDestroy {
           this.closeCart();
           this.loadUser();
           this.loadCart();
+    this.loadHeaderCategories();
         }
       })
     );
@@ -83,6 +95,17 @@ export class Header implements OnInit, OnDestroy {
   private popInvite(): void {
     this.showInvite = true;
     setTimeout(() => (this.showInvite = false), 5000);
+  }
+
+  private loadHeaderCategories(): void {
+    this.productService.getCategories().subscribe({
+      next: (res) => {
+        if (Array.isArray(res?.mainCategories)) {
+          this.headerCategories = res.mainCategories.map((cat) => ({ name: cat.name, slug: cat.slug }));
+        }
+      },
+      error: () => {},
+    });
   }
 
   /* ================= SỰ KIỆN CHUNG ================= */
@@ -112,6 +135,7 @@ export class Header implements OnInit, OnDestroy {
   onStorageChange(): void {
     this.loadUser();
     this.loadCart();
+    this.loadHeaderCategories();
   }
 
   scrollTop(): void {
@@ -265,8 +289,14 @@ export class Header implements OnInit, OnDestroy {
     this.userOpen = !this.userOpen;
   }
 
-  logout(e: Event): void {
+  requestLogout(e: Event): void {
     e.preventDefault();
+    this.showLogoutConfirm = true;
+    this.userOpen = false;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
     localStorage.removeItem('currentUser');
     sessionStorage.removeItem('currentUser');
     localStorage.removeItem('token');
@@ -274,6 +304,7 @@ export class Header implements OnInit, OnDestroy {
     this.user = null;
     this.userOpen = false;
     this.loadCart();
+    this.loadHeaderCategories();
     window.dispatchEvent(new Event('auth-changed'));
     window.dispatchEvent(new Event('cart-updated'));
     this.router.navigate(['/login']);
@@ -296,6 +327,7 @@ export class Header implements OnInit, OnDestroy {
     e.stopPropagation();
     this.closePanels();
     this.loadCart();
+    this.loadHeaderCategories();
     this.cartOpen = true;
     document.body.style.overflow = 'hidden';
   }
@@ -309,8 +341,25 @@ export class Header implements OnInit, OnDestroy {
     this.cartService.changeQuantity(item, delta);
   }
 
+  cartStock(item: CartItem): number {
+    const variant = item.variants?.find((option) => option.sku === item.variantSku);
+    return Number(item.stock ?? variant?.stock ?? 0);
+  }
+
   removeItem(item: any): void {
     this.cartService.removeItem(item);
+  }
+
+  requestItemRemoval(item: CartItem): void {
+    this.itemPendingRemoval = item;
+  }
+
+  confirmItemRemoval(): void {
+    if (!this.itemPendingRemoval) return;
+    this.removeItem(this.itemPendingRemoval);
+    this.itemPendingRemoval = null;
+    this.loadCart();
+    this.loadHeaderCategories();
   }
 
   openVariantPicker(item: CartItem): void {
@@ -407,6 +456,7 @@ export class Header implements OnInit, OnDestroy {
       this.variantPickerQuantity,
     )) {
       this.loadCart();
+    this.loadHeaderCategories();
       this.closeVariantPicker();
     } else {
       this.variantPickerError = this.cartService.cartMessage();

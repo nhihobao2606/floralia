@@ -1,0 +1,424 @@
+<div class="editor-layout">
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+
+  <main class="editor-main">
+    <header class="editor-topbar">
+      <div class="breadcrumbs">
+        <a routerLink="/articles">Quản lý bài viết</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <strong>{{ editing ? 'Chỉnh sửa bài viết' : 'Thêm bài viết' }}</strong>
+      </div>
+      <div class="admin-account">
+        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+        <span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span>
+        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất
+        </button>
+      </div>
+
+    </header>
+
+    <div class="editor-page">
+      <a class="back-link" routerLink="/articles"><i class="bi bi-arrow-left" aria-hidden="true"></i> Quay lại danh sách bài viết</a>
+      <div class="page-heading">
+        <h1>{{ editing ? 'Chỉnh sửa bài viết' : 'Thêm bài viết mới' }}</h1>
+        <div class="heading-actions">
+          <button
+            *ngIf="editing"
+            type="button"
+            class="outline-button delete-article-button"
+            [disabled]="saving || loading"
+            (click)="deleteConfirmationVisible = true; deleteAcknowledged = false">
+            <i class="bi bi-trash3" aria-hidden="true"></i> Xóa bài viết
+          </button>
+          <button *ngIf="!editing" type="button" class="outline-button" [disabled]="saving || loading" (click)="save('draft')">Lưu nháp</button>
+          <button type="button" class="outline-button preview-button" [disabled]="loading" (click)="previewArticle()"><i class="bi bi-eye" aria-hidden="true"></i> Xem trước</button>
+          <button type="button" class="primary-button" [disabled]="saving || loading" (click)="save(editing ? article.status : 'published')">
+            <i [class]="editing ? 'bi bi-check2' : 'bi bi-send'" aria-hidden="true"></i>
+            {{ saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Đăng bài' }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="loading" class="editor-loading"><span class="loading-spinner"></span> Đang tải bài viết...</div>
+      <div *ngIf="loadError || errorMessage" class="editor-alert" role="alert">
+        <span>{{ loadError || errorMessage }}</span>
+        <button type="button" aria-label="Đóng thông báo" (click)="errorMessage = ''; loadError = ''"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div *ngIf="successMessage" class="update-toast" role="status" aria-live="polite">
+        <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+        <span>{{ successMessage }}</span>
+      </div>
+
+      <div class="editor-grid" *ngIf="!loading">
+        <div class="editor-primary-column">
+          <section class="editor-card title-card">
+            <label class="field-label" for="articleTitle">Tiêu đề bài viết <span>*</span></label>
+            <input id="articleTitle" class="title-input" name="title" [(ngModel)]="article.title" required maxlength="180">
+            <div class="slug-preview">Đường dẫn: <strong>floraliatea.vn/blog/{{ slugPreview }}</strong></div>
+          </section>
+
+          <section class="editor-card content-card">
+            <div class="editor-toolbar" role="toolbar" aria-label="Định dạng nội dung">
+              <div class="toolbar-format-select">
+                <button
+                  type="button"
+                  class="toolbar-format-trigger"
+                  role="combobox"
+                  aria-label="Kiểu đoạn văn"
+                  aria-haspopup="listbox"
+                  [attr.aria-expanded]="blockFormatDropdownOpen"
+                  aria-controls="blockFormatOptions"
+                  (mousedown)="captureEditorSelection()"
+                  (click)="toggleBlockFormatDropdown()">
+                  <span>{{ activeBlockFormatLabel }}</span>
+                  <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </button>
+                <div *ngIf="blockFormatDropdownOpen" id="blockFormatOptions" class="toolbar-format-menu" role="listbox" aria-label="Kiểu đoạn văn">
+                  <button
+                    *ngFor="let option of blockFormatOptions"
+                    type="button"
+                    class="toolbar-format-option"
+                    role="option"
+                    [attr.aria-selected]="activeBlockFormat === option.value"
+                    [class.selected]="activeBlockFormat === option.value"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="applyBlockFormat(option.value)">
+                    {{ option.label }}
+                  </button>
+                </div>
+              </div>
+              <span class="toolbar-divider"></span>
+              <button type="button" aria-label="In đậm" title="In đậm" (click)="formatText('bold')"><i class="bi bi-type-bold"></i></button>
+              <button type="button" aria-label="In nghiêng" title="In nghiêng" (click)="formatText('italic')"><i class="bi bi-type-italic"></i></button>
+              <button type="button" aria-label="Gạch chân" title="Gạch chân" (click)="formatText('underline')"><i class="bi bi-type-underline"></i></button>
+              <span class="toolbar-divider"></span>
+              <button type="button" aria-label="Danh sách dấu chấm" title="Danh sách dấu chấm" (click)="formatText('insertUnorderedList')"><i class="bi bi-list-ul"></i></button>
+              <button type="button" aria-label="Danh sách đánh số" title="Danh sách đánh số" (click)="formatText('insertOrderedList')"><i class="bi bi-list-ol"></i></button>
+              <button type="button" aria-label="Trích dẫn" title="Trích dẫn" (click)="formatText('formatBlock', 'BLOCKQUOTE')"><i class="bi bi-quote"></i></button>
+              <button type="button" aria-label="Chèn liên kết" title="Chèn liên kết" (click)="formatText('createLink', 'https://')"><i class="bi bi-link-45deg"></i></button>
+              <span class="toolbar-spacer"></span>
+              <label class="toolbar-image" title="Chèn ảnh">
+                <i class="bi bi-image" aria-hidden="true"></i><span>Chèn ảnh</span>
+                <input type="file" accept="image/jpeg,image/png" (click)="captureEditorSelection()" (change)="onInlineImageSelected($event)">
+              </label>
+            </div>
+            <div
+              class="rich-editor"
+              contenteditable="true"
+              role="textbox"
+              aria-label="Nội dung bài viết"
+              aria-multiline="true"
+              data-placeholder="Bắt đầu viết nội dung bài viết tại đây..."
+              (input)="onContentInput($event)"></div>
+            <div class="editor-status"><span>Số từ: {{ contentWordCount }}</span><span>Tự động lưu nháp sau mỗi 30 giây</span></div>
+          </section>
+
+          <section class="editor-card">
+            <div class="section-title"><h2>Tóm tắt bài viết</h2></div>
+            <textarea class="summary-input" name="excerpt" [(ngModel)]="article.excerpt" required maxlength="160" rows="4" placeholder="Một đoạn ngắn giới thiệu hiển thị ở danh sách Blog"></textarea>
+            <div class="character-count">{{ article.excerpt.length }}/160</div>
+          </section>
+
+          <section class="editor-card seo-card">
+            <div class="section-title"><h2>Tối ưu SEO</h2></div>
+            <label class="field-label" for="metaTitle">Tiêu đề SEO</label>
+            <input id="metaTitle" class="standard-input" name="metaTitle" [(ngModel)]="article.metaTitle" maxlength="180" placeholder="Mặc định lấy theo tiêu đề bài viết">
+            <label class="field-label" for="metaDescription">Mô tả meta</label>
+            <textarea id="metaDescription" class="standard-input seo-description" name="metaDescription" [(ngModel)]="article.metaDescription" maxlength="160" rows="2" placeholder="Mô tả hiển thị trên Google (tối đa 160 ký tự)"></textarea>
+            <div class="google-preview">
+              <small>Xem trước trên Google</small>
+              <strong>{{ article.metaTitle || article.title || 'Tiêu đề bài viết | Floralia Tea' }}</strong>
+              <span>floraliatea.vn › blog › {{ slugPreview }}</span>
+              <p>{{ article.metaDescription || article.excerpt || 'Mô tả bài viết sẽ hiển thị tại đây.' }}</p>
+            </div>
+          </section>
+        </div>
+
+        <aside class="editor-side-column">
+          <section class="editor-card side-card publish-card">
+            <div class="section-title"><h2>Đăng bài</h2></div>
+            <ng-container *ngIf="editing">
+              <label class="field-label" for="articleStatus">Trạng thái</label>
+              <div class="custom-select status-select">
+                <button
+                  id="articleStatus"
+                  class="standard-input status-select-trigger"
+                  type="button"
+                  role="combobox"
+                  aria-haspopup="listbox"
+                  [attr.aria-expanded]="statusDropdownOpen"
+                  aria-controls="articleStatusOptions"
+                  (click)="statusDropdownOpen = !statusDropdownOpen"
+                  (keydown.escape)="statusDropdownOpen = false">
+                  <span>{{ statusLabel }}</span>
+                  <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </button>
+                <div *ngIf="statusDropdownOpen" id="articleStatusOptions" class="custom-select-menu" role="listbox" aria-label="Trạng thái bài viết">
+                  <button
+                    *ngFor="let option of statusOptions"
+                    class="custom-select-option"
+                    type="button"
+                    role="option"
+                    [attr.aria-selected]="article.status === option.value"
+                    [class.selected]="article.status === option.value"
+                    (click)="selectStatus(option.value)">
+                    {{ option.label }}
+                  </button>
+                </div>
+              </div>
+            </ng-container>
+            <label class="field-label" for="publishDate">Ngày đăng</label>
+            <div class="date-picker">
+              <button
+                id="publishDate"
+                class="standard-input date-picker-trigger"
+                type="button"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="datePickerOpen"
+                aria-controls="publishDateCalendar"
+                (click)="toggleDatePicker()"
+                (keydown.escape)="datePickerOpen = false">
+                <span>{{ publishedDateLabel }}</span>
+                <i class="bi bi-calendar3" aria-hidden="true"></i>
+              </button>
+              <div *ngIf="datePickerOpen" id="publishDateCalendar" class="date-picker-calendar" role="dialog" aria-label="Chọn ngày đăng">
+                <div class="calendar-header">
+                  <strong>{{ calendarMonthLabel }}</strong>
+                  <div class="calendar-navigation">
+                    <button type="button" aria-label="Tháng trước" (click)="changeCalendarMonth(-1)"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" aria-label="Tháng sau" (click)="changeCalendarMonth(1)"><i class="bi bi-chevron-right"></i></button>
+                  </div>
+                </div>
+                <div class="calendar-grid" role="grid">
+                  <span *ngFor="let weekday of weekdays" class="calendar-weekday" role="columnheader">{{ weekday }}</span>
+                  <button
+                    *ngFor="let day of calendarDays"
+                    class="calendar-day"
+                    type="button"
+                    role="gridcell"
+                    [class.outside-month]="!day.inCurrentMonth"
+                    [class.today]="day.isToday"
+                    [class.selected]="day.isSelected"
+                    [attr.aria-selected]="day.isSelected"
+                    [attr.aria-label]="day.date | date:'fullDate'"
+                    (click)="selectPublishedDate(day.date)">
+                    {{ day.dayNumber }}
+                  </button>
+                </div>
+                <div class="calendar-footer">
+                  <button type="button" class="calendar-text-button" (click)="clearPublishedDate()">Xóa</button>
+                  <button type="button" class="calendar-text-button" (click)="setPublishedDateToToday()">Hôm nay</button>
+                </div>
+              </div>
+            </div>
+            <label class="field-label" for="articleAuthor">Tác giả</label>
+            <div class="custom-select author-select">
+              <button
+                id="articleAuthor"
+                class="standard-input author-select-trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                [attr.aria-expanded]="authorDropdownOpen"
+                aria-controls="articleAuthorOptions"
+                [attr.aria-required]="true"
+                (click)="toggleAuthorDropdown()"
+                (keydown.escape)="authorDropdownOpen = false">
+                <span>{{ authorLabel }}</span>
+                <i class="bi bi-chevron-down" aria-hidden="true"></i>
+              </button>
+              <div *ngIf="authorDropdownOpen" id="articleAuthorOptions" class="custom-select-menu" role="listbox" aria-label="Tác giả bài viết">
+                <button
+                  *ngFor="let author of authors"
+                  class="custom-select-option"
+                  type="button"
+                  role="option"
+                  [attr.aria-selected]="article.author === author"
+                  [class.selected]="article.author === author"
+                  (click)="selectAuthor(author)">
+                  {{ author }}
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section *ngIf="editing && articleInfo" class="editor-card side-card article-info-card">
+            <div class="section-title"><h2>Thông tin bài viết</h2></div>
+            <dl class="article-info-list">
+              <div><dt>Mã bài viết</dt><dd>{{ articleCode }}</dd></div>
+              <div><dt>Ngày tạo</dt><dd>{{ formatArticleInfoDate(articleInfo.createdAt) }}</dd></div>
+              <div><dt>Cập nhật lần cuối</dt><dd>{{ formatArticleInfoDate(articleInfo.updatedAt, true) }}</dd></div>
+              <div><dt>Lượt xem</dt><dd>{{ formatArticleViews(articleInfo.views) }}</dd></div>
+            </dl>
+          </section>
+
+          <section class="editor-card side-card">
+            <div class="section-title"><div><h2>Ảnh đại diện</h2><p>Ảnh bìa bài viết hiển thị ngoài Blog.</p></div></div>
+            <div
+              class="cover-dropzone"
+              [class.has-cover]="imagePreview"
+              [class.dragging]="draggingCover"
+              (dragover)="onCoverDragOver($event)"
+              (dragleave)="onCoverDragLeave($event)"
+              (drop)="onCoverDrop($event)">
+              <img *ngIf="imagePreview" [src]="imagePreview" alt="Ảnh bìa xem trước">
+              <ng-container *ngIf="!imagePreview">
+                <i class="bi bi-image" aria-hidden="true"></i>
+                <strong>Kéo thả ảnh vào đây hoặc chọn từ máy</strong>
+                <small>Khuyến nghị 1200 × 800 px, JPG hoặc PNG, dưới 2 MB</small>
+              </ng-container>
+              <span *ngIf="imagePreview" class="cover-overlay">Ảnh bìa hiện tại</span>
+            </div>
+            <div class="cover-actions">
+              <label class="cover-button"><i class="bi bi-upload"></i> Chọn ảnh từ máy
+                <input type="file" accept="image/jpeg,image/png" (change)="onCoverSelected($event)">
+              </label>
+              <button type="button" class="outline-button" (click)="removeCover()">Dùng ảnh mẫu</button>
+            </div>
+            <label class="field-label" for="coverPath">Mô tả ảnh (alt)</label>
+            <input id="coverPath" class="standard-input" name="imageAlt" [(ngModel)]="article.imageAlt" maxlength="200" placeholder="VD: Tách trà hoa cúc nóng">
+          </section>
+
+          <section class="editor-card side-card">
+            <div class="section-title"><h2>Ảnh trong bài viết</h2></div>
+            <div class="inline-image-gallery">
+              <div *ngFor="let image of inlineImages; let index = index" class="inline-image-thumb">
+                <img [src]="image" [alt]="'Ảnh trong bài viết ' + (index + 1)">
+                <button type="button" [attr.aria-label]="'Xóa ảnh ' + (index + 1)" (click)="removeInlineImage(index)">×</button>
+              </div>
+              <label class="inline-image-picker" aria-label="Chèn ảnh vào bài viết">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                <input type="file" accept="image/jpeg,image/png" (click)="captureEditorSelection()" (change)="onInlineImageSelected($event)">
+              </label>
+            </div>
+            <small class="helper-text">Bấm "Chèn ảnh" trên thanh công cụ để tải ảnh vào nội dung.</small>
+          </section>
+
+          <section class="editor-card side-card">
+            <div class="section-title"><h2>Danh mục</h2></div>
+            <div *ngIf="categories.length; else noCategories" class="category-list">
+              <label *ngFor="let category of categories" class="category-option">
+                <input type="radio" name="category" [value]="category.name" [checked]="article.category === category.name" (change)="selectCategory(category)">
+                <span class="custom-radio"></span><span>{{ category.name }}</span>
+              </label>
+            </div>
+            <ng-template #noCategories><p class="helper-text">Chưa có danh mục</p></ng-template>
+            <button *ngIf="!addingCategory" type="button" class="add-category-trigger" (click)="addingCategory = true">+ Thêm danh mục mới</button>
+            <div *ngIf="addingCategory" class="add-category">
+              <input name="newCategory" [(ngModel)]="newCategory" maxlength="80" placeholder="Tên danh mục mới" (keydown.enter)="$event.preventDefault(); addCategory()">
+              <button type="button" aria-label="Lưu danh mục" [disabled]="!newCategory.trim()" (click)="addCategory()"><i class="bi bi-check-lg"></i></button>
+              <button type="button" aria-label="Hủy thêm danh mục" (click)="cancelAddCategory()"><i class="bi bi-x-lg"></i></button>
+            </div>
+          </section>
+
+          <section class="editor-card side-card">
+            <div class="section-title"><h2>Thẻ (tag)</h2></div>
+            <div class="tag-input-row">
+              <input name="tagInput" [(ngModel)]="tagInput" maxlength="30" (keydown.enter)="$event.preventDefault(); addTag()">
+            </div>
+            <div class="tag-list">
+              <span *ngFor="let tag of article.tags" class="tag-chip">{{ tag }}<button type="button" [attr.aria-label]="'Xóa thẻ ' + tag" (click)="removeTag(tag)"><i class="bi bi-x"></i></button></span>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <div *ngIf="previewVisible" class="article-preview-backdrop" (click)="closePreview()">
+        <section
+          class="article-preview-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="articlePreviewTitle"
+          (click)="$event.stopPropagation()">
+          <header class="article-preview-toolbar">
+            <div><i class="bi bi-eye" aria-hidden="true"></i> Bản xem trước</div>
+            <button type="button" aria-label="Đóng bản xem trước" (click)="closePreview()"><i class="bi bi-x-lg"></i></button>
+          </header>
+          <article class="article-preview-content">
+            <img *ngIf="imagePreview" class="article-preview-cover" [src]="imagePreview" [alt]="article.imageAlt || article.title">
+            <div class="article-preview-meta">
+              <span *ngIf="previewDate"><i class="bi bi-calendar3" aria-hidden="true"></i> {{ previewDateLabel }}</span>
+              <span *ngIf="article.category">{{ article.category }}</span>
+            </div>
+            <h1 id="articlePreviewTitle">{{ article.title || 'Tiêu đề bài viết' }}</h1>
+            <p class="article-preview-excerpt" *ngIf="article.excerpt">{{ article.excerpt }}</p>
+            <div class="article-preview-byline" *ngIf="article.author">Bởi {{ article.author }}</div>
+            <div class="article-preview-body" [innerHTML]="article.content"></div>
+            <div class="article-preview-tags" *ngIf="article.tags?.length">
+              <span *ngFor="let tag of article.tags">#{{ tag.replace('#', '') }}</span>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <div *ngIf="exitPromptVisible" class="unsaved-changes-backdrop">
+        <section class="unsaved-changes-dialog" role="alertdialog" aria-modal="true" aria-labelledby="unsavedChangesTitle">
+          <span class="unsaved-changes-icon"><i class="bi bi-exclamation-lg" aria-hidden="true"></i></span>
+          <h2 id="unsavedChangesTitle">Bạn có thay đổi chưa lưu</h2>
+          <p>Bạn có muốn lưu thay đổi trước khi rời khỏi trang này không?</p>
+          <div class="unsaved-changes-actions">
+            <button type="button" class="unsaved-stay-button" [disabled]="saving" (click)="stayOnEditor()">Ở lại</button>
+            <button type="button" class="unsaved-discard-button" [disabled]="saving" (click)="discardChangesAndExit()">Không lưu</button>
+            <button type="button" class="unsaved-save-button" [disabled]="saving" (click)="saveChangesAndExit()">
+              {{ saving ? 'Đang lưu...' : 'Lưu và rời trang' }}
+            </button>
+          </div>
+          <p *ngIf="errorMessage" class="unsaved-changes-error" role="alert">{{ errorMessage }}</p>
+        </section>
+      </div>
+
+      <div *ngIf="deleteConfirmationVisible" class="editor-delete-backdrop" (click)="closeDeleteConfirmation()">
+        <section
+          class="editor-delete-dialog"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="editorDeleteTitle"
+          (click)="$event.stopPropagation()">
+          <span class="editor-delete-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
+          <h2 id="editorDeleteTitle">Bạn có chắc chắn muốn xóa bài viết này?</h2>
+          <p class="editor-delete-description">Hành động này không thể hoàn tác. Bài viết sẽ bị gỡ khỏi website Floralia Tea.</p>
+          <div class="editor-delete-summary">
+            <div><span>Mã bài viết</span><strong>BV-{{ currentId?.slice(-6)?.toUpperCase() }}</strong></div>
+            <p>{{ article.title }}</p>
+            <small>{{ article.category || 'Chưa phân loại' }}</small>
+          </div>
+          <ul class="editor-delete-consequences">
+            <li>Bài viết biến mất khỏi trang Blog của website.</li>
+            <li>Liên kết chia sẻ trước đó sẽ không còn truy cập được.</li>
+          </ul>
+          <label class="editor-delete-acknowledgement">
+            <input type="checkbox" [(ngModel)]="deleteAcknowledged" [disabled]="deletingArticle">
+            <span class="editor-delete-checkbox"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+            <span>Tôi hiểu và muốn xóa bài viết này</span>
+          </label>
+          <p *ngIf="errorMessage" class="editor-delete-error" role="alert">{{ errorMessage }}</p>
+          <div class="editor-delete-actions">
+            <button type="button" [disabled]="deletingArticle" (click)="closeDeleteConfirmation()">Hủy</button>
+            <button type="button" class="editor-delete-submit" [disabled]="!deleteAcknowledged || deletingArticle" (click)="confirmDeleteArticle()">
+              <i *ngIf="!deletingArticle" class="bi bi-trash3" aria-hidden="true"></i>
+              {{ deletingArticle ? 'Đang xóa...' : 'Xóa bài viết' }}
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div *ngIf="logoutConfirmationVisible" class="logout-confirm-backdrop" (click)="cancelLogoutConfirmation()">
+  <section
+    class="logout-confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="logoutConfirmTitle"
+    (click)="$event.stopPropagation()">
+    <span class="logout-confirm-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
+    <h2 id="logoutConfirmTitle">Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="logout-cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button>
+      <button type="button" class="logout-submit-button" (click)="confirmLogout()">Đăng xuất</button>
+    </div>
+  </section>
+</div>

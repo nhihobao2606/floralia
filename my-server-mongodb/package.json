@@ -20,7 +20,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoclient": "^1.0.3",
     "mongodb": "^7.7.0",
-    "mongoose": "^9.11.4"
+    "mongoose": "^9.11.4",
+    "nodemailer": "^10.3.1"
   },
   "devDependencies": {
     "morgan": "^1.12.1",

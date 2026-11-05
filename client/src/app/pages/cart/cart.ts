@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { HostListener } from '@angular/core';
 import { Router } from '@angular/router';
-import { CartItem, CartService } from '../../services/cart-service';
+import { CartItem, CartService, CartVariant } from '../../services/cart-service';
+import { ProductNavigationService } from '../../services/product-navigation-service';
 
 export interface CartDisplayItem extends CartItem {
-  selected?: boolean;
+  selected: boolean;
 }
 
 @Component({
@@ -16,92 +18,111 @@ export class CartComponent implements OnInit {
   items: CartDisplayItem[] = [];
   pageSize = 4;
   currentPage = 1;
-
-  private readonly sampleItems: CartDisplayItem[] = [
-    {
-      id: 'TTM004',
-      productId: 'TTM004',
-      sku: 'TTM004',
-      name: 'Lục Mễ Trà - Trà Xanh Gạo Lứt Rang',
-      price: 200000,
-      quantity: 1,
-      image: '/assets/images/products/74.png',
-      selected: true
-    },
-    {
-      id: 'HQ020',
-      productId: 'HQ020',
-      sku: 'HQ020',
-      name: 'Set Quà Tặng Trà Hoa Hồng',
-      price: 630000,
-      quantity: 1,
-      image: '/assets/images/products/131.png',
-      selected: false
-    },
-    {
-      id: 'TTM010',
-      productId: 'TTM010',
-      sku: 'TTM010',
-      name: 'Lam Diệp Trà - Trà Hắc Kỷ Tử',
-      price: 250000,
-      quantity: 1,
-      image: '/assets/images/products/34.png',
-      selected: true
-    },
-    {
-      id: 'TTM021',
-      productId: 'TTM021',
-      sku: 'TTM021',
-      name: 'Huyết Ngọc Trà - Trà Bổ Huyết Dưỡng Nhan',
-      price: 250000,
-      quantity: 1,
-      image: '/assets/images/products/79.png',
-      selected: true
-    }
-  ];
+  readonly defaultShippingFee = 30000;
+  openVariantItem: CartDisplayItem | null = null;
 
   constructor(
-    private readonly cartService: CartService,
+    readonly cartService: CartService,
+    readonly productNavigation: ProductNavigationService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadCart();
+    this.cartService.syncFromServer();
+  }
+
+  @HostListener('window:cart-updated')
+  @HostListener('window:auth-changed')
+  onCartExternalUpdate(): void {
+    const selectedKeys = new Set(
+      this.items
+        .filter(item => item.selected)
+        .map(item => `${item.productId || item.productSku || item.slug || item.id}_${item.variantSku || ''}`)
+    );
+    this.items = this.cartService.getCart().map(item => {
+      const key = `${item.productId || item.productSku || item.slug || item.id}_${item.variantSku || ''}`;
+      return {
+        ...item,
+        selected: Boolean(item.selected) || selectedKeys.has(key),
+      };
+    });
+    if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
   }
 
   loadCart(): void {
-    const rawCart = this.cartService.getCart();
-    if (rawCart && rawCart.length > 0) {
-      this.items = rawCart.map(item => ({
-        ...item,
-        selected: item['selected'] !== false
-      }));
-    } else {
-      // Dùng dữ liệu mẫu như trong hình thiết kế nếu giỏ hàng hiện tại trống
-      this.items = [...this.sampleItems];
-    }
+    this.items = this.cartService.getCart().map(item => ({
+      ...item,
+      selected: false,
+    }));
+    if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+  }
+
+  get allSelected(): boolean {
+    return this.items.length > 0 && this.items.every(item => item.selected);
   }
 
   toggleSelect(item: CartDisplayItem): void {
     item.selected = !item.selected;
+    this.persistSelection();
+  }
+
+  toggleSelectAll(): void {
+    const selected = !this.allSelected;
+    this.items.forEach(item => item.selected = selected);
+    this.persistSelection();
+  }
+
+  private persistSelection(): void {
+    this.cartService.saveCart(this.items);
   }
 
   changeQty(item: CartDisplayItem, delta: number): void {
-    const newQty = (item.quantity || 1) + delta;
-    if (newQty < 1) {
-      this.removeItem(item);
-      return;
-    }
-    item.quantity = newQty;
+    const nextQuantity = item.quantity + delta;
+    const stock = this.stock(item);
+    if (nextQuantity < 1 || (delta > 0 && stock > 0 && nextQuantity > stock)) return;
     this.cartService.changeQuantity(item, delta);
+    item.quantity = nextQuantity;
+  }
+
+  stock(item: CartDisplayItem): number {
+    return Number(item.variants?.find(variant => variant.sku === item.variantSku)?.stock ?? 0);
+  }
+
+  isVariantDropdownOpen(item: CartDisplayItem): boolean {
+    return this.openVariantItem === item;
+  }
+
+  toggleVariantDropdown(item: CartDisplayItem, event: MouseEvent): void {
+    event.stopPropagation();
+    this.openVariantItem = this.openVariantItem === item ? null : item;
+  }
+
+  selectVariant(item: CartDisplayItem, variantSku: string, event: MouseEvent): void {
+    event.stopPropagation();
+    const variant = item.variants?.find(option => option.sku === variantSku);
+    if (!variant) return;
+    this.openVariantItem = null;
+    if (this.cartService.changeVariant(item, variant, item.quantity)) this.loadCart();
+  }
+
+  selectedVariantLabel(item: CartDisplayItem): string {
+    return item.variants?.find(variant => variant.sku === item.variantSku)?.label || item.variantLabel || 'Chọn phân loại';
+  }
+
+  @HostListener('document:click')
+  closeVariantDropdown(): void {
+    this.openVariantItem = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  closeVariantDropdownOnEscape(): void {
+    this.openVariantItem = null;
   }
 
   removeItem(item: CartDisplayItem): void {
-    this.items = this.items.filter(i => i !== item);
-    this.cartService.changeQuantity(item, -item.quantity);
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = this.totalPages;
-    }
+    this.cartService.removeItem(item);
+    this.loadCart();
   }
 
   get totalPages(): number {
@@ -109,11 +130,7 @@ export class CartComponent implements OnInit {
   }
 
   get pages(): number[] {
-    const list: number[] = [];
-    for (let i = 1; i <= this.totalPages; i++) {
-      list.push(i);
-    }
-    return list;
+    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
   }
 
   get pagedItems(): CartDisplayItem[] {
@@ -122,41 +139,65 @@ export class CartComponent implements OnInit {
   }
 
   setPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
+    if (page >= 1 && page <= this.totalPages) this.currentPage = page;
+  }
+
+  unitSalePrice(item: CartDisplayItem): number {
+    return Number(item.price) || 0;
+  }
+
+  unitOriginalPrice(item: CartDisplayItem): number {
+    const oldPrice = Number(item.oldPrice) || 0;
+    return oldPrice > this.unitSalePrice(item) ? oldPrice : this.unitSalePrice(item);
+  }
+
+  lineDiscount(item: CartDisplayItem): number {
+    return Math.max(0, this.unitOriginalPrice(item) - this.unitSalePrice(item)) * item.quantity;
+  }
+
+  lineOriginalTotal(item: CartDisplayItem): number {
+    return this.unitOriginalPrice(item) * item.quantity;
+  }
+
+  get selectedItems(): CartDisplayItem[] {
+    return this.items.filter(item => item.selected);
   }
 
   get selectedSubtotal(): number {
-    return this.items
-      .filter(item => item.selected)
-      .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return this.selectedItems.reduce((sum, item) => sum + this.lineOriginalTotal(item), 0);
+  }
+
+  get productDiscount(): number {
+    return this.selectedItems.reduce((sum, item) => sum + this.lineDiscount(item), 0);
   }
 
   get shippingFee(): number {
-    return 0; // Free
+    return this.selectedItems.length ? this.defaultShippingFee : 0;
   }
 
   get total(): number {
-    return this.selectedSubtotal + this.shippingFee;
+    return Math.max(0, this.selectedSubtotal - this.productDiscount + this.shippingFee);
   }
 
   formatPrice(num: number): string {
-    return (num || 0).toLocaleString('vi-VN') + 'đ';
+    return new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(num || 0) + ' ₫';
   }
 
   proceedToCheckout(): void {
-    const selected = this.items.filter(item => item.selected);
-    if (selected.length === 0) {
-      alert('Vui lòng chọn ít nhất một sản phẩm để tiến hành thanh toán.');
-      return;
-    }
-    // Lưu các sản phẩm đã chọn vào sessionStorage để trang thanh toán đọc
-    sessionStorage.setItem('checkout_items', JSON.stringify(selected));
-    this.router.navigate(['/checkout']);
+    if (!this.selectedItems.length) return;
+    const checkoutItems = this.selectedItems.map(item => ({
+      ...item,
+      price: this.unitOriginalPrice(item),
+      oldPrice: this.unitOriginalPrice(item),
+      productDiscount: this.lineDiscount(item),
+      total: this.lineOriginalTotal(item),
+    }));
+    sessionStorage.setItem('checkout_items', JSON.stringify(checkoutItems));
+    sessionStorage.setItem('checkout_shipping_fee', String(this.defaultShippingFee));
+    void this.router.navigate(['/checkout']);
   }
 
   continueShopping(): void {
-    this.router.navigate(['/products']);
+    void this.router.navigate(['/products']);
   }
 }

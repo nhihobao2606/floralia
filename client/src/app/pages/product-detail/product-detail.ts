@@ -1,4 +1,4 @@
-﻿import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../services/product-service';
@@ -7,6 +7,7 @@ import { CartService } from '../../services/cart-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { Products } from '../../classes/Products';
+import { BuyNowService } from '../../services/buy-now-service';
 
 interface ProductVariant {
   sku: string;
@@ -101,10 +102,20 @@ export class ProductDetail implements OnInit {
     readonly productNavigation: ProductNavigationService,
     readonly cartService: CartService,
     private readonly wishlistService: WishlistService,
+    private readonly buyNowService: BuyNowService,
   ) {}
 
   ngOnInit(): void {
     this.syncReviewAccount();
+    this.productService.productsChanges$
+      ?.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const currentSlug = this.route.snapshot.paramMap.get('productSlug') || this.route.snapshot.paramMap.get('slug') || this.product?.slug;
+        if (currentSlug) {
+          this.refreshProductFromServer(currentSlug);
+        }
+      });
+
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -152,13 +163,15 @@ export class ProductDetail implements OnInit {
     const navigationState = window.history.state as {
       product?: ProductDetails;
       products?: ProductDetails[];
+      selectedVariantSku?: string;
     } | undefined;
     const navigationProduct = navigationState?.product;
+    const preferredVariantSku = navigationState?.selectedVariantSku;
     const navigationProducts = Array.isArray(navigationState?.products)
       ? navigationState.products
       : null;
     const cachedProducts = this.productService.getCachedProducts();
-    const initialProduct = (navigationProduct?.slug === slug || navigationProduct?.sku === slug || (navigationProduct as any)?.id === slug || (navigationProduct as any)?._id === slug) && navigationProduct?.isActive !== false
+    const initialProduct = (navigationProduct?.slug === slug || navigationProduct?.sku === slug || (navigationProduct as any)?.id === slug || (navigationProduct as any)?._id === slug) && navigationProduct?.status !== 'inactive'
       ? navigationProduct
       : null;
 
@@ -174,7 +187,7 @@ export class ProductDetail implements OnInit {
     this.loading = !initialProduct;
     this.errorMessage = '';
     if (initialProduct) {
-      this.setProduct(initialProduct);
+      this.setProduct(initialProduct, preferredVariantSku);
     } else {
       this.product = null;
     }
@@ -188,7 +201,7 @@ export class ProductDetail implements OnInit {
           : [];
         this.allProducts = products;
         this.relatedProductsLoading = false;
-        const product = products.find((item) => (item.slug === slug || item.sku === slug || (item as any)._id === slug || (item as any).id === slug) && item.isActive !== false);
+        const product = products.find((item) => (item.slug === slug || item.sku === slug || (item as any)._id === slug || (item as any).id === slug));
 
         if (!product) {
           if (!initialProduct) {
@@ -198,7 +211,8 @@ export class ProductDetail implements OnInit {
           return;
         }
 
-        this.setProduct(product);
+        this.setProduct(product, preferredVariantSku);
+        this.changeDetector.markForCheck();
       },
       error: (error: unknown) => {
         if (requestId !== this.productLoadRequestId) return;
@@ -213,8 +227,38 @@ export class ProductDetail implements OnInit {
     });
   }
 
-  private setProduct(product: ProductDetails): void {
-    const sameProduct = this.product?.slug === product.slug;
+  private refreshProductFromServer(slug: string): void {
+    const requestId = ++this.productLoadRequestId;
+    this.productService.getAll().subscribe({
+      next: (response: unknown) => {
+        if (requestId !== this.productLoadRequestId) return;
+        const products = Array.isArray(response) ? (response as ProductDetails[]) : [];
+        this.allProducts = products;
+        const product = products.find(
+          (item) =>
+            item.slug === slug ||
+            item.sku === slug ||
+            (item as any)._id === slug ||
+            (item as any).id === slug ||
+            (this.product?._id && (item as any)._id === this.product._id) ||
+            (this.product?.sku && item.sku === this.product.sku),
+        );
+        if (product) {
+          this.errorMessage = '';
+          this.setProduct(product);
+          this.changeDetector.markForCheck();
+        }
+      },
+    });
+  }
+
+  private setProduct(product: ProductDetails, preferredVariantSku?: string): void {
+    const sameProduct = Boolean(
+      this.product &&
+      ((this.product._id && product._id && this.product._id === product._id) ||
+        (this.product.sku && product.sku && this.product.sku === product.sku) ||
+        (this.product.slug && product.slug && this.product.slug === product.slug)),
+    );
     this.product = product;
     this.favorite = this.isProductFavorite(product);
     if (!sameProduct) {
@@ -228,10 +272,22 @@ export class ProductDetail implements OnInit {
       this.activeTab = 'info';
       this.loadReviews(product.sku || '');
       this.selectedVariant =
+        (preferredVariantSku ? product.variants?.find((variant) => variant.sku === preferredVariantSku) : undefined) ??
         product.variants?.find((variant) => variant.isDefault) ??
         product.variants?.[0] ??
         null;
       this.quantity = 1;
+    } else if (product.variants?.length) {
+      const targetSku = preferredVariantSku || this.selectedVariant?.sku;
+      this.selectedVariant =
+        product.variants.find((variant) => variant.sku === targetSku) ??
+        product.variants.find((variant) => variant.isDefault) ??
+        product.variants[0] ??
+        null;
+      this.quantity = Math.min(this.quantity, Math.max(this.currentStock, 1));
+    } else {
+      this.selectedVariant = null;
+      this.quantity = Math.min(this.quantity, Math.max(this.currentStock, 1));
     }
     this.galleryImages = this.getGalleryImages(product);
     if (!this.galleryImages.includes(this.activeImage)) {
@@ -398,6 +454,9 @@ export class ProductDetail implements OnInit {
   }
 
   get currentStock(): number {
+    if (this.product?.status === 'out-of-stock' || this.product?.status === 'inactive' || this.product?.isActive === false) {
+      return 0;
+    }
     return Number(this.selectedVariant?.stock ?? this.product?.stock ?? 0);
   }
 
@@ -615,30 +674,12 @@ export class ProductDetail implements OnInit {
 
   buyNow(): void {
     if (!this.product) return;
-    const variant = this.selectedVariant;
-    const price = Number(variant?.price ?? this.product.price ?? this.product.minPrice ?? 0);
-    const qty = Math.max(1, this.quantity || 1);
-    const image = this.activeImage || this.productImage(this.product);
-
-    this.cartService.addProduct(this.product, variant, qty, image);
-
-    const checkoutItem = {
-      id: variant?.sku || this.product.sku || this.product._id || 'PROD',
-      productId: this.product._id || this.product.id || this.product.sku,
-      sku: variant?.sku || this.product.sku || 'PROD',
-      name: this.product.name,
-      title: this.product.name,
-      image: image,
-      thumbnail: image,
-      variant: variant?.label || '',
-      variantLabel: variant?.label || '',
-      price: price,
-      quantity: qty,
-      total: price * qty
-    };
-    sessionStorage.setItem('checkout_items', JSON.stringify([checkoutItem]));
-
-    this.router.navigate(['/checkout']);
+    this.buyNowService.open(
+      this.product,
+      this.activeImage || this.productImage(this.product),
+      this.selectedVariant,
+      this.quantity,
+    );
   }
 
   isProductFavorite(product: ProductDetails): boolean {

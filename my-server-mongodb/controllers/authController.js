@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const PasswordResetService = require('../services/password-reset-service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -150,6 +151,67 @@ async function login(req, res) {
     }
 }
 
+// POST /api/auth/forgot-password
+async function forgotPassword(req, res) {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Email không hợp lệ.'
+        });
+    }
+
+    try {
+        await PasswordResetService.requestPasswordReset(email);
+        res.json({
+            success: true,
+            message: 'Nếu email này đã đăng ký, hướng dẫn đặt lại mật khẩu sẽ được gửi đến hộp thư của bạn.'
+        });
+    } catch (err) {
+        console.error('Lỗi gửi email đặt lại mật khẩu:', err);
+        res.status(503).json({
+            success: false,
+            message: 'Chưa thể gửi email đặt lại mật khẩu. Vui lòng thử lại sau.'
+        });
+    }
+}
+
+// POST /api/auth/reset-password
+async function resetPassword(req, res) {
+    const token = String(req.body.token || '').trim();
+    const password = String(req.body.password || '');
+
+    if (!/^[a-f0-9]{64}$/i.test(token)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.'
+        });
+    }
+    if (!PASS_RE.test(password)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Mật khẩu tối thiểu 8 ký tự, gồm cả chữ và số.'
+        });
+    }
+
+    try {
+        const updated = await PasswordResetService.resetPassword(token, password);
+        if (!updated) {
+            return res.status(400).json({
+                success: false,
+                message: 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.'
+            });
+        }
+        res.json({ success: true, message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập.' });
+    } catch (err) {
+        console.error('Lỗi đặt lại mật khẩu:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Không thể cập nhật mật khẩu lúc này. Vui lòng thử lại.'
+        });
+    }
+}
+
 // Middleware kiểm tra đăng nhập
 function requireAuth(req, res, next) {
     const header = req.headers.authorization || '';
@@ -169,9 +231,33 @@ function requireAuth(req, res, next) {
     }
 }
 
+async function requireAdmin(req, res, next) {
+    try {
+        const user = await User.getById(req.userId);
+
+        if (!user || user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Bạn không có quyền thực hiện thao tác này.'
+            });
+        }
+
+        next();
+    } catch (error) {
+        console.error('Lỗi xác thực quyền quản trị:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Không thể xác thực quyền quản trị.'
+        });
+    }
+}
+
 module.exports = {
     signup,
     login,
+    forgotPassword,
+    resetPassword,
     requireAuth,
+    requireAdmin,
     toPublicUser
 };

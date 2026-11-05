@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
 
 @Component({
@@ -23,7 +23,8 @@ export class Login {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   togglePassword(): void {
@@ -90,7 +91,7 @@ export class Login {
           window.dispatchEvent(new Event('cart-updated'));
 
           alert('Đăng nhập thành công!');
-          this.router.navigate(['/']);
+          this.navigateAfterLogin();
         } else {
           this.errorMessage = result.message || 'Email hoặc mật khẩu không chính xác.';
         }
@@ -107,6 +108,19 @@ export class Login {
     });
   }
 
+  private navigateAfterLogin(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (returnUrl?.startsWith('/') && !returnUrl.startsWith('//')) {
+      try {
+        void this.router.navigateByUrl(this.router.parseUrl(returnUrl));
+        return;
+      } catch {
+        // Invalid return URLs fall back to the homepage.
+      }
+    }
+    void this.router.navigate(['/']);
+  }
+
   // Đăng nhập bằng mạng xã hội (chưa nối API).
   socialLogin(provider: 'google' | 'facebook'): void {
     this.errorMessage = '';
@@ -119,6 +133,7 @@ export class Login {
 
   forgotPassword(): void {
     this.errorMessage = '';
-    this.notice = 'Chức năng quên mật khẩu hiện chưa được triển khai.';
+    this.notice = '';
+    void this.router.navigate(['/forgot-password']);
   }
 }

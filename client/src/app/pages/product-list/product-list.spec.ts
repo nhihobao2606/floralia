@@ -45,4 +45,35 @@ describe('ProductListComponent', () => {
     expect(component.filteredProducts).toHaveLength(1);
     expect(component.filteredProducts[0].subCategory).toBe('Nguyên chất');
   });
+
+  it('filters products by the benefit selected from the homepage', () => {
+    component.products = [
+      {
+        sku: 'TEA-1',
+        slug: 'tea-1',
+        name: 'Trà thanh lọc',
+        category: 'Trà thảo mộc',
+        categorySlug: 'tra-thao-moc',
+        price: 100000,
+        benefits: ['thanh-loc'],
+        tags: [],
+      } as any,
+      {
+        sku: 'TEA-2',
+        slug: 'tea-2',
+        name: 'Trà dưỡng nhan',
+        category: 'Trà thảo mộc',
+        categorySlug: 'tra-thao-moc',
+        price: 100000,
+        benefits: ['duong-nhan'],
+        tags: [],
+      } as any,
+    ];
+    component.selectedTag = 'Thanh lọc – Mát gan';
+
+    component.applyFilters();
+
+    expect(component.filteredProducts.map(product => product.sku)).toEqual(['TEA-1']);
+  });
 });
+

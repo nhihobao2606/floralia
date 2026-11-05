@@ -7,6 +7,7 @@ import { ProductNavigationService } from '../../services/product-navigation-serv
 import { CartService } from '../../services/cart-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { Products } from '../../classes/Products';
+import { BuyNowService } from '../../services/buy-now-service';
 
 @Component({
   selector: 'app-product-list',
@@ -29,7 +30,6 @@ export class ProductListComponent implements OnInit {
   selectedTag: string = '';
   currentPage = 1;
   wishlist = new Set<string>();
-  buyNowProduct: Products | null = null;
   cartPopupProduct: Products | null = null;
   cartPopupVariant: Products['variants'][number] | null = null;
   cartPopupQuantity = 1;
@@ -49,7 +49,8 @@ export class ProductListComponent implements OnInit {
     { label: '600.000đ - 1.000.000đ', value: '600000-1000000' }
   ];
 
-  benefitsList = [
+  private allBenefits: Array<{ label: string; values: string[]; parentSlugs?: string[] }> = [];
+  benefitsList: Array<{ label: string; values: string[]; parentSlugs?: string[] }> = [
     { label: 'Thanh lọc – Mát gan', values: ['thanh-loc', 'mat-gan'] },
     { label: 'Dưỡng nhan – Cân bằng nội tiết', values: ['duong-nhan', 'can-bang-noi-tiet'] },
     { label: 'Thanh tâm – Dưỡng thần', values: ['thanh-tam', 'duong-than'] },
@@ -66,6 +67,7 @@ export class ProductListComponent implements OnInit {
     private changeDetector: ChangeDetectorRef,
     readonly cartService: CartService,
     private readonly wishlistService: WishlistService,
+    readonly buyNowService: BuyNowService,
   ) {}
 
   get pageSize(): number {
@@ -140,33 +142,91 @@ export class ProductListComponent implements OnInit {
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncCategoryFromRoute());
-    this.fetchProducts();
+    this.route.queryParamMap.subscribe(params => {
+      this.selectedCategory = params.get('category') || 'all';
+        const benefitSlug = this.normalizeSlug(params.get('congdung') || '');
+        this.selectedTag = this.benefitsList.find(benefit =>
+          benefit.values.some(value => this.normalizeSlug(value) === benefitSlug)
+        )?.label ?? '';
+        this.applyFilters();
+        this.changeDetector.markForCheck();
+      });
+    this.productService.productsChanges$
+      ?.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadPublicCategories();
+        this.fetchProducts(false);
+      });
+    this.loadPublicCategories();
+    this.fetchProducts(true);
+  }
+
+  private loadPublicCategories(): void {
+    this.productService.getCategories().subscribe({
+      next: (res) => {
+        if (Array.isArray(res?.mainCategories)) {
+          this.categories = res.mainCategories.map((cat) => ({ name: cat.name, slug: cat.slug }));
+        }
+        if (Array.isArray(res?.benefits)) {
+          this.allBenefits = res.benefits.map((b) => ({
+            label: b.label,
+            values: b.values?.length ? b.values : [b.slug],
+            parentSlugs: b.parentSlugs || [],
+          }));
+          this.syncBenefitsForSelectedCategory();
+        }
+        this.applyFilters();
+        this.changeDetector.markForCheck();
+      },
+      error: () => {},
+    });
+  }
+
+  private syncBenefitsForSelectedCategory(): void {
+    if (this.selectedCategory === 'all') {
+      this.benefitsList = [...this.allBenefits];
+      return;
+    }
+    const matching = this.allBenefits.filter(
+      (b) => !b.parentSlugs?.length || b.parentSlugs.includes(this.selectedCategory)
+    );
+    this.benefitsList = matching.length ? matching : [...this.allBenefits];
   }
 
   private syncCategoryFromRoute(): void {
     this.selectedCategory = this.route.snapshot.queryParamMap.get('category') || 'all';
     this.selectedSubCategory = this.route.snapshot.queryParamMap.get('subCategory') || '';
+    this.syncBenefitsForSelectedCategory();
     this.applyFilters();
     this.changeDetector.markForCheck();
   }
 
-  fetchProducts(): void {
-    this.loading = true;
+  fetchProducts(showSpinner = true): void {
+    if (showSpinner && !this.products.length) {
+      this.loading = true;
+    }
+    const savedPage = this.currentPage;
     this.productService.getProducts().subscribe({
       next: (data) => {
         this.products = data || [];
         
-        // Gán giá hiển thị mặc định từ variants cho từng sản phẩm
+        // Gán giá hiển thị mặc định (thấp nhất) từ variants cho từng sản phẩm
         this.products.forEach((p: any) => {
           if (p.variants && p.variants.length > 0) {
-            const defaultVar = p.variants.find((v: any) => v.isDefault) || p.variants[0];
-            p.price = defaultVar ? defaultVar.price : 0;
+            const lowestVar = p.variants.reduce((minVar: any, curVar: any) =>
+              (curVar.price ?? 0) < (minVar.price ?? 0) ? curVar : minVar, p.variants[0]
+            );
+            p.price = lowestVar ? lowestVar.price : 0;
+            p.oldPrice = lowestVar ? (lowestVar.oldPrice ?? p.oldPrice ?? 0) : (p.oldPrice ?? 0);
           } else if (!p.price) {
             p.price = 0;
           }
         });
 
         this.applyFilters();
+        if (!showSpinner) {
+          this.currentPage = Math.min(savedPage, this.totalPages);
+        }
         this.loading = false;
         this.changeDetector.markForCheck();
       },
@@ -185,13 +245,20 @@ export class ProductListComponent implements OnInit {
 
   onSelectCategory(slug: string): void {
     this.selectedCategory = slug;
+    this.syncBenefitsForSelectedCategory();
     this.selectedSubCategory = '';
     this.applyFilters();
-    void this.router.navigate(['/products'], {
+    this.selectedTag = '';
+    this.applyFilters();
+    this.router.navigate([], {
+      relativeTo: this.route,
       queryParams: {
         category: slug === 'all' ? null : slug,
         subCategory: null,
+        congdung: null,
       },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
@@ -201,8 +268,15 @@ export class ProductListComponent implements OnInit {
     this.selectedPriceRange = 'all';
     this.selectedTag = '';
     this.applyFilters();
-    void this.router.navigate(['/products'], {
-      queryParams: { category: null, subCategory: null },
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        category: null,
+        subCategory: null,
+        congdung: null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
@@ -214,6 +288,13 @@ export class ProductListComponent implements OnInit {
   onSelectTag(tag: string): void {
     this.selectedTag = this.selectedTag === tag ? '' : tag; // Toggle chọn / bỏ chọn
     this.applyFilters();
+    const benefit = this.benefitsList.find(item => item.label === this.selectedTag);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { congdung: benefit?.values[0] ?? null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   goToPage(page: number): void {
@@ -233,17 +314,72 @@ export class ProductListComponent implements OnInit {
   }
 
   hasStock(product: Products): boolean {
+    if (product.status === 'out-of-stock' || product.status === 'inactive' || product.isActive === false) {
+      return false;
+    }
     return product.variants?.length
       ? product.variants.some((variant) => variant.stock > 0)
       : product.stock > 0;
   }
 
+  getMatchingVariants(product: Products): Products['variants'] {
+    const variants = product.variants ?? [];
+    if (!variants.length) return [];
+    if (this.selectedPriceRange === 'all') return variants;
+    const [min, max] = this.selectedPriceRange.split('-').map(Number);
+    const matched = variants.filter((variant) => {
+      const price = variant.price ?? 0;
+      return price >= min && price <= max;
+    });
+    return matched.length ? matched : variants;
+  }
+
+  getDisplayVariant(product: Products): Products['variants'][number] | null {
+    const matching = this.getMatchingVariants(product);
+    if (!matching.length) return null;
+    const inStockMatching = matching.filter((variant) => (variant.stock ?? 0) > 0);
+    const pool = inStockMatching.length ? inStockMatching : matching;
+    return pool.reduce((lowest, variant) =>
+      (variant.price ?? 0) < (lowest.price ?? 0) ? variant : lowest, pool[0]
+    );
+  }
+
+  shouldShowFromPrefix(product?: Products): boolean {
+    return this.selectedPriceRange === 'all' && (product?.variants?.length ?? 0) > 1;
+  }
+
+  getDisplayVariantLabel(product: Products): string {
+    return this.getDisplayVariant(product)?.label || '';
+  }
+
+  getDisplayPrice(product: Products): number {
+    return this.getDisplayVariant(product)?.price ?? product.price ?? 0;
+  }
+
+  getDisplayOldPrice(product: Products): number {
+    const variant = this.getDisplayVariant(product);
+    const price = this.getDisplayPrice(product);
+    const oldPrice = variant ? Number(variant.oldPrice ?? 0) : Number(product.oldPrice ?? 0);
+    return oldPrice > price ? oldPrice : 0;
+  }
+
+  getDisplayDiscount(product: Products): number {
+    const price = this.getDisplayPrice(product);
+    const oldPrice = this.getDisplayOldPrice(product);
+    if (oldPrice > price && oldPrice > 0) {
+      return Math.round((1 - price / oldPrice) * 100);
+    }
+    return !product.variants?.length && product.discount > 0 ? product.discount : 0;
+  }
+
   addToCart(product: Products): void {
-    this.buyNowProduct = null;
     this.cartPopupProduct = product;
+    const preferred = this.getDisplayVariant(product);
     this.cartPopupVariant =
+      (preferred && preferred.stock > 0 ? preferred : null) ??
       product.variants?.find((option) => option.isDefault && option.stock > 0) ??
       product.variants?.find((option) => option.stock > 0) ??
+      preferred ??
       product.variants?.find((option) => option.isDefault) ??
       product.variants?.[0] ??
       null;
@@ -292,34 +428,7 @@ export class ProductListComponent implements OnInit {
   }
 
   openBuyNowPopup(product: Products): void {
-    this.closeCartPopup();
-    const variant = product.variants?.find(v => (v.stock ?? 0) > 0) || product.variants?.[0] || null;
-    const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
-    const image = this.getProductImage(product);
-
-    this.cartService.addProduct(product, variant, 1, image);
-
-    const checkoutItem = {
-      id: variant?.sku || product.sku || product._id || 'PROD',
-      productId: product._id || product.id || product.sku,
-      sku: variant?.sku || product.sku || 'PROD',
-      name: product.name,
-      title: product.name,
-      image: image,
-      thumbnail: image,
-      variant: variant?.label || '',
-      variantLabel: variant?.label || '',
-      price: price,
-      quantity: 1,
-      total: price
-    };
-    sessionStorage.setItem('checkout_items', JSON.stringify([checkoutItem]));
-
-    this.router.navigate(['/checkout']);
-  }
-
-  closeBuyNowPopup(): void {
-    this.buyNowProduct = null;
+    this.buyNowService.open(product, this.getProductImage(product), this.getDisplayVariant(product));
   }
 
   isWished(product: Products): boolean {
@@ -387,12 +496,19 @@ export class ProductListComponent implements OnInit {
       const matchSubCategory = !this.selectedSubCategory ||
         this.normalizeSlug(item.subCategory ?? '') === this.selectedSubCategory.toLowerCase();
 
-      // 2. Lọc theo Giá
+      // 2. Lọc theo Giá (xét tất cả các phân loại của sản phẩm theo giá bán đã giảm)
       let matchPrice = true;
       if (this.selectedPriceRange !== 'all') {
         const [min, max] = this.selectedPriceRange.split('-').map(Number);
-        const itemPrice = item.price ?? 0;
-        matchPrice = itemPrice >= min && itemPrice <= max;
+        if (item.variants?.length) {
+          matchPrice = item.variants.some((variant) => {
+            const vPrice = variant.price ?? 0;
+            return vPrice >= min && vPrice <= max;
+          });
+        } else {
+          const itemPrice = item.price ?? 0;
+          matchPrice = itemPrice >= min && itemPrice <= max;
+        }
       }
 
       // 3. Lọc theo Tag Công dụng

@@ -1,6 +1,28 @@
-﻿<!-- Banner -->
-<section class="banner">
-  <img src="/assets/images/thanhloc.jpg" alt="Banner Floralia Tea" loading="lazy">
+<!-- Banner -->
+<nav class="shop-breadcrumb" aria-label="Điều hướng">
+  <a routerLink="/home">Trang chủ</a>
+  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+  <span>Sản phẩm</span>
+</nav>
+
+<section class="shop-hero">
+  <div class="container shop-hero-inner">
+    <div class="shop-hero-copy">
+      <span class="shop-eyebrow"><i aria-hidden="true"></i> FLORALIA TEA</span>
+      <h1>Khám phá thế giới trà thảo mộc</h1>
+      <p>Chào mừng bạn đến với Floralia. Tìm thức trà tự nhiên phù hợp với khẩu vị, nhu cầu và những phút giây thư thái của riêng mình.</p>
+    </div>
+    <div class="shop-hero-art" aria-hidden="true">
+      <span class="shop-art-ring ring-one"></span>
+      <span class="shop-art-ring ring-two"></span>
+      <svg viewBox="0 0 220 250" role="presentation">
+        <path d="M27 235C80 194 72 142 116 110S149 49 194 18" />
+        <path d="M75 181C37 181 28 151 39 133C67 137 83 155 75 181ZM93 135C89 102 113 87 134 96C135 121 117 139 93 135ZM133 82C104 65 112 37 132 27C152 44 153 65 133 82ZM127 111C156 106 171 125 168 148C146 155 128 139 127 111Z" />
+        <path d="M40 138C52 152 64 168 75 181M130 99C116 110 104 123 93 135M130 31C133 49 134 66 133 82M165 145C153 133 140 121 127 111" />
+      </svg>
+      <span class="shop-art-dot dot-one"></span><span class="shop-art-dot dot-two"></span>
+    </div>
+  </div>
 </section>
 
 <main class="shop-section">
@@ -126,8 +148,8 @@
         <div id="product-list" class="product-grid" *ngIf="!loading">
           <div class="product-card" *ngFor="let item of paginatedProducts">
             <div class="product-img">
-             <span class="sale-badge" *ngIf="item.isSale || item.discount > 0">-{{ item.discount }}%</span>
-             <a [routerLink]="productNavigation.detailRoute(item)" [state]="{ product: item, products: products }">
+             <span class="sale-badge" *ngIf="getDisplayDiscount(item) > 0">-{{ getDisplayDiscount(item) }}%</span>
+             <a [routerLink]="productNavigation.detailRoute(item)" [state]="{ product: item, products: products, selectedVariantSku: getDisplayVariant(item)?.sku }">
                <img [src]="getProductImage(item)" [alt]="item.name">
              </a>
              <span class="out-of-stock-overlay" *ngIf="!hasStock(item)">HẾT HÀNG</span>
@@ -143,17 +165,23 @@
             </div>
 
             <div class="product-info">
-             <a [routerLink]="productNavigation.detailRoute(item)" [state]="{ product: item, products: products }" class="sale-name">{{ item.name }}</a>
+             <a [routerLink]="productNavigation.detailRoute(item)" [state]="{ product: item, products: products, selectedVariantSku: getDisplayVariant(item)?.sku }" class="sale-name">{{ item.name }}</a>
 
              <div class="sale-rating" [attr.aria-label]="'Đánh giá ' + formatRatingAverage(item.ratingAverage) + ' trên 5 sao'">
                <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi"
                   [ngClass]="star <= getRoundedRatingAverage(item.ratingAverage) ? 'bi-star-fill' : 'bi-star'"></i>
                <small>{{ formatRatingAverage(item.ratingAverage) }} ({{ item.ratingCount || 0 }})</small>
              </div>
+             <div class="sale-meta-row">
+               <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ item.sold || 0 }}</div>
+               <span class="sale-variant-pill" *ngIf="getDisplayVariantLabel(item)">{{ getDisplayVariantLabel(item) }}</span>
+             </div>
 
              <div class="sale-price">
-               <span class="sale-current">{{ item.price | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
-               <span class="sale-old" *ngIf="item.oldPrice">{{ item.oldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+               <span class="sale-current">
+                 <small class="price-from-prefix" *ngIf="shouldShowFromPrefix(item)">Từ </small>{{ getDisplayPrice(item) | currency:'VND':'symbol':'1.0-0':'vi' }}
+               </span>
+               <span class="sale-old" *ngIf="getDisplayOldPrice(item) > 0">{{ getDisplayOldPrice(item) | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
              </div>
 
              <div class="product-actions">

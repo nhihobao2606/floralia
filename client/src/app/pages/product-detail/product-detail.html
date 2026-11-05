@@ -76,6 +76,8 @@
             <span class="rating-divider"></span>
             <span>{{ displayedRatingCount }} đánh giá</span>
             <span class="rating-divider"></span>
+            <span class="detail-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ item.sold || 0 }}</span>
+            <span class="rating-divider"></span>
             <span>SKU: {{ currentSku }}</span>
           </div>
 
@@ -132,7 +134,7 @@
           <div class="quick-details">
             <p *ngIf="item.category"><i class="bi bi-tag"></i><strong>Danh mục:</strong> {{ item.category }}</p>
             <p *ngIf="item.benefits?.length || item.tags?.length">
-              <i class="bi bi-flower1"></i><strong>Công dụng:</strong>
+              <i class="bi bi-flower1"></i><strong>Tags:</strong>
               {{ (item.tags?.length ? item.tags : item.benefits)?.join(', ') }}
             </p>
             <p *ngIf="item.flavorNote"><i class="bi bi-cup-hot"></i><strong>Hương vị:</strong> {{ item.flavorNote }}</p>
@@ -179,9 +181,9 @@
           <dl class="detail-table">
             <div class="detail-row"><dt>Mã sản phẩm</dt><dd>{{ currentSku || '—' }}</dd></div>
             <div class="detail-row" *ngIf="item.category"><dt>Danh mục</dt><dd>{{ item.category }}</dd></div>
-            <div class="detail-row" *ngIf="item.subCategory"><dt>Phân loại</dt><dd>{{ item.subCategory }}</dd></div>
+            <div class="detail-row" *ngIf="item.subCategory"><dt>Phân loại sản phẩm</dt><dd>{{ item.subCategory }}</dd></div>
             <div class="detail-row" *ngIf="item.isMix !== undefined"><dt>Sản phẩm mix</dt><dd>{{ item.isMix ? 'Có' : 'Không' }}</dd></div>
-            <div class="detail-row" *ngIf="selectedVariant?.type"><dt>Phân loại</dt><dd>{{ formatVariantType(selectedVariant?.type || '') }}</dd></div>
+            <div class="detail-row" *ngIf="selectedVariant?.type"><dt>Hình thức đóng gói</dt><dd>{{ formatVariantType(selectedVariant?.type || '') }}</dd></div>
             <div class="detail-row" *ngIf="selectedVariant?.weightGram || item.weightGram">
               <dt>Khối lượng</dt><dd>{{ selectedVariant?.weightGram || item.weightGram }}g</dd>
             </div>
@@ -190,7 +192,7 @@
             <div class="detail-row" *ngIf="item.color"><dt>Màu sắc</dt><dd>{{ item.color }}</dd></div>
             <div class="detail-row" *ngIf="item.brand"><dt>Thương hiệu</dt><dd>{{ item.brand }}</dd></div>
             <div class="detail-row" *ngIf="item.shelfLifeMonths"><dt>Hạn sử dụng</dt><dd>{{ item.shelfLifeMonths }} tháng</dd></div>
-            <div class="detail-row"><dt>Tình trạng</dt><dd>{{ currentStock > 0 ? (item.status || 'Còn hàng') : 'Tạm hết hàng' }}</dd></div>
+            <div class="detail-row"><dt>Tình trạng</dt><dd>{{ currentStock > 0 ? 'Đang kinh doanh' : 'Tạm hết hàng' }}</dd></div>
             <div class="detail-row"><dt>Tồn kho phân loại đang chọn</dt><dd>{{ currentStock }}</dd></div>
           </dl>
         </div>
@@ -334,6 +336,7 @@
                 </i>
                 <span>{{ formatRatingAverage(related.ratingAverage) }} ({{ related.ratingCount || 0 }})</span>
               </div>
+              <div class="related-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ related.sold || 0 }}</div>
               <div class="related-action-row">
                 <strong>{{ formatPrice(getRelatedPrice(related)) }}</strong>
                 <button

@@ -5,6 +5,7 @@ import { ProductService } from '../../services/product-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { CartItem, CartVariant, CartService } from '../../services/cart-service';
 import { Products } from '../../classes/Products';
+import { GUEST_TRACKED_ORDER_KEY } from '../../services/order-service';
 
 @Component({
   selector: 'app-header2',
@@ -33,6 +34,8 @@ export class Header2 implements OnInit, OnDestroy {
   variantPickerLoading = false;
   variantPickerError = '';
   private variantPickerRequestId = 0;
+  guestTrackedOrderId: string | null = null;
+  itemPendingRemoval: CartItem | null = null;
 
   // Giao diện
   scrolled = false;
@@ -50,6 +53,7 @@ export class Header2 implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.loadGuestTrackedOrder();
     this.loadCart();
     this.onScroll();
 
@@ -58,6 +62,7 @@ export class Header2 implements OnInit, OnDestroy {
         if (e instanceof NavigationEnd) {
           this.searchOpen = false;
           this.closeCart();
+          this.loadGuestTrackedOrder();
           this.loadCart();
         }
       })
@@ -102,8 +107,14 @@ export class Header2 implements OnInit, OnDestroy {
 
   @HostListener('window:storage')
   @HostListener('window:cart-updated')
+  @HostListener('window:guest-order-tracked')
   onStorageChange(): void {
+    this.loadGuestTrackedOrder();
     this.loadCart();
+  }
+
+  private loadGuestTrackedOrder(): void {
+    this.guestTrackedOrderId = localStorage.getItem(GUEST_TRACKED_ORDER_KEY);
   }
 
   scrollTop(): void {
@@ -274,6 +285,17 @@ export class Header2 implements OnInit, OnDestroy {
 
   removeItem(item: any): void {
     this.cartService.removeItem(item);
+  }
+
+  requestItemRemoval(item: CartItem): void {
+    this.itemPendingRemoval = item;
+  }
+
+  confirmItemRemoval(): void {
+    if (!this.itemPendingRemoval) return;
+    this.removeItem(this.itemPendingRemoval);
+    this.itemPendingRemoval = null;
+    this.loadCart();
   }
 
   openVariantPicker(item: CartItem): void {

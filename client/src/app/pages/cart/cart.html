@@ -1,61 +1,89 @@
-<div class="cart-page">
-
-  <!-- TOP TEA BANNER -->
-  <div class="top-banner-wrap">
-    <img src="/assets/images/tea-banner.png" alt="Floralia Herbal Tea" class="banner-img">
-  </div>
-
+<main class="cart-page">
   <div class="container cart-container">
+    <header class="page-heading">
+      <p class="eyebrow">FLORALIA HERBAL TEA</p>
+      <h1>Giỏ hàng</h1>
+      <p class="heading-note">Kiểm tra sản phẩm và phân loại trước khi thanh toán.</p>
+    </header>
 
-    <!-- PAGE TITLE -->
-    <h1 class="page-title">Giỏ hàng</h1>
+    <div class="cart-layout" *ngIf="items.length; else emptyCart">
+      <section class="cart-list-panel" aria-label="Sản phẩm trong giỏ hàng">
+        <div class="cart-panel-heading">
+          <h2>Sản phẩm của bạn</h2>
+          <span>{{ items.length }} sản phẩm</span>
+        </div>
 
-    <!-- 2-COLUMNS CART LAYOUT -->
-    <div class="cart-layout">
-
-      <!-- Left Column: Items Table -->
-      <div class="cart-main">
-        <div class="cart-table-card">
+        <div class="cart-table-wrap">
           <table class="cart-table">
             <thead>
               <tr>
-                <th class="th-prod">SẢN PHẨM</th>
-                <th class="th-price">GIÁ</th>
-                <th class="th-qty">SỐ LƯỢNG</th>
-                <th class="th-total">THÀNH TIỀN</th>
-                <th class="th-check"></th>
+                <th class="check-column">
+                  <input type="checkbox" class="cart-check" [checked]="allSelected" (change)="toggleSelectAll()" aria-label="Chọn tất cả sản phẩm">
+                </th>
+                <th class="product-column">Sản phẩm</th>
+                <th class="price-column">Giá gốc</th>
+                <th class="quantity-column">Số lượng</th>
+                <th class="total-column">Thành tiền</th>
+                <th class="action-column">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let it of pagedItems" [class.unselected]="!it.selected">
-                <!-- Product info -->
-                <td class="td-prod">
-                  <div class="prod-cell">
-                    <img [src]="it.image || it.thumbnail" [alt]="it.name || it.title" (error)="it.image = '/assets/images/no-image.svg'">
-                    <span class="prod-name">{{ it.name || it.title }}</span>
+                <td class="check-column">
+                  <input type="checkbox" class="cart-check" [checked]="it.selected" (change)="toggleSelect(it)" [attr.aria-label]="'Chọn ' + (it.name || it.title)">
+                </td>
+                <td class="product-column">
+                  <div class="cart-product">
+                    <a *ngIf="it.slug; else imageWithoutLink" [routerLink]="productNavigation.detailRoute(it.slug)" class="cart-product-image">
+                      <img [src]="it.image || it.thumbnail || '/assets/images/no-image.svg'" [alt]="it.name || it.title" loading="lazy">
+                    </a>
+                    <ng-template #imageWithoutLink>
+                      <span class="cart-product-image"><img [src]="it.image || it.thumbnail || '/assets/images/no-image.svg'" [alt]="it.name || it.title" loading="lazy"></span>
+                    </ng-template>
+                    <div class="cart-product-info">
+                      <a *ngIf="it.slug; else nameWithoutLink" class="product-name" [routerLink]="productNavigation.detailRoute(it.slug)">{{ it.name || it.title }}</a>
+                      <ng-template #nameWithoutLink><span class="product-name">{{ it.name || it.title }}</span></ng-template>
+                      <div class="variant-picker" *ngIf="it.variants?.length">
+                        <span>Phân loại</span>
+                        <div class="variant-select-wrap">
+                          <button type="button" class="variant-select-trigger"
+                                  [attr.aria-label]="'Chọn phân loại cho ' + (it.name || it.title)"
+                                  aria-haspopup="listbox" [attr.aria-expanded]="isVariantDropdownOpen(it)"
+                                  (click)="toggleVariantDropdown(it, $event)">
+                            <span>{{ selectedVariantLabel(it) }}</span>
+                            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                          </button>
+                          <div class="variant-options" *ngIf="isVariantDropdownOpen(it)" role="listbox" [attr.aria-label]="'Các phân loại của ' + (it.name || it.title)" (click)="$event.stopPropagation()">
+                            <button *ngFor="let variant of it.variants" type="button" class="variant-option"
+                                    role="option" [class.selected]="variant.sku === it.variantSku"
+                                    [attr.aria-selected]="variant.sku === it.variantSku"
+                                    [disabled]="(variant.stock || 0) < 1"
+                                    (click)="selectVariant(it, variant.sku || '', $event)">
+                              <span>{{ variant.label }}</span>
+                              <small *ngIf="(variant.stock || 0) < 1">Hết hàng</small>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <span class="variant-label" *ngIf="!it.variants?.length && it.variantLabel">Phân loại: {{ it.variantLabel }}</span>
+                    </div>
                   </div>
                 </td>
-
-                <!-- Unit Price -->
-                <td class="td-price">{{ formatPrice(it.price) }}</td>
-
-                <!-- Quantity Stepper -->
-                <td class="td-qty">
-                  <div class="qty-stepper">
-                    <button type="button" class="btn-qty" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
-                    <span class="qty-num">{{ it.quantity }}</span>
-                    <button type="button" class="btn-qty" (click)="changeQty(it, 1)" aria-label="Tăng">+</button>
+                <td class="price-column">
+                  <span class="original-price">{{ formatPrice(unitOriginalPrice(it)) }}</span>
+                  <span class="sale-price" *ngIf="lineDiscount(it) > 0">Giá ưu đãi {{ formatPrice(unitSalePrice(it)) }}</span>
+                </td>
+                <td class="quantity-column">
+                  <div class="quantity-stepper">
+                    <button type="button" (click)="changeQty(it, -1)" [disabled]="it.quantity <= 1" [attr.aria-label]="'Giảm số lượng ' + (it.name || it.title)">−</button>
+                    <span>{{ it.quantity }}</span>
+                    <button type="button" (click)="changeQty(it, 1)" [disabled]="stock(it) > 0 && it.quantity >= stock(it)" [attr.aria-label]="'Tăng số lượng ' + (it.name || it.title)">+</button>
                   </div>
                 </td>
-
-                <!-- Line Total -->
-                <td class="td-total">{{ formatPrice(it.price * it.quantity) }}</td>
-
-                <!-- Checkbox circle -->
-                <td class="td-check">
-                  <button type="button" class="check-circle-btn" [class.checked]="it.selected" (click)="toggleSelect(it)">
-                    <i class="bi bi-check-circle-fill" *ngIf="it.selected"></i>
-                    <i class="bi bi-circle" *ngIf="!it.selected"></i>
+                <td class="total-column"><strong>{{ formatPrice(lineOriginalTotal(it)) }}</strong></td>
+                <td class="action-column">
+                  <button type="button" class="remove-button" (click)="removeItem(it)" [attr.aria-label]="'Xóa ' + (it.name || it.title)">
+                    <i class="bi bi-trash3" aria-hidden="true"></i><span>Xóa</span>
                   </button>
                 </td>
               </tr>
@@ -63,61 +91,51 @@
           </table>
         </div>
 
-        <!-- Table Bottom: Continue Shopping & Pagination -->
-        <div class="table-bottom-bar">
-          <button type="button" class="btn-continue" (click)="continueShopping()">
-            « Tiếp tục mua hàng
+        <div class="cart-list-footer">
+          <button type="button" class="continue-button" (click)="continueShopping()">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> Tiếp tục mua sắm
           </button>
-
-          <div class="pagination-bar" *ngIf="totalPages > 1">
-            <button type="button" class="page-arrow" [disabled]="currentPage === 1" (click)="setPage(currentPage - 1)">
-              <i class="bi bi-chevron-left"></i>
+          <nav class="pagination" *ngIf="totalPages > 1" aria-label="Phân trang giỏ hàng">
+            <button type="button" class="page-arrow" [disabled]="currentPage === 1" (click)="setPage(currentPage - 1)" aria-label="Trang trước">
+              <i class="bi bi-chevron-left" aria-hidden="true"></i>
             </button>
-            <button
-              type="button"
-              *ngFor="let p of pages"
-              class="page-num"
-              [class.active]="currentPage === p"
-              (click)="setPage(p)"
-            >
-              {{ p }}
+            <button type="button" *ngFor="let page of pages" [class.active]="currentPage === page" (click)="setPage(page)">{{ page }}</button>
+            <button type="button" class="page-arrow" [disabled]="currentPage === totalPages" (click)="setPage(currentPage + 1)" aria-label="Trang sau">
+              <i class="bi bi-chevron-right" aria-hidden="true"></i>
             </button>
-            <button type="button" class="page-arrow" [disabled]="currentPage === totalPages" (click)="setPage(currentPage + 1)">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-          </div>
+          </nav>
         </div>
-      </div>
+      </section>
 
-      <!-- Right Column: Summary Card -->
-      <aside class="cart-summary-side">
+      <aside class="cart-summary" aria-label="Tổng giỏ hàng">
         <div class="summary-card">
-          <h2 class="sum-title">Tổng giỏ hàng</h2>
-
-          <div class="sum-row">
-            <span class="sum-label">Tạm tính:</span>
-            <span class="sum-val">{{ formatPrice(selectedSubtotal) }}</span>
-          </div>
-
-          <div class="sum-row">
-            <span class="sum-label">Phí vận chuyển:</span>
-            <span class="sum-val">{{ shippingFee === 0 ? 'Free' : formatPrice(shippingFee) }}</span>
-          </div>
-
-          <div class="sum-divider"></div>
-
-          <div class="sum-row total-row">
-            <span class="sum-label-total">Thành tiền:</span>
-            <strong class="sum-val-total">{{ formatPrice(total) }}</strong>
-          </div>
-
-          <button type="button" class="btn-checkout" (click)="proceedToCheckout()">
-            Tiến hành thanh toán
+          <p class="summary-eyebrow">ĐƠN HÀNG CỦA BẠN</p>
+          <h2>Tổng giỏ hàng</h2>
+          <div class="summary-row"><span>Đã chọn</span><strong>{{ selectedItems.length }} sản phẩm</strong></div>
+          <div class="summary-row"><span>Tạm tính (giá gốc)</span><strong>{{ formatPrice(selectedSubtotal) }}</strong></div>
+          <div class="summary-row discount-row"><span><i class="bi bi-tag" aria-hidden="true"></i> Giảm giá sản phẩm</span><strong>−{{ formatPrice(productDiscount) }}</strong></div>
+          <div class="summary-row"><span>Phí vận chuyển</span><strong>{{ formatPrice(shippingFee) }}</strong></div>
+          <div class="summary-divider"></div>
+          <div class="summary-total"><span>Thành tiền</span><strong>{{ formatPrice(total) }}</strong></div>
+          <button type="button" class="checkout-button" [disabled]="selectedItems.length === 0" (click)="proceedToCheckout()">
+            Tiến hành thanh toán <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </button>
+          <p class="shipping-note"><i class="bi bi-truck" aria-hidden="true"></i> Phí giao hàng cố định 30.000đ</p>
         </div>
       </aside>
-
     </div>
 
+    <ng-template #emptyCart>
+      <section class="empty-cart">
+        <span class="empty-cart-icon"><i class="bi bi-bag" aria-hidden="true"></i></span>
+        <h2>Giỏ hàng đang trống</h2>
+        <p>Hãy chọn những sản phẩm trà bạn yêu thích để bắt đầu đơn hàng.</p>
+        <button type="button" class="checkout-button empty-shop-button" (click)="continueShopping()">Khám phá sản phẩm</button>
+      </section>
+    </ng-template>
   </div>
-</div>
+
+  <div class="cart-notification" *ngIf="cartService.cartMessage()" role="status" aria-live="polite">
+    <i class="bi bi-bag-check" aria-hidden="true"></i><span>{{ cartService.cartMessage() }}</span>
+  </div>
+</main>

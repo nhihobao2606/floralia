@@ -12,7 +12,7 @@
 
         <!-- Email -->
         <div class="form-field">
-          <label for="loginEmail">Email</label>
+          <label for="loginEmail">Email <span class="req">*</span></label>
           <div class="input-wrapper"
                [class.is-invalid]="emailCtrl.invalid && (emailCtrl.touched || loginForm.submitted)"
                [class.is-valid]="emailCtrl.valid && emailCtrl.touched">
@@ -34,7 +34,7 @@
 
         <!-- Mật khẩu -->
         <div class="form-field">
-          <label for="loginPassword">Mật khẩu</label>
+          <label for="loginPassword">Mật khẩu <span class="req">*</span></label>
           <div class="input-wrapper"
                [class.is-invalid]="passCtrl.invalid && (passCtrl.touched || loginForm.submitted)"
                [class.is-valid]="passCtrl.valid && passCtrl.touched">

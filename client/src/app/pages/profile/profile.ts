@@ -10,6 +10,7 @@ import { NgControl, NgForm } from '@angular/forms';
   styleUrl: './profile.css',
 })
 export class Profile implements OnInit {
+  showLogoutConfirm = false;
   private readonly API = 'http://localhost:3002/api/users';
 
   // Menu bên trái
@@ -284,5 +285,15 @@ export class Profile implements OnInit {
     window.dispatchEvent(new Event('cart-updated'));
     window.dispatchEvent(new Event('auth-changed'));
     this.router.navigate(['/login']);
+  }
+
+  requestLogout(e: Event): void {
+    e.preventDefault();
+    this.showLogoutConfirm = true;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
+    this.logout();
   }
 }

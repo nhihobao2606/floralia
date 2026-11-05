@@ -64,6 +64,7 @@
 
 .form-field { margin-bottom: 18px; }
 .form-field label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; }
+.req { color: #e0352b; font-weight: 700; margin-left: 2px; }
 
 .input-wrapper { position: relative; display: flex; align-items: center; }
 .input-wrapper > i:first-child {

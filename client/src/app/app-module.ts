@@ -29,6 +29,9 @@ import { SupportPage } from './pages/support/support-page';
 import { ContactPage } from './pages/contact/contact-page';
 import { MixTeaPage } from './pages/mix-tea/mix-tea-page';
 import { WishlistPage } from './pages/wishlist/wishlist-page';
+import { LogoutConfirmation } from './components/logout-confirmation/logout-confirmation';
+import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
+import { PasswordRecovery } from './pages/password-recovery/password-recovery';
 
 registerLocaleData(localeVi);
 
@@ -58,6 +61,8 @@ registerLocaleData(localeVi);
     ContactPage,
     MixTeaPage,
     WishlistPage,
+    LogoutConfirmation,
+    Pagenotfound,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [provideBrowserGlobalErrorListeners(), { provide: LOCALE_ID, useValue: 'vi' }],

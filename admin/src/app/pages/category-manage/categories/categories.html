@@ -1,0 +1,197 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <main class="admin-main">
+    <header class="topbar">
+      <h1>Quản lý danh mục</h1>
+      <div class="admin-account">
+        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+        <span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span>
+        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <section class="welcome-card">
+        <div>
+          <p class="welcome-kicker">KHÔNG GIAN DANH MỤC FLORALIA</p>
+          <h2>Quản lý danh mục</h2>
+          <p>Quản lý danh mục chính và danh mục con theo công dụng của Floralia Tea và theo dõi số lượng sản phẩm.</p>
+        </div>
+        <div class="welcome-actions">
+          <button class="primary-button" type="button" (click)="createCategory()"><i class="bi bi-plus-lg"></i> Thêm danh mục </button>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Thống kê danh mục">
+        <article class="stat-card">
+          <span class="stat-icon main-icon"><i class="bi bi-check-circle"></i></span>
+          <div>
+            <span class="stat-label">Danh mục chính</span>
+            <strong>{{ stats.main }}</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon sub-icon"><i class="bi bi-flower2"></i></span>
+          <div>
+            <span class="stat-label">Danh mục con (Công dụng)</span>
+            <strong>{{ stats.sub }}</strong>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon hidden-icon"><i class="bi bi-eye-slash"></i></span>
+          <div>
+            <span class="stat-label">Đang ẩn</span>
+            <strong>{{ stats.hidden }}</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="categories-card">
+        <div class="list-toolbar">
+          <label class="search-box">
+            <i class="bi bi-search"></i>
+            <input #searchInput type="search" [value]="searchText" (input)="onSearch(searchInput.value)" placeholder="Tìm tên hoặc mã danh mục...">
+          </label>
+          <app-custom-select ariaLabel="Lọc cấp danh mục" placeholder="Tất cả cấp danh mục" [options]="levelOptions" [(ngModel)]="levelFilter" (ngModelChange)="onFilterChange()"></app-custom-select>
+          <app-custom-select ariaLabel="Lọc trạng thái" placeholder="Tất cả trạng thái" [options]="statusOptions" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()"></app-custom-select>
+          <button class="reset-button" type="button" (click)="resetFilters()">Đặt lại</button>
+        </div>
+
+        <p class="action-error" *ngIf="actionError">{{ actionError }}</p>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã DM</th>
+                <th>Tên danh mục</th>
+                <th>Cấp</th>
+                <th>Số SP</th>
+                <th>Hiển thị</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="listError && categories.length === 0">
+                <td colspan="6" class="table-state error-state">
+                  {{ listError }}
+                  <button class="retry-button" type="button" (click)="retryLoading()">Thử tải lại</button>
+                </td>
+              </tr>
+              <tr *ngIf="!listError && categories.length === 0">
+                <td colspan="6" class="table-state">Không tìm thấy danh mục phù hợp.</td>
+              </tr>
+              <tr *ngFor="let category of categories" [class.main-row]="category.level === 'main'" [class.sub-row]="category.level === 'sub'">
+                <td class="code-cell">{{ category.code }}</td>
+                <td class="name-cell" [class.sub-name-cell]="category.level === 'sub'">
+                  <button
+                    *ngIf="category.level === 'main' && hasChildren(category)"
+                    type="button"
+                    class="collapse-btn"
+                    [attr.aria-label]="isCollapsed(category) ? 'Mở rộng ' + category.name : 'Thu gọn ' + category.name"
+                    (click)="toggleCollapse(category)">
+                    <i class="bi" [class.bi-caret-down-fill]="!isCollapsed(category)" [class.bi-caret-right-fill]="isCollapsed(category)"></i>
+                  </button>
+                  <span *ngIf="category.level === 'sub'" class="tree-branch" aria-hidden="true">└</span>
+                  <strong>{{ category.name }}</strong>
+                </td>
+                <td>
+                  <span class="level-pill" [class.level-main]="category.level === 'main'" [class.level-sub]="category.level === 'sub'">
+                    {{ category.level === 'main' ? 'Danh mục chính' : 'Công dụng' }}
+                  </span>
+                </td>
+                <td class="count-cell"><strong>{{ category.productCount || 0 }}</strong></td>
+                <td class="visible-cell">
+                  <label class="visibility-checkbox" [attr.aria-label]="'Hiển thị ' + category.name" (click)="requestToggleVisibility($event, category)">
+                    <input type="checkbox" [checked]="category.visible" readonly>
+                    <span class="custom-check"><i class="bi bi-check-lg"></i></span>
+                  </label>
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button class="edit-button" type="button" (click)="editCategory(category)"><i class="bi bi-pencil"></i> Sửa</button>
+                    <button class="delete-button" type="button" (click)="requestDelete(category)"><i class="bi bi-trash"></i> Xóa</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer class="table-footer">
+          <span>Hiển thị {{ pageStart }}–{{ pageEnd }} / {{ total }} danh mục</span>
+          <nav class="pagination" aria-label="Phân trang">
+            <button type="button" aria-label="Trang trước" [disabled]="currentPage <= 1" (click)="goToPage(currentPage - 1)"><i class="bi bi-chevron-left"></i></button>
+            <button *ngFor="let page of pageNumbers" type="button" [class.current]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+            <button type="button" aria-label="Trang sau" [disabled]="currentPage >= totalPages" (click)="goToPage(currentPage + 1)"><i class="bi bi-chevron-right"></i></button>
+          </nav>
+        </footer>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div class="confirm-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()">
+  <section class="delete-dialog logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="logout-title" (click)="$event.stopPropagation()">
+    <span class="logout-icon"><i class="bi bi-box-arrow-right"></i></span>
+    <h2 id="logout-title">Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
+    <div class="dialog-actions">
+      <button type="button" class="cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button>
+      <button type="button" class="confirm-logout-button" (click)="confirmLogout()">Đăng xuất</button>
+    </div>
+  </section>
+</div>
+
+<div class="update-toast" *ngIf="toastMessage" role="status" aria-live="polite">
+  <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+  <span>{{ toastMessage }}</span>
+</div>
+
+<div class="confirm-backdrop" *ngIf="pendingVisibilityToggle as toggleTarget" (click)="cancelToggleVisibility()">
+  <section class="delete-dialog visibility-dialog" role="alertdialog" aria-modal="true" aria-labelledby="visibility-category-title" (click)="$event.stopPropagation()">
+    <h2 id="visibility-category-title">{{ toggleTarget.nextVisible ? 'Hiển thị danh mục' : 'Ẩn danh mục' }}</h2>
+    <div class="delete-category-summary" [class.visibility-show-summary]="toggleTarget.nextVisible">
+      <strong>{{ toggleTarget.category.name }}</strong>
+      <small>{{ toggleTarget.category.code }} · {{ toggleTarget.category.level === 'main' ? 'Danh mục chính' : 'Công dụng' }} · {{ toggleTarget.category.productCount || 0 }} sản phẩm</small>
+    </div>
+    <p class="delete-question">
+      <strong>{{ toggleTarget.nextVisible ? 'Bạn có chắc chắn muốn hiển thị danh mục này trên website?' : 'Bạn có chắc chắn muốn ẩn danh mục này khỏi website?' }}</strong>
+    </p>
+    <p class="delete-note" *ngIf="!toggleTarget.nextVisible">
+      Danh mục này sẽ tạm ẩn khỏi menu Sản phẩm và bộ lọc bên trang khách hàng.<ng-container *ngIf="toggleTarget.category.level === 'main'"> Các danh mục con thuộc "{{ toggleTarget.category.name }}" cũng sẽ được ẩn theo.</ng-container>
+    </p>
+    <p class="delete-note" *ngIf="toggleTarget.nextVisible">
+      Danh mục này sẽ xuất hiện lại trên menu Sản phẩm và bộ lọc bên trang khách hàng.<ng-container *ngIf="toggleTarget.category.level === 'main'"> Các danh mục con thuộc "{{ toggleTarget.category.name }}" cũng sẽ được hiển thị lại.</ng-container>
+    </p>
+    <p class="action-error" *ngIf="actionError">{{ actionError }}</p>
+    <div class="dialog-actions">
+      <button type="button" class="cancel-button" (click)="cancelToggleVisibility()">Hủy</button>
+      <button
+        type="button"
+        [class.confirm-logout-button]="toggleTarget.nextVisible"
+        [class.confirm-hide-button]="!toggleTarget.nextVisible"
+        (click)="confirmToggleVisibility()">
+        {{ toggleTarget.nextVisible ? 'Xác nhận hiển thị' : 'Xác nhận ẩn' }}
+      </button>
+    </div>
+  </section>
+</div>
+
+<div class="confirm-backdrop" *ngIf="pendingDelete as categoryToDelete" (click)="cancelDelete()">
+  <section class="delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-category-title" (click)="$event.stopPropagation()">
+    <h2 id="delete-category-title">Xóa danh mục</h2>
+    <div class="delete-category-summary">
+      <strong>{{ categoryToDelete.name }}</strong>
+      <small>{{ categoryToDelete.code }} · {{ categoryToDelete.level === 'main' ? 'Danh mục chính' : 'Công dụng' }} · {{ categoryToDelete.productCount || 0 }} sản phẩm</small>
+    </div>
+    <p class="delete-question"><strong>Bạn có chắc chắn muốn xóa danh mục này?</strong></p>
+    <p class="delete-note">Hành động này không thể hoàn tác. {{ categoryToDelete.productCount || 0 }} sản phẩm thuộc danh mục sẽ chuyển sang “Chưa phân loại”.</p>
+    <p class="action-error" *ngIf="actionError">{{ actionError }}</p>
+    <div class="dialog-actions">
+      <button type="button" class="cancel-button" [disabled]="deleting" (click)="cancelDelete()">Hủy</button>
+      <button type="button" class="confirm-delete-button" [disabled]="deleting" (click)="confirmDelete()">
+        {{ deleting ? 'Đang xóa...' : 'Xác nhận xóa' }}
+      </button>
+    </div>
+  </section>
+</div>

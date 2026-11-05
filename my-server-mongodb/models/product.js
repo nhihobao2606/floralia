@@ -1,4 +1,6 @@
 const { ObjectId } = require('mongodb');
+const Cart = require('./cart');
+const Category = require('./category');
 
 let productsCollection;
 let productAssetsCollection;
@@ -8,6 +10,10 @@ function setCollections(products, productAssets, reviews) {
     productsCollection = products;
     productAssetsCollection = productAssets;
     reviewsCollection = reviews;
+    if (products?.s?.db) {
+        Cart.setCollection(products.s.db.collection('Cart'));
+        Category.setCollection(products.s.db.collection('Categories'));
+    }
 }
 
 // Products
@@ -55,6 +61,13 @@ function getById(id) {
 
 function getBySku(sku) {
     return productsCollection.findOne({ sku });
+}
+
+function incrementSoldBySku(sku, quantity) {
+    return productsCollection.updateOne(
+        { $or: [{ sku }, { 'variants.sku': sku }] },
+        { $inc: { sold: quantity } }
+    );
 }
 
 // ProductAssets
@@ -142,6 +155,7 @@ module.exports = {
     getAll,
     getById,
     getBySku,
+    incrementSoldBySku,
     getAllAssets,
     getAssetsByThumbnails,
     getAssetImageById,

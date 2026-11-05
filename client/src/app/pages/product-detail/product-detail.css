@@ -308,6 +308,19 @@
   background: #d9dfd8;
 }
 
+.detail-sold {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #78877c;
+  font-size: 13px;
+}
+
+.detail-sold i {
+  color: #789879;
+  font-size: 14px;
+}
+
 .price-line {
   display: flex;
   align-items: baseline;
@@ -1233,6 +1246,20 @@
 
 .related-rating i {
   color: #e6a941;
+}
+
+.related-sold {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: -2px 0 2px;
+  color: #78877c;
+  font-size: 12px;
+}
+
+.related-sold i {
+  color: #789879;
+  font-size: 13px;
 }
 
 .related-info > strong {

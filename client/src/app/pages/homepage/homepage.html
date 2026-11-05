@@ -49,7 +49,7 @@
     <div class="need-list">
       <a *ngFor="let n of needs; let i = index"
          class="need-card" [ngClass]="'tone-' + (i % 5)"
-         routerLink="/sales" [queryParams]="{ congdung: n.slug }">
+         routerLink="/products" [queryParams]="{ congdung: n.slug }">
         <div class="need-img"><img [src]="n.img" [alt]="n.title" /></div>
         <h5>{{ n.title }}</h5>
         <span>{{ n.desc }}</span>
@@ -93,7 +93,7 @@
     </div>
 
     <div class="view-more">
-      <a routerLink="/sales" class="more-btn">Xem Thêm</a>
+      <a routerLink="/products" class="more-btn">Xem Thêm</a>
     </div>
   </div>
 </section>
@@ -132,19 +132,23 @@
     <p class="sub-title text-center">Những điều thú vị</p>
     <h2 class="heading text-center">Cảm hứng từ trà thảo mộc</h2>
 
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4 justify-content-center" *ngIf="!blogsLoading() && blogs().length > 0">
       <div class="col-md-6 col-lg-4" *ngFor="let b of blogs()">
         <article class="blog-card">
-          <a [routerLink]="b.link" class="blog-image"><img [src]="b.img" [alt]="b.title" /></a>
+          <a [routerLink]="['/blog', b.slug]" class="blog-image">
+            <img [src]="getBlogImg(b)" [alt]="b.title" loading="lazy" />
+          </a>
           <div class="blog-content">
             <span class="blog-date"><i class="bi bi-calendar3"></i> {{ b.date }}</span>
-            <a [routerLink]="b.link"><h3>{{ b.title }}</h3></a>
-            <p>{{ b.desc }}</p>
-            <a [routerLink]="b.link" class="blog-btn">Xem thêm</a>
+            <a [routerLink]="['/blog', b.slug]"><h3>{{ b.title }}</h3></a>
+            <p>{{ b.excerpt }}</p>
+            <a [routerLink]="['/blog', b.slug]" class="blog-btn">Xem thêm</a>
           </div>
         </article>
       </div>
     </div>
+    <p class="empty" *ngIf="blogsLoading()">Đang tải bài viết...</p>
+    <p class="empty" *ngIf="!blogsLoading() && blogs().length === 0">Chưa có bài viết nào.</p>
     <div class="view-more">
       <a routerLink="/blog" class="more-btn">
           Khám phá tất cả bài viết <i class="bi bi-arrow-right"></i>
@@ -158,7 +162,7 @@
   <div class="product-card">
     <div class="product-img">
       <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
-      <span class="sale-badge" *ngIf="hasDiscount(p)">-{{ getDiscount(p) }}%</span>
+      <span class="sale-badge" *ngIf="hasDiscount(p) || p.isSale || p.discount > 0">-{{ getDiscount(p) }}%</span>
       <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products() }">
         <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
       </a>
@@ -176,27 +180,68 @@
            [ngClass]="s <= getRating(p) ? 'bi-star-fill' : 'bi-star'"></i>
         <small>({{ getRatingCount(p) }})</small>
       </div>
+      <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ p.sold || 0 }}</div>
 
       <div class="sale-price">
         <span class="sale-current">{{ formatPrice(getProductPrice(p)) }}</span>
         <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
       </div>
 
-      <button type="button" class="sale-cart" [class.added]="addedSku() === p.sku" (click)="addToCart(p, $event)">
-        <i class="bi" [ngClass]="addedSku() === p.sku ? 'bi-check2' : 'bi-bag-plus'"></i>
-        {{ addedSku() === p.sku ? 'Đã thêm vào giỏ!' : 'Thêm vào giỏ hàng' }}
-      </button>
+      <div class="product-actions">
+        <button type="button" class="sale-cart-icon" [disabled]="!hasStock(p)"
+                [attr.aria-label]="'Thêm ' + getProductName(p) + ' vào giỏ hàng'"
+                title="Thêm vào giỏ hàng" (click)="addToCart(p, $event)">
+          <i class="bi bi-bag-plus" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="sale-buy-now" [disabled]="!hasStock(p)" (click)="buyNow(p)">
+          <i class="bi bi-lightning-charge" aria-hidden="true"></i> Mua ngay
+        </button>
+      </div>
     </div>
   </div>
 </ng-template>
 
-<!-- TOAST THÔNG BÁO TỰ ĐỘNG THÊM GIỎ HÀNG THÀNH CÔNG -->
-<div class="cart-floating-toast" *ngIf="addedProductMessage() as msg">
-  <div class="toast-left">
-    <i class="bi bi-check-circle-fill"></i>
-    <span>{{ msg }}</span>
-  </div>
-  <a routerLink="/cart" class="toast-link">Xem giỏ hàng</a>
+<div *ngIf="cartPopupProduct as product" class="cart-add-backdrop" (click)="closeCartPopup()">
+  <section class="cart-add-dialog" role="dialog" aria-modal="true" aria-labelledby="home-cart-add-title"
+           (click)="$event.stopPropagation()">
+    <button type="button" class="cart-add-close" aria-label="Đóng" (click)="closeCartPopup()">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+    <div class="cart-add-product">
+      <img [src]="getProductImage(product)" [alt]="getProductName(product)" />
+      <div>
+        <p class="cart-add-eyebrow">THÊM VÀO GIỎ HÀNG</p>
+        <h2 id="home-cart-add-title">{{ getProductName(product) }}</h2>
+        <strong>{{ cartPopupPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
+      </div>
+    </div>
+    <div class="cart-add-variants" *ngIf="product.variants?.length">
+      <h3>Phân loại</h3>
+      <div class="cart-add-variant-options">
+        <button *ngFor="let variant of product.variants" type="button" class="cart-add-variant"
+                [class.selected]="cartPopupVariant?.sku === variant.sku" [disabled]="variant.stock < 1"
+                [attr.aria-pressed]="cartPopupVariant?.sku === variant.sku" (click)="selectCartPopupVariant(variant)">
+          {{ variant.label }} <small *ngIf="variant.stock < 1">Hết hàng</small>
+        </button>
+      </div>
+    </div>
+    <p class="cart-add-stock">Kho: {{ cartPopupStock }}</p>
+    <div class="cart-add-footer">
+      <div class="cart-add-quantity" aria-label="Số lượng">
+        <button type="button" aria-label="Giảm số lượng" [disabled]="cartPopupQuantity <= 1" (click)="changeCartPopupQuantity(-1)">−</button>
+        <span aria-live="polite">{{ cartPopupQuantity }}</span>
+        <button type="button" aria-label="Tăng số lượng" [disabled]="cartPopupQuantity >= cartPopupStock" (click)="changeCartPopupQuantity(1)">+</button>
+      </div>
+      <button type="button" class="cart-add-confirm" [disabled]="cartPopupStock < 1" (click)="confirmAddToCart()">
+        <i class="bi bi-bag-plus" aria-hidden="true"></i> Thêm vào giỏ hàng
+      </button>
+    </div>
+  </section>
+</div>
+
+<div class="cart-notification" *ngIf="cartService.cartMessage()" role="status" aria-live="polite">
+  <i class="bi bi-bag-check" aria-hidden="true"></i>
+  <span>{{ cartService.cartMessage() }}</span>
 </div>
 
 <ng-template #skeleton>

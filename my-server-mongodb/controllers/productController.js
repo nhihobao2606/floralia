@@ -1,6 +1,7 @@
 const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
 const User = require('../models/user');
+const { normalizeClientProduct } = require('./clientProductController');
 
 // GET /products
 async function getProducts(req, res) {
@@ -8,19 +9,9 @@ async function getProducts(req, res) {
         const products = await Product.getAll();
 
         // Không tải dữ liệu ảnh ở API danh sách
-        const result = products.map(product => {
-            const thumbnail = product.thumbnail;
-            let imageId = thumbnail;
+        const result = products.map(normalizeClientProduct);
 
-            return {
-                ...product,
-                imageId: imageId ? String(imageId) : null,
-                imageUrl: imageId
-                    ? `/products/image/${encodeURIComponent(String(imageId))}`
-                    : null
-            };
-        });
-
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.json(result);
     } catch (error) {
         console.error('Lỗi lấy danh sách sản phẩm:', error);
@@ -181,12 +172,8 @@ async function getProductById(req, res) {
         }
 
         // Không trả dữ liệu ảnh Base64 trong response chi tiết
-        res.json({
-            ...product,
-            imageUrl: thumbnail
-                ? `/products/image/${encodeURIComponent(String(thumbnail))}`
-                : null
-        });
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+        res.json(normalizeClientProduct(product));
     } catch (error) {
         console.error('Lỗi lấy chi tiết sản phẩm:', error);
 

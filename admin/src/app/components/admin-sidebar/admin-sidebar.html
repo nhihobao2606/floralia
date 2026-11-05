@@ -1,0 +1,29 @@
+<aside class="admin-sidebar" [class.product-route]="isProductManagementRoute()">
+  <a class="sidebar-brand" routerLink="/articles" aria-label="Floralia Tea - quản trị">
+    <img src="/assets/logo.png" alt="Floralia Tea">
+  </a>
+
+  <nav class="sidebar-nav" aria-label="Menu quản trị">
+    <a
+      *ngFor="let item of menu"
+      class="sidebar-link"
+      [class.active]="!item.disabled"
+      [class.disabled]="item.disabled"
+      [routerLink]="item.disabled ? null : '/articles'"
+      [attr.aria-label]="item.label"
+      [attr.aria-disabled]="item.disabled"
+      [attr.title]="item.disabled ? 'Mục này sẽ được triển khai sau' : null">
+      <i [ngClass]="['bi', item.icon]" aria-hidden="true"></i>
+      <span>{{ item.label }}</span>
+    </a>
+    <a class="sidebar-link product-manage-shortcut" routerLink="/products" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" aria-label="Quản lý sản phẩm">
+      <i class="bi bi-box-seam" aria-hidden="true"></i>
+      <span>Quản lý sản phẩm</span>
+    </a>
+    <a class="sidebar-link category-manage-shortcut" routerLink="/categories" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" aria-label="Quản lý danh mục">
+      <i class="bi bi-folder2" aria-hidden="true"></i>
+      <span>Quản lý danh mục</span>
+    </a>
+  </nav>
+
+</aside>

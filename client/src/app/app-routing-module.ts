@@ -20,6 +20,9 @@ import { SupportPage } from './pages/support/support-page';
 import { ContactPage } from './pages/contact/contact-page';
 import { MixTeaPage } from './pages/mix-tea/mix-tea-page';
 import { WishlistPage } from './pages/wishlist/wishlist-page';
+import { authGuard } from './classes/auth.guard';
+import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
+import { PasswordRecovery } from './pages/password-recovery/password-recovery';
 
 const routes: Routes = [
   { path: '', component: Homepage, pathMatch: 'full' },
@@ -34,14 +37,16 @@ const routes: Routes = [
   { path: 'faq', component: SupportPage, data: { supportPage: 'faq' } },
   { path: 'contact', component: ContactPage },
   { path: 'mix-tra', component: MixTeaPage },
-  { path: 'wishlist', component: WishlistPage },
+  { path: 'wishlist', component: WishlistPage, canActivate: [authGuard] },
 
   // Tài khoản & Xác thực
   { path: 'login', component: Login },
+  { path: 'forgot-password', component: PasswordRecovery },
+  { path: 'reset-password', component: PasswordRecovery },
   { path: 'signup', component: Signup },
-  { path: 'account', component: Profile },
+  { path: 'account', component: Profile, canActivate: [authGuard] },
   { path: 'profile', redirectTo: 'account', pathMatch: 'full' },
-  { path: 'addresses', component: Addresses },
+  { path: 'addresses', component: Addresses, canActivate: [authGuard] },
 
   // Sản phẩm & Chi tiết sản phẩm
   { path: 'products', component: ProductListComponent },
@@ -58,15 +63,15 @@ const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent },
 
   // Đơn hàng của tôi, Chi tiết đơn hàng & Đặt hàng thành công
-  { path: 'orders', component: Orders },
-  { path: 'orders/:id', component: OrderDetail },
-  { path: 'order-history', component: Orders },
-  { path: 'order-detail/:id', component: OrderDetail },
+  { path: 'orders', component: Orders, canActivate: [authGuard] },
+  { path: 'orders/:id', component: OrderDetail, canActivate: [authGuard] },
+  { path: 'order-history', component: Orders, canActivate: [authGuard] },
+  { path: 'order-detail/:id', component: OrderDetail, canActivate: [authGuard] },
   { path: 'order-success', component: OrderSuccess },
   { path: 'order-success/:id', component: OrderSuccess },
 
   { path: ':categorySlug/:productSlug', component: ProductDetail },
-  { path: '**', redirectTo: '' },
+  { path: '**', component: Pagenotfound },
 ];
 
 @NgModule({

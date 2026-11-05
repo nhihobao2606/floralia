@@ -112,6 +112,7 @@
               <img [src]="it.image" [alt]="it.name" (error)="it.image = '/assets/images/no-image.svg'" class="item-img">
               <div class="item-meta">
                 <span class="item-name">{{ it.name }}</span>
+                <small class="item-discount" *ngIf="it.productDiscount">Đã giảm {{ formatPrice(it.productDiscount) }}</small>
                 <span class="item-qty">x{{ it.quantity }}</span>
               </div>
               <span class="item-total">{{ formatPrice(it.price * it.quantity) }}</span>

@@ -1,0 +1,227 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+
+  <main class="admin-main">
+    <header class="topbar">
+      <h1>Quản lý bài viết</h1>
+      <div class="admin-account">
+        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+        <span class="account-copy">
+          <strong>{{ adminName }}</strong>
+          <small>Quản trị viên</small>
+        </span>
+        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          Đăng xuất
+        </button>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <section class="welcome-card">
+        <div>
+          <p class="welcome-kicker">KHÔNG GIAN NỘI DUNG FLORALIA</p>
+          <h2>Chào mừng trở lại, {{ adminName }}</h2>
+          <p>Hôm nay bạn muốn chia sẻ câu chuyện trà thảo mộc nào với khách hàng?</p>
+        </div>
+        <button class="primary-button" type="button" (click)="openCreateModal()">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Thêm bài viết
+        </button>
+      </section>
+
+      <section class="stats-grid" aria-label="Thống kê bài viết">
+        <article class="stat-card">
+          <span class="stat-icon total-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Tổng bài viết</span><strong>{{ stats.total }}</strong></div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon published-icon"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Đã đăng</span><strong>{{ stats.published }}</strong></div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon draft-icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Bản nháp</span><strong>{{ stats.draft }}</strong></div>
+        </article>
+        <article class="stat-card">
+          <span class="stat-icon views-icon"><i class="bi bi-eye" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Lượt xem</span><strong>{{ stats.views | number }}</strong></div>
+        </article>
+      </section>
+
+      <section class="articles-card" aria-label="Danh sách bài viết">
+        <div class="list-toolbar">
+          <div class="filter-tabs" role="tablist" aria-label="Lọc trạng thái">
+            <button
+              *ngFor="let filter of filters"
+              type="button"
+              role="tab"
+              [attr.aria-selected]="activeFilter === filter.key"
+              [class.selected]="activeFilter === filter.key"
+              (click)="selectFilter(filter.key)">
+              {{ filter.label }}
+              <span class="tab-count">{{ filter.key === 'all' ? stats.total : stats[filter.key] }}</span>
+            </button>
+          </div>
+          <label class="search-box">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input
+              type="search"
+              [value]="searchText"
+              (input)="onSearchInput($any($event.target).value)"
+              placeholder="Tìm theo tiêu đề bài viết"
+              aria-label="Tìm kiếm bài viết">
+            <button *ngIf="searchText" type="button" class="clear-search" aria-label="Xóa tìm kiếm" (click)="onSearchInput('')">
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+          </label>
+        </div>
+
+        <div *ngIf="loadError" class="notice error-notice" role="alert">
+          <span>{{ loadError }}</span>
+          <button type="button" (click)="loadArticles()">Thử lại</button>
+        </div>
+        <div *ngIf="actionError" class="notice error-notice" role="alert">
+          <span>{{ actionError }}</span>
+          <button type="button" (click)="actionError = ''" aria-label="Đóng thông báo"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Mã</th>
+                <th scope="col">Tiêu đề bài viết</th>
+                <th scope="col">Danh mục</th>
+                <th scope="col">Ngày đăng</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col">Lượt xem</th>
+                <th scope="col" class="actions-heading">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="loading && articles.length === 0">
+                <td colspan="7" class="table-message"><span class="loading-spinner"></span> Đang tải dữ liệu từ máy chủ...</td>
+              </tr>
+              <tr *ngIf="!loading && !loadError && articles.length === 0">
+                <td colspan="7" class="table-message empty-message">
+                  <i class="bi bi-journal-x" aria-hidden="true"></i>
+                  <strong>Chưa có bài viết phù hợp</strong>
+                  <span>Thử đổi từ khóa hoặc trạng thái lọc.</span>
+                </td>
+              </tr>
+              <tr *ngFor="let article of articles">
+                <td class="article-id">{{ formatId(article._id) }}</td>
+                <td class="article-title">{{ article.title }}</td>
+                <td class="article-category">{{ article.category || 'Chưa phân loại' }}</td>
+                <td class="article-date">{{ formatDate(article.publishedAt) }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="'status-' + article.status">
+                    {{ statusLabel(article.status) }}
+                  </span>
+                </td>
+                <td class="article-views">{{ (article.views || 0) | number }}</td>
+                <td class="row-actions">
+                  <button class="icon-action edit-action" type="button" (click)="editArticle(article)" [attr.aria-label]="'Sửa ' + article.title">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                    <span>Sửa</span>
+                  </button>
+                  <button class="icon-action delete-action" type="button" (click)="deleteArticle(article)" [attr.aria-label]="'Xóa ' + article.title">
+                    <i class="bi bi-trash3" aria-hidden="true"></i>
+                    <span>Xóa</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="loading && articles.length > 0" class="table-loading-overlay" role="status" aria-live="polite">
+            <span class="loading-spinner"></span> Đang tải dữ liệu từ máy chủ...
+          </div>
+        </div>
+
+        <footer class="table-footer">
+          <span>Hiển thị {{ firstVisibleRow }}–{{ lastVisibleRow }} trong {{ total }} bài viết</span>
+          <nav class="pagination" aria-label="Phân trang bài viết">
+            <button type="button" [disabled]="currentPage <= 1 || loading" (click)="goToPage(currentPage - 1)" aria-label="Trang trước">
+              <i class="bi bi-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button
+              *ngFor="let page of pages"
+              type="button"
+              [class.current]="currentPage === page"
+              [attr.aria-current]="currentPage === page ? 'page' : null"
+              [disabled]="loading"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+            <button type="button" [disabled]="currentPage >= totalPages || loading" (click)="goToPage(currentPage + 1)" aria-label="Trang tiếp">
+              <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            </button>
+          </nav>
+        </footer>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div *ngIf="logoutConfirmationVisible" class="logout-confirm-backdrop" (click)="cancelLogoutConfirmation()">
+  <section
+    class="logout-confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="logoutConfirmTitle"
+    (click)="$event.stopPropagation()">
+    <span class="logout-confirm-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
+    <h2 id="logoutConfirmTitle">Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="logout-cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button>
+      <button type="button" class="logout-submit-button" (click)="confirmLogout()">Đăng xuất</button>
+    </div>
+  </section>
+</div>
+
+<div *ngIf="pendingDeleteArticle as article" class="delete-confirm-backdrop" (click)="cancelDelete()">
+  <section
+    class="delete-confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="deleteConfirmTitle"
+    aria-describedby="deleteConfirmDescription"
+    (click)="$event.stopPropagation()">
+    <span class="delete-confirm-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
+    <h2 id="deleteConfirmTitle">Bạn có chắc chắn muốn xóa bài viết này?</h2>
+    <p id="deleteConfirmDescription" class="delete-confirm-description">
+      Hành động này không thể hoàn tác. Bài viết sẽ bị gỡ khỏi website Floralia Tea.
+    </p>
+
+    <div class="delete-article-summary">
+      <div class="delete-article-code"><span>Mã bài viết</span><strong>BV-{{ formatId(article._id) }}</strong></div>
+      <p>{{ article.title }}</p>
+      <small>{{ article.category || 'Chưa phân loại' }} · {{ (article.views || 0) | number }} lượt xem</small>
+    </div>
+
+    <ul class="delete-consequences">
+      <li>Bài viết biến mất khỏi trang Blog của website.</li>
+      <li>Liên kết chia sẻ trước đó sẽ không còn truy cập được.</li>
+    </ul>
+
+    <label class="delete-acknowledgement">
+      <input type="checkbox" [(ngModel)]="deleteAcknowledged" [disabled]="deletingArticle">
+      <span class="delete-checkbox"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+      <span>Tôi hiểu và muốn xóa bài viết này</span>
+    </label>
+
+    <p *ngIf="deleteError" class="delete-confirm-error" role="alert">{{ deleteError }}</p>
+    <div class="delete-confirm-actions">
+      <button type="button" class="delete-cancel-button" [disabled]="deletingArticle" (click)="cancelDelete()">Hủy</button>
+      <button
+        type="button"
+        class="delete-submit-button"
+        [disabled]="!deleteAcknowledged || deletingArticle"
+        (click)="confirmDeleteArticle()">
+        <i *ngIf="!deletingArticle" class="bi bi-trash3" aria-hidden="true"></i>
+        <span>{{ deletingArticle ? 'Đang xóa...' : 'Xóa bài viết' }}</span>
+      </button>
+    </div>
+  </section>
+</div>

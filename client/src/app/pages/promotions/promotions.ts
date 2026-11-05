@@ -1,4 +1,3 @@
-import { Router } from '@angular/router';
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { ProductService } from '../../services/product-service';
 import { CartService } from '../../services/cart-service';
@@ -6,6 +5,7 @@ import { ProductNavigationService } from '../../services/product-navigation-serv
 import { Products } from '../../classes/Products';
 import { CouponItem, DEFAULT_COUPONS } from '../../classes/Coupon';
 import { WishlistService } from '../../services/wishlist-service';
+import { BuyNowService } from '../../services/buy-now-service';
 
 @Component({
   selector: 'app-promotions',
@@ -18,7 +18,9 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   specialPromos = signal<Products[]>([]);
   bigDeals = signal<Products[]>([]);
   loading = signal(true);
-  buyNowProduct: Products | null = null;
+  cartPopupProduct: Products | null = null;
+  cartPopupVariant: Products['variants'][number] | null = null;
+  cartPopupQuantity = 1;
 
   // Yêu thích
   wishlist = signal<Set<string>>(new Set());
@@ -45,8 +47,8 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     private productService: ProductService,
     readonly cartService: CartService,
     readonly productNavigation: ProductNavigationService,
-    private router: Router,
     private readonly wishlistService: WishlistService,
+    readonly buyNowService: BuyNowService,
   ) {}
 
   ngOnInit(): void {
@@ -218,47 +220,60 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   }
 
   addToCart(product: Products): void {
-    const variant =
+    if (!this.hasStock(product)) return;
+    this.cartPopupProduct = product;
+    this.cartPopupVariant =
       product.variants?.find((option) => option.isDefault && option.stock > 0) ??
       product.variants?.find((option) => option.stock > 0) ??
+      product.variants?.find((option) => option.isDefault) ??
+      product.variants?.[0] ??
       null;
+    this.cartPopupQuantity = 1;
+  }
 
-    this.cartService.addProduct(
+  closeCartPopup(): void {
+    this.cartPopupProduct = null;
+    this.cartPopupVariant = null;
+    this.cartPopupQuantity = 1;
+  }
+
+  selectCartPopupVariant(variant: Products['variants'][number]): void {
+    if (variant.stock < 1) return;
+    this.cartPopupVariant = variant;
+    this.cartPopupQuantity = Math.min(this.cartPopupQuantity, variant.stock);
+  }
+
+  changeCartPopupQuantity(delta: number): void {
+    const quantity = this.cartPopupQuantity + delta;
+    if (quantity >= 1 && quantity <= this.cartPopupStock) {
+      this.cartPopupQuantity = quantity;
+    }
+  }
+
+  get cartPopupStock(): number {
+    return this.cartPopupVariant?.stock ?? this.cartPopupProduct?.stock ?? 0;
+  }
+
+  get cartPopupPrice(): number {
+    return this.cartPopupVariant?.price ?? this.cartPopupProduct?.price ?? 0;
+  }
+
+  confirmAddToCart(): void {
+    const product = this.cartPopupProduct;
+    if (!product || this.cartPopupStock < 1) return;
+
+    if (this.cartService.addProduct(
       product,
-      variant,
-      1,
+      this.cartPopupVariant,
+      this.cartPopupQuantity,
       this.getProductImage(product),
-    );
+    )) {
+      this.closeCartPopup();
+    }
   }
 
   openBuyNowPopup(product: Products): void {
-    const variant = product.variants?.find(v => (v.stock ?? 0) > 0) || product.variants?.[0] || null;
-    const price = Number(variant?.price ?? product.price ?? product.minPrice ?? 0);
-    const image = this.getProductImage(product);
-
-    this.cartService.addProduct(product, variant, 1, image);
-
-    const checkoutItem = {
-      id: variant?.sku || product.sku || product._id || 'PROD',
-      productId: product._id || product.id || product.sku,
-      sku: variant?.sku || product.sku || 'PROD',
-      name: product.name,
-      title: product.name,
-      image: image,
-      thumbnail: image,
-      variant: variant?.label || '',
-      variantLabel: variant?.label || '',
-      price: price,
-      quantity: 1,
-      total: price
-    };
-    sessionStorage.setItem('checkout_items', JSON.stringify([checkoutItem]));
-
-    this.router.navigate(['/checkout']);
-  }
-
-  closeBuyNowPopup(): void {
-    this.buyNowProduct = null;
+    this.buyNowService.open(product, this.getProductImage(product));
   }
 
   isWished(product: Products): boolean {

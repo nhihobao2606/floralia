@@ -290,6 +290,11 @@
   color: var(--muted);
 }
 
+.item-discount {
+  color: #b65d6d;
+  font-size: 11px;
+}
+
 .item-total {
   font-size: 14px;
   font-weight: 600;
