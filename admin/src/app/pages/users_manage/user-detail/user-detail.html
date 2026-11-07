@@ -124,14 +124,14 @@
 
           <section class="orders-panel">
             <div class="tabs-row">
-              <button type="button" class="tab-button active" (click)="toggleTab('orders')">
+              <button type="button" class="tab-button" [class.active]="activeTab === 'orders'" (click)="toggleTab('orders')">
                 Lịch sử đơn hàng ({{ userOrders.length }})
               </button>
-              <button type="button" class="tab-button" (click)="toggleTab('vouchers')">
+              <button type="button" class="tab-button" [class.active]="activeTab === 'vouchers'" (click)="toggleTab('vouchers')">
                 Voucher đã dùng ({{ usedVoucherCodes.length }})
               </button>
 
-              <div class="search-box">
+              <div *ngIf="activeTab === 'orders'" class="search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" [value]="searchTerm" (input)="onSearchChange($any($event.target).value)" placeholder="Tìm theo mã đơn..." />
               </div>
@@ -154,7 +154,8 @@
                     <div class="cell code-cell">{{ order.id }}</div>
                     <div class="cell date-cell">{{ order.date }}</div>
                     <div class="cell product-cell">
-                      <span class="product-thumb {{ order.accent }}"></span>
+                      <img *ngIf="order.image; else noOrderImage" class="product-thumb" [src]="order.image" [alt]="order.title" loading="lazy" (error)="onOrderImageError(order)" />
+                      <ng-template #noOrderImage><span class="product-thumb product-thumb-placeholder" aria-hidden="true"><i class="bi bi-image"></i></span></ng-template>
                       <div class="product-copy">
                         <span>{{ order.title }}</span>
                         <small>{{ order.subtitle }}</small>
@@ -187,15 +188,31 @@
                 </div>
               </div>
             } @else {
-              <div class="voucher-empty">
-                @if (usedVoucherCodes.length) {
-                  <div class="tag-list">
-                    @for (code of usedVoucherCodes; track code) { <span class="tag">{{ code }}</span> }
+              <section class="used-vouchers" aria-label="Voucher đã sử dụng">
+                @if (usedVouchers.length) {
+                  <div class="voucher-list">
+                    @for (voucher of usedVouchers; track voucher.code) {
+                      <article class="used-voucher-card">
+                        <span class="voucher-icon"><i class="bi bi-ticket-perforated" aria-hidden="true"></i></span>
+                        <div class="voucher-main">
+                          <strong>{{ voucher.code }}</strong>
+                          <small>Đã dùng {{ voucher.usageCount }} lần · Lần cuối {{ voucher.lastUsed }}</small>
+                        </div>
+                        <div class="voucher-savings">
+                          <small>Tổng giảm</small>
+                          <strong>{{ formatCurrency(voucher.totalDiscount) }}</strong>
+                        </div>
+                      </article>
+                    }
                   </div>
                 } @else {
-                  <span>Chưa ghi nhận voucher đã dùng.</span>
+                  <div class="voucher-empty voucher-empty-state">
+                    <span class="voucher-empty-icon"><i class="bi bi-ticket-perforated" aria-hidden="true"></i></span>
+                    <strong>Chưa sử dụng voucher</strong>
+                    <small>Các mã giảm giá đã dùng sẽ xuất hiện tại đây.</small>
+                  </div>
                 }
-              </div>
+              </section>
             }
           </section>
         </div>
@@ -244,8 +261,7 @@
           }
         </select>
       </div>
-
-      <p *ngIf="statusMessage" class="modal-status-message" [class.error]="statusMessageType === 'error'" [class.success]="statusMessageType === 'success'" role="status">{{ statusMessage }}</p>
+      <p *ngIf="statusMessage && statusMessageType !== 'success'" class="modal-status-message" [class.error]="statusMessageType === 'error'" role="status">{{ statusMessage }}</p>
 
       <div class="modal-actions">
         <button type="button" class="cancel-button" (click)="closeLockModal()">Hủy</button>

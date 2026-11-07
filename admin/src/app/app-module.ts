@@ -1,6 +1,6 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterOutlet } from '@angular/router';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -21,6 +21,7 @@ import { AdminOrderDetail } from './pages/orders_manage/order-detail/order-detai
 import { AdminUsers } from './pages/users_manage/users/users';
 import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
 import { AdminUserForm } from './pages/users_manage/user-form/user-form';
+import { ApiOriginInterceptor } from './services/api-origin.interceptor';
 
 @NgModule({
   declarations: [App, Pagenotfound, ProductManage, Products, ProductEditor, Categories, CategoryEditor],
@@ -41,7 +42,10 @@ import { AdminUserForm } from './pages/users_manage/user-form/user-form';
     AdminUserDetail,
     AdminUserForm,
   ],
-  providers: [provideBrowserGlobalErrorListeners()],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    { provide: HTTP_INTERCEPTORS, useClass: ApiOriginInterceptor, multi: true },
+  ],
   bootstrap: [App],
 })
 export class AppModule {}

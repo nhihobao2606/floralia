@@ -34,7 +34,7 @@
       </header>
 
       <div class="mix-presets" aria-label="Gợi ý phối trà">
-        <button type="button" *ngFor="let preset of presets" (click)="applyPreset(preset)" [class.active]="isPresetSelected(preset)">
+        <button type="button" *ngFor="let preset of presets" (click)="applyPreset(preset)" [class.active]="isPresetSelected(preset)" [disabled]="!isPresetAvailable(preset)">
           <span>{{ preset.name }}</span><small>{{ preset.description }}</small><i class="bi bi-arrow-up-right" aria-hidden="true"></i>
         </button>
       </div>
@@ -43,12 +43,14 @@
         <div class="tea-choice-area">
           <div class="choice-heading"><span>01 / CHỌN CỐT TRÀ</span><span>{{ selectedSkus.length }} / {{ maxChoices }} cốt</span></div>
           <div class="tea-choice-grid">
-            <button type="button" class="tea-choice" *ngFor="let tea of teas" [class.selected]="isSelected(tea.sku)" [attr.aria-pressed]="isSelected(tea.sku)" (click)="toggleTea(tea.sku)">
-              <span class="tea-choice-image"><img [src]="'/assets/images/products/' + tea.image" [alt]="tea.name" loading="lazy"><span class="choice-check"><i class="bi bi-check2" aria-hidden="true"></i></span></span>
+            <button type="button" class="tea-choice" *ngFor="let tea of teas" [class.selected]="isSelected(tea.sku)" [class.unavailable]="!tea.available" [attr.aria-pressed]="isSelected(tea.sku)" [disabled]="!tea.available" (click)="toggleTea(tea.sku)">
+              <span class="tea-choice-image"><img [src]="tea.image" [alt]="tea.name" (error)="onImageError($event)" loading="lazy"><span class="choice-check"><i class="bi bi-check2" aria-hidden="true"></i></span></span>
               <span class="tea-choice-name">{{ tea.name }}</span>
               <span class="tea-choice-note">{{ tea.tastingNote }}</span>
+              <span class="stock-note" *ngIf="!tea.available">Tạm hết hàng</span>
             </button>
           </div>
+          <p class="catalog-message" role="status" *ngIf="catalogMessage">{{ catalogMessage }}</p>
           <p class="selection-limit" role="status" *ngIf="selectionLimitMessage">{{ selectionLimitMessage }}</p>
 
           <div class="ratio-control" *ngIf="selectedTeas.length === 2">
@@ -64,16 +66,16 @@
                 <span class="sugar-choice-mark"><i class="bi bi-dash" aria-hidden="true"></i></span>
                 <span><strong>Không thêm đường</strong><small>Giữ vị trà nguyên bản</small></span>
               </button>
-              <button type="button" class="sugar-choice" *ngFor="let sugar of sugars" [class.selected]="sugarSku === sugar.sku" [attr.aria-pressed]="sugarSku === sugar.sku" (click)="chooseSugar(sugar.sku)">
-                <span class="sugar-choice-image"><img [src]="'/assets/images/products/' + sugar.image" [alt]="sugar.name" loading="lazy"></span>
-                <span><strong>{{ sugar.name }}</strong><small>{{ sugar.detail }}</small></span>
+              <button type="button" class="sugar-choice" *ngFor="let sugar of sugars" [class.selected]="sugarSku === sugar.sku" [class.unavailable]="!sugar.available" [attr.aria-pressed]="sugarSku === sugar.sku" [disabled]="!sugar.available" (click)="chooseSugar(sugar.sku)">
+                <span class="sugar-choice-image"><img [src]="sugar.image" [alt]="sugar.name" (error)="onImageError($event)" loading="lazy"></span>
+                <span><strong>{{ sugar.name }}</strong><small>{{ sugar.available ? sugar.detail : 'Tạm hết hàng' }}</small></span>
                 <i class="bi bi-check-circle-fill sugar-check" aria-hidden="true"></i>
               </button>
             </div>
             <div class="sugar-amount-control" *ngIf="selectedSugar">
               <label for="sugar-amount"><span>Lượng {{ selectedSugar?.name }}</span><strong>{{ sugarGrams }}g / 100g</strong></label>
-              <input id="sugar-amount" type="range" min="0" max="30" step="1" [value]="sugarGrams" (input)="sugarGrams = +$any($event.target).value">
-              <div class="ratio-caption"><span>0g · ít ngọt</span><span>30g · ngọt đậm</span></div>
+              <input id="sugar-amount" type="range" min="1" max="30" step="1" [value]="sugarGrams" (input)="sugarGrams = +$any($event.target).value">
+              <div class="ratio-caption"><span>1g · ít ngọt</span><span>30g · ngọt đậm</span></div>
             </div>
           </div>
         </div>
@@ -87,7 +89,7 @@
             <span class="jar-spark spark-a" aria-hidden="true"></span><span class="jar-spark spark-b" aria-hidden="true"></span>
             <div class="blend-orbit" *ngIf="selectedTeas.length" aria-hidden="true">
               <span class="blend-orbit-item" *ngFor="let tea of selectedTeas; let i = index" [class.orbit-second]="i === 1">
-                <img [src]="'/assets/images/products/' + tea.image" alt="" loading="lazy">
+                <img [src]="tea.image" alt="" (error)="onImageError($event)" loading="lazy">
                 <small>{{ tea.name }}</small>
               </span>
             </div>
@@ -119,8 +121,10 @@
 
           <div class="recipe-actions">
             <button class="recipe-submit" type="button" [disabled]="!selectedTeas.length" (click)="sendRecipe()">Gửi công thức tư vấn <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+            <button class="recipe-copy" type="button" [disabled]="!selectedTeas.length" (click)="copyRecipe()"><i class="bi bi-copy" aria-hidden="true"></i> Sao chép công thức</button>
             <button class="recipe-clear" type="button" *ngIf="selectedTeas.length" (click)="clearSelection()">Xóa lựa chọn</button>
           </div>
+          <p class="recipe-message" role="status" aria-live="polite" *ngIf="recipeMessage">{{ recipeMessage }}</p>
           <p class="recipe-footnote">Lượng trà và đường được tính trên mẻ phối 100g. Công thức sẽ được Floralia xác nhận cùng bạn trước khi đặt.</p>
         </aside>
       </div>

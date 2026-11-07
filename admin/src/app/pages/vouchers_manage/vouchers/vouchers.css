@@ -11,3 +11,23 @@
 .account-copy strong{font-size:11px}
 .account-copy small{font-size:9px}
 .logout{color:#b24b47}
+
+/* Match the type scale used on the articles management page. */
+.topbar h1{font-size:17px}
+.account-copy strong{font-size:12px}
+.account-copy small{font-size:10px}
+.hero-kicker,.stat-card>small{font-size:11px}
+.promo-hero h1{font-size:22px}
+.promo-hero p,.hero-button{font-size:13px}
+.stat-card>strong{font-size:19px}
+.stat-card>strong small{font-size:11px}
+.stat-note{font-size:12px}
+.filter-tabs button,.search input{font-size:13px}
+.filter-tabs b{font-size:11px}
+th{font-size:11px}
+td{font-size:13px}
+.campaign strong{font-size:13px}
+.campaign small,.date-cell small{font-size:11px}
+.status-pill{font-size:11px}
+.action-button{font-size:12px}
+.table-footer,.pagination button,.notice{font-size:12px}

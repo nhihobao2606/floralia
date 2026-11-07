@@ -42,11 +42,15 @@ function update(id, data) {
 
 function updateStatus(id, data, historyEntry) {
     const filter = { ...getIdFilter(id), role: { $ne: 'admin' } };
-    return usersCollection.findOneAndUpdate(
+    return usersCollection.updateOne(
         filter,
         { $set: { ...data, updatedAt: new Date() }, $push: { statusHistory: historyEntry } },
-        { returnDocument: 'after' }
-    );
+    ).then(result => {
+        if (result.matchedCount !== 1) return null;
+
+        // Re-read the document so callers can confirm the state MongoDB persisted.
+        return getById(id);
+    });
 }
 
 function updatePassword(id, hashedPassword) {

@@ -14,11 +14,12 @@ export interface AdminOrder {
   date?: string;
   time?: string;
   receiver?: { name?: string; phone?: string; address?: string; email?: string };
-  items?: Array<{ name: string; quantity: number; price?: number; image?: string; productName?: string; variant?: string }>;
+  items?: Array<{ name: string; quantity: number; price?: number; image?: string; productName?: string; variant?: string; sku?: string }>;
   refundReason?: string;
   refundNote?: string;
   refundImages?: string[];
   voucherCode?: string;
+  voucherDiscount?: number;
 }
 
 @Injectable({ providedIn: 'root' })

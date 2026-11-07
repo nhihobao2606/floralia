@@ -315,6 +315,19 @@ async function toggleUserStatusForAdmin(req, res) {
         if (!updatedUser) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng cần cập nhật.' });
         }
+        const expectedStatus = nextIsBlocked ? 'blocked' : 'active';
+        if (Boolean(updatedUser.isBlocked) !== nextIsBlocked || updatedUser.status !== expectedStatus) {
+            console.error('Account status read back from MongoDB does not match the requested state.', {
+                userId: id,
+                expectedStatus,
+                actualStatus: updatedUser.status,
+                actualIsBlocked: updatedUser.isBlocked
+            });
+            return res.status(500).json({
+                success: false,
+                message: 'Kh\u00f4ng x\u00e1c nh\u1eadn \u0111\u01b0\u1ee3c tr\u1ea1ng th\u00e1i t\u00e0i kho\u1ea3n \u0111\u00e3 l\u01b0u trong c\u01a1 s\u1edf d\u1eef li\u1ec7u.'
+            });
+        }
         res.json({
             success: true,
             message: nextIsBlocked ? 'Đã khóa tài khoản người dùng.' : 'Đã mở khóa tài khoản người dùng.',

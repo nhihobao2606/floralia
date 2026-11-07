@@ -11,8 +11,9 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-async function getOrdersForUser(userId, status, query, userEmail) {
-  const filters = [];
+async function getOrdersForUser(userId, status, query, user = null) {
+  // Include legacy orders that can only be associated with the user by email.
+  const userEmail = typeof user === 'string' ? user : user?.email;
   const emailOrderFilter = userEmail
     ? {
         $and: [
@@ -37,6 +38,8 @@ async function getOrdersForUser(userId, status, query, userEmail) {
   if (emailOrderFilter) {
     orderOwnerMatches.push(emailOrderFilter);
   }
+  const filters = [];
+
   if (status && status !== 'all') {
     const statuses = status === 'shipping'
       ? ['shipping', 'delivered', 'waiting']
@@ -167,12 +170,25 @@ async function getAdminOrdersForUser(req, res) {
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
     }
-    const orders = sortOrdersNewestFirst(await getOrdersForUser(
-      user._id?.toString() || String(user.id),
-      undefined,
-      undefined,
-      user.email
-    ));
+    const orders = sortOrdersNewestFirst(await getOrdersForUser(user._id?.toString() || String(user.id), 'all', '', user));
+    for (const order of orders) {
+      order.items = await Promise.all((order.items || []).map(async item => {
+        const currentImage = typeof item.image === 'string' ? item.image.trim() : '';
+        if (/^(https?:|data:|blob:)/i.test(currentImage)) return item;
+
+        const product = item.sku ? await Product.getBySku(item.sku) : null;
+        const thumbnail = product?.thumbnail;
+        const imageId = thumbnail ? String(thumbnail) : currentImage.startsWith('/products/image/')
+          ? currentImage.slice('/products/image/'.length)
+          : '';
+        return {
+          ...item,
+          image: imageId
+            ? `http://localhost:3002/products/image/${encodeURIComponent(imageId)}`
+            : currentImage.startsWith('/assets/') ? currentImage : ''
+        };
+      }));
+    }
     return res.json({ success: true, orders });
   } catch (err) {
     console.error('Lỗi lấy lịch sử đơn hàng người dùng:', err);
