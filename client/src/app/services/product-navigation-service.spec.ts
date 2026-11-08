@@ -22,14 +22,30 @@ describe('ProductNavigationService', () => {
     expect(service.detailUrl('')).toBeNull();
   });
 
+  it('builds a detail route from category and product slugs', () => {
+    const product = {
+      slug: 'hong-diep-tra',
+      categorySlug: 'tra-thao-moc',
+      subCategory: 'Trà hoa',
+    };
+
+    expect(service.detailRoute(product)).toEqual(['/', 'tra-thao-moc', 'hong-diep-tra']);
+    expect(service.detailUrl(product)).toBe('/tra-thao-moc/hong-diep-tra');
+  });
+
   it('navigates to a product detail page with shared product state', async () => {
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
-    const product = { slug: 'herbal-tea', sku: 'TEA-1' };
+    const product = {
+      slug: 'herbal-tea',
+      sku: 'TEA-1',
+      categorySlug: 'tra-thao-moc',
+      subCategory: 'Trà hoa',
+    };
     const products = [product];
 
     await service.navigateToProduct(product, products);
 
-    expect(navigate).toHaveBeenCalledWith(['/product', 'herbal-tea'], {
+    expect(navigate).toHaveBeenCalledWith(['/', 'tra-thao-moc', 'herbal-tea'], {
       state: { product, products },
     });
   });

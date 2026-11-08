@@ -1,5 +1,7 @@
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 export interface AdminMenuItem {
@@ -17,9 +19,16 @@ export interface AdminMenuItem {
   templateUrl: './admin-sidebar.html',
   styleUrl: './admin-sidebar.css',
 })
+export class AdminSidebar {
+  private readonly router = inject(Router);
 export class AdminSidebar implements OnInit, OnChanges {
   @Input() orderBadge?: number | string | null;
   @Output() readonly logoutRequested = new EventEmitter<void>();
+
+  isProductManagementRoute(): boolean {
+    const path = this.router.url.split(/[?#]/, 1)[0];
+    return path.startsWith('/products') || path.startsWith('/categories');
+  }
 
   readonly menu: AdminMenuItem[] = [
     { label: 'Tổng quan', icon: 'bi-grid-1x2', disabled: true },

@@ -610,6 +610,7 @@
 }
 .cart-add-variant:disabled { color: #aab4aa; cursor: not-allowed; }
 .cart-add-variant small { display: block; font-size: 10px; }
+.cart-add-stock { margin: 16px 0 0; color: #657568; font-size: 14px; }
 .cart-add-footer { display: flex; gap: 14px; margin-top: 30px; }
 .cart-add-quantity {
   display: inline-flex;

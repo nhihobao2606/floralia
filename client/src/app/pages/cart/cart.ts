@@ -27,6 +27,25 @@ export class CartComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCart();
+    this.cartService.syncFromServer();
+  }
+
+  @HostListener('window:cart-updated')
+  @HostListener('window:auth-changed')
+  onCartExternalUpdate(): void {
+    const selectedKeys = new Set(
+      this.items
+        .filter(item => item.selected)
+        .map(item => `${item.productId || item.productSku || item.slug || item.id}_${item.variantSku || ''}`)
+    );
+    this.items = this.cartService.getCart().map(item => {
+      const key = `${item.productId || item.productSku || item.slug || item.id}_${item.variantSku || ''}`;
+      return {
+        ...item,
+        selected: Boolean(item.selected) || selectedKeys.has(key),
+      };
+    });
+    if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
   }
 
   loadCart(): void {

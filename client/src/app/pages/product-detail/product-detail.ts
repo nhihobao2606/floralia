@@ -1,4 +1,4 @@
-﻿import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../services/product-service';
@@ -81,6 +81,7 @@ export class ProductDetail implements OnInit {
   reviewRating = 0;
   reviewAccount: ReviewAccount | null = null;
   reviewFormOpen = false;
+  loginPromptOpen = false;
   reviewSubmitting = false;
   reviewSubmitError = '';
   reviewSubmitMessage = '';
@@ -106,10 +107,19 @@ export class ProductDetail implements OnInit {
 
   ngOnInit(): void {
     this.syncReviewAccount();
+    this.productService.productsChanges$
+      ?.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const currentSlug = this.route.snapshot.paramMap.get('productSlug') || this.route.snapshot.paramMap.get('slug') || this.product?.slug;
+        if (currentSlug) {
+          this.refreshProductFromServer(currentSlug);
+        }
+      });
+
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const slug = params.get('slug');
+        const slug = params.get('productSlug') || params.get('slug');
         if (slug) {
           window.scrollTo(0, 0);
           this.loadProduct(slug);
@@ -150,46 +160,145 @@ export class ProductDetail implements OnInit {
 
   private loadProduct(slug: string): void {
     const requestId = ++this.productLoadRequestId;
-    this.allProducts = [];
-    this.relatedProductsLoading = true;
-    this.loading = true;
-    this.product = null;
-    this.errorMessage = '';
+    const navigationState = window.history.state as {
+      product?: ProductDetails;
+      products?: ProductDetails[];
+      selectedVariantSku?: string;
+    } | undefined;
+    const navigationProduct = navigationState?.product;
+    const preferredVariantSku = navigationState?.selectedVariantSku;
+    const navigationProducts = Array.isArray(navigationState?.products)
+      ? navigationState.products
+      : null;
+    const cachedProducts = this.productService.getCachedProducts();
+    const initialProduct =
+      (navigationProduct?.slug === slug ||
+        navigationProduct?.sku === slug ||
+        (navigationProduct as any)?.id === slug ||
+        (navigationProduct as any)?._id === slug) &&
+      navigationProduct?.status !== 'inactive' &&
+      navigationProduct?.isActive !== false
+        ? navigationProduct
+        : null;
 
-    this.productService.getProductBySlug(slug).subscribe({
+    if (navigationProducts?.length) {
+      this.allProducts = navigationProducts;
+    } else if (cachedProducts?.length) {
+      this.allProducts = cachedProducts;
+    } else if (initialProduct && !this.allProducts.length) {
+      this.allProducts = [initialProduct];
+    } else {
+      this.allProducts = [];
+    }
+    this.relatedProductsLoading = this.allProducts.length === 0;
+
+    this.loading = !initialProduct;
+    this.errorMessage = '';
+    if (initialProduct) {
+      this.setProduct(initialProduct, preferredVariantSku);
+    } else {
+      this.product = null;
+    }
+
+    this.productService.getProductBySlug?.(slug)?.subscribe({
       next: (product) => {
         if (requestId !== this.productLoadRequestId) return;
-        if (!product || product.isActive === false) {
+        if (!product || product.isActive === false || (product as ProductDetails).status === 'inactive') {
           this.errorMessage = 'Không tìm thấy sản phẩm này.';
           this.loading = false;
+          this.changeDetector.markForCheck();
           return;
         }
-        this.setProduct(product);
+        this.errorMessage = '';
+        this.setProduct(product, preferredVariantSku);
+        this.changeDetector.markForCheck();
       },
       error: (error: unknown) => {
         if (requestId !== this.productLoadRequestId) return;
         console.error('Không thể tải thông tin sản phẩm:', error);
-        this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
-        this.loading = false;
+        if (!this.product && !this.allProducts.length) {
+          this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
+          this.loading = false;
+          this.changeDetector.markForCheck();
+        }
       },
     });
 
     this.productService.getAll().subscribe({
-      next: (products) => {
+      next: (response: unknown) => {
         if (requestId !== this.productLoadRequestId) return;
+        const products = Array.isArray(response)
+          ? (response as ProductDetails[])
+          : [];
         this.allProducts = products;
         this.relatedProductsLoading = false;
+
+        const product = products.find(
+          (item) =>
+            item.slug === slug ||
+            item.sku === slug ||
+            (item as any)._id === slug ||
+            (item as any).id === slug,
+        );
+
+        if (!product || product.isActive === false || product.status === 'inactive') {
+          if (!this.product && !initialProduct) {
+            this.errorMessage = 'Không tìm thấy sản phẩm này.';
+            this.loading = false;
+          }
+          this.changeDetector.markForCheck();
+          return;
+        }
+
+        this.errorMessage = '';
+        this.setProduct(product, preferredVariantSku);
+        this.changeDetector.markForCheck();
       },
       error: (error: unknown) => {
         if (requestId !== this.productLoadRequestId) return;
         console.error('Không thể tải sản phẩm liên quan:', error);
         this.relatedProductsLoading = false;
-      }
+        if (!this.product && !initialProduct) {
+          this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
+          this.loading = false;
+        }
+        this.changeDetector.markForCheck();
+      },
     });
   }
 
-  private setProduct(product: ProductDetails): void {
-    const sameProduct = this.product?.slug === product.slug;
+  private refreshProductFromServer(slug: string): void {
+    const requestId = ++this.productLoadRequestId;
+    this.productService.getAll().subscribe({
+      next: (response: unknown) => {
+        if (requestId !== this.productLoadRequestId) return;
+        const products = Array.isArray(response) ? (response as ProductDetails[]) : [];
+        this.allProducts = products;
+        const product = products.find(
+          (item) =>
+            item.slug === slug ||
+            item.sku === slug ||
+            (item as any)._id === slug ||
+            (item as any).id === slug ||
+            (this.product?._id && (item as any)._id === this.product._id) ||
+            (this.product?.sku && item.sku === this.product.sku),
+        );
+        if (product) {
+          this.errorMessage = '';
+          this.setProduct(product);
+          this.changeDetector.markForCheck();
+        }
+      },
+    });
+  }
+
+  private setProduct(product: ProductDetails, preferredVariantSku?: string): void {
+    const sameProduct = Boolean(
+      this.product &&
+      ((this.product._id && product._id && this.product._id === product._id) ||
+        (this.product.sku && product.sku && this.product.sku === product.sku) ||
+        (this.product.slug && product.slug && this.product.slug === product.slug)),
+    );
     this.product = product;
     this.favorite = this.isProductFavorite(product);
     if (!sameProduct) {
@@ -203,10 +312,22 @@ export class ProductDetail implements OnInit {
       this.activeTab = 'info';
       this.loadReviews(product.sku || '');
       this.selectedVariant =
+        (preferredVariantSku ? product.variants?.find((variant) => variant.sku === preferredVariantSku) : undefined) ??
         product.variants?.find((variant) => variant.isDefault) ??
         product.variants?.[0] ??
         null;
       this.quantity = 1;
+    } else if (product.variants?.length) {
+      const targetSku = preferredVariantSku || this.selectedVariant?.sku;
+      this.selectedVariant =
+        product.variants.find((variant) => variant.sku === targetSku) ??
+        product.variants.find((variant) => variant.isDefault) ??
+        product.variants[0] ??
+        null;
+      this.quantity = Math.min(this.quantity, Math.max(this.currentStock, 1));
+    } else {
+      this.selectedVariant = null;
+      this.quantity = Math.min(this.quantity, Math.max(this.currentStock, 1));
     }
     this.galleryImages = this.getGalleryImages(product);
     if (!this.galleryImages.includes(this.activeImage)) {
@@ -326,6 +447,28 @@ export class ProductDetail implements OnInit {
     return Number(ratingAverage ?? 0).toFixed(1);
   }
 
+  getRoundedRatingAverage(ratingAverage: number | null | undefined): number {
+    return Math.round(Number(ratingAverage ?? 0));
+  }
+
+  getLowestPriceVariant(product: ProductDetails): ProductVariant | null {
+    const variants = product.variants ?? [];
+    if (!variants.length) return null;
+
+    return variants.reduce(
+      (lowest, variant) => variant.price < lowest.price ? variant : lowest,
+    );
+  }
+
+  getRelatedPrice(product: ProductDetails): number {
+    return Number(
+      this.getLowestPriceVariant(product)?.price ??
+      product.minPrice ??
+      product.price ??
+      0,
+    );
+  }
+
   private updateDisplayedProductRating(): void {
     const product = this.product;
     const productSku = product?.sku;
@@ -351,6 +494,9 @@ export class ProductDetail implements OnInit {
   }
 
   get currentStock(): number {
+    if (this.product?.status === 'out-of-stock' || this.product?.status === 'inactive' || this.product?.isActive === false) {
+      return 0;
+    }
     return Number(this.selectedVariant?.stock ?? this.product?.stock ?? 0);
   }
 
@@ -391,6 +537,7 @@ export class ProductDetail implements OnInit {
 
   openQuickAdd(product: ProductDetails): void {
     const variant =
+      this.getLowestPriceVariant(product) ??
       product.variants?.find((option) => option.isDefault && option.stock > 0) ??
       product.variants?.find((option) => option.stock > 0) ??
       product.variants?.find((option) => option.isDefault) ??
@@ -406,6 +553,8 @@ export class ProductDetail implements OnInit {
     if (product.slug === this.product?.slug) return;
 
     this.setProduct(product);
+    const lowestPriceVariant = this.getLowestPriceVariant(product);
+    if (lowestPriceVariant) this.selectVariant(lowestPriceVariant);
     void this.productNavigation.navigateToProduct(product, this.allProducts);
   }
 
@@ -462,7 +611,7 @@ export class ProductDetail implements OnInit {
   submitReview(event: Event): void {
     event.preventDefault();
     if (!this.canSubmitReview) {
-      this.router.navigate(['/login']);
+      this.loginPromptOpen = true;
       return;
     }
 
@@ -526,7 +675,7 @@ export class ProductDetail implements OnInit {
 
   toggleReviewForm(): void {
     if (!this.canSubmitReview) {
-      this.router.navigate(['/login']);
+      this.loginPromptOpen = true;
       return;
     }
 
@@ -535,6 +684,15 @@ export class ProductDetail implements OnInit {
       this.reviewSubmitError = '';
       this.reviewSubmitMessage = '';
     }
+  }
+
+  closeLoginPrompt(): void {
+    this.loginPromptOpen = false;
+  }
+
+  goToLoginFromPrompt(): void {
+    this.closeLoginPrompt();
+    void this.router.navigate(['/login']);
   }
 
   changeQuantity(delta: number): void {

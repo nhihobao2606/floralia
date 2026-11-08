@@ -1,0 +1,184 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <main class="admin-main">
+    <header class="editor-topbar">
+      <div class="breadcrumbs">
+        <a routerLink="/products">Quản lý sản phẩm</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <strong>{{ isEdit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm' }}</strong>
+      </div>
+      <div class="admin-account">
+        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+        <span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span>
+        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất</button>
+      </div>
+    </header>
+
+    <section class="editor-content editor-page">
+      <a class="back-link" routerLink="/products"><i class="bi bi-arrow-left" aria-hidden="true"></i> Quay lại danh sách sản phẩm</a>
+      <div class="page-heading"><h1>{{ isEdit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' }}</h1><div class="heading-actions"><button type="button" class="outline-button" (click)="cancel()">Hủy</button><button type="button" class="primary-button" [disabled]="saving || loading" (click)="save()"><i class="bi bi-check2"></i> {{ saving ? 'Đang lưu...' : isEdit ? 'Lưu thay đổi' : 'Lưu sản phẩm' }}</button></div></div>
+      <p class="form-error" *ngIf="error" role="alert">{{ error }}</p>
+      <p class="form-success" *ngIf="successMessage" role="status"><i class="bi bi-check-circle" aria-hidden="true"></i> {{ successMessage }}</p>
+      <div class="editor-grid">
+        <div class="editor-main-column">
+          <section class="form-card">
+            <h2>Thông tin cơ bản</h2>
+            <div class="field full"><label for="productName">Tên sản phẩm <b>*</b></label><input id="productName" name="name" [(ngModel)]="form.name" placeholder="Nhập tên sản phẩm" maxlength="180"></div>
+            <div class="field-grid">
+              <div class="field"><label for="productSku">Mã SKU <b>*</b></label><input id="productSku" name="sku" [(ngModel)]="form.sku" placeholder="Ví dụ: TTM001" maxlength="60"></div>
+              <div class="field"><label for="productBrand">Thương hiệu</label><input id="productBrand" name="brand" [(ngModel)]="form.brand" placeholder="Floralia Tea"></div>
+              <div class="field"><label>Danh mục <b>*</b></label><app-custom-select ariaLabel="Danh mục" placeholder="Chọn danh mục" [options]="categoryOptions" [(ngModel)]="form.category" (ngModelChange)="onCategoryChange($event)"></app-custom-select></div>
+              <div class="field"><label>Phân loại sản phẩm</label><app-custom-select ariaLabel="Phân loại sản phẩm" placeholder="Chọn phân loại sản phẩm" [options]="availableSubcategories" [(ngModel)]="form.subCategory"></app-custom-select></div>
+              <div class="field"><label>Trạng thái kinh doanh</label><app-custom-select ariaLabel="Trạng thái kinh doanh" placeholder="Chọn trạng thái" [options]="businessStatusOptions" [(ngModel)]="form.status" (ngModelChange)="onStatusChange($event)"></app-custom-select></div>
+            </div>
+<div class="benefit-editor">
+                <label>Tags</label>
+                <div class="benefit-list">
+                  <span
+                    class="benefit-chip"
+                    *ngFor="let tag of form.tags; let i = index"
+                    [class.editing]="editingTagIndex === i"
+                    title="Bấm để sửa tag này"
+                    (click)="editTag(i)">
+                    {{ tag }}
+                    <button type="button" [attr.aria-label]="'Xóa tag ' + tag" (click)="$event.stopPropagation(); removeTag(i)"><i class="bi bi-x"></i></button>
+                  </span>
+                  <button class="add-benefit" *ngIf="!tagInputVisible" type="button" (click)="openTagInput()"><span>+</span> Thêm</button>
+                </div>
+                <div class="benefit-entry" *ngIf="tagInputVisible">
+                  <input
+                    type="text"
+                    [(ngModel)]="newTagText"
+                    name="newTag"
+                    [placeholder]="editingTagIndex !== null ? 'Sửa tag (có thể dùng dấu , để tách nhiều tag)' : 'Nhập nhiều tag cách nhau bằng dấu phẩy (,)'"
+                    (keydown.enter)="$event.preventDefault(); saveTag()"
+                    (keydown.escape)="cancelTagInput()">
+                  <button type="button" class="benefit-save" (click)="saveTag()">{{ editingTagIndex !== null ? 'Cập nhật' : 'Lưu' }}</button>
+                  <button type="button" class="benefit-cancel" (click)="cancelTagInput()">Hủy</button>
+                </div>
+              </div>
+
+                        <div class="field full"><label for="productDescription">Mô tả ngắn</label><textarea id="productDescription" name="description" [(ngModel)]="form.description" rows="3" placeholder="Nhập mô tả ngắn về sản phẩm..."></textarea></div>
+            
+          </section>
+
+          <section class="form-card detail-card">
+            <h2>Nội dung chi tiết</h2>
+            <div class="detail-tabs" role="tablist" aria-label="Thông tin sản phẩm">
+              <button type="button" role="tab" [attr.aria-selected]="selectedTab === 'basic'" [class.selected]="selectedTab === 'basic'" (click)="selectedTab = 'basic'">Thông tin</button>
+              <button type="button" role="tab" [attr.aria-selected]="selectedTab === 'details'" [class.selected]="selectedTab === 'details'" (click)="selectedTab = 'details'">Thông tin chi tiết</button>
+            </div>
+            <ng-container *ngIf="selectedTab === 'basic'; else productDetailsTab">
+              <div class="field full"><label for="productStory">Câu chuyện sản phẩm</label><textarea id="productStory" name="story" [(ngModel)]="form.story" rows="4" placeholder="Nguồn gốc và câu chuyện về sản phẩm..."></textarea></div>
+              <div class="benefit-editor">
+                <label>Công dụng</label>
+                <div class="benefit-list">
+                  <span
+                    class="benefit-chip"
+                    *ngFor="let benefit of form.usage; let i = index"
+                    [class.editing]="editingBenefitIndex === i"
+                    title="Bấm để sửa công dụng này"
+                    (click)="editBenefit(i)">
+                    {{ benefit }}
+                    <button type="button" [attr.aria-label]="'Xóa công dụng ' + benefit" (click)="$event.stopPropagation(); removeBenefit(i)"><i class="bi bi-x"></i></button>
+                  </span>
+                  <button class="add-benefit" *ngIf="!benefitInputVisible" type="button" (click)="openBenefitInput()"><span>+</span> Thêm</button>
+                </div>
+                <div class="benefit-entry" *ngIf="benefitInputVisible">
+                  <input
+                    #benefitInput
+                    type="text"
+                    [(ngModel)]="newBenefitText"
+                    name="newBenefit"
+                    [placeholder]="editingBenefitIndex !== null ? 'Sửa công dụng (có thể dùng dấu , để tách nhiều mục)' : 'Nhập nhiều công dụng cách nhau bằng dấu phẩy (,)'"
+                    (keydown.enter)="$event.preventDefault(); saveBenefit()"
+                    (keydown.escape)="cancelBenefitInput()">
+                  <button type="button" class="benefit-save" (click)="saveBenefit()">{{ editingBenefitIndex !== null ? 'Cập nhật' : 'Lưu' }}</button>
+                  <button type="button" class="benefit-cancel" (click)="cancelBenefitInput()">Hủy</button>
+                </div>
+              </div>
+                            <div class="field full"><label for="productInstructions">Hướng dẫn sử dụng (mỗi dòng một bước)</label><textarea id="productInstructions" name="instructions" [ngModel]="instructionsText" (ngModelChange)="setInstructions($event)" rows="4" placeholder="Hãm trà trong nước nóng...&#10;Thưởng thức khi còn ấm..."></textarea></div>
+            </ng-container>
+            <ng-template #productDetailsTab>
+              <div class="field-grid extra-fields">
+                <div class="field"><label for="flavorNote">Hương vị</label><input id="flavorNote" name="flavorNote" [(ngModel)]="form.flavorNote" placeholder="Hương thơm dịu nhẹ"></div>
+                <div class="field"><label for="productColor">Màu sắc</label><input id="productColor" name="color" [(ngModel)]="form.color" placeholder="Vàng nhạt"></div>
+                <div class="field"><label for="shelfLife">Hạn sử dụng (tháng)</label><input id="shelfLife" name="shelfLifeMonths" type="number" min="0" [(ngModel)]="form.shelfLifeMonths"></div>
+                <div class="field"><label for="productWeight">Khối lượng chung (g)</label><input id="productWeight" name="weightGram" type="number" min="0" [(ngModel)]="form.weightGram"></div>
+                <label class="check-field"><input type="checkbox" name="featured" [(ngModel)]="form.featured"> Sản phẩm nổi bật</label>
+                <label class="check-field"><input type="checkbox" name="isMix" [(ngModel)]="form.isMix"> Sản phẩm mix</label>
+              </div>
+            </ng-template>
+          </section>
+
+          <section class="form-card variants-card">
+            <div class="section-heading"><div><h2>Phân loại sản phẩm</h2><p>Quản lý SKU, giá bán và thông số của từng quy cách.</p></div><button type="button" class="outline-button" (click)="addVariant()"><i class="bi bi-plus"></i> Thêm phân loại</button></div>
+            <div class="variant-empty" *ngIf="!form.variants.length">Sản phẩm chưa có phân loại</div>
+            <article class="variant-row" *ngFor="let variant of form.variants; let i = index">
+              <div class="variant-row-title"><strong>Phân loại {{ i + 1 }}</strong><button type="button" aria-label="Xóa phân loại" (click)="removeVariant(i)"><i class="bi bi-trash"></i></button></div>
+              <div class="variant-fields">
+                <label>SKU<input [name]="'variantSku' + i" [(ngModel)]="variant.sku" placeholder="SKU phân loại"></label>
+                <label>Tên phân loại<app-custom-select [ariaLabel]="'Tên phân loại ' + (i + 1)" placeholder="Chọn phân loại" [options]="optionsWithCurrent(variantNameOptions, variant.label)" [(ngModel)]="variant.label"></app-custom-select></label>
+                <label>Hình thức đóng gói<app-custom-select [ariaLabel]="'Hình thức đóng gói ' + (i + 1)" placeholder="Chọn hình thức" [options]="packagingOptions" [(ngModel)]="variant.type"></app-custom-select></label>
+                <label>Giá bán<input [name]="'variantPrice' + i" type="text" inputmode="numeric" placeholder="0" [ngModel]="formatPriceInput(variant.price)" (ngModelChange)="onVariantPriceInput(i, $event)"></label>
+                <label>Giá gốc<input [name]="'variantOldPrice' + i" type="text" inputmode="numeric" placeholder="0" [ngModel]="formatPriceInput(variant.oldPrice)" (ngModelChange)="onVariantOldPriceInput(i, $event)"></label>
+                <label>Tồn kho<input [name]="'variantStock' + i" type="number" min="0" [(ngModel)]="variant.stock" (ngModelChange)="onVariantStockChange()"></label>
+                <label>Khối lượng (g)<input [name]="'variantWeight' + i" type="number" min="0" [(ngModel)]="variant.weightGram"></label>
+                <label class="default-variant"><input type="radio" name="defaultVariant" [checked]="variant.isDefault" (change)="setDefaultVariant(i)"> Mặc định</label>
+              </div>
+            </article>
+          </section>
+        </div>
+
+        <aside class="editor-side-column">
+          <section class="form-card image-card">
+            <div class="section-heading"><div><h2>Hình ảnh sản phẩm</h2><p>JPG, PNG hoặc WebP </p></div><button *ngIf="imagePreviews.length" type="button" class="clear-images" (click)="clearImages()">Xóa ảnh</button></div>
+            <div class="image-grid">
+              <figure *ngFor="let preview of imagePreviews; let i = index">
+                <img [src]="preview" [alt]="'Ảnh sản phẩm ' + (i + 1)">
+                <button type="button" class="remove-image-btn" [attr.aria-label]="'Xóa ảnh ' + (i + 1)" title="Xóa ảnh này" (click)="removeImage(i)">
+                  <i class="bi bi-x" aria-hidden="true"></i>
+                </button>
+                <span>{{ i === 0 ? 'Ảnh đại diện' : 'Ảnh ' + (i + 1) }}</span>
+              </figure>
+              <label class="upload-tile"><input type="file" accept="image/*" multiple (change)="onImagesSelected($event)"><i class="bi bi-plus-lg"></i><span>Tải ảnh lên</span></label>
+            </div>
+          </section>
+          <section class="form-card price-card">
+            <h2>Giá sản phẩm</h2>
+            <p *ngIf="form.variants.length" class="price-note">Giá được quản lý theo từng phân loại.</p>
+            <div class="field" *ngIf="form.variants.length"><label for="listPrice">Giá hiển thị từ (VND)</label><input id="listPrice" name="price" type="text" inputmode="numeric" placeholder="0" [ngModel]="formatPriceInput(form.price)" (ngModelChange)="onBasePriceInput($event)"><small>Dùng làm giá tham khảo trên danh sách sản phẩm.</small></div>
+            <div class="field" *ngIf="!form.variants.length"><label for="sidePrice">Giá bán (VND) <b>*</b></label><input id="sidePrice" name="sidePrice" type="text" inputmode="numeric" placeholder="0" [ngModel]="formatPriceInput(form.price)" (ngModelChange)="onBasePriceInput($event)"></div>
+            <div class="field" *ngIf="!form.variants.length"><label for="sideOldPrice">Giá gốc (VND)</label><input id="sideOldPrice" name="sideOldPrice" type="text" inputmode="numeric" placeholder="0" [ngModel]="formatPriceInput(form.oldPrice)" (ngModelChange)="onBaseOldPriceInput($event)"></div>
+            <div class="field" *ngIf="!form.variants.length"><label for="sideStock">Tồn kho</label><input id="sideStock" name="sideStock" type="number" min="0" [(ngModel)]="form.stock" (ngModelChange)="onBaseStockChange($event)"></div>
+          </section>
+        </aside>
+      </div>
+
+      <div *ngIf="exitPromptVisible" class="unsaved-changes-backdrop">
+        <section class="unsaved-changes-dialog" role="alertdialog" aria-modal="true" aria-labelledby="unsavedChangesTitle">
+          <span class="unsaved-changes-icon"><i class="bi bi-exclamation-lg" aria-hidden="true"></i></span>
+          <h2 id="unsavedChangesTitle">Bạn có thay đổi chưa lưu</h2>
+          <p>Bạn có muốn lưu thay đổi trước khi rời khỏi trang này không?</p>
+          <div class="unsaved-changes-actions">
+            <button type="button" class="unsaved-stay-button" [disabled]="saving" (click)="stayOnEditor()">Ở lại</button>
+            <button type="button" class="unsaved-discard-button" [disabled]="saving" (click)="discardChangesAndExit()">Không lưu</button>
+            <button type="button" class="unsaved-save-button" [disabled]="saving" (click)="saveChangesAndExit()">
+              {{ saving ? 'Đang lưu...' : 'Lưu và rời trang' }}
+            </button>
+          </div>
+          <p *ngIf="error" class="unsaved-changes-error" role="alert">{{ error }}</p>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="confirm-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()">
+  <section class="logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="editor-logout-title" (click)="$event.stopPropagation()">
+    <span class="logout-icon"><i class="bi bi-box-arrow-right"></i></span>
+    <h2 id="editor-logout-title">Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
+    <div class="dialog-actions"><button type="button" class="cancel-top" (click)="cancelLogoutConfirmation()">Ở lại</button><button type="button" class="save-top" (click)="confirmLogout()">Đăng xuất</button></div>
+  </section>
+</div>

@@ -1,6 +1,7 @@
 const Order = require('../models/order');
 const Product = require('../models/product');
 const ProductSalesService = require('../models/product-sales-service');
+const AdminProduct = require('../models/adminProduct');
 const User = require('../models/user');
 const Voucher = require('../models/voucher');
 const { randomBytes } = require('crypto');
@@ -10,14 +11,20 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-async function getOrdersForUser(userId, status, query, userEmail) {
-  const filters = [];
+async function getOrdersForUser(userId, status, query, user = null) {
+  // Include legacy orders that can only be associated with the user by email.
+  const userEmail = typeof user === 'string' ? user : user?.email;
   const emailOrderFilter = userEmail
     ? {
-        'receiver.email': {
-          $regex: `^${escapeRegex(String(userEmail).trim())}$`,
-          $options: 'i'
-        }
+        $and: [
+          { $or: [{ userId: { $exists: false } }, { userId: null }, { userId: '' }] },
+          {
+            'receiver.email': {
+              $regex: `^${escapeRegex(String(userEmail).trim())}$`,
+              $options: 'i'
+            }
+          }
+        ]
       }
     : null;
   const userIdMatches = [{ userId: String(userId) }];
@@ -26,13 +33,13 @@ async function getOrdersForUser(userId, status, query, userEmail) {
   }
   const orderOwnerMatches = [
     ...userIdMatches,
-    { userId: { $exists: false } },
-    { userId: null },
-    { userId: '' }
+    { isDemo: true }
   ];
   if (emailOrderFilter) {
     orderOwnerMatches.push(emailOrderFilter);
   }
+  const filters = [];
+
   if (status && status !== 'all') {
     const statuses = status === 'shipping'
       ? ['shipping', 'delivered', 'waiting']
@@ -59,11 +66,21 @@ async function getOrdersForUser(userId, status, query, userEmail) {
   return Order.getAll(
     { $and: [{ $or: orderOwnerMatches }, ...filters] },
     { sort: { createdAt: -1 } }
-  );
+  ).then(orders => orders.filter(order => !isLegacyDemoOrder(order)));
 }
 
 function belongsToUser(order, userId) {
   return Boolean(order?.userId && userId && String(order.userId) === String(userId));
+}
+
+function belongsToUserEmail(order, userEmail) {
+  return Boolean(
+    order && !order.userId && userEmail && order.receiver?.email &&
+    String(order.receiver.email).trim().toLowerCase() === String(userEmail).trim().toLowerCase()
+  );
+}
+function isLegacyDemoOrder(order) {
+  return /^#?FL00\d+$/i.test(String(order?.id || order?.code || ''));
 }
 
 function getAvailableStock(product, item) {
@@ -129,7 +146,7 @@ async function getOrders(req, res) {
     if (!req.userId) {
       return res.json({ success: true, orders: [] });
     }
-    const list = await getOrdersForUser(req.userId, status, q);
+    const list = await getOrdersForUser(req.userId, status, q, req.authenticatedUser?.email);
     res.json({ success: true, orders: list });
   } catch (err) {
     console.error('Lỗi server khi lấy danh sách đơn hàng:', err);
@@ -139,7 +156,7 @@ async function getOrders(req, res) {
 
 async function getAdminOrders(req, res) {
   try {
-    const orders = sortOrdersNewestFirst(await Order.getAll());
+    const orders = sortOrdersNewestFirst(await Order.getAll()).filter(order => !isLegacyDemoOrder(order));
     res.json({ success: true, orders });
   } catch (err) {
     console.error('Lỗi lấy danh sách đơn hàng quản trị:', err);
@@ -153,12 +170,25 @@ async function getAdminOrdersForUser(req, res) {
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
     }
-    const orders = sortOrdersNewestFirst(await getOrdersForUser(
-      user._id?.toString() || String(user.id),
-      undefined,
-      undefined,
-      user.email
-    ));
+    const orders = sortOrdersNewestFirst(await getOrdersForUser(user._id?.toString() || String(user.id), 'all', '', user));
+    for (const order of orders) {
+      order.items = await Promise.all((order.items || []).map(async item => {
+        const currentImage = typeof item.image === 'string' ? item.image.trim() : '';
+        if (/^(https?:|data:|blob:)/i.test(currentImage)) return item;
+
+        const product = item.sku ? await Product.getBySku(item.sku) : null;
+        const thumbnail = product?.thumbnail;
+        const imageId = thumbnail ? String(thumbnail) : currentImage.startsWith('/products/image/')
+          ? currentImage.slice('/products/image/'.length)
+          : '';
+        return {
+          ...item,
+          image: imageId
+            ? `http://localhost:3002/products/image/${encodeURIComponent(imageId)}`
+            : currentImage.startsWith('/assets/') ? currentImage : ''
+        };
+      }));
+    }
     return res.json({ success: true, orders });
   } catch (err) {
     console.error('Lỗi lấy lịch sử đơn hàng người dùng:', err);
@@ -173,7 +203,9 @@ async function getOrderById(req, res) {
     const order = id.startsWith('don-hang-')
       ? await Order.getBySlug(id)
       : await Order.getById(id);
-    if (!order || (order.userId && !(await belongsToUser(order, req.userId))) || (!order.userId && !req.userId)) {
+    const belongsToRequester = belongsToUser(order, req.userId) ||
+      belongsToUserEmail(order, req.authenticatedUser?.email);
+      if (!order || isLegacyDemoOrder(order) || !req.userId || (!belongsToRequester && !order.isDemo)) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
     res.json({ success: true, order });
@@ -288,6 +320,13 @@ async function createOrder(req, res) {
     let voucherDiscount = 0;
     if (voucherCode) {
       const voucher = await Voucher.getByCode(voucherCode);
+      if (voucher && req.userId) {
+        const userOrders = await Order.getAll({ userId: String(req.userId) });
+        const eligibilityError = Voucher.getUserEligibilityError(voucher, userOrders, Boolean(req.userId));
+        if (eligibilityError) {
+          return res.status(400).json({ success: false, message: eligibilityError });
+        }
+      }
       const voucherItems = verifiedItems.map(item => ({
         ...item,
         total: (Number(item.salePrice) || 0) * item.quantity
@@ -313,6 +352,7 @@ async function createOrder(req, res) {
       time: createdAt.toLocaleTimeString('vi-VN'),
       createdAt,
       status: 'pending',
+      isDemo: false,
       statusLabel: 'CHỜ XÁC NHẬN',
       step: 1,
       paymentStatus: 'unpaid',
@@ -355,6 +395,7 @@ async function createOrder(req, res) {
         missingSkus.forEach(sku => {
           console.error(`Không tìm thấy sản phẩm SKU "${sku}" để cập nhật số lượng đã bán.`);
         });
+        AdminProduct.notifyProductChanged('sold');
       })
       .catch(error => {
         console.error('Không thể cập nhật thống kê sau khi lưu đơn hàng:', error);
@@ -372,12 +413,14 @@ async function updateOrderStatus(req, res) {
     const order = await Order.getById(id);
     const { status, cancelReason, cancelReasons, refundReason, refundNote, refundImages } = req.body || {};
     const canCancelSharedDemo = Boolean(
-      order && !order.userId && ['pending', 'processing'].includes(order.status) && status === 'cancelled' && req.userId
+      order && order.isDemo && ['pending', 'processing'].includes(order.status) && status === 'cancelled' && req.userId
     );
     const canCompleteSharedDemo = Boolean(
-      order && !order.userId && order.status === 'delivered' && status === 'completed' && req.userId
+      order && order.isDemo && order.status === 'delivered' && status === 'completed' && req.userId
     );
-    if (!(await belongsToUser(order, req.userId)) && !canCancelSharedDemo && !canCompleteSharedDemo) {
+    const belongsToRequester = belongsToUser(order, req.userId) ||
+      belongsToUserEmail(order, req.authenticatedUser?.email);
+      if (isLegacyDemoOrder(order) || (!belongsToRequester && !canCancelSharedDemo && !canCompleteSharedDemo)) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
 

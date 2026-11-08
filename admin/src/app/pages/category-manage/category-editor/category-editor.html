@@ -1,0 +1,126 @@
+<div class="admin-layout">
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <main class="admin-main">
+    <header class="editor-topbar">
+      <nav class="breadcrumbs" aria-label="Điều hướng">
+        <a routerLink="/categories">Quản lý danh mục</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <strong>{{ isEdit ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</strong>
+      </nav>
+      <div class="admin-account">
+        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
+        <span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span>
+        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
+      </div>
+    </header>
+
+    <section class="editor-content">
+      <a class="back-link" routerLink="/categories"><i class="bi bi-arrow-left" aria-hidden="true"></i> Quay lại danh sách danh mục</a>
+
+      <div class="page-heading">
+        <div>
+          <h1>{{ isEdit ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</h1>
+        </div>
+        <div class="heading-actions">
+          <button type="button" class="outline-button" (click)="cancel()">Hủy</button>
+          <button type="button" class="primary-button" [disabled]="saving" (click)="save()">
+            {{ saving ? 'Đang lưu...' : (isEdit ? 'Lưu thay đổi' : 'Lưu danh mục') }}
+          </button>
+        </div>
+      </div>
+
+      <p class="form-error" *ngIf="error && !nameInvalid">{{ error }}</p>
+      <p class="form-success" *ngIf="successMessage">{{ successMessage }}</p>
+      <div *ngIf="loading" class="loading-state"><i class="bi bi-arrow-repeat"></i><span>Đang tải danh mục...</span></div>
+
+      <div class="editor-grid" *ngIf="!loading">
+        <div class="editor-main-column">
+          <section class="form-card">
+            <h2>Thông tin danh mục</h2>
+            <div class="field-grid">
+              <div class="field" [class.field-invalid]="nameInvalid">
+                <label for="catName">Tên danh mục <b>*</b></label>
+                <input
+                  id="catName"
+                  name="name"
+                  [(ngModel)]="form.name"
+                  (blur)="nameTouched = true"
+                  placeholder="Ví dụ: Thanh lọc – Mát gan">
+                <small class="field-error-text" *ngIf="nameInvalid">Vui lòng nhập tên danh mục</small>
+              </div>
+              <div class="field">
+                <label for="catCode">Mã danh mục <b>*</b></label>
+                <input
+                  id="catCode"
+                  name="code"
+                  [(ngModel)]="form.code"
+                  (input)="onCodeInput()"
+                  placeholder="DM01-06">
+              </div>
+            </div>
+
+            <div class="field full">
+              <label>Danh mục cha</label>
+              <app-custom-select
+                ariaLabel="Danh mục cha"
+                placeholder="— Danh mục chính (không có cha) —"
+                [options]="parentOptions"
+                [ngModel]="form.parentName"
+                (ngModelChange)="onParentChange($event)">
+              </app-custom-select>
+              <small class="field-helper">Chọn “Trà thảo mộc” hoặc “Trà thảo mộc mix” để tạo danh mục con theo công dụng; để trống nếu là danh mục chính.</small>
+            </div>
+          </section>
+        </div>
+
+        <aside class="editor-side-column">
+          <section class="form-card display-card">
+            <h2>Cài đặt hiển thị</h2>
+            <div class="field">
+              <label>Hiển thị trên website</label>
+              <label class="visibility-toggle">
+                <input type="checkbox" name="visible" [(ngModel)]="form.visible">
+                <span class="custom-check"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+                <span class="toggle-text">Tick để hiển thị, bỏ tick để ẩn danh mục</span>
+              </label>
+            </div>
+
+            <div class="field count-field" *ngIf="isEdit">
+              <label for="productCount">Số sản phẩm (tự tính)</label>
+              <input id="productCount" name="productCount" type="text" [value]="form.productCount ?? 0" readonly>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <div *ngIf="exitPromptVisible" class="unsaved-changes-backdrop">
+        <section class="unsaved-changes-dialog" role="alertdialog" aria-modal="true" aria-labelledby="unsavedChangesTitle">
+          <span class="unsaved-changes-icon"><i class="bi bi-exclamation-lg" aria-hidden="true"></i></span>
+          <h2 id="unsavedChangesTitle">Bạn có thay đổi chưa lưu</h2>
+          <p>Bạn có muốn lưu thay đổi trước khi rời khỏi trang này không?</p>
+          <div class="unsaved-changes-actions">
+            <button type="button" class="unsaved-stay-button" [disabled]="saving" (click)="stayOnEditor()">Ở lại</button>
+            <button type="button" class="unsaved-discard-button" [disabled]="saving" (click)="discardChangesAndExit()">Không lưu</button>
+            <button type="button" class="unsaved-save-button" [disabled]="saving" (click)="saveChangesAndExit()">
+              {{ saving ? 'Đang lưu...' : 'Lưu và rời trang' }}
+            </button>
+          </div>
+          <p *ngIf="error" class="unsaved-changes-error" role="alert">{{ error }}</p>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="confirm-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()">
+  <section class="logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="editor-logout-title" (click)="$event.stopPropagation()">
+    <span class="logout-icon"><i class="bi bi-box-arrow-right"></i></span>
+    <h2 id="editor-logout-title">Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
+    <div class="dialog-actions">
+      <button type="button" class="cancel-top" (click)="cancelLogoutConfirmation()">Ở lại</button>
+      <button type="button" class="save-top" (click)="confirmLogout()">Đăng xuất</button>
+    </div>
+  </section>
+</div>
+

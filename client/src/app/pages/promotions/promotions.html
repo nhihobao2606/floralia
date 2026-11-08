@@ -191,7 +191,7 @@
       <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
       <span class="sale-badge" *ngIf="getDiscount(p) > 0">-{{ getDiscount(p) }}%</span>
       <a
-        [routerLink]="productNavigation.detailRoute(p.slug)"
+        [routerLink]="productNavigation.detailRoute(p)"
         [state]="{ product: p, products: products() }">
         <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
       </a>
@@ -203,7 +203,7 @@
 
     <div class="product-info">
       <a
-        [routerLink]="productNavigation.detailRoute(p.slug)"
+        [routerLink]="productNavigation.detailRoute(p)"
         [state]="{ product: p, products: products() }"
         class="sale-name">{{ getProductName(p) }}</a>
 
@@ -305,6 +305,8 @@
         </button>
       </div>
     </div>
+
+    <p class="cart-add-stock">Kho: {{ cartPopupStock }}</p>
 
     <div class="cart-add-footer">
       <div class="cart-add-quantity" aria-label="Số lượng">

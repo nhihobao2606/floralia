@@ -35,6 +35,7 @@ export class Header2 implements OnInit, OnDestroy {
   variantPickerError = '';
   private variantPickerRequestId = 0;
   guestTrackedOrderId: string | null = null;
+  itemPendingRemoval: CartItem | null = null;
 
   // Giao diện
   scrolled = false;
@@ -277,8 +278,24 @@ export class Header2 implements OnInit, OnDestroy {
     this.cartService.changeQuantity(item, delta);
   }
 
+  cartStock(item: CartItem): number {
+    const variant = item.variants?.find((option) => option.sku === item.variantSku);
+    return Number(item.stock ?? variant?.stock ?? 0);
+  }
+
   removeItem(item: any): void {
     this.cartService.removeItem(item);
+  }
+
+  requestItemRemoval(item: CartItem): void {
+    this.itemPendingRemoval = item;
+  }
+
+  confirmItemRemoval(): void {
+    if (!this.itemPendingRemoval) return;
+    this.removeItem(this.itemPendingRemoval);
+    this.itemPendingRemoval = null;
+    this.loadCart();
   }
 
   openVariantPicker(item: CartItem): void {
@@ -365,6 +382,10 @@ export class Header2 implements OnInit, OnDestroy {
 
   get variantPickerPrice(): number {
     return this.selectedVariant?.price ?? 0;
+  }
+
+  get variantPickerOldPrice(): number {
+    return this.selectedVariant?.oldPrice ?? 0;
   }
 
   confirmVariantChange(): void {

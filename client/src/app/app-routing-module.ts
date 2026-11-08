@@ -72,6 +72,7 @@ const routes: Routes = [
   { path: 'order-success', component: OrderSuccess },
   { path: 'order-success/:id', component: OrderSuccess },
 
+  { path: ':categorySlug/:productSlug', component: ProductDetail },
   { path: '**', component: Pagenotfound },
 ];
 

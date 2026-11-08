@@ -92,6 +92,17 @@ export interface AdminOrderListResponse {
   success: boolean;
   orders: AdminOrder[];
   total: number;
+  createdAt?: string;
+  date?: string;
+  time?: string;
+  receiver?: { name?: string; phone?: string; address?: string; email?: string };
+  items?: Array<{ name: string; quantity: number; price?: number; image?: string; productName?: string; variant?: string; sku?: string }>;
+  refundReason?: string;
+  refundNote?: string;
+  refundImages?: string[];
+  voucherCode?: string;
+  voucherDiscount?: number;
+}
   page: number;
   limit: number;
   stats: AdminOrderStats;

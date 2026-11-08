@@ -195,6 +195,33 @@ describe('ProductDetail', () => {
     expect(fixture.nativeElement.textContent).toContain('Sản phẩm bạn có thể thích');
     expect(fixture.nativeElement.textContent).toContain('Trà liên quan');
     expect(fixture.nativeElement.textContent).not.toContain('Đang tải sản phẩm gợi ý');
+    expect(fixture.nativeElement.querySelectorAll('.related-rating i')).toHaveLength(5);
+  });
+
+  it('shows and selects the lowest-priced variant for a related product', () => {
+    const related = {
+      sku: 'TEA-3',
+      slug: 'related-tea-3',
+      name: 'Trà liên quan',
+      minPrice: 36000,
+      price: 60000,
+      variants: [
+        { sku: 'TEA-3-SMALL', label: 'Gói nhỏ', price: 36000, stock: 5, isDefault: false },
+        { sku: 'TEA-3-LARGE', label: 'Gói lớn', price: 60000, stock: 5, isDefault: true },
+      ],
+    };
+
+    expect(component.getRelatedPrice(related)).toBe(36000);
+    component.openQuickAdd(related);
+
+    expect(component.quickAdd?.variant?.sku).toBe('TEA-3-SMALL');
+    expect(component.quickAdd?.variant?.price).toBe(36000);
+
+    vi.spyOn(component.productNavigation, 'navigateToProduct').mockResolvedValue(true);
+    component.navigateToRelatedProduct(new MouseEvent('click', { cancelable: true }), related);
+
+    expect(component.selectedVariant?.sku).toBe('TEA-3-SMALL');
+    expect(component.currentPrice).toBe(36000);
   });
 
   it('saves and immediately displays a new review', () => {
@@ -274,7 +301,7 @@ describe('ProductDetail', () => {
     expect(reviewPrompt.textContent).toContain('Bình luận dưới tên Thương Trương');
   });
 
-  it('redirects guests to login instead of opening the review form', () => {
+  it('asks guests to log in before opening the review form', () => {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
     component.syncReviewAccount();
@@ -289,10 +316,35 @@ describe('ProductDetail', () => {
     expect(reviewPrompt.textContent?.trim()).toBe('Bình luận');
 
     reviewPrompt.click();
+    fixture.detectChanges();
 
-    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+    expect(navigateSpy).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Bạn cần đăng nhập để đánh giá sản phẩm.');
     expect(component.reviewFormOpen).toBe(false);
     expect(fixture.nativeElement.querySelector('.review-form')).toBeNull();
+
+    const cancelButton = fixture.nativeElement.querySelector('.login-prompt-cancel') as HTMLButtonElement;
+    cancelButton.click();
+    fixture.detectChanges();
+    expect(component.loginPromptOpen).toBe(false);
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('navigates guests to login after confirming the review prompt', () => {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
+    component.syncReviewAccount();
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    component.toggleReviewForm();
+    expect(navigateSpy).not.toHaveBeenCalled();
+
+    component.goToLoginFromPrompt();
+
+    expect(component.loginPromptOpen).toBe(false);
+    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
   });
 
   it('removes an optimistic review and reopens the form if saving fails', () => {

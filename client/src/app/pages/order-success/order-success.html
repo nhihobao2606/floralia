@@ -105,7 +105,7 @@
         </div>
         <div class="success-summary-row" *ngIf="(order.voucherDiscount ?? 0) > 0">
           <span>Giảm giá voucher <small *ngIf="order.voucherCode">{{ order.voucherCode }}</small></span>
-          <span>-{{ formatPrice(order.voucherDiscount ?? 0) }}</span>
+          <span class="success-summary-discount">-{{ formatPrice(order.voucherDiscount ?? 0) }}</span>
         </div>
         <div class="success-summary-row">
           <span>Phí vận chuyển</span>

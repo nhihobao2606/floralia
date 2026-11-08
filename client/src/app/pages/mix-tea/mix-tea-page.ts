@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, Optional } from '@angular/core';
+import { Products } from '../../classes/Products';
+import { ProductService } from '../../services/product-service';
 
 interface TeaChoice {
   sku: string;
   name: string;
   tastingNote: string;
   image: string;
+  available: boolean;
 }
 
 interface TeaPreset {
@@ -20,6 +23,7 @@ interface SugarChoice {
   name: string;
   detail: string;
   image: string;
+  available: boolean;
 }
 
 @Component({
@@ -28,29 +32,29 @@ interface SugarChoice {
   templateUrl: './mix-tea-page.html',
   styleUrl: './mix-tea-page.css',
 })
-export class MixTeaPage {
+export class MixTeaPage implements OnInit {
   readonly maxChoices = 2;
   readonly batchGrams = 100;
   readonly teas: TeaChoice[] = [
-    { sku: 'TTM001', name: 'Hồng Diệp Trà', tastingNote: 'Atiso đỏ · chua thanh, thơm dịu', image: '3.png' },
-    { sku: 'TTM003', name: 'Hoàng Cúc Trà', tastingNote: 'Cúc vàng · thanh nhẹ, thơm hoa', image: '31.png' },
-    { sku: 'TTM006', name: 'Lệ Hạ Trà', tastingNote: 'Mâm xôi · ngọt nồng, hương hoa', image: '147.png' },
-    { sku: 'TTM007', name: 'Kim Tâm Trà', tastingNote: 'Tam thất · đắng nhẹ, hậu ngọt sâu', image: '22.png' },
-    { sku: 'TTM008', name: 'Hồng Vân Trà', tastingNote: 'Hoa hồng · hương nồng nàn, thanh nhẹ', image: '26.png' },
-    { sku: 'TTM009', name: 'Bạch Cúc An Trà', tastingNote: 'Cúc trắng · thanh mát, dịu nhẹ', image: '4.png' },
-    { sku: 'TTM010', name: 'Lam Diệp Trà', tastingNote: 'Hắc kỷ tử · chua ngọt dịu', image: '34.png' },
-    { sku: 'TTM011', name: 'Tuyết Liên Trà', tastingNote: 'Hoa sen tuyết · thanh khiết, hương dịu', image: '153.png' },
-    { sku: 'TTM012', name: 'Hồng Nhãn Trà', tastingNote: 'Kỷ tử · vị ngọt đượm', image: '49.png' },
-    { sku: 'TTM014', name: 'Chi Bản Tịnh Trà', tastingNote: 'Atiso đỏ & hoa hồng · chua thanh', image: '150.png' },
+    { sku: 'TTM001', name: 'Hồng Diệp Trà', tastingNote: 'Atiso đỏ · chua thanh, thơm dịu', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM003', name: 'Hoàng Cúc Trà', tastingNote: 'Cúc vàng · thanh nhẹ, thơm hoa', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM006', name: 'Lệ Hạ Trà', tastingNote: 'Mâm xôi · ngọt nồng, hương hoa', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM007', name: 'Kim Tâm Trà', tastingNote: 'Tam thất · đắng nhẹ, hậu ngọt sâu', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM008', name: 'Hồng Vân Trà', tastingNote: 'Hoa hồng · hương nồng nàn, thanh nhẹ', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM009', name: 'Bạch Cúc An Trà', tastingNote: 'Cúc trắng · thanh mát, dịu nhẹ', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM010', name: 'Lam Diệp Trà', tastingNote: 'Hắc kỷ tử · chua ngọt dịu', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM011', name: 'Tuyết Liên Trà', tastingNote: 'Hoa sen tuyết · thanh khiết, hương dịu', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM012', name: 'Hồng Nhãn Trà', tastingNote: 'Kỷ tử · vị ngọt đượm', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'TTM014', name: 'Chi Bản Tịnh Trà', tastingNote: 'Atiso đỏ & hoa hồng · chua thanh', image: '/assets/images/no-image.svg', available: true },
   ];
 
   readonly sugars: SugarChoice[] = [
-    { sku: 'DU001', name: 'Đường phèn vàng', detail: 'Dịu ngọt, vị thanh', image: '202.png' },
-    { sku: 'DK030', name: 'Đường nâu viên', detail: 'Ngọt ấm, đậm vị', image: '190.png' },
-    { sku: 'DK031', name: 'Đường phèn trắng', detail: 'Ngọt nhẹ, trong vị', image: '195.png' },
-    { sku: 'DK032', name: 'Đường Stevia', detail: 'Lựa chọn vị ngọt riêng', image: '198.png' },
-    { sku: 'DK033', name: 'Đường dừa', detail: 'Hương vị dịu, thơm nhẹ', image: '43.png' },
-    { sku: 'DK034', name: 'Đường phèn mật mía', detail: 'Ngọt đượm, hương mật mía', image: '207.png' },
+    { sku: 'DU001', name: 'Đường phèn vàng', detail: 'Dịu ngọt, vị thanh', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'DK030', name: 'Đường nâu viên', detail: 'Ngọt ấm, đậm vị', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'DK031', name: 'Đường phèn trắng', detail: 'Ngọt nhẹ, trong vị', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'DK032', name: 'Đường Stevia', detail: 'Lựa chọn vị ngọt riêng', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'DK033', name: 'Đường dừa', detail: 'Hương vị dịu, thơm nhẹ', image: '/assets/images/no-image.svg', available: true },
+    { sku: 'DK034', name: 'Đường phèn mật mía', detail: 'Ngọt đượm, hương mật mía', image: '/assets/images/no-image.svg', available: true },
   ];
 
   readonly presets: TeaPreset[] = [
@@ -64,9 +68,72 @@ export class MixTeaPage {
   sugarGrams = 0;
   teaRatio = 50;
   selectionLimitMessage = '';
+  catalogMessage = '';
+  recipeMessage = '';
+
+  constructor(@Optional() private readonly productService: ProductService | null) {}
+
+  ngOnInit(): void {
+    if (!this.productService) return;
+    this.productService.getProducts().subscribe({
+      next: products => this.applyCatalog(products),
+      error: () => {
+        this.catalogMessage = 'Chưa tải được tồn kho mới nhất. Bạn vẫn có thể gửi công thức để Floralia xác nhận.';
+      }
+    });
+  }
+
+  private applyCatalog(products: Products[]): void {
+    const bySku = new Map(products.map(product => [product.sku, product]));
+    for (const choice of [...this.teas, ...this.sugars]) {
+      const product = bySku.get(choice.sku);
+      if (!product) {
+        choice.available = false;
+        choice.image = '/assets/images/no-image.svg';
+        continue;
+      }
+      choice.name = product.name || choice.name;
+      choice.available = product.isActive !== false && Number(product.stock) > 0;
+      choice.image = this.getProductImage(product);
+    }
+
+    const unavailable = this.selectedSkus.filter(sku => !this.teas.find(tea => tea.sku === sku)?.available);
+    this.selectedSkus = this.selectedSkus.filter(sku => !unavailable.includes(sku));
+    if (this.sugarSku && !this.sugars.find(sugar => sugar.sku === this.sugarSku)?.available) {
+      this.sugarSku = '';
+      this.sugarGrams = 0;
+    }
+    if (unavailable.length || [...this.teas, ...this.sugars].some(choice => !choice.available)) {
+      this.catalogMessage = 'Một số nguyên liệu đang hết hàng hoặc không còn kinh doanh.';
+    }
+  }
+
+  private getProductImage(product: Products): string {
+    const source = product.imageUrl || '';
+    if (source) {
+      if (/^(https?:|data:)/i.test(source)) return source;
+      const configured = (window as Window & { FLORALIA_API_ORIGIN?: string }).FLORALIA_API_ORIGIN?.trim();
+      const apiOrigin = configured || `${window.location.protocol}//${window.location.hostname}:3002`;
+      return `${apiOrigin}${source.startsWith('/') ? '' : '/'}${source}`;
+    }
+    const thumbnail = product.thumbnail || '';
+    if (/^(https?:|data:)/i.test(thumbnail)) return thumbnail;
+    return /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(thumbnail)
+      ? (thumbnail.startsWith('/') ? thumbnail : `/assets/images/${thumbnail}`)
+      : '/assets/images/no-image.svg';
+  }
+
+  onImageError(event: Event): void {
+    const image = event.target as HTMLImageElement | null;
+    if (image && !image.src.endsWith('/assets/images/no-image.svg')) {
+      image.src = '/assets/images/no-image.svg';
+    }
+  }
 
   get selectedTeas(): TeaChoice[] {
-    return this.teas.filter((tea) => this.selectedSkus.includes(tea.sku));
+    return this.selectedSkus
+      .map(sku => this.teas.find(tea => tea.sku === sku))
+      .filter((tea): tea is TeaChoice => Boolean(tea));
   }
 
   get selectedSugar(): SugarChoice | undefined {
@@ -111,8 +178,18 @@ export class MixTeaPage {
       && this.sugarGrams === preset.sugarGrams;
   }
 
+  isPresetAvailable(preset: TeaPreset): boolean {
+    return preset.skus.every(sku => this.teas.find(tea => tea.sku === sku)?.available)
+      && Boolean(this.sugars.find(sugar => sugar.sku === preset.sugarSku)?.available);
+  }
+
   toggleTea(sku: string): void {
     this.selectionLimitMessage = '';
+    this.recipeMessage = '';
+    if (!this.teas.find(tea => tea.sku === sku)?.available) {
+      this.selectionLimitMessage = 'Nguyên liệu này hiện đang hết hàng.';
+      return;
+    }
     if (this.isSelected(sku)) {
       this.selectedSkus = this.selectedSkus.filter((item) => item !== sku);
       if (this.selectedSkus.length < 2) this.teaRatio = 50;
@@ -126,14 +203,27 @@ export class MixTeaPage {
   }
 
   applyPreset(preset: TeaPreset): void {
+    const allAvailable = preset.skus.every(sku => this.teas.find(tea => tea.sku === sku)?.available)
+      && Boolean(this.sugars.find(sugar => sugar.sku === preset.sugarSku)?.available);
+    if (!allAvailable) {
+      this.selectionLimitMessage = 'Công thức này có nguyên liệu đang hết hàng. Hãy chọn công thức khác.';
+      return;
+    }
     this.selectedSkus = [...preset.skus];
     this.sugarSku = preset.sugarSku;
     this.sugarGrams = preset.sugarGrams;
     this.teaRatio = 50;
     this.selectionLimitMessage = '';
+    this.recipeMessage = '';
   }
 
   chooseSugar(sku: string): void {
+    if (sku && !this.sugars.find(sugar => sugar.sku === sku)?.available) {
+      this.selectionLimitMessage = 'Đường này hiện đang hết hàng.';
+      return;
+    }
+    this.selectionLimitMessage = '';
+    this.recipeMessage = '';
     this.sugarSku = sku;
     this.sugarGrams = sku ? (this.sugarGrams || 5) : 0;
   }
@@ -144,6 +234,7 @@ export class MixTeaPage {
     this.sugarGrams = 0;
     this.teaRatio = 50;
     this.selectionLimitMessage = '';
+    this.recipeMessage = '';
   }
 
   sendRecipe(): void {
@@ -154,5 +245,22 @@ export class MixTeaPage {
     const ratio = this.selectedTeas.length > 1 ? `\nTỷ lệ cốt trà: ${this.teaRatio}% / ${100 - this.teaRatio}%` : '';
     const body = `Xin chào Floralia,\n\nMình muốn được tư vấn công thức phối trà 100g gồm:\n${recipe}\n${sugar}${ratio}\n\nMong Floralia tư vấn thêm giúp mình.\n\nCảm ơn!`;
     window.location.href = `mailto:floralia@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
+  async copyRecipe(): Promise<void> {
+    if (!this.selectedTeas.length) return;
+    const ingredients = this.selectedTeas.map(tea => `• ${tea.name}: ${this.getTeaGrams(tea.sku)}g`);
+    ingredients.push(this.selectedSugar
+      ? `• ${this.selectedSugar.name}: ${this.sugarGrams}g`
+      : '• Không thêm đường: 0g');
+    if (this.selectedTeas.length > 1) {
+      ingredients.push(`Tỷ lệ cốt trà: ${this.teaRatio}% / ${100 - this.teaRatio}%`);
+    }
+    try {
+      await navigator.clipboard.writeText([`Công thức trà Floralia - mẻ phối ${this.batchGrams}g`, ...ingredients].join('\n'));
+      this.recipeMessage = 'Đã sao chép công thức. Bạn có thể dán vào tin nhắn để gửi Floralia.';
+    } catch {
+      this.recipeMessage = 'Trình duyệt không cho phép sao chép tự động. Hãy dùng nút gửi email để chuyển công thức.';
+    }
   }
 }

@@ -1,4 +1,4 @@
-﻿export interface Products {
+export interface Products {
   _id?: string;
   id?: string;
   sku: string;
@@ -6,6 +6,9 @@
   name: string;
   category: string;
   categorySlug: string;
+  subCategory?: string;
+  status?: string;
+  isActive?: boolean;
   featured: boolean;
   price: number;
   oldPrice: number;
@@ -22,7 +25,6 @@
   images: string[];
   ratingAverage: number;
   ratingCount: number;
-  isActive?: boolean;
   description: string;
   tags: string[];
   benefits: string[];

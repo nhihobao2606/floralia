@@ -15,8 +15,16 @@ interface OrderRow {
   title: string;
   subtitle: string;
   total: number;
-  accent: string;
+  image: string;
   voucherCode?: string;
+  voucherDiscount: number;
+}
+
+interface UsedVoucherRow {
+  code: string;
+  usageCount: number;
+  totalDiscount: number;
+  lastUsed: string;
 }
 
 @Component({
@@ -143,14 +151,15 @@ export class AdminUserDetail implements OnInit {
         }
         const orders = response.orders || [];
         this.userOrders = orders
-          .map((order, index) => ({
+          .map(order => ({
             id: order.code || order.id,
             date: this.formatOrderDate(order.createdAt || order.date),
             title: this.getOrderTitle(order),
             subtitle: this.getOrderSubtitle(order),
             total: Number(order.total || 0),
-            accent: ['tea-mint', 'tea-gold', 'tea-rose', 'tea-brown'][index % 4],
+            image: this.getOrderImage(order),
             voucherCode: order.voucherCode,
+            voucherDiscount: Number(order.voucherDiscount) || 0,
           }));
 
         if (this.user) {
@@ -193,8 +202,33 @@ export class AdminUserDetail implements OnInit {
   }
 
   get usedVoucherCodes(): string[] {
-    // Voucher usage is only available on orders that store a voucherCode.
-    return [...new Set(this.userOrders.map(order => order.voucherCode).filter((code): code is string => Boolean(code)))];
+    return [...new Set(this.userOrders
+      .map(order => order.voucherCode?.trim().toUpperCase())
+      .filter((code): code is string => Boolean(code)))];
+  }
+
+  get usedVouchers(): UsedVoucherRow[] {
+    const vouchers = new Map<string, UsedVoucherRow>();
+    for (const order of this.userOrders) {
+      if (!order.voucherCode) continue;
+      const code = order.voucherCode.trim().toUpperCase();
+      const voucher = vouchers.get(code) || { code, usageCount: 0, totalDiscount: 0, lastUsed: order.date };
+      voucher.usageCount += 1;
+      voucher.totalDiscount += Number(order.voucherDiscount) || 0;
+      if (order.date !== '—' && (voucher.lastUsed === '—' || this.compareOrderDates(order.date, voucher.lastUsed) > 0)) {
+        voucher.lastUsed = order.date;
+      }
+      vouchers.set(code, voucher);
+    }
+    return [...vouchers.values()].sort((a, b) => this.compareOrderDates(b.lastUsed, a.lastUsed));
+  }
+
+  private compareOrderDates(first: string, second: string): number {
+    const parse = (value: string) => {
+      const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      return match ? new Date(+match[3], +match[2] - 1, +match[1]).getTime() : 0;
+    };
+    return parse(first) - parse(second);
   }
 
   get paginatedOrders(): OrderRow[] {
@@ -270,11 +304,8 @@ export class AdminUserDetail implements OnInit {
         this.user = { ...targetUser, ...response.user };
         this.statusMessage = response.message;
         this.statusMessageType = 'success';
+        this.showLockModal = false;
         this.changeDetector.detectChanges();
-        window.setTimeout(() => {
-          this.closeLockModal();
-          this.changeDetector.detectChanges();
-        }, 1200);
       },
       error: error => {
         this.statusMessage = error?.error?.message || (error?.name === 'TimeoutError'
@@ -306,33 +337,48 @@ export class AdminUserDetail implements OnInit {
 
   formatDate(value?: string | null): string {
     if (!value) return '12/10/2024';
-    const date = new Date(value);
+    const match = String(value).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    const date = match
+      ? new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]))
+      : new Date(value);
     if (Number.isNaN(date.getTime())) return '12/10/2024';
     return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
   }
 
   private formatOrderDate(value?: string | null): string {
     if (!value) return '—';
-    const date = new Date(value);
+    const match = String(value).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    const date = match
+      ? new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]))
+      : new Date(value);
     if (Number.isNaN(date.getTime())) return '—';
     return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
   }
 
   private getOrderTitle(order: AdminOrder): string {
     const itemName = order.items?.[0]?.name || order.items?.[0]?.productName || 'Sản phẩm Floralia';
-    return itemName;
+    const remainingProducts = Math.max(0, (order.items?.length || 0) - 1);
+    return remainingProducts ? `${itemName} + ${remainingProducts} sản phẩm khác` : itemName;
   }
 
   private getOrderSubtitle(order: AdminOrder): string {
-    const firstItem = order.items?.[0];
-    if (!firstItem) {
-      return 'Đơn hàng đã thanh toán';
-    }
-
-    const quantityText = firstItem.quantity ? `Số lượng: ${firstItem.quantity} ${firstItem.quantity > 1 ? 'hộp' : 'hộp'}` : 'Đơn hàng đã thanh toán';
-    return quantityText;
+    const items = order.items || [];
+    const quantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+    return items.length
+      ? `Số lượng: ${quantity} hộp${items.length > 1 ? ` · ${items.length} sản phẩm` : ''}`
+      : 'Đơn hàng không có thông tin sản phẩm';
   }
 
+  private getOrderImage(order: AdminOrder): string {
+    const image = order.items?.[0]?.image?.trim() || '';
+    if (!image) return '';
+    if (/^(https?:|data:|blob:)/i.test(image)) return image;
+    return image.startsWith('/') ? `http://localhost:3002${image}` : '';
+  }
+
+  onOrderImageError(order: OrderRow): void {
+    order.image = '';
+  }
   formatCurrency(value: number): string {
     return `${value.toLocaleString('vi-VN')}đ`;
   }

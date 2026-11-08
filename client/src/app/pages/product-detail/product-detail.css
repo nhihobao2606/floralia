@@ -308,6 +308,19 @@
   background: #d9dfd8;
 }
 
+.detail-sold {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #78877c;
+  font-size: 13px;
+}
+
+.detail-sold i {
+  color: #789879;
+  font-size: 14px;
+}
+
 .price-line {
   display: flex;
   align-items: baseline;
@@ -770,6 +783,82 @@
   background: #e9edef;
 }
 
+.login-prompt-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(25, 42, 31, 0.48);
+  backdrop-filter: blur(4px);
+}
+
+.login-prompt-dialog {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 30px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(13, 37, 22, 0.25);
+  text-align: center;
+}
+
+.login-prompt-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5ef;
+  color: var(--detail-green);
+  cursor: pointer;
+}
+
+.login-prompt-dialog h2 {
+  margin: 0 24px 10px;
+  color: var(--detail-green-dark);
+  font-family: 'Lora', Georgia, serif;
+  font-size: 21px;
+}
+
+.login-prompt-dialog p {
+  margin: 0;
+  color: var(--detail-muted);
+  line-height: 1.6;
+}
+
+.login-prompt-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.login-prompt-actions button {
+  min-width: 100px;
+  padding: 10px 18px;
+  border: 1px solid var(--detail-green);
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-prompt-cancel {
+  background: #fff;
+  color: var(--detail-green);
+}
+
+.login-prompt-confirm {
+  background: var(--detail-green);
+  color: #fff;
+}
+
 .review-form h2 {
   margin: 0 0 4px;
   color: var(--detail-green-dark);
@@ -1072,14 +1161,17 @@
   line-height: 1.35;
 }
 
+.quick-add-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; }
 .quick-add-product strong {
   color: var(--detail-green);
   font-size: 18px;
 }
+.quick-add-price del { color: #a7aaa6; font-size: 14px; }
 
 .quick-add-variants {
   margin-top: 24px;
 }
+.quick-add-stock { margin: 16px 0 0; color: #657568; font-size: 14px; }
 
 .quick-add-variants h3 {
   margin: 0 0 11px;
@@ -1154,6 +1246,20 @@
 
 .related-rating i {
   color: #e6a941;
+}
+
+.related-sold {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: -2px 0 2px;
+  color: #78877c;
+  font-size: 12px;
+}
+
+.related-sold i {
+  color: #789879;
+  font-size: 13px;
 }
 
 .related-info > strong {

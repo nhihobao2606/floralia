@@ -159,10 +159,6 @@
                   </span>
                 </td>
                 <td class="row-actions">
-                  <button class="icon-action edit-action" type="button" (click)="$event.stopPropagation(); openUserProfile(user)" [attr.aria-label]="'Xem ' + user.fullName">
-                    <i class="bi bi-eye" aria-hidden="true"></i>
-                    <span>Xem</span>
-                  </button>
                   <button class="icon-action edit-action" type="button" (click)="$event.stopPropagation(); openEditProfile(user)" [attr.aria-label]="'Sửa ' + user.fullName">
                     <i class="bi bi-pencil" aria-hidden="true"></i>
                     <span>Sửa</span>
@@ -266,33 +262,35 @@
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="modalOpen">
-  <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="lock-user-title">
-    <button type="button" class="close-button" aria-label="Đóng" (click)="closeModal()">×</button>
+<div class="modal-backdrop" *ngIf="modalOpen" (click)="closeModal()">
+  <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="lock-user-title" (click)="$event.stopPropagation()">
+    <button type="button" class="close-modal" aria-label="Đóng" (click)="closeModal()">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
 
-    <div class="modal-icon" aria-hidden="true">
-      <span class="bi bi-person-lock"></span>
+    <div class="modal-icon-wrap">
+      <div class="modal-icon" aria-hidden="true"><i class="bi bi-lock-fill"></i></div>
     </div>
 
-    <h3 id="lock-user-title">{{ action === 'block' ? 'Bạn có chắc chắn muốn khóa tài khoản này?' : 'Bạn có chắc chắn muốn mở khóa tài khoản này?' }}</h3>
+    <h3 id="lock-user-title">{{ selectedUser?.status === 'blocked' ? 'Bạn có chắc chắn muốn mở khóa tài khoản này?' : 'Bạn có chắc chắn muốn khóa tài khoản này?' }}</h3>
 
-    <div class="modal-user" *ngIf="selectedUser">
-      <div class="user-avatar large" [ngClass]="{ 'blocked': selectedUser.status === 'blocked' }">{{ getInitials(selectedUser.fullName) }}</div>
-      <div class="user-meta">
+    <div class="modal-user-card" *ngIf="selectedUser">
+      <div class="modal-avatar">{{ getInitials(selectedUser.fullName) }}</div>
+      <div class="modal-user-copy">
         <strong>{{ selectedUser.fullName }}</strong>
         <span>{{ selectedUser.email }}</span>
       </div>
     </div>
 
     <p class="modal-note">
-      {{ action === 'block' ? 'Người dùng sẽ không thể đăng nhập vào hệ thống cho đến khi bạn mở khóa lại.' : 'Người dùng sẽ có thể đăng nhập lại bình thường sau khi được mở khóa.' }}
+      {{ selectedUser?.status === 'blocked' ? 'Người dùng sẽ có thể đăng nhập và sử dụng voucher trở lại sau khi được mở khóa.' : 'Người dùng sẽ không thể đăng nhập hoặc sử dụng voucher cho đến khi tài khoản được mở khóa.' }}
     </p>
 
-    <div *ngIf="error" class="modal-error" role="alert">{{ error }}</div>
-    <div *ngIf="success" class="modal-success" role="status">{{ success }}</div>
+    <div *ngIf="error" class="modal-status-message error" role="alert">{{ error }}</div>
+    <div *ngIf="success" class="modal-status-message" role="status">{{ success }}</div>
 
     <div class="reason-row" *ngIf="action === 'block'">
-      <label for="users-lock-reason">Lý do khóa:</label>
+      <label for="users-lock-reason">Lý do khóa tài khoản</label>
       <select id="users-lock-reason" [(ngModel)]="lockReason">
         <option *ngFor="let reason of reasonOptions" [value]="reason">{{ reason }}</option>
       </select>
@@ -301,9 +299,11 @@
     <div class="modal-actions">
       <button type="button" class="secondary-modal-button" (click)="closeModal()">Hủy</button>
       <button type="button" class="danger-modal-button" (click)="confirmStatusChange()" [disabled]="updatingId === selectedUser?.id">
+        <i class="bi bi-lock-fill" aria-hidden="true"></i>
         {{ updatingId === selectedUser?.id ? 'Đang cập nhật...' : (action === 'block' ? 'Khóa tài khoản' : 'Mở khóa tài khoản') }}
       </button>
     </div>
+
+    <div class="modal-caption">Hành động này sẽ được ghi vào nhật ký kiểm toán quản trị viên.</div>
   </div>
 </div>
-

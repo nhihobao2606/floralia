@@ -220,6 +220,7 @@ export class AdminUsers implements OnInit {
     this.action = user.status === 'blocked' ? 'unblock' : 'block';
     this.modalOpen = true;
     this.error = '';
+    this.success = '';
   }
 
   closeModal(): void {
@@ -246,11 +247,8 @@ export class AdminUsers implements OnInit {
         this.users = this.users.map((user) => user.id === response.user.id ? response.user : user);
         this.summary = this.buildSummary(this.users);
         this.success = response.message;
+        this.closeModal();
         this.changeDetector.detectChanges();
-        window.setTimeout(() => {
-          this.closeModal();
-          this.changeDetector.detectChanges();
-        }, 1200);
       },
       error: (error) => {
         this.error = error?.error?.message || (error?.name === 'TimeoutError'

@@ -24,11 +24,11 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" routerLink="/products" routerLinkActive="active">Sản phẩm</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc' }">Trà thảo mộc</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'tra-thao-moc-mix' }">Trà thảo mộc mix</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'do-uong-kem-tra' }">Đồ uống kèm trà</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'am-tra' }">Ấm trà</a></li>
-              <li><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: 'set-qua-tang' }">Set quà tặng</a></li>
+              <li *ngFor="let cat of headerCategories"><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: cat.slug }">{{ cat.name }}</a></li>
+
+
+
+
             </ul>
           </li>
           <li class="nav-item"><a class="nav-link" routerLink="/blog" routerLinkActive="active">Blog</a></li>
@@ -61,7 +61,7 @@
               </form>
 
               <div class="search-results-list">
-                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p.slug)" [state]="{ product: p }">
+                <a *ngFor="let p of results" class="search-item" [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p }">
                   <img [src]="getSearchProductImage(p)" [alt]="getName(p)" (error)="onImgError($event)">
                   <div class="search-item-info">
                     <span class="search-item-name">{{ getName(p) }}</span>
@@ -165,6 +165,7 @@
           <img [src]="cartImage(it)" [alt]="it.name" (error)="onImgError($event)">
           <div class="cart-info">
             <h5>{{ it.name || it.title }}</h5>
+            <div class="cart-stock">Kho: {{ cartStock(it) }}</div>
             <div class="cart-controls">
               <div class="quantity">
                 <button type="button" (click)="changeQty(it, -1)" aria-label="Giảm">−</button>
@@ -183,7 +184,7 @@
             </div>
             <div class="cart-price">{{ formatPrice(+it.price * +it.quantity) }}</div>
           </div>
-          <button type="button" class="remove-item" (click)="removeItem(it)" aria-label="Xóa">
+          <button type="button" class="remove-item" (click)="requestItemRemoval(it)" aria-label="Xóa">
             <i class="bi bi-trash3"></i>
           </button>
         </div>
@@ -241,6 +242,8 @@
       </div>
       <p class="variant-picker-error" *ngIf="variantPickerError">{{ variantPickerError }}</p>
 
+      <p class="variant-picker-stock" *ngIf="selectedVariant">Kho: {{ selectedVariant.stock ?? 0 }}</p>
+
       <div class="cart-add-footer">
         <div class="cart-add-quantity" aria-label="Số lượng">
           <button type="button" aria-label="Giảm số lượng" [disabled]="variantPickerQuantity <= 1" (click)="changeVariantPickerQuantity(-1)">−</button>
@@ -254,6 +257,17 @@
           (click)="confirmVariantChange()">
           Xác nhận
         </button>
+      </div>
+    </section>
+  </div>
+  <div class="cart-remove-confirm-overlay" *ngIf="itemPendingRemoval" (click)="itemPendingRemoval = null">
+    <section class="cart-remove-confirm" role="alertdialog" aria-modal="true" aria-labelledby="removeCartItemTitle" (click)="$event.stopPropagation()">
+      <button type="button" class="cart-remove-close" aria-label="Đóng" (click)="itemPendingRemoval = null"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+      <h2 id="removeCartItemTitle">Xóa sản phẩm</h2>
+      <p>Bạn có muốn xóa <strong>{{ itemPendingRemoval.name || itemPendingRemoval.title }}</strong> khỏi giỏ hàng không?</p>
+      <div class="cart-remove-confirm-actions">
+        <button type="button" class="cart-remove-cancel" (click)="itemPendingRemoval = null">Hủy</button>
+        <button type="button" class="cart-remove-accept" (click)="confirmItemRemoval()">Xóa</button>
       </div>
     </section>
   </div>

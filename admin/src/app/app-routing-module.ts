@@ -7,6 +7,12 @@ import { Orders } from './pages/orders_manage/orders/orders';
 import { OrderDetail } from './pages/orders_manage/order-detail/order-detail';
 import { adminAuthGuard } from './guards/admin-auth.guard';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
+import { Products } from './pages/product-manage/products/products';
+import { ProductEditor, canDeactivateProductEditor } from './pages/product-manage/product-editor/product-editor';
+import { Categories } from './pages/category-manage/categories/categories';
+import { CategoryEditor, canDeactivateCategoryEditor } from './pages/category-manage/category-editor/category-editor';
+import { AdminOrders } from './pages/orders_manage/orders/orders';
+import { AdminOrderDetail } from './pages/orders_manage/order-detail/order-detail';
 import { AdminUsers } from './pages/users_manage/users/users';
 import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
 import { AdminUserForm } from './pages/users_manage/user-form/user-form';
@@ -32,6 +38,15 @@ export const routes: Routes = [
   { path: '', redirectTo: 'orders', pathMatch: 'full' },
   { path: '**', component: Pagenotfound },
 ];
+
+routes.splice(routes.length - 1, 0,
+  { path: 'products/new', component: ProductEditor, canActivate: [adminAuthGuard], canDeactivate: [canDeactivateProductEditor] },
+  { path: 'products/:id/edit', component: ProductEditor, canActivate: [adminAuthGuard], canDeactivate: [canDeactivateProductEditor] },
+  { path: 'products', component: Products, canActivate: [adminAuthGuard] },
+  { path: 'categories/new', component: CategoryEditor, canActivate: [adminAuthGuard], canDeactivate: [canDeactivateCategoryEditor] },
+  { path: 'categories/:id/edit', component: CategoryEditor, canActivate: [adminAuthGuard], canDeactivate: [canDeactivateCategoryEditor] },
+  { path: 'categories', component: Categories, canActivate: [adminAuthGuard] },
+);
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

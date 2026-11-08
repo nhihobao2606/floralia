@@ -18,10 +18,13 @@ const Voucher = require('./models/voucher');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
+const clientProductRoutes = require('./routes/clientProductRoutes');
 const addressRoutes = require('./routes/addressRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const adminBlogRoutes = require('./routes/adminBlogRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const adminProductRoutes = require('./routes/adminProductRoutes');
+const AdminProduct = require('./models/adminProduct');
 const voucherRoutes = require('./routes/voucherRoutes');
 const adminOrderRoutes = require('./routes/adminOrderRoutes');
 
@@ -31,8 +34,8 @@ const port = process.env.PORT || 3002;
 app.use(morgan('combined'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ limit: '200mb', extended: true }));
 
 app.get('/', (req, res) => {
     res.send('Floralia Web Server is running');
@@ -40,10 +43,12 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/products', clientProductRoutes);
 app.use('/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/blogs', blogRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
+app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
@@ -68,6 +73,7 @@ async function startServer() {
             db.collection('ProductAssets'),
             db.collection('Reviews')
         );
+        AdminProduct.setCollections(db.collection('Product'), db.collection('ProductAssets'));
         Blog.setCollection(db.collection('Blogs'));
 
         Order.setCollection(db.collection('Orders'));

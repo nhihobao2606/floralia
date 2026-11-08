@@ -217,6 +217,7 @@ a:focus-visible, button:focus-visible {
 .cart-add-variant.selected { border-color: #245c3e; background: #eef5ef; color: #214e36; box-shadow: 0 0 0 2px rgba(36, 92, 62, .1); }
 .cart-add-variant:disabled { color: #aab4aa; cursor: not-allowed; }
 .cart-add-variant small { display: block; font-size: 10px; }
+.cart-add-stock { margin: 16px 0 0; color: #657568; font-size: 14px; }
 .cart-add-footer { display: flex; gap: 14px; margin-top: 28px; }
 .cart-add-quantity { display: inline-flex; min-width: 150px; height: 58px; align-items: center; justify-content: space-between; border: 1px solid #dfe5dc; border-radius: 999px; background: #fff; }
 .cart-add-quantity button { width: 48px; height: 100%; border: 0; border-radius: 999px; background: transparent; color: #245c3e; font-size: 22px; cursor: pointer; }

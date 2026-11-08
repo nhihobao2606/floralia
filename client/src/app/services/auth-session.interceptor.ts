@@ -11,10 +11,15 @@ export class AuthSessionInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const isLoginRequest = request.url.includes('/api/auth/login') || request.url.includes('/api/auth/signup');
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const authenticatedRequest = token && !isLoginRequest && request.url.includes('localhost:3002')
-      ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    const configuredOrigin = (window as Window & { FLORALIA_API_ORIGIN?: string }).FLORALIA_API_ORIGIN?.trim();
+    const apiOrigin = configuredOrigin || `${window.location.protocol}//${window.location.hostname}:3002`;
+    const apiRequest = request.url.startsWith('http://localhost:3002') || request.url.startsWith('http://127.0.0.1:3002')
+      ? request.clone({ url: request.url.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002/, apiOrigin) })
       : request;
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const authenticatedRequest = token && !isLoginRequest && apiRequest.url.startsWith(apiOrigin)
+      ? apiRequest.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+      : apiRequest;
 
     return next.handle(authenticatedRequest).pipe(
       catchError((error: unknown) => {

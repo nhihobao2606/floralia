@@ -70,3 +70,9 @@
   .sidebar-badge { position: absolute; top: 4px; right: 4px; }
   .sidebar-link i { width: auto; font-size: 18px; }
 }
+.sidebar-nav .sidebar-link.disabled:nth-of-type(3) { display: none; }
+.sidebar-nav .sidebar-link.disabled:nth-of-type(4) { display: none; }
+.product-manage-shortcut { grid-row: 3; margin-top: 0; }
+.category-manage-shortcut { grid-row: 4; margin-top: 0; }
+.admin-sidebar.product-route .sidebar-nav .sidebar-link.active:not(.product-manage-shortcut):not(.category-manage-shortcut) { background: transparent; color: rgba(245,248,243,.86); font-weight: 400; }
+@media (max-width: 760px) { .product-manage-shortcut, .category-manage-shortcut { grid-row: auto; } }

@@ -154,6 +154,7 @@
 }
 .buy-now-variant:disabled { color: #aab4aa; cursor: not-allowed; }
 .buy-now-variant small { display: block; font-size: 10px; }
+.buy-now-stock { margin: 16px 0 0; color: #657568; font-size: 14px; }
 .buy-now-footer { display: flex; gap: 14px; margin-top: 30px; }
 .buy-now-quantity {
   display: inline-flex;
