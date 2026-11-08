@@ -1,0 +1,1437 @@
+[
+  {
+    "id": "FL0009",
+    "code": "#FL0009",
+    "userId": null,
+    "date": "09/10/2026",
+    "time": "09:05",
+    "status": "shipping",
+    "statusLabel": "Đang giao hàng",
+    "step": 3,
+    "paymentMethod": "VNPay",
+    "paymentStatus": "paid",
+    "paymentStatusLabel": "Đã thanh toán",
+    "receiver": {
+      "name": "Thu Hà",
+      "phone": "0987 654 321",
+      "address": "88 Lê Lợi, TP. Thủ Đức, TP.HCM",
+      "email": "thuha@email.com",
+      "customerId": "#KH102"
+    },
+    "items": [
+      {
+        "sku": "TTM004",
+        "name": "Lục Mễ Trà",
+        "variant": "Hộp 50g",
+        "image": "/assets/images/products/74.png",
+        "price": 95000,
+        "quantity": 1,
+        "total": 95000
+      },
+      {
+        "sku": "TTM001",
+        "name": "Lam hoa trà",
+        "variant": "Hộp 100g",
+        "image": "/assets/images/products/82.png",
+        "price": 75000,
+        "quantity": 1,
+        "total": 75000
+      },
+      {
+        "sku": "TTM009",
+        "name": "Liên hoa trà",
+        "variant": "Túi lọc 20 gói",
+        "image": "/assets/images/products/85.png",
+        "price": 90000,
+        "quantity": 2,
+        "total": 180000
+      }
+    ],
+    "subtotal": 350000,
+    "discount": 0,
+    "shippingFee": 0,
+    "total": 350000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đang giao đến khách",
+        "time": "10/10 - 08:40",
+        "completed": true
+      },
+      {
+        "title": "Đã đến kho Thủ Đức",
+        "time": "09/10 - 21:10",
+        "completed": true
+      },
+      {
+        "title": "Đã bàn giao vận chuyển",
+        "time": "09/10 - 14:00",
+        "completed": true
+      },
+      {
+        "title": "Đang chuẩn bị hàng",
+        "time": "09/10 - 10:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "09/10 - 09:20",
+        "completed": true
+      }
+    ],
+    "notes": [
+      {
+        "text": "Yêu cầu gói quà, giao giờ hành chính.",
+        "author": "Khách hàng",
+        "date": "09/10"
+      }
+    ]
+  },
+  {
+    "id": "FL0010",
+    "code": "#FL0010",
+    "userId": null,
+    "date": "09/10/2026",
+    "time": "16:20",
+    "status": "processing",
+    "statusLabel": "Đang chuẩn bị",
+    "step": 2,
+    "paymentMethod": "Chuyển khoản",
+    "paymentStatus": "paid",
+    "paymentStatusLabel": "Đã thanh toán",
+    "receiver": {
+      "name": "Lan Phương",
+      "phone": "0912 345 678",
+      "address": "12 Nguyễn Trãi, Q.1, TP.HCM",
+      "email": "lanphuong@gmail.com",
+      "customerId": "#KH100"
+    },
+    "items": [
+      {
+        "sku": "THC001",
+        "name": "Trà hoa cúc",
+        "variant": "Hộp 100g",
+        "image": "/assets/images/products/74.png",
+        "price": 80000,
+        "quantity": 3,
+        "total": 240000
+      }
+    ],
+    "subtotal": 240000,
+    "discount": 0,
+    "shippingFee": 0,
+    "total": 240000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8843",
+    "trackingTimeline": [
+      {
+        "title": "Đang chuẩn bị hàng",
+        "time": "09/10 - 16:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "09/10 - 16:20",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "FL0011",
+    "code": "#FL0011",
+    "userId": null,
+    "date": "10/10/2026",
+    "time": "11:53",
+    "status": "pending",
+    "statusLabel": "Chờ xác nhận",
+    "step": 1,
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Minh Hoàng",
+      "phone": "0909 050 909",
+      "address": "341 Cao Đạt, Q.5, TP.HCM",
+      "email": "minhhoang@gmail.com",
+      "customerId": "#KH101"
+    },
+    "items": [
+      {
+        "sku": "THC001",
+        "name": "Trà hoa cúc",
+        "variant": "Hộp 50g",
+        "image": "/assets/images/products/74.png",
+        "price": 50000,
+        "quantity": 2,
+        "total": 100000
+      },
+      {
+        "sku": "TAT002",
+        "name": "Trà Atisô đỏ",
+        "variant": "Hộp 50g",
+        "image": "/assets/images/products/34.png",
+        "price": 85000,
+        "quantity": 1,
+        "total": 85000
+      }
+    ],
+    "subtotal": 185000,
+    "discount": 0,
+    "shippingFee": 0,
+    "total": 185000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8845",
+    "trackingTimeline": [
+      {
+        "title": "Chờ xác nhận đơn hàng",
+        "time": "10/10 - 11:53",
+        "completed": true
+      }
+    ],
+    "notes": [
+      {
+        "text": "Gọi điện trước khi giao",
+        "author": "Khách hàng",
+        "date": "10/10"
+      }
+    ]
+  },
+  {
+    "id": "e6535fadbe226583d923fa2666e23945",
+    "code": "#66E23945",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "5/11/2026",
+    "time": "11:24:34",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "Thanh toán khi nhận hàng (COD)",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912345678",
+      "address": "669 Đỗ Mười, khu phố 13, Phường Linh Xuân, Thành phố Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM006-G20V3",
+        "name": "Lệ Hạ Trà – Trà Hoa Rượu Mâm Xôi",
+        "variant": "Hộp 20 gói · 3 vị",
+        "image": "http://localhost:3002/products/image/TTM006_THUMB",
+        "price": 320000,
+        "quantity": 1,
+        "total": 320000
+      }
+    ],
+    "subtotal": 320000,
+    "discount": 70000,
+    "shippingFee": 30000,
+    "total": 280000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "status": "pending",
+        "statusLabel": "CHỜ XÁC NHẬN",
+        "notice": "Đơn hàng đang chờ cửa hàng xác nhận",
+        "createdAt": "2026-11-05T04:24:34.055Z"
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "ef130b413b6eab406364a00dd855a939",
+    "code": "#D855A939",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "5/11/2026",
+    "time": "11:22:04",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "Thanh toán khi nhận hàng (COD)",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912345678",
+      "address": "669 Đỗ Mười, khu phố 13, Phường Linh Xuân, Thành phố Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "DK030-300G",
+        "name": "Đường Nâu Cổ Truyền Viên",
+        "variant": "Túi 300g",
+        "image": "http://localhost:3002/products/image/DK030_THUMB",
+        "price": 85000,
+        "quantity": 1,
+        "total": 85000
+      }
+    ],
+    "subtotal": 85000,
+    "discount": 0,
+    "shippingFee": 30000,
+    "total": 115000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "status": "pending",
+        "statusLabel": "CHỜ XÁC NHẬN",
+        "notice": "Đơn hàng đang chờ cửa hàng xác nhận",
+        "createdAt": "2026-11-05T04:22:04.200Z"
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "8af3ec6d9ab0a689e28deeb20f33e0e9",
+    "code": "#0F33E0E9",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "5/11/2026",
+    "time": "11:19:29",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "Thanh toán khi nhận hàng (COD)",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912345678",
+      "address": "669 Đỗ Mười, khu phố 13, Phường Linh Xuân, Thành phố Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM005-G20V5",
+        "name": "Ngũ Linh Thang – Nhân Sâm Ngũ Bảo Trà Nam",
+        "variant": "Hộp 20 gói · 5 vị",
+        "image": "http://localhost:3002/products/image/TTM005_THUMB",
+        "price": 350000,
+        "quantity": 1,
+        "total": 350000
+      }
+    ],
+    "subtotal": 350000,
+    "discount": 110000,
+    "shippingFee": 30000,
+    "total": 270000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "status": "pending",
+        "statusLabel": "CHỜ XÁC NHẬN",
+        "notice": "Đơn hàng đang chờ cửa hàng xác nhận",
+        "createdAt": "2026-11-05T04:19:29.625Z"
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "aaea332be52ea4a5094a6ca80f4aa342",
+    "code": "#0F4AA342",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "5/11/2026",
+    "time": "10:59:51",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "Thanh toán khi nhận hàng (COD)",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912345678",
+      "address": "669 Đỗ Mười, khu phố 13, Phường Linh Xuân, Thành phố Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM020-G20V3",
+        "name": "Ngọc Nữ Thanh Trà – Trà Thanh Lọc Cơ Thể",
+        "variant": "Hộp 20 gói · 3 vị",
+        "image": "http://localhost:3002/products/image/TTM020_THUMB",
+        "price": 260000,
+        "quantity": 1,
+        "total": 260000
+      }
+    ],
+    "subtotal": 260000,
+    "discount": 71000,
+    "shippingFee": 30000,
+    "total": 219000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "status": "pending",
+        "statusLabel": "CHỜ XÁC NHẬN",
+        "notice": "Đơn hàng đang chờ cửa hàng xác nhận",
+        "createdAt": "2026-11-05T03:59:51.412Z"
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "394b3441e1dcb9f8148a4b5a982c8190",
+    "code": "#982C8190",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "5/11/2026",
+    "time": "10:56:41",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "Thanh toán khi nhận hàng (COD)",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912345678",
+      "address": "669 Đỗ Mười, khu phố 13, Phường Linh Xuân, Thành phố Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "HQ017",
+        "name": "Set Quà Tặng Trà Hoa Mộng",
+        "variant": "Tiêu chuẩn",
+        "image": "http://localhost:3002/products/image/HQ017_THUMB",
+        "price": 1020000,
+        "quantity": 1,
+        "total": 1020000
+      },
+      {
+        "sku": "TTM007-150G",
+        "name": "Kim Tâm Trà - Trà Hoa Tam Thất",
+        "variant": "Hộp 150g",
+        "image": "http://localhost:3002/products/image/TTM007_THUMB",
+        "price": 180000,
+        "quantity": 1,
+        "total": 180000
+      },
+      {
+        "sku": "DK030-300G",
+        "name": "Đường Nâu Cổ Truyền Viên",
+        "variant": "Túi 300g",
+        "image": "http://localhost:3002/products/image/DK030_THUMB",
+        "price": 85000,
+        "quantity": 1,
+        "total": 85000
+      },
+      {
+        "sku": "DK032-200G",
+        "name": "Đường Ăn Kiêng Thảo Mộc Stevia",
+        "variant": "Túi 200g",
+        "image": "http://localhost:3002/products/image/DK032_THUMB",
+        "price": 145000,
+        "quantity": 1,
+        "total": 145000
+      }
+    ],
+    "subtotal": 1430000,
+    "discount": 225000,
+    "shippingFee": 30000,
+    "total": 1235000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "status": "pending",
+        "statusLabel": "CHỜ XÁC NHẬN",
+        "notice": "Đơn hàng đang chờ cửa hàng xác nhận",
+        "createdAt": "2026-11-05T03:56:41.779Z"
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "4d3399e0e48e03adf4929a7c45431eb7",
+    "code": "#45431EB7",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "5/11/2026",
+    "time": "10:05:40",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "Thanh toán khi nhận hàng (COD)",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912345678",
+      "address": "669 Đỗ Mười, khu phố 13, Phường Linh Xuân, Thành phố Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM007-150G",
+        "name": "Kim Tâm Trà - Trà Hoa Tam Thất",
+        "variant": "Hộp 150g",
+        "image": "http://localhost:3002/products/image/TTM007_THUMB",
+        "price": 180000,
+        "quantity": 1,
+        "total": 180000
+      }
+    ],
+    "subtotal": 180000,
+    "discount": 0,
+    "shippingFee": 30000,
+    "total": 210000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "status": "pending",
+        "statusLabel": "CHỜ XÁC NHẬN",
+        "notice": "Đơn hàng đang chờ cửa hàng xác nhận",
+        "createdAt": "2026-11-05T03:05:40.985Z"
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "67fd4fa568bd827b4fb82f3b93f48b30",
+    "code": "#93F48B30",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "5/11/2026",
+    "time": "10:05:04",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "Thanh toán khi nhận hàng (COD)",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912345678",
+      "address": "669 Đỗ Mười, khu phố 13, Phường Linh Xuân, Thành phố Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM011-200G",
+        "name": "Tuyết Liên Trà - Trà Hoa Sen Tuyết",
+        "variant": "Hộp 200g",
+        "image": "http://localhost:3002/products/image/TTM011_THUMB",
+        "price": 150000,
+        "quantity": 1,
+        "total": 150000
+      }
+    ],
+    "subtotal": 150000,
+    "discount": 0,
+    "shippingFee": 30000,
+    "total": 180000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "status": "pending",
+        "statusLabel": "CHỜ XÁC NHẬN",
+        "notice": "Đơn hàng đang chờ cửa hàng xác nhận",
+        "createdAt": "2026-11-05T03:05:04.248Z"
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "0163073f353670a6a665e4a4b6a2bea5",
+    "code": "#B6A2BEA5",
+    "userId": null,
+    "date": "4/11/2026",
+    "time": "08:21:40",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "MoMo",
+    "paymentStatus": "paid",
+    "paymentStatusLabel": "Đã thanh toán",
+    "receiver": {
+      "name": "Đinh Quang Vinh",
+      "phone": "0986 778 654",
+      "address": "201 Nguyễn Trãi, Phường Thanh Xuân, Hà Nội",
+      "email": "quangvinh.dinh@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM001-G20",
+        "name": "Hồng Diệp Trà – Trà Atiso Đỏ Nguyên Nụ",
+        "variant": "Hộp 20 gói (5g/gói)",
+        "image": "http://localhost:3002/products/image/TTM001_THUMB",
+        "price": 113000,
+        "quantity": 2,
+        "total": 226000
+      },
+      {
+        "sku": "TTM006-G20V3",
+        "name": "Lệ Hạ Trà – Trà Hoa Rượu Mâm Xôi",
+        "variant": "Hộp 20 gói · 3 vị",
+        "image": "http://localhost:3002/products/image/TTM006_THUMB",
+        "price": 250000,
+        "quantity": 1,
+        "total": 250000
+      }
+    ],
+    "subtotal": 596000,
+    "discount": 120000,
+    "shippingFee": 30000,
+    "total": 506000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đặt hàng thành công",
+        "time": "04/11 - 08:21",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "5bd58a2d07e1b295d8b4076afe98b09f",
+    "code": "#FE98B09F",
+    "userId": null,
+    "date": "3/11/2026",
+    "time": "21:02:58",
+    "status": "pending",
+    "statusLabel": "CHỜ XÁC NHẬN",
+    "step": 1,
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Lâm Anh Thư",
+      "phone": "0932 556 771",
+      "address": "15 Võ Văn Tần, Phường Xuân Hòa, TP. Hồ Chí Minh",
+      "email": "anhthu.lam@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM023-G10V3",
+        "name": "Phúc Cốc Trà – Trà Ngũ Cốc Thanh Lọc Giữ Dáng",
+        "variant": "Hộp 10 gói · 3 vị",
+        "image": "http://localhost:3002/products/image/TTM023_THUMB",
+        "price": 82000,
+        "quantity": 3,
+        "total": 246000
+      },
+      {
+        "sku": "DK034-200G",
+        "name": "Đường Phèn Vàng Mật Mía Viên",
+        "variant": "Túi 200g",
+        "image": "http://localhost:3002/products/image/DK034_THUMB",
+        "price": 25000,
+        "quantity": 1,
+        "total": 25000
+      }
+    ],
+    "subtotal": 326000,
+    "discount": 55000,
+    "shippingFee": 30000,
+    "total": 301000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đặt hàng thành công",
+        "time": "03/11 - 21:02",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "31a7a5255e74554a530481f20bfd3e0d",
+    "code": "#0BFD3E0D",
+    "userId": null,
+    "date": "3/11/2026",
+    "time": "13:44:26",
+    "status": "processing",
+    "statusLabel": "CHỜ LẤY HÀNG",
+    "step": 2,
+    "paymentMethod": "VNPay",
+    "paymentStatus": "paid",
+    "paymentStatusLabel": "Đã thanh toán",
+    "receiver": {
+      "name": "Cao Thị Hồng",
+      "phone": "0969 223 887",
+      "address": "72 Hùng Vương, Phường Hải Châu, Đà Nẵng",
+      "email": "hongcao.thi@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "HQ018",
+        "name": "Set Quà Tặng Trà Hoa Lam",
+        "variant": "Tiêu chuẩn",
+        "image": "http://localhost:3002/products/image/HQ018_THUMB",
+        "price": 520000,
+        "quantity": 1,
+        "total": 520000
+      }
+    ],
+    "subtotal": 620000,
+    "discount": 100000,
+    "shippingFee": 30000,
+    "total": 550000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "03/11 - 14:09",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "03/11 - 13:44",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "a32e1063e736d9f86f19ca66795c1c70",
+    "code": "#795C1C70",
+    "userId": null,
+    "date": "2/11/2026",
+    "time": "18:17:03",
+    "status": "processing",
+    "statusLabel": "CHỜ LẤY HÀNG",
+    "step": 2,
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Phan Bích Ngọc",
+      "phone": "0907 334 998",
+      "address": "9 Lê Lợi, Phường Sài Gòn, TP. Hồ Chí Minh",
+      "email": "bichngoc.phan@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM007-150G",
+        "name": "Kim Tâm Trà - Trà Hoa Tam Thất",
+        "variant": "Hộp 150g",
+        "image": "http://localhost:3002/products/image/TTM007_THUMB",
+        "price": 180000,
+        "quantity": 1,
+        "total": 180000
+      },
+      {
+        "sku": "TTM022-G10V5",
+        "name": "Bách Hoa Trà – Trà Ngũ Hoa Giảm Mụn An Mộc",
+        "variant": "Hộp 10 gói · 5 vị",
+        "image": "http://localhost:3002/products/image/TTM022_THUMB",
+        "price": 124000,
+        "quantity": 2,
+        "total": 248000
+      },
+      {
+        "sku": "DU001-200G",
+        "name": "Kim Tinh Đường – Đường Phèn Vàng Quảng Ngãi",
+        "variant": "Túi 200g",
+        "image": "http://localhost:3002/products/image/DU001_THUMB",
+        "price": 40000,
+        "quantity": 1,
+        "total": 40000
+      }
+    ],
+    "subtotal": 527000,
+    "discount": 59000,
+    "shippingFee": 30000,
+    "total": 498000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "02/11 - 18:42",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "02/11 - 18:17",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "240b7c52864e35a8a78ea01af2c06a77",
+    "code": "#F2C06A77",
+    "userId": null,
+    "date": "1/11/2026",
+    "time": "09:30:15",
+    "status": "shipping",
+    "statusLabel": "ĐANG VẬN CHUYỂN",
+    "step": 3,
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Ngô Mỹ Linh",
+      "phone": "0918 990 011",
+      "address": "24 Nguyễn Thị Minh Khai, Phường Bến Thành, TP. Hồ Chí Minh",
+      "email": "mylinh.ngo@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM002-G20V3",
+        "name": "Thanh Sắc Trà – Trà Thanh Tâm An Mộc",
+        "variant": "Hộp 20 gói · 3 vị",
+        "image": "http://localhost:3002/products/image/TTM002_THUMB",
+        "price": 210000,
+        "quantity": 1,
+        "total": 210000
+      },
+      {
+        "sku": "DK030-300G",
+        "name": "Đường Nâu Cổ Truyền Viên",
+        "variant": "Túi 300g",
+        "image": "http://localhost:3002/products/image/DK030_THUMB",
+        "price": 85000,
+        "quantity": 2,
+        "total": 170000
+      }
+    ],
+    "subtotal": 380000,
+    "discount": 0,
+    "shippingFee": 30000,
+    "total": 410000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN62841",
+    "trackingTimeline": [
+      {
+        "title": "Đang giao đến khách",
+        "time": "03/11 - 08:30",
+        "completed": true
+      },
+      {
+        "title": "Đã bàn giao vận chuyển",
+        "time": "02/11 - 09:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "01/11 - 09:55",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "01/11 - 09:30",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "df4c8b3e38e0d2fd4afad3c06aeacb03",
+    "code": "#6AEACB03",
+    "userId": null,
+    "date": "30/10/2026",
+    "time": "16:42:09",
+    "status": "delivered",
+    "statusLabel": "ĐÃ GIAO",
+    "step": 4,
+    "paymentMethod": "COD",
+    "paymentStatus": "paid",
+    "paymentStatusLabel": "Đã thanh toán",
+    "receiver": {
+      "name": "Trịnh Khánh Linh",
+      "phone": "0902 667 123",
+      "address": "31 Phan Chu Trinh, Phường Hội An, Đà Nẵng",
+      "email": "khanhlinh.trinh@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM020-G20V3",
+        "name": "Ngọc Nữ Thanh Trà – Trà Thanh Lọc Cơ Thể",
+        "variant": "Hộp 20 gói · 3 vị",
+        "image": "http://localhost:3002/products/image/TTM020_THUMB",
+        "price": 210000,
+        "quantity": 1,
+        "total": 210000
+      },
+      {
+        "sku": "DK033-350G",
+        "name": "Đường Dừa Hữu Cơ Kết Tinh",
+        "variant": "Túi 350g",
+        "image": "http://localhost:3002/products/image/DK033_THUMB",
+        "price": 95000,
+        "quantity": 1,
+        "total": 95000
+      }
+    ],
+    "subtotal": 355000,
+    "discount": 50000,
+    "shippingFee": 30000,
+    "total": 335000,
+    "shippingUnit": "J&T Express",
+    "trackingCode": "JT41804",
+    "trackingTimeline": [
+      {
+        "title": "Giao hàng thành công",
+        "time": "01/11 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Đang giao đến khách",
+        "time": "01/11 - 08:30",
+        "completed": true
+      },
+      {
+        "title": "Đã bàn giao vận chuyển",
+        "time": "31/10 - 09:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "30/10 - 17:07",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "30/10 - 16:42",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "bece53332b37fe3d87a15fa31b2f76ab",
+    "code": "#1B2F76AB",
+    "userId": null,
+    "date": "26/10/2026",
+    "time": "19:08:47",
+    "status": "refunded",
+    "statusLabel": "ĐÃ HOÀN TIỀN",
+    "step": 1,
+    "paymentMethod": "MoMo",
+    "paymentStatus": "refunded",
+    "paymentStatusLabel": "Đã hoàn tiền",
+    "receiver": {
+      "name": "Đỗ Thanh Tùng",
+      "phone": "0977 445 566",
+      "address": "150 Láng Hạ, Phường Láng, Hà Nội",
+      "email": "thanhtung.do@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM005-G10V5",
+        "name": "Ngũ Linh Thang – Nhân Sâm Ngũ Bảo Trà Nam",
+        "variant": "Hộp 10 gói · 5 vị",
+        "image": "http://localhost:3002/products/image/TTM005_THUMB",
+        "price": 154000,
+        "quantity": 2,
+        "total": 308000
+      }
+    ],
+    "subtotal": 386000,
+    "discount": 78000,
+    "shippingFee": 30000,
+    "total": 338000,
+    "shippingUnit": "Viettel Post",
+    "trackingCode": "VTP76066",
+    "trackingTimeline": [
+      {
+        "title": "Đã hoàn tiền",
+        "time": "30/10 - 20:45",
+        "completed": true
+      },
+      {
+        "title": "Đã duyệt yêu cầu trả hàng",
+        "time": "29/10 - 20:45",
+        "completed": true
+      },
+      {
+        "title": "Yêu cầu trả hàng/hoàn tiền",
+        "time": "29/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Giao hàng thành công",
+        "time": "28/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Đang giao đến khách",
+        "time": "28/10 - 08:30",
+        "completed": true
+      },
+      {
+        "title": "Đã bàn giao vận chuyển",
+        "time": "27/10 - 09:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "26/10 - 19:33",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "26/10 - 19:08",
+        "completed": true
+      }
+    ],
+    "notes": [
+      {
+        "text": "Khách yêu cầu trả hàng: Nhận được sản phẩm không nguyên vẹn (bao bì rách, hộp móp méo, vỡ). Đã duyệt và hoàn tiền về ví MoMo.",
+        "author": "Admin",
+        "date": "30/10"
+      }
+    ]
+  },
+  {
+    "id": "637f3e3de6a536579d7e41c66b0d3972",
+    "code": "#6B0D3972",
+    "userId": null,
+    "date": "21/10/2026",
+    "time": "20:48:10",
+    "status": "cancelled",
+    "statusLabel": "ĐÃ HỦY",
+    "step": 1,
+    "paymentMethod": "VNPay",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Đặng Hoàng Long",
+      "phone": "0944 556 677",
+      "address": "102 Điện Biên Phủ, Phường Bình Thạnh, TP. Hồ Chí Minh",
+      "email": "hoanglong.dang@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "HQ017",
+        "name": "Set Quà Tặng Trà Hoa Mộng",
+        "variant": "Tiêu chuẩn",
+        "image": "http://localhost:3002/products/image/HQ017_THUMB",
+        "price": 850000,
+        "quantity": 1,
+        "total": 850000
+      }
+    ],
+    "subtotal": 1020000,
+    "discount": 170000,
+    "shippingFee": 30000,
+    "total": 880000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đơn hàng đã hủy",
+        "time": "21/10 - 22:48",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "21/10 - 20:48",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "571a42aaad7cb80ff7894df2ccfdae9c",
+    "code": "#CCFDAE9C",
+    "userId": null,
+    "date": "18/10/2026",
+    "time": "14:20:35",
+    "status": "refunded",
+    "statusLabel": "ĐÃ HOÀN TIỀN",
+    "step": 1,
+    "paymentMethod": "VNPay",
+    "paymentStatus": "refunded",
+    "paymentStatusLabel": "Đã hoàn tiền",
+    "receiver": {
+      "name": "Võ Thanh Trúc",
+      "phone": "0966 778 899",
+      "address": "19 Nguyễn Văn Linh, Phường Tân Thuận, TP. Hồ Chí Minh",
+      "email": "thanhtruc.vo@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "AT022",
+        "name": "Ấm Sứ Hoa Sen Vẽ Tay – Tịnh Tâm Hương",
+        "variant": "Tiêu chuẩn",
+        "image": "http://localhost:3002/products/image/AT022_THUMB",
+        "price": 380000,
+        "quantity": 1,
+        "total": 380000
+      },
+      {
+        "sku": "TTM011-200G",
+        "name": "Tuyết Liên Trà - Trà Hoa Sen Tuyết",
+        "variant": "Hộp 200g",
+        "image": "http://localhost:3002/products/image/TTM011_THUMB",
+        "price": 150000,
+        "quantity": 1,
+        "total": 150000
+      }
+    ],
+    "subtotal": 600000,
+    "discount": 70000,
+    "shippingFee": 30000,
+    "total": 560000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN16665",
+    "trackingTimeline": [
+      {
+        "title": "Đã hoàn tiền",
+        "time": "22/10 - 20:45",
+        "completed": true
+      },
+      {
+        "title": "Đã duyệt yêu cầu trả hàng",
+        "time": "21/10 - 20:45",
+        "completed": true
+      },
+      {
+        "title": "Yêu cầu trả hàng/hoàn tiền",
+        "time": "21/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Giao hàng thành công",
+        "time": "20/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Đang giao đến khách",
+        "time": "20/10 - 08:30",
+        "completed": true
+      },
+      {
+        "title": "Đã bàn giao vận chuyển",
+        "time": "19/10 - 09:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "18/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "18/10 - 14:20",
+        "completed": true
+      }
+    ],
+    "notes": [
+      {
+        "text": "Khách yêu cầu trả hàng: Hàng nhận được không đúng mô tả. Đã duyệt và hoàn tiền về VNPay.",
+        "author": "Admin",
+        "date": "22/10"
+      }
+    ]
+  },
+  {
+    "id": "20683be032dcffa73fd580f268f508bf",
+    "code": "#68F508BF",
+    "userId": null,
+    "date": "16/10/2026",
+    "time": "09:12:44",
+    "status": "delivered",
+    "statusLabel": "HOÀN THÀNH",
+    "step": 4,
+    "paymentMethod": "VNPay",
+    "paymentStatus": "paid",
+    "paymentStatusLabel": "Đã thanh toán",
+    "receiver": {
+      "name": "Phạm Gia Huy",
+      "phone": "0978 334 455",
+      "address": "88 Cầu Giấy, Phường Cầu Giấy, Hà Nội",
+      "email": "giahuy.pham@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM003-150G",
+        "name": "Hoàng Cúc Trà – Trà Cúc Vàng",
+        "variant": "Hộp 150g",
+        "image": "http://localhost:3002/products/image/TTM003_THUMB",
+        "price": 150000,
+        "quantity": 2,
+        "total": 300000
+      },
+      {
+        "sku": "TTM004-G20V5",
+        "name": "Hòa Mộc Trà – Trà Gạo Lứt Ngũ Hoa",
+        "variant": "Hộp 20 gói · 5 vị",
+        "image": "http://localhost:3002/products/image/TTM004_THUMB",
+        "price": 144000,
+        "quantity": 1,
+        "total": 144000
+      }
+    ],
+    "subtotal": 560000,
+    "discount": 116000,
+    "shippingFee": 30000,
+    "total": 474000,
+    "shippingUnit": "J&T Express",
+    "trackingCode": "JT15999",
+    "trackingTimeline": [
+      {
+        "title": "Khách hàng đã xác nhận hoàn thành",
+        "time": "20/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Giao hàng thành công",
+        "time": "18/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Đang giao đến khách",
+        "time": "18/10 - 08:30",
+        "completed": true
+      },
+      {
+        "title": "Đã bàn giao vận chuyển",
+        "time": "17/10 - 09:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "16/10 - 09:37",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "16/10 - 09:12",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "7f6951ed100c65934f5a93a7761b0e5a",
+    "code": "#761B0E5A",
+    "userId": null,
+    "date": "13/10/2026",
+    "time": "10:05:30",
+    "status": "cancelled",
+    "statusLabel": "ĐÃ HỦY",
+    "step": 1,
+    "paymentMethod": "COD",
+    "paymentStatus": "unpaid",
+    "paymentStatusLabel": "Chưa thanh toán",
+    "receiver": {
+      "name": "Trần Quốc Bảo",
+      "phone": "0933 221 100",
+      "address": "5 Hai Bà Trưng, Phường Võ Thị Sáu, TP. Hồ Chí Minh",
+      "email": "quocbao.tran@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "HQ015",
+        "name": "Set Quà Tặng Trà Hoa Sen Xanh",
+        "variant": "Tiêu chuẩn",
+        "image": "http://localhost:3002/products/image/HQ015_THUMB",
+        "price": 480000,
+        "quantity": 1,
+        "total": 480000
+      },
+      {
+        "sku": "TTM006-G10V3",
+        "name": "Lệ Hạ Trà – Trà Hoa Rượu Mâm Xôi",
+        "variant": "Hộp 10 gói · 3 vị",
+        "image": "http://localhost:3002/products/image/TTM006_THUMB",
+        "price": 138000,
+        "quantity": 1,
+        "total": 138000
+      }
+    ],
+    "subtotal": 756000,
+    "discount": 138000,
+    "shippingFee": 30000,
+    "total": 648000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đơn hàng đã hủy",
+        "time": "13/10 - 12:05",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "13/10 - 10:05",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "cba88a50a6559ac837e27eaa45844c9c",
+    "code": "#45844C9C",
+    "userId": null,
+    "date": "12/10/2026",
+    "time": "23:01:06",
+    "status": "pending",
+    "statusLabel": "Chờ xác nhận",
+    "step": 1,
+    "paymentMethod": "COD",
+    "paymentStatus": "paid",
+    "paymentStatusLabel": "Đã thanh toán",
+    "receiver": {
+      "name": "Nguyễn Minh Anh",
+      "phone": "0987 112 233",
+      "address": "12 Lê Văn Việt, Phường Tăng Nhơn Phú, TP. Hồ Chí Minh",
+      "email": "minhanh.nguyen92@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "TTM001-200G",
+        "name": "Hồng Diệp Trà – Trà Atiso Đỏ Nguyên Nụ",
+        "variant": "Hộp 200g",
+        "image": "http://localhost:3002/products/image/TTM001_THUMB",
+        "price": 180000,
+        "quantity": 2,
+        "total": 360000
+      },
+      {
+        "sku": "DK034-500G",
+        "name": "Đường Phèn Vàng Mật Mía Viên",
+        "variant": "Túi 500g",
+        "image": "http://localhost:3002/products/image/DK034_THUMB",
+        "price": 55000,
+        "quantity": 1,
+        "total": 55000
+      }
+    ],
+    "subtotal": 505000,
+    "discount": 90000,
+    "shippingFee": 30000,
+    "total": 445000,
+    "shippingUnit": "Giao Hàng Tiết Kiệm",
+    "trackingCode": "GHTK65521",
+    "trackingTimeline": [
+      {
+        "title": "Khách hàng đã xác nhận hoàn thành",
+        "time": "16/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Giao hàng thành công",
+        "time": "14/10 - 14:45",
+        "completed": true
+      },
+      {
+        "title": "Đang giao đến khách",
+        "time": "14/10 - 08:30",
+        "completed": true
+      },
+      {
+        "title": "Đã bàn giao vận chuyển",
+        "time": "13/10 - 09:30",
+        "completed": true
+      },
+      {
+        "title": "Đã xác nhận đơn",
+        "time": "12/10 - 23:26",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "12/10 - 23:01",
+        "completed": true
+      }
+    ],
+    "notes": []
+  },
+  {
+    "id": "5f0eb59a036067ab409cac86077555b3",
+    "code": "#077555B3",
+    "userId": "6ae198915c6ab642fcabd355",
+    "date": "10/10/2026",
+    "time": "15:25:09",
+    "status": "refunded",
+    "statusLabel": "ĐÃ HOÀN TIỀN",
+    "step": 1,
+    "paymentMethod": "MoMo",
+    "paymentStatus": "refunded",
+    "paymentStatusLabel": "Đã hoàn tiền",
+    "receiver": {
+      "name": "Hồ Bảo Nhi",
+      "phone": "0912 345 678",
+      "address": "45 Nguyễn Huệ, Phường Bến Nghé, TP. Hồ Chí Minh",
+      "email": "hobaonhi400@gmail.com",
+      "customerId": ""
+    },
+    "items": [
+      {
+        "sku": "HQ020",
+        "name": "Set Quà Tặng Trà Hoa Hồng",
+        "variant": "Tiêu chuẩn",
+        "image": "http://localhost:3002/products/image/HQ020_THUMB",
+        "price": 630000,
+        "quantity": 1,
+        "total": 630000
+      },
+      {
+        "sku": "TTM021-G10V5",
+        "name": "Đan Châu Trà – Trà Dưỡng Nhan Cổ Truyền",
+        "variant": "Hộp 10 gói · 5 vị",
+        "image": "http://localhost:3002/products/image/TTM021_THUMB",
+        "price": 114000,
+        "quantity": 1,
+        "total": 114000
+      }
+    ],
+    "subtotal": 864000,
+    "discount": 120000,
+    "shippingFee": 30000,
+    "total": 774000,
+    "shippingUnit": "Giao Hàng Nhanh",
+    "trackingCode": "GHN8842",
+    "trackingTimeline": [
+      {
+        "title": "Đã hoàn tiền",
+        "time": "11/10 - 13:25",
+        "completed": true
+      },
+      {
+        "title": "Đơn hàng đã hủy",
+        "time": "10/10 - 17:25",
+        "completed": true
+      },
+      {
+        "title": "Đặt hàng thành công",
+        "time": "10/10 - 15:25",
+        "completed": true
+      }
+    ],
+    "notes": [
+      {
+        "text": "Khách hủy đơn sau khi đã thanh toán (Đổi ý, không muốn mua nữa). Đã hoàn tiền về ví MoMo.",
+        "author": "Admin",
+        "date": "11/10"
+      }
+    ]
+  }
+]

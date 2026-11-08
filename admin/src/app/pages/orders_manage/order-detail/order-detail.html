@@ -1,15 +1,15 @@
 <div class="admin-layout">
-  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <app-admin-sidebar [orderBadge]="notificationCount" (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
 
   <main class="admin-main">
     <header class="topbar">
       <div class="topbar-title-group">
-        <h1>Quản lý đơn hàng/Chi tiết đơn hàng</h1>
+        <h1>Quản lý đơn hàng / Chi tiết đơn hàng</h1>
       </div>
       <div class="topbar-right">
         <button class="topbar-bell" type="button" aria-label="Thông báo">
           <i class="bi bi-bell" aria-hidden="true"></i>
-          <span class="bell-badge">3</span>
+          <span class="bell-badge">{{ notificationCount }}</span>
         </button>
 
         <div class="admin-account">
@@ -53,7 +53,7 @@
         <button type="button" (click)="actionError = ''" aria-label="Đóng"><i class="bi bi-x-lg"></i></button>
       </div>
 
-      <!-- Main Order View matching Image 2 -->
+      <!-- Main Order View -->
       <ng-container *ngIf="order as ord">
         <!-- Banner Card -->
         <section class="order-header-card">
@@ -69,32 +69,19 @@
               In hóa đơn
             </button>
             <button
-              *ngIf="ord.status !== 'cancelled'"
-              class="banner-btn btn-cancel"
-              type="button"
-              (click)="requestCancelOrder()">
-              Hủy đơn hàng
-            </button>
-            <button
-              *ngIf="ord.status === 'pending'"
               class="banner-btn btn-confirm"
               type="button"
+              [disabled]="ord.status !== 'pending'"
               (click)="confirmOrder()">
-              Xác nhận đơn hàng
+              Chờ xác nhận
             </button>
             <button
-              *ngIf="ord.status === 'processing'"
-              class="banner-btn btn-shipping"
+              class="banner-btn btn-cancel-order"
               type="button"
-              (click)="onStatusChange('shipping')">
-              Giao hàng
-            </button>
-            <button
-              *ngIf="ord.status === 'shipping'"
-              class="banner-btn btn-delivered"
-              type="button"
-              (click)="onStatusChange('delivered')">
-              Đã giao thành công
+              [disabled]="!canCancelOrder || cancellingOrder"
+              (click)="requestCancelOrder()">
+              <i class="bi bi-x-circle" aria-hidden="true"></i>
+              Hủy đơn hàng
             </button>
           </div>
         </section>
@@ -108,31 +95,26 @@
               <h3 class="card-title">Thông tin chung</h3>
 
               <div class="info-columns-3">
-                <!-- Col 1 -->
+                <!-- Col 1: Thời gian, Trạng thái, Khách hàng (Không có option dropdown) -->
                 <div class="info-group">
                   <span class="info-label">Thời gian đặt hàng</span>
-                  <p class="info-value-time">{{ ord.date }} - {{ ord.time || '09:05' }}</p>
+                  <p class="info-value-time">{{ ord.date }} - {{ ord.time || '10:00' }}</p>
 
                   <span class="info-label mt-3">Trạng thái đơn hàng</span>
-                  <select
-                    class="info-select"
-                    [ngModel]="ord.status"
-                    (ngModelChange)="onStatusChange($event)"
-                    aria-label="Chọn trạng thái đơn hàng">
-                    <option value="pending">Chờ xác nhận</option>
-                    <option value="processing">Đang chuẩn bị</option>
-                    <option value="shipping">Đang giao hàng</option>
-                    <option value="delivered">Đã giao</option>
-                    <option value="cancelled">Đã hủy</option>
-                  </select>
+                  <div class="static-field-box">
+                    <span class="status-pill" [ngClass]="'status-pill-' + ord.status">
+                      {{ ord.statusLabel }}
+                    </span>
+                  </div>
 
                   <span class="info-label mt-3">Khách hàng</span>
-                  <select class="info-select" [disabled]="true" aria-label="Khách hàng">
-                    <option selected>{{ ord.receiver.name }} ({{ ord.receiver.customerId || '#KH102' }})</option>
-                  </select>
+                  <div class="static-field-box static-customer-box">
+                    <strong>{{ ord.receiver.name }}</strong>
+                    <span *ngIf="ord.receiver.customerId" class="customer-tag">({{ ord.receiver.customerId }})</span>
+                  </div>
                 </div>
 
-                <!-- Col 2 -->
+                <!-- Col 2: Thanh toán -->
                 <div class="info-group">
                   <span class="info-label font-bold">Thông tin thanh toán</span>
                   <div class="payment-sub-info">
@@ -146,14 +128,14 @@
                   </div>
                 </div>
 
-                <!-- Col 3 -->
+                <!-- Col 3: Giao nhận -->
                 <div class="info-group">
                   <span class="info-label font-bold">Giao nhận hàng</span>
                   <div class="receiver-sub-info">
                     <strong class="receiver-name">{{ ord.receiver.name }}</strong>
                     <p class="receiver-address">{{ ord.receiver.address }}</p>
                     <p class="receiver-phone">{{ ord.receiver.phone }}</p>
-                    <p class="receiver-email">{{ ord.receiver.email || 'thuha@email.com' }}</p>
+                    <p *ngIf="ord.receiver.email" class="receiver-email">{{ ord.receiver.email }}</p>
                   </div>
                 </div>
               </div>
@@ -170,7 +152,7 @@
                   </div>
                   <div class="item-meta">
                     <h4 class="item-name">{{ item.name }}</h4>
-                    <span class="item-variant">{{ item.variant || 'Hộp 50g' }}</span>
+                    <span class="item-variant">{{ item.variant || 'Tiêu chuẩn' }}</span>
                   </div>
                   <div class="item-calc">
                     <span>{{ formatPrice(item.price) }} × {{ item.quantity }}</span>
@@ -193,7 +175,7 @@
                 </div>
                 <div class="fin-row">
                   <span>Phí giao hàng</span>
-                  <span>{{ formatPrice(ord.shippingFee) }}</span>
+                  <span>{{ ord.shippingFee ? formatPrice(ord.shippingFee) : 'Miễn phí' }}</span>
                 </div>
                 <div class="fin-row fin-grand-total">
                   <strong>Tổng đơn hàng</strong>
@@ -268,7 +250,7 @@
     <header class="modal-header">
       <div>
         <span class="modal-kicker">HÓA ĐƠN BÁN HÀNG</span>
-        <h2>Hóa đơn #{{ order?.code }}</h2>
+        <h2>Hóa đơn {{ order?.code }}</h2>
       </div>
       <div class="modal-header-actions">
         <button class="primary-button print-action-btn" type="button" (click)="printInvoice()">
@@ -331,62 +313,61 @@
             <td>{{ item.variant || 'Tiêu chuẩn' }}</td>
             <td class="text-right">{{ formatPrice(item.price) }}</td>
             <td class="text-center">{{ item.quantity }}</td>
-            <td class="text-right">{{ formatPrice(item.total) }}</td>
+            <td class="text-right"><strong>{{ formatPrice(item.total) }}</strong></td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" class="text-right">Tạm tính:</td>
+            <td class="text-right">{{ formatPrice(inv.subtotal) }}</td>
+          </tr>
+          <tr *ngIf="inv.discount > 0">
+            <td colspan="5" class="text-right">Giảm giá:</td>
+            <td class="text-right text-discount">-{{ formatPrice(inv.discount) }}</td>
+          </tr>
+          <tr>
+            <td colspan="5" class="text-right">Phí vận chuyển:</td>
+            <td class="text-right">{{ inv.shippingFee ? formatPrice(inv.shippingFee) : 'Miễn phí' }}</td>
+          </tr>
+          <tr class="invoice-total-row">
+            <td colspan="5" class="text-right"><strong>TỔNG THANH TOÁN:</strong></td>
+            <td class="text-right"><strong class="grand-total">{{ formatPrice(inv.total) }}</strong></td>
+          </tr>
+        </tfoot>
       </table>
 
-      <div class="invoice-totals-box">
-        <div class="invoice-totals-row">
-          <span>Tạm tính:</span>
-          <span>{{ formatPrice(inv.subtotal) }}</span>
-        </div>
-        <div class="invoice-totals-row" *ngIf="inv.discount > 0">
-          <span>Giảm giá:</span>
-          <span>-{{ formatPrice(inv.discount) }}</span>
-        </div>
-        <div class="invoice-totals-row">
-          <span>Phí giao hàng:</span>
-          <span>{{ formatPrice(inv.shippingFee) }}</span>
-        </div>
-        <div class="invoice-totals-row invoice-grand-total">
-          <strong>Tổng thanh toán:</strong>
-          <strong>{{ formatPrice(inv.total) }}</strong>
-        </div>
+      <div class="invoice-footer-message">
+        <p>Cảm ơn quý khách đã tin tưởng và ủng hộ Floralia Herbal Tea!</p>
+        <p>Mọi thắc mắc xin vui lòng liên hệ hotline: 0901 234 567.</p>
       </div>
     </div>
   </section>
 </div>
 
-<!-- Modal: Xác nhận hủy đơn hàng -->
+<!-- Modal: Hủy đơn hàng -->
 <div *ngIf="cancelModalVisible" class="modal-backdrop" (click)="dismissCancelOrder()">
-  <section class="dialog-card" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
-    <span class="dialog-icon"><i class="bi bi-exclamation-triangle"></i></span>
+  <section class="dialog-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="dialog-icon"><i class="bi bi-exclamation-triangle"></i></div>
     <h2>Xác nhận hủy đơn hàng</h2>
-    <p>Bạn có chắc chắn muốn hủy đơn hàng <strong>{{ order?.code }}</strong> không?</p>
+    <p>Bạn có chắc chắn muốn hủy đơn hàng <strong>{{ order?.code }}</strong>? Thao tác này sẽ chuyển trạng thái đơn hàng sang "Đã hủy".</p>
     <div class="dialog-actions">
       <button class="secondary-button" type="button" [disabled]="cancellingOrder" (click)="dismissCancelOrder()">Đóng</button>
       <button class="danger-btn" type="button" [disabled]="cancellingOrder" (click)="confirmCancelOrder()">
-        {{ cancellingOrder ? 'Đang hủy...' : 'Hủy đơn hàng' }}
+        {{ cancellingOrder ? 'Đang hủy...' : 'Xác nhận hủy' }}
       </button>
     </div>
   </section>
 </div>
 
 <!-- Modal: Đăng xuất -->
-<div *ngIf="logoutConfirmationVisible" class="logout-confirm-backdrop" (click)="cancelLogoutConfirmation()">
-  <section
-    class="logout-confirm-dialog"
-    role="alertdialog"
-    aria-modal="true"
-    aria-labelledby="logoutConfirmOrderDetailTitle"
-    (click)="$event.stopPropagation()">
-    <span class="logout-confirm-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
-    <h2 id="logoutConfirmOrderDetailTitle">Xác nhận đăng xuất</h2>
-    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị Floralia không?</p>
-    <div class="logout-confirm-actions">
-      <button type="button" class="logout-cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button>
-      <button type="button" class="logout-submit-button" (click)="confirmLogout()">Đăng xuất</button>
+<div *ngIf="logoutConfirmationVisible" class="modal-backdrop" (click)="cancelLogoutConfirmation()">
+  <section class="logout-modal-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="logout-icon"><i class="bi bi-box-arrow-right"></i></div>
+    <h2>Xác nhận đăng xuất</h2>
+    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị Floralia?</p>
+    <div class="modal-footer justify-center">
+      <button class="secondary-button" type="button" (click)="cancelLogoutConfirmation()">Hủy</button>
+      <button class="primary-button" type="button" (click)="confirmLogout()">Đăng xuất</button>
     </div>
   </section>
 </div>

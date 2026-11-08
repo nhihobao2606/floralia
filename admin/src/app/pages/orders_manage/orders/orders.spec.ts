@@ -61,11 +61,26 @@ describe('Orders', () => {
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+
+    const prodReqs = http.match('http://localhost:3002/products');
+    prodReqs.forEach(r => r.flush([]));
   });
 
   afterEach(() => {
     http.verify();
     localStorage.removeItem('adminToken');
+  });
+
+  it('shows simulated pending order notifications and can mark them read', () => {
+    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+      success: true, orders: [], total: 0, page: 1, limit: 5,
+      stats: { total: 0, pending: 0, processing: 0, shipping: 0, delivered: 0, cancelled: 0 }
+    });
+    expect(component.unreadNotificationsCount).toBe(3);
+    component.toggleNotifications();
+    expect(component.notificationsOpen).toBe(true);
+    component.markNotificationsRead();
+    expect(component.unreadNotificationsCount).toBe(0);
   });
 
   it('loads live orders and populates the 5 metric stat cards', () => {

@@ -189,6 +189,83 @@ function incrementSoldBySku(sku, quantity) {
     );
 }
 
+async function getInventoryProducts() {
+    if (!productsCollection) throw new Error('MongoDB Product collection is not available');
+    return productsCollection.find({ isActive: { $ne: false } }, {
+        projection: { sku: 1, name: 1, category: 1, price: 1, importPrice: 1, stock: 1, thumbnail: 1, variants: 1 }
+    }).sort({ sku: 1 }).toArray();
+}
+
+async function setStockBySku(sku, stock, reason = '', importPrice, productSku, variantLabel) {
+    if (!productsCollection) throw new Error('MongoDB Product collection is not available');
+    const updatedAt = new Date();
+    let variantProduct = await productsCollection.findOne({ 'variants.sku': sku, isActive: { $ne: false } });
+    if (!variantProduct && productSku) {
+        variantProduct = await productsCollection.findOne({ sku: productSku, isActive: { $ne: false } });
+    }
+    if (variantProduct) {
+        const selectedVariant = (variantProduct.variants || []).find(variant =>
+            variant.sku === sku || (variantLabel && variant.label === variantLabel)
+        );
+        if (selectedVariant) {
+        const currentVariantStock = Number(selectedVariant.stock) || 0;
+        const variantFields = {
+            'variants.$.stock': stock,
+            'variants.$.stockAdjustmentReason': reason,
+            'variants.$.updatedAt': updatedAt,
+            updatedAt,
+            stockAdjustmentReason: reason,
+        };
+        if (importPrice !== undefined) variantFields['variants.$.importPrice'] = importPrice;
+        return productsCollection.updateOne(
+            { _id: variantProduct._id, 'variants.sku': selectedVariant.sku },
+            { $set: variantFields, $inc: { stock: stock - currentVariantStock } }
+        );
+        }
+        if (Array.isArray(variantProduct.variants) && variantProduct.variants.length > 0) return { matchedCount: 0 };
+    }
+    const fields = { stock, updatedAt, stockAdjustmentReason: reason };
+    if (importPrice !== undefined) fields.importPrice = importPrice;
+    return productsCollection.updateOne(
+        { sku: productSku || sku, isActive: { $ne: false } },
+        { $set: fields }
+    );
+}
+
+async function addStockBulk(items, reason = '') {
+    if (!productsCollection) throw new Error('MongoDB Product collection is not available');
+    if (!items.length) return;
+    for (const item of items) {
+        const variantProduct = await productsCollection.findOne({ 'variants.sku': item.sku, isActive: { $ne: false } });
+        const updatedAt = new Date();
+        if (variantProduct) {
+            const variants = (variantProduct.variants || []).map(variant => {
+                if (variant.sku !== item.sku) return variant;
+                const updatedVariant = {
+                    ...variant,
+                    stock: (Number(variant.stock) || 0) + item.quantity,
+                    stockAdjustmentReason: reason,
+                    updatedAt,
+                };
+                if (item.importPrice !== undefined) updatedVariant.importPrice = item.importPrice;
+                return updatedVariant;
+            });
+            const stock = variants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0);
+            await productsCollection.updateOne(
+                { _id: variantProduct._id },
+                { $set: { variants, stock, updatedAt, stockAdjustmentReason: reason } }
+            );
+            continue;
+        }
+        const fields = { updatedAt, stockAdjustmentReason: reason };
+        if (item.importPrice !== undefined) fields.importPrice = item.importPrice;
+        await productsCollection.updateOne(
+            { sku: item.sku, isActive: { $ne: false } },
+            { $inc: { stock: item.quantity }, $set: fields }
+        );
+    }
+}
+
 // ProductAssets
 function getAllAssets() {
     return productAssetsCollection.find({}).toArray();
@@ -276,6 +353,9 @@ module.exports = {
     getBySku,
     getBySlug,
     incrementSoldBySku,
+    getInventoryProducts,
+    setStockBySku,
+    addStockBulk,
     getAllAssets,
     getAssetsByThumbnails,
     getAssetImageById,

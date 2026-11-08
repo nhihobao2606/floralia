@@ -7,8 +7,6 @@ import { Orders } from './pages/orders_manage/orders/orders';
 import { OrderDetail } from './pages/orders_manage/order-detail/order-detail';
 import { adminAuthGuard } from './guards/admin-auth.guard';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
-import { AdminOrders } from './pages/orders_manage/orders/orders';
-import { AdminOrderDetail } from './pages/orders_manage/order-detail/order-detail';
 import { AdminUsers } from './pages/users_manage/users/users';
 import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
 import { AdminUserForm } from './pages/users_manage/user-form/user-form';
@@ -17,11 +15,11 @@ export const routes: Routes = [
   { path: 'admin-login', component: AdminLogin },
   { path: 'orders/:id', component: OrderDetail, canActivate: [adminAuthGuard] },
   { path: 'orders', component: Orders, canActivate: [adminAuthGuard] },
+  { path: 'inventory/receive', loadComponent: () => import('./pages/inventory_manage/receive-stock/receive-stock').then(module => module.ReceiveStock), canActivate: [adminAuthGuard] },
+  { path: 'inventory', loadComponent: () => import('./pages/inventory_manage/inventory/inventory').then(module => module.Inventory), canActivate: [adminAuthGuard] },
   { path: 'articles/new', component: ArticleEditor, canActivate: [adminAuthGuard], canDeactivate: [canDeactivateArticleEditor] },
   { path: 'articles/:id/edit', component: ArticleEditor, canActivate: [adminAuthGuard], canDeactivate: [canDeactivateArticleEditor] },
   { path: 'articles', component: Articles, canActivate: [adminAuthGuard] },
-  { path: 'orders', component: AdminOrders, canActivate: [adminAuthGuard] },
-  { path: 'orders/:id', component: AdminOrderDetail, canActivate: [adminAuthGuard] },
   { path: 'vouchers/new', loadComponent: () => import('./pages/vouchers_manage/voucher-form/voucher-form').then(module => module.AdminVoucherForm), canActivate: [adminAuthGuard] },
   { path: 'vouchers/:id/edit', loadComponent: () => import('./pages/vouchers_manage/voucher-form/voucher-form').then(module => module.AdminVoucherForm), canActivate: [adminAuthGuard] },
   { path: 'vouchers/:id', loadComponent: () => import('./pages/vouchers_manage/voucher-detail/voucher-detail').then(module => module.AdminVoucherDetail), canActivate: [adminAuthGuard] },

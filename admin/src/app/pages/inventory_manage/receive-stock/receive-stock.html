@@ -1,0 +1,37 @@
+<div class="receive-layout">
+  <app-admin-sidebar [orderBadge]="unreadNotificationsCount" (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <main class="receive-main">
+    <header class="receive-topbar"><h1>Nhập hàng tồn kho</h1><div class="receive-account"><span class="receive-avatar">{{ adminName.charAt(0).toUpperCase() }}</span><span><strong>{{ adminName }}</strong><small>Quản trị viên</small></span><button type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button></div></header>
+    <section class="receive-content">
+      <a class="receive-back-link" routerLink="/inventory"><i class="bi bi-arrow-left" aria-hidden="true"></i> Quay lại Quản lý tồn kho</a>
+      <div class="receive-welcome"><div><h2>Tạo phiếu nhập hàng</h2><p>Chọn một hoặc nhiều sản phẩm và nhập số lượng cần bổ sung vào kho.</p></div></div>
+
+      <section class="receipt-card">
+        <header class="receipt-card-heading"><div><h3>Sản phẩm nhập kho</h3><p>Phiếu nhập gồm {{ lines.length }} mặt hàng · {{ totalUnits }} sản phẩm</p></div><button class="receive-button outline" type="button" (click)="addLine()" [disabled]="loading || products.length === 0"><i class="bi bi-plus-lg"></i> Thêm mặt hàng</button></header>
+        <div *ngIf="loading" class="receipt-message">Đang tải danh sách sản phẩm…</div>
+        <div *ngIf="loadError" class="receipt-error" role="alert">{{ loadError }}</div>
+        <div *ngIf="!loading && !loadError && products.length === 0" class="receipt-message">Chưa có sản phẩm để nhập kho.</div>
+
+        <div class="receipt-table-wrap" *ngIf="products.length">
+          <table class="receipt-table"><thead><tr><th>Sản phẩm</th><th>Phân loại</th><th>Tồn hiện tại</th><th>Số lượng nhập</th><th>Tồn sau nhập</th><th></th></tr></thead>
+            <tbody><tr *ngFor="let line of lines; let index = index">
+              <td><div class="receipt-product"><img *ngIf="productFor(line) as product" [src]="imageUrl(product.imageUrl)" [alt]="product.name"><div class="receipt-product-placeholder" *ngIf="!productFor(line)"><i class="bi bi-box"></i></div><select [attr.aria-label]="'Chọn sản phẩm dòng ' + (index + 1)" [ngModel]="line.productSku" (ngModelChange)="selectProduct(line, $event)"><option value="">Chọn sản phẩm</option><option *ngFor="let product of products" [value]="product.sku">{{ product.name }}</option></select></div></td>
+              <td><select *ngIf="productFor(line)?.variants?.length" class="variant-select" [attr.aria-label]="'Chọn phân loại dòng ' + (index + 1)" [ngModel]="line.variantSku" (ngModelChange)="selectVariant(line, $event)"><option value="">Chọn phân loại</option><option *ngFor="let variant of productFor(line)?.variants" [value]="variant.sku">{{ variant.label }}</option></select><span *ngIf="productFor(line) && !productFor(line)?.variants?.length">Không có phân loại</span><span *ngIf="!productFor(line)">—</span></td>
+              <td>{{ productFor(line) ? (currentStock(line) ?? '—') : '—' }}</td>
+              <td><input class="quantity-input" type="number" min="1" step="1" [attr.aria-label]="'Số lượng nhập dòng ' + (index + 1)" [(ngModel)]="line.quantity"></td>
+              <td class="projected-stock">{{ productFor(line) && currentStock(line) !== null ? projectedStock(line) : '—' }}</td>
+              <td><button class="remove-line" type="button" [attr.aria-label]="'Xóa dòng ' + (index + 1)" (click)="removeLine(index)"><i class="bi bi-trash3"></i></button></td>
+            </tr></tbody>
+          </table>
+        </div>
+        <button *ngIf="products.length" class="add-line-link" type="button" (click)="addLine()"><i class="bi bi-plus-circle"></i> Thêm sản phẩm khác</button>
+        <label class="receipt-reason">Lý do nhập hàng<input type="text" maxlength="160" placeholder="Ví dụ: Nhập hàng từ nhà cung cấp" [(ngModel)]="reason"></label>
+        <div class="receipt-summary"><span>Tổng số lượng nhập</span><strong>{{ totalUnits }} sản phẩm</strong></div>
+        <p *ngIf="errorMessage" class="receipt-error" role="alert">{{ errorMessage }}</p>
+        <footer class="receipt-footer"><button class="receive-button outline" type="button" (click)="cancel()" [disabled]="saving">Hủy</button><button class="receive-button primary" type="button" (click)="submitReceipt()" [disabled]="saving || loading || !validLines"><i class="bi bi-check2"></i> {{ saving ? 'Đang lưu…' : 'Lưu phiếu nhập' }}</button></footer>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div class="receive-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()"><section class="receive-logout-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><h2>Đăng xuất</h2><p>Bạn có chắc muốn đăng xuất khỏi trang quản trị?</p><footer><button class="receive-button outline" type="button" (click)="cancelLogoutConfirmation()">Ở lại</button><button class="receive-button primary" type="button" (click)="confirmLogout()">Đăng xuất</button></footer></section></div>

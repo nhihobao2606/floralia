@@ -67,14 +67,19 @@ registerLocaleData(localeVi);
     OrderReorderDialog,
     Pagenotfound,
   ],
-  imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    PasswordRecovery,
+  ],
   providers: [
     provideBrowserGlobalErrorListeners(),
     { provide: LOCALE_ID, useValue: 'vi' },
     { provide: HTTP_INTERCEPTORS, useClass: AuthSessionInterceptor, multi: true },
   ],
-  imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule, HttpClientModule, PasswordRecovery],
-  providers: [provideBrowserGlobalErrorListeners(), { provide: LOCALE_ID, useValue: 'vi' }],
   bootstrap: [App],
 })
 export class AppModule {}

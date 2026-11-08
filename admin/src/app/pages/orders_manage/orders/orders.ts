@@ -3,7 +3,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
+import { AdminNotificationService, SimulatedOrderNotification } from '../../../services/admin-notification-service';
 import {
   AdminOrder,
   AdminOrderItem,
@@ -11,6 +13,8 @@ import {
   AdminOrderStats,
   OrderStatus,
   PaymentStatus,
+  ProductCatalogItem,
+  ProductCatalogVariant,
 } from '../../../services/admin-order-service';
 
 const EMPTY_STATS: AdminOrderStats = {
@@ -45,15 +49,25 @@ export class Orders implements OnInit, OnDestroy {
   loadError = '';
   actionMessage = '';
   actionError = '';
+  cancellingSelectedOrder = false;
 
   adminName = 'Admin';
   logoutConfirmationVisible = false;
+
+  // Notification count (synced with sidebar)
+  notificationCount = 0;
+  notificationsOpen = false;
+  private pendingSub?: Subscription;
 
   // Delete modal
   pendingDeleteOrders: AdminOrder[] = [];
   deleteAcknowledged = false;
   deletingOrders = false;
   deleteError = '';
+
+  // Products catalog for Create Order modal
+  productCatalog: ProductCatalogItem[] = [];
+  availableVariants: ProductCatalogVariant[] = [];
 
   // Create Order Modal
   createModalVisible = false;
@@ -63,9 +77,9 @@ export class Orders implements OnInit, OnDestroy {
     customerPhone: '',
     customerAddress: '',
     customerEmail: '',
-    productName: 'Lục Mễ Trà – Trà Xanh Gạo Lứt Rang',
-    productVariant: 'Hộp 100g',
-    productPrice: 150000,
+    productName: '',
+    productVariant: '',
+    productPrice: 0,
     productQuantity: 1,
     paymentMethod: 'COD',
     paymentStatus: 'unpaid' as PaymentStatus,
@@ -80,12 +94,26 @@ export class Orders implements OnInit, OnDestroy {
 
   constructor(
     private readonly orderService: AdminOrderService,
+    private readonly notificationService: AdminNotificationService,
     private readonly router: Router,
     private readonly changeDetector: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.readAdminName();
+
+    this.pendingSub = this.orderService.pendingCount$.subscribe(count => {
+      this.notificationCount = count;
+      this.changeDetector.markForCheck();
+    });
+
+    this.orderService.getProductsCatalog().subscribe(catalog => {
+      this.productCatalog = catalog || [];
+      if (this.productCatalog.length > 0 && !this.createForm.productName) {
+        this.onProductSelected(this.productCatalog[0].name);
+      }
+    });
+
     this.loadOrders();
   }
 
@@ -94,10 +122,61 @@ export class Orders implements OnInit, OnDestroy {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
+    if (this.pendingSub) {
+      this.pendingSub.unsubscribe();
+    }
   }
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.total / this.pageSize));
+  }
+
+  get unreadNotificationsCount(): number {
+    return this.notificationService.unreadCount;
+  }
+
+  get canCancelSelectedOrder(): boolean {
+    if (this.selectedOrderIds.size !== 1) return false;
+    const id = this.selectedOrderIds.values().next().value;
+    const order = this.orders.find(item => item.id === id);
+    return !!order && (order.status === 'pending' || order.status === 'processing');
+  }
+
+  cancelSelectedOrder(): void {
+    if (!this.canCancelSelectedOrder || this.cancellingSelectedOrder) return;
+    const id = this.selectedOrderIds.values().next().value;
+    const order = this.orders.find(item => item.id === id);
+    if (!order || !window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${order.code}?`)) return;
+
+    this.cancellingSelectedOrder = true;
+    this.orderService.cancelOrder(order.id).subscribe({
+      next: () => {
+        order.status = 'cancelled';
+        order.statusLabel = 'Đã hủy';
+        this.selectedOrderIds.delete(order.id);
+        this.cancellingSelectedOrder = false;
+        this.flashActionMessage(`Đơn hàng ${order.code} đã chuyển sang trạng thái "Đã hủy".`);
+        this.loadOrders();
+      },
+      error: (error) => {
+        this.cancellingSelectedOrder = false;
+        this.actionError = error?.error?.message || 'Không thể hủy đơn hàng lúc này.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
+
+  get orderNotifications(): SimulatedOrderNotification[] { return this.notificationService.notifications; }
+
+  toggleNotifications(): void { this.notificationsOpen = !this.notificationsOpen; }
+
+  markNotificationsRead(): void {
+    this.notificationService.markAllRead();
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeNotificationsOnOutsideClick(event: MouseEvent): void {
+    if (!(event.target as HTMLElement | null)?.closest('.notification-wrap')) this.notificationsOpen = false;
   }
 
   get pages(): number[] {
@@ -130,6 +209,7 @@ export class Orders implements OnInit, OnDestroy {
         this.orders = response.orders || [];
         this.total = response.total;
         this.stats = response.stats || { ...EMPTY_STATS };
+        this.notificationCount = this.stats.pending;
         this.loading = false;
         this.changeDetector.markForCheck();
       },
@@ -196,6 +276,11 @@ export class Orders implements OnInit, OnDestroy {
     this.loadOrders();
   }
 
+  // Row navigation to order detail
+  goToDetail(order: AdminOrder): void {
+    void this.router.navigate(['/orders', order.id]);
+  }
+
   // Checkbox selection
   isAllSelected(): boolean {
     return this.orders.length > 0 && this.orders.every(o => this.selectedOrderIds.has(o.id));
@@ -222,19 +307,13 @@ export class Orders implements OnInit, OnDestroy {
     return this.selectedOrderIds.has(order.id);
   }
 
-  // Status and quick actions
-  onQuickStatusChange(order: AdminOrder, newStatus: string): void {
-    let label = 'Chờ xác nhận';
-    if (newStatus === 'processing') label = 'Đang chuẩn bị';
-    else if (newStatus === 'shipping') label = 'Đang giao hàng';
-    else if (newStatus === 'delivered') label = 'Đã giao';
-    else if (newStatus === 'cancelled') label = 'Đã hủy';
-
-    this.orderService.updateStatus(order.id, newStatus, label).subscribe({
-      next: (res) => {
-        order.status = newStatus;
-        order.statusLabel = label;
-        this.flashActionMessage(`Cập nhật đơn hàng ${order.code} thành "${label}"`);
+  // Quick action: Xác nhận đơn -> chuyển sang "Chờ lấy hàng" (processing)
+  confirmOrder(order: AdminOrder): void {
+    this.orderService.updateStatus(order.id, 'processing', 'Chờ lấy hàng').subscribe({
+      next: () => {
+        order.status = 'processing';
+        order.statusLabel = 'Chờ lấy hàng';
+        this.flashActionMessage(`Đơn hàng ${order.code} đã chuyển sang "Chờ lấy hàng".`);
         this.loadOrders();
       },
       error: () => {
@@ -242,10 +321,6 @@ export class Orders implements OnInit, OnDestroy {
         this.changeDetector.markForCheck();
       },
     });
-  }
-
-  confirmOrder(order: AdminOrder): void {
-    this.onQuickStatusChange(order, 'processing');
   }
 
   printInvoice(order: AdminOrder): void {
@@ -264,21 +339,47 @@ export class Orders implements OnInit, OnDestroy {
     this.orderService.exportToCsv(this.orders);
   }
 
-  // Create Order
+  // Create Order handling
+  onProductSelected(name: string): void {
+    this.createForm.productName = name;
+    const prod = this.productCatalog.find(p => p.name === name);
+    if (prod && Array.isArray(prod.variants) && prod.variants.length > 0) {
+      this.availableVariants = prod.variants;
+      this.onVariantSelected(prod.variants[0].label);
+    } else {
+      this.availableVariants = [{ label: 'Tiêu chuẩn', price: 150000 }];
+      this.createForm.productVariant = 'Tiêu chuẩn';
+      this.createForm.productPrice = 150000;
+    }
+  }
+
+  onVariantSelected(variantLabel: string): void {
+    this.createForm.productVariant = variantLabel;
+    const v = this.availableVariants.find(item => item.label === variantLabel);
+    if (v) {
+      this.createForm.productPrice = v.price;
+    }
+  }
+
   openCreateModal(): void {
+    const firstProd = this.productCatalog.length > 0 ? this.productCatalog[0] : null;
+    const firstVar = firstProd?.variants?.[0];
     this.createForm = {
       customerName: '',
       customerPhone: '',
       customerAddress: '',
       customerEmail: '',
-      productName: 'Lục Mễ Trà – Trà Xanh Gạo Lứt Rang',
-      productVariant: 'Hộp 100g',
-      productPrice: 150000,
+      productName: firstProd?.name || 'Hồng Diệp Trà – Trà Atiso Đỏ Nguyên Nụ',
+      productVariant: firstVar?.label || 'Hộp 200g',
+      productPrice: firstVar?.price || 180000,
       productQuantity: 1,
       paymentMethod: 'COD',
       paymentStatus: 'unpaid',
       status: 'pending',
     };
+    if (firstProd && Array.isArray(firstProd.variants)) {
+      this.availableVariants = firstProd.variants;
+    }
     this.createModalVisible = true;
   }
 
@@ -296,6 +397,11 @@ export class Orders implements OnInit, OnDestroy {
     const subtotal = this.createForm.productPrice * this.createForm.productQuantity;
     const total = subtotal;
 
+    const matchedProd = this.productCatalog.find(p => p.name === this.createForm.productName);
+    const matchedVariant = this.availableVariants.find(v => v.label === this.createForm.productVariant);
+    const itemImage = matchedVariant?.image || matchedProd?.imageUrl || '/assets/images/products/74.png';
+    const itemSku = matchedVariant?.sku || matchedProd?.sku || '';
+
     const newOrderPayload: Partial<AdminOrder> = {
       receiver: {
         name: this.createForm.customerName.trim(),
@@ -305,12 +411,13 @@ export class Orders implements OnInit, OnDestroy {
       },
       items: [
         {
+          sku: itemSku,
           name: this.createForm.productName,
           variant: this.createForm.productVariant,
           price: this.createForm.productPrice,
           quantity: this.createForm.productQuantity,
           total: subtotal,
-          image: '/assets/images/products/74.png',
+          image: itemImage,
         },
       ],
       subtotal,
@@ -321,7 +428,7 @@ export class Orders implements OnInit, OnDestroy {
       paymentStatus: this.createForm.paymentStatus,
       paymentStatusLabel: this.createForm.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán',
       status: this.createForm.status,
-      statusLabel: this.createForm.status === 'pending' ? 'Chờ xác nhận' : 'Đang chuẩn bị',
+      statusLabel: this.createForm.status === 'pending' ? 'Chờ xác nhận' : 'Chờ lấy hàng',
     };
 
     this.orderService.createOrder(newOrderPayload).subscribe({
@@ -331,9 +438,9 @@ export class Orders implements OnInit, OnDestroy {
         this.flashActionMessage(`Tạo đơn hàng ${res.order.code} thành công.`);
         this.loadOrders();
       },
-      error: () => {
+      error: (error) => {
         this.creatingOrder = false;
-        alert('Không thể tạo đơn hàng. Vui lòng kiểm tra lại kết nối.');
+        alert(error?.error?.message || 'Không thể lưu đơn hàng vào MongoDB. Vui lòng kiểm tra kết nối máy chủ.');
       },
     });
   }
@@ -439,6 +546,10 @@ export class Orders implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.notificationsOpen) {
+      this.notificationsOpen = false;
+      return;
+    }
     if (this.invoiceOrder) {
       this.closeInvoice();
       return;

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../controllers/authController');
+const { requireAuth, requireAdmin } = require('../controllers/authController');
 
 const {
     getProducts,
@@ -9,10 +9,16 @@ const {
     getProductBySku,
     getProductImage,
     getProductReviews,
-    createProductReview
+    createProductReview,
+    getInventory,
+    updateInventoryStock,
+    receiveInventoryStock
 } = require('../controllers/productController');
 
 router.get('/', getProducts);
+router.get('/admin/inventory', requireAuth, requireAdmin, getInventory);
+router.patch('/admin/inventory/bulk', requireAuth, requireAdmin, receiveInventoryStock);
+router.patch('/admin/inventory/:sku', requireAuth, requireAdmin, updateInventoryStock);
 router.get('/reviews/:sku', getProductReviews);
 router.post('/reviews', requireAuth, createProductReview);
 router.get('/image/:id', getProductImage);

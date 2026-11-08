@@ -118,6 +118,47 @@ describe('AdminOrderService', () => {
     });
   });
 
+  it('posts admin-created orders to the MongoDB admin orders endpoint', () => {
+    const payload = {
+      receiver: { name: 'Nguyễn An', phone: '0900000000', address: 'Hồ Chí Minh' },
+      items: [{ sku: 'TTM007-150G', name: 'Kim Tâm Trà', variant: 'Hộp 150g', price: 180000, quantity: 1, total: 180000 }],
+      subtotal: 180000,
+      discount: 0,
+      shippingFee: 0,
+      total: 180000,
+      paymentMethod: 'COD',
+      status: 'pending',
+    } as Partial<AdminOrder>;
+
+    service.createOrder(payload).subscribe(response => expect(response.order.items[0].sku).toBe('TTM007-150G'));
+    const request = http.expectOne('http://localhost:3002/api/admin/orders');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.headers.get('Authorization')).toBe('Bearer test-admin-token');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ success: true, order: { ...payload, id: 'FL123456', code: '#FL123456' } });
+  });
+
+  it('fetches orders for a user', () => {
+    service.getForUser('user-123').subscribe(res => {
+      expect(res.success).toBe(true);
+      expect(res.orders).toHaveLength(1);
+      expect(res.orders[0].id).toBe('FL0009');
+    });
+
+    const req = http.expectOne(request =>
+      request.url === 'http://localhost:3002/api/admin/orders' &&
+      request.params.get('userId') === 'user-123'
+    );
+    req.flush({
+      success: true,
+      orders: [{ id: 'FL0009', code: '#FL0009' }],
+      total: 1,
+      page: 1,
+      limit: 5,
+      stats: { total: 1, pending: 0, processing: 0, shipping: 1, delivered: 0, cancelled: 0 },
+    });
+  });
+
   it('updates order status', () => {
     service.updateStatus('FL0011', 'processing', 'Đang chuẩn bị').subscribe(res => {
       expect(res.success).toBe(true);

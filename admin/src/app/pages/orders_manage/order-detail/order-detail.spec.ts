@@ -115,11 +115,11 @@ describe('OrderDetail', () => {
 
     const patchReq = http.expectOne('http://localhost:3002/api/admin/orders/FL0009/status');
     expect(patchReq.request.method).toBe('PATCH');
-    expect(patchReq.request.body).toEqual({ status: 'processing', statusLabel: 'Đang chuẩn bị' });
+    expect(patchReq.request.body).toEqual({ status: 'processing', statusLabel: 'Chờ lấy hàng' });
 
     patchReq.flush({
       success: true,
-      order: { ...mockOrder, status: 'processing', statusLabel: 'Đang chuẩn bị' },
+      order: { ...mockOrder, status: 'processing', statusLabel: 'Chờ lấy hàng' },
     });
     fixture.detectChanges();
 

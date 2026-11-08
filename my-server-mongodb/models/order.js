@@ -26,7 +26,6 @@ function getIdFilter(id) {
 }
 
 function getAll(filter = {}, options = {}) {
-function getAll(filter = {}, options = {}) {
     if (!ordersCollection) return Promise.resolve([]);
     let cursor = ordersCollection.find(filter);
     if (options.sort) cursor = cursor.sort(options.sort);
@@ -63,7 +62,6 @@ function create(order) {
     }
     return ordersCollection.insertOne({
         ...order,
-        createdAt: order.createdAt || new Date()
         createdAt: order.createdAt || new Date()
     });
 }

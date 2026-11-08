@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import {
   AdminOrder,
@@ -19,7 +20,7 @@ import {
   templateUrl: './order-detail.html',
   styleUrl: './order-detail.css',
 })
-export class OrderDetail implements OnInit {
+export class OrderDetail implements OnInit, OnDestroy {
   orderId = '';
   order: AdminOrder | null = null;
   loading = false;
@@ -27,6 +28,10 @@ export class OrderDetail implements OnInit {
   actionMessage = '';
   actionError = '';
   adminName = 'Admin';
+
+  // Notification count (synced with sidebar)
+  notificationCount = 0;
+  private pendingSub?: Subscription;
 
   // Notes
   newNoteText = '';
@@ -47,12 +52,28 @@ export class OrderDetail implements OnInit {
 
   ngOnInit(): void {
     this.readAdminName();
+
+    this.pendingSub = this.orderService.pendingCount$.subscribe(count => {
+      this.notificationCount = count;
+      this.changeDetector.markForCheck();
+    });
+
     this.route.paramMap.subscribe((params) => {
       this.orderId = params.get('id') || '';
       if (this.orderId) {
         this.loadOrder();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.pendingSub) {
+      this.pendingSub.unsubscribe();
+    }
+  }
+
+  get canCancelOrder(): boolean {
+    return this.order?.status === 'pending' || this.order?.status === 'processing';
   }
 
   loadOrder(): void {
@@ -87,18 +108,15 @@ export class OrderDetail implements OnInit {
     if (!this.order) return;
     if (!this.order.trackingTimeline || this.order.trackingTimeline.length === 0) {
       this.order.trackingTimeline = [
-        { title: 'Đang giao đến khách', time: '10/10 - 08:40', completed: true },
-        { title: 'Đã đến kho Thủ Đức', time: '09/10 - 21:10', completed: true },
-        { title: 'Đã bàn giao vận chuyển', time: '09/10 - 14:00', completed: true },
-        { title: 'Đang chuẩn bị hàng', time: '09/10 - 10:30', completed: true },
-        { title: 'Đã xác nhận đơn', time: '09/10 - 09:20', completed: true },
+        { title: 'Đặt hàng thành công', time: `${this.order.date} ${this.order.time || ''}`, completed: true },
+        { title: 'Chờ xác nhận đơn hàng', time: `${this.order.date}`, completed: true },
       ];
     }
     if (!this.order.shippingUnit) {
       this.order.shippingUnit = 'Giao Hàng Nhanh';
     }
     if (!this.order.trackingCode) {
-      this.order.trackingCode = 'GHN8842';
+      this.order.trackingCode = `GHN${Math.floor(1000 + Math.random() * 9000)}`;
     }
     if (!this.order.notes) {
       this.order.notes = [];
@@ -108,13 +126,13 @@ export class OrderDetail implements OnInit {
   onStatusChange(newStatus: string): void {
     if (!this.order) return;
     let label = 'Chờ xác nhận';
-    if (newStatus === 'processing') label = 'Đang chuẩn bị';
-    else if (newStatus === 'shipping') label = 'Đang giao hàng';
+    if (newStatus === 'processing') label = 'Chờ lấy hàng';
+    else if (newStatus === 'shipping') label = 'Đang vận chuyển';
     else if (newStatus === 'delivered') label = 'Đã giao';
     else if (newStatus === 'cancelled') label = 'Đã hủy';
 
     this.orderService.updateStatus(this.order.id, newStatus, label).subscribe({
-      next: (res) => {
+      next: () => {
         if (this.order) {
           this.order.status = newStatus as OrderStatus;
           this.order.statusLabel = label;
@@ -133,6 +151,7 @@ export class OrderDetail implements OnInit {
   }
 
   requestCancelOrder(): void {
+    if (!this.canCancelOrder || this.cancellingOrder) return;
     this.cancelModalVisible = true;
   }
 
@@ -143,14 +162,13 @@ export class OrderDetail implements OnInit {
   confirmCancelOrder(): void {
     if (!this.order) return;
     this.cancellingOrder = true;
-    this.orderService.updateStatus(this.order.id, 'cancelled', 'Đã hủy').subscribe({
+    this.orderService.cancelOrder(this.order.id).subscribe({
       next: () => {
         this.cancellingOrder = false;
         this.cancelModalVisible = false;
         if (this.order) {
           this.order.status = 'cancelled';
           this.order.statusLabel = 'Đã hủy';
-          this.flashMessage('Đơn hàng đã được chuyển sang trạng thái "Đã hủy".');
         }
       },
       error: () => {

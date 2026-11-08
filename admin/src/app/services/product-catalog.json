@@ -1,0 +1,1148 @@
+[
+  {
+    "name": "Kim Tâm Trà - Trà Hoa Tam Thất",
+    "sku": "TTM007",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM007_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM007_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 150g",
+        "sku": "TTM007-150G",
+        "price": 180000,
+        "image": "http://localhost:3002/products/image/TTM007_THUMB"
+      },
+      {
+        "label": "Hộp 200g",
+        "sku": "TTM007-200G",
+        "price": 240000,
+        "image": "http://localhost:3002/products/image/TTM007_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM007-500G",
+        "price": 552000,
+        "image": "http://localhost:3002/products/image/TTM007_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM007-G10",
+        "price": 75000,
+        "image": "http://localhost:3002/products/image/TTM007_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói (5g/gói)",
+        "sku": "TTM007-G20",
+        "price": 150000,
+        "image": "http://localhost:3002/products/image/TTM007_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM007-T10",
+        "price": 43000,
+        "image": "http://localhost:3002/products/image/TTM007_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM007-T20",
+        "price": 86000,
+        "image": "http://localhost:3002/products/image/TTM007_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Lam Diệp Trà – Trà Hắc Kỷ Tử",
+    "sku": "TTM010",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM010_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM010_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM010-100G",
+        "price": 103000,
+        "image": "http://localhost:3002/products/image/TTM010_THUMB"
+      },
+      {
+        "label": "Hộp 250g",
+        "sku": "TTM010-250G",
+        "price": 230000,
+        "image": "http://localhost:3002/products/image/TTM010_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM010-500G",
+        "price": 423000,
+        "image": "http://localhost:3002/products/image/TTM010_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM010-T10",
+        "price": 33000,
+        "image": "http://localhost:3002/products/image/TTM010_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM010-T20",
+        "price": 66000,
+        "image": "http://localhost:3002/products/image/TTM010_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Kim Tinh Đường – Đường Phèn Vàng Quảng Ngãi",
+    "sku": "DU001",
+    "category": "Đồ uống kèm trà",
+    "thumbnail": "DU001_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/DU001_THUMB",
+    "variants": [
+      {
+        "label": "Túi 200g",
+        "sku": "DU001-200G",
+        "price": 40000,
+        "image": "http://localhost:3002/products/image/DU001_THUMB"
+      },
+      {
+        "label": "Túi 500g",
+        "sku": "DU001-500G",
+        "price": 90000,
+        "image": "http://localhost:3002/products/image/DU001_THUMB"
+      },
+      {
+        "label": "Túi 1kg",
+        "sku": "DU001-1000G",
+        "price": 166000,
+        "image": "http://localhost:3002/products/image/DU001_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Tuyết Liên Trà - Trà Hoa Sen Tuyết",
+    "sku": "TTM011",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM011_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM011_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM011-100G",
+        "price": 84000,
+        "image": "http://localhost:3002/products/image/TTM011_THUMB"
+      },
+      {
+        "label": "Hộp 200g",
+        "sku": "TTM011-200G",
+        "price": 150000,
+        "image": "http://localhost:3002/products/image/TTM011_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM011-500G",
+        "price": 345000,
+        "image": "http://localhost:3002/products/image/TTM011_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM011-G10",
+        "price": 47000,
+        "image": "http://localhost:3002/products/image/TTM011_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói (5g/gói)",
+        "sku": "TTM011-G20",
+        "price": 94000,
+        "image": "http://localhost:3002/products/image/TTM011_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM011-T10",
+        "price": 27000,
+        "image": "http://localhost:3002/products/image/TTM011_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM011-T20",
+        "price": 54000,
+        "image": "http://localhost:3002/products/image/TTM011_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Trà Hoa Mộng",
+    "sku": "HQ017",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ017_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ017_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ017",
+        "price": 850000,
+        "image": "http://localhost:3002/products/image/HQ017_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Trà Hoa Lam",
+    "sku": "HQ018",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ018_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ018_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ018",
+        "price": 520000,
+        "image": "http://localhost:3002/products/image/HQ018_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Trà Hoa Tím",
+    "sku": "HQ019",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ019_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ019_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ019",
+        "price": 490000,
+        "image": "http://localhost:3002/products/image/HQ019_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Trà Hoa Hồng",
+    "sku": "HQ020",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ020_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ020_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ020",
+        "price": 630000,
+        "image": "http://localhost:3002/products/image/HQ020_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Trà Hoa Cổ Điển",
+    "sku": "HQ022",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ022_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ022_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ022",
+        "price": 720000,
+        "image": "http://localhost:3002/products/image/HQ022_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Đường Nâu Cổ Truyền Viên",
+    "sku": "DK030",
+    "category": "Đồ uống kèm trà",
+    "thumbnail": "DK030_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/DK030_THUMB",
+    "variants": [
+      {
+        "label": "Túi 300g",
+        "sku": "DK030-300G",
+        "price": 85000,
+        "image": "http://localhost:3002/products/image/DK030_THUMB"
+      },
+      {
+        "label": "Túi 500g",
+        "sku": "DK030-500G",
+        "price": 142000,
+        "image": "http://localhost:3002/products/image/DK030_THUMB"
+      },
+      {
+        "label": "Túi 1kg",
+        "sku": "DK030-1000G",
+        "price": 261000,
+        "image": "http://localhost:3002/products/image/DK030_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Đường Ăn Kiêng Thảo Mộc Stevia",
+    "sku": "DK032",
+    "category": "Đồ uống kèm trà",
+    "thumbnail": "DK032_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/DK032_THUMB",
+    "variants": [
+      {
+        "label": "Túi 200g",
+        "sku": "DK032-200G",
+        "price": 120000,
+        "image": "http://localhost:3002/products/image/DK032_THUMB"
+      },
+      {
+        "label": "Túi 500g",
+        "sku": "DK032-500G",
+        "price": 276000,
+        "image": "http://localhost:3002/products/image/DK032_THUMB"
+      },
+      {
+        "label": "Túi 1kg",
+        "sku": "DK032-1000G",
+        "price": 528000,
+        "image": "http://localhost:3002/products/image/DK032_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Lục Diệp Trà – Trà Cam Chanh Bạc Hà Giải Nhiệt",
+    "sku": "TTM024",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM024_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM024_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 3 vị",
+        "sku": "TTM024-G10V3",
+        "price": 102000,
+        "image": "http://localhost:3002/products/image/TTM024_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM024-G10V5",
+        "price": 112000,
+        "image": "http://localhost:3002/products/image/TTM024_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 3 vị",
+        "sku": "TTM024-G20V3",
+        "price": 185000,
+        "image": "http://localhost:3002/products/image/TTM024_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM024-G20V5",
+        "price": 204000,
+        "image": "http://localhost:3002/products/image/TTM024_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Hồng Diệp Trà – Trà Atiso Đỏ Nguyên Nụ",
+    "sku": "TTM001",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM001_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM001_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM001-100G",
+        "price": 101000,
+        "image": "http://localhost:3002/products/image/TTM001_THUMB"
+      },
+      {
+        "label": "Hộp 200g",
+        "sku": "TTM001-200G",
+        "price": 180000,
+        "image": "http://localhost:3002/products/image/TTM001_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM001-500G",
+        "price": 414000,
+        "image": "http://localhost:3002/products/image/TTM001_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM001-G10",
+        "price": 56000,
+        "image": "http://localhost:3002/products/image/TTM001_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói (5g/gói)",
+        "sku": "TTM001-G20",
+        "price": 113000,
+        "image": "http://localhost:3002/products/image/TTM001_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM001-T10",
+        "price": 32000,
+        "image": "http://localhost:3002/products/image/TTM001_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM001-T20",
+        "price": 65000,
+        "image": "http://localhost:3002/products/image/TTM001_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Hoàng Cúc Trà – Trà Cúc Vàng",
+    "sku": "TTM003",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM003_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM003_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 150g",
+        "sku": "TTM003-150G",
+        "price": 150000,
+        "image": "http://localhost:3002/products/image/TTM003_THUMB"
+      },
+      {
+        "label": "Hộp 200g",
+        "sku": "TTM003-200G",
+        "price": 200000,
+        "image": "http://localhost:3002/products/image/TTM003_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM003-500G",
+        "price": 460000,
+        "image": "http://localhost:3002/products/image/TTM003_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM003-G10",
+        "price": 62000,
+        "image": "http://localhost:3002/products/image/TTM003_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói (5g/gói)",
+        "sku": "TTM003-G20",
+        "price": 125000,
+        "image": "http://localhost:3002/products/image/TTM003_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM003-T10",
+        "price": 36000,
+        "image": "http://localhost:3002/products/image/TTM003_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM003-T20",
+        "price": 72000,
+        "image": "http://localhost:3002/products/image/TTM003_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Lệ Hạ Trà – Trà Hoa Rượu Mâm Xôi",
+    "sku": "TTM006",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM006_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM006_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 3 vị",
+        "sku": "TTM006-G10V3",
+        "price": 138000,
+        "image": "http://localhost:3002/products/image/TTM006_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM006-G10V5",
+        "price": 151000,
+        "image": "http://localhost:3002/products/image/TTM006_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 3 vị",
+        "sku": "TTM006-G20V3",
+        "price": 250000,
+        "image": "http://localhost:3002/products/image/TTM006_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM006-G20V5",
+        "price": 275000,
+        "image": "http://localhost:3002/products/image/TTM006_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Hồng Nhãn Trà - Trà Kỷ Tử",
+    "sku": "TTM012",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM012_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM012_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM012-100G",
+        "price": 131000,
+        "image": "http://localhost:3002/products/image/TTM012_THUMB"
+      },
+      {
+        "label": "Hộp 300g",
+        "sku": "TTM012-300G",
+        "price": 350000,
+        "image": "http://localhost:3002/products/image/TTM012_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM012-500G",
+        "price": 583000,
+        "image": "http://localhost:3002/products/image/TTM012_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM012-T10",
+        "price": 42000,
+        "image": "http://localhost:3002/products/image/TTM012_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM012-T20",
+        "price": 84000,
+        "image": "http://localhost:3002/products/image/TTM012_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Chi Bản Tịnh Trà – Trà Atiso Đỏ Hoa Hồng",
+    "sku": "TTM014",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM014_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM014_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM014-100G",
+        "price": 109000,
+        "image": "http://localhost:3002/products/image/TTM014_THUMB"
+      },
+      {
+        "label": "Hộp 200g",
+        "sku": "TTM014-200G",
+        "price": 195000,
+        "image": "http://localhost:3002/products/image/TTM014_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM014-500G",
+        "price": 449000,
+        "image": "http://localhost:3002/products/image/TTM014_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM014-G10",
+        "price": 61000,
+        "image": "http://localhost:3002/products/image/TTM014_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói (5g/gói)",
+        "sku": "TTM014-G20",
+        "price": 122000,
+        "image": "http://localhost:3002/products/image/TTM014_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM014-T10",
+        "price": 35000,
+        "image": "http://localhost:3002/products/image/TTM014_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM014-T20",
+        "price": 70000,
+        "image": "http://localhost:3002/products/image/TTM014_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Trà Hoa Sen Xanh",
+    "sku": "HQ015",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ015_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ015_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ015",
+        "price": 480000,
+        "image": "http://localhost:3002/products/image/HQ015_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Liên Hoa Thanh",
+    "sku": "HQ016",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ016_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ016_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ016",
+        "price": 650000,
+        "image": "http://localhost:3002/products/image/HQ016_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Ngũ Linh Thang – Nhân Sâm Ngũ Bảo Trà Nam",
+    "sku": "TTM005",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM005_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM005_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 3 vị",
+        "sku": "TTM005-G10V3",
+        "price": 139000,
+        "image": "http://localhost:3002/products/image/TTM005_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM005-G10V5",
+        "price": 154000,
+        "image": "http://localhost:3002/products/image/TTM005_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 7 vị",
+        "sku": "TTM005-G10V7",
+        "price": 169000,
+        "image": "http://localhost:3002/products/image/TTM005_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 3 vị",
+        "sku": "TTM005-G20V3",
+        "price": 252000,
+        "image": "http://localhost:3002/products/image/TTM005_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM005-G20V5",
+        "price": 280000,
+        "image": "http://localhost:3002/products/image/TTM005_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 7 vị",
+        "sku": "TTM005-G20V7",
+        "price": 308000,
+        "image": "http://localhost:3002/products/image/TTM005_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Hồng Vân Trà - Trà Hoa Hồng Tây Tạng",
+    "sku": "TTM008",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM008_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM008_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM008-100G",
+        "price": 317000,
+        "image": "http://localhost:3002/products/image/TTM008_THUMB"
+      },
+      {
+        "label": "Hộp 300g",
+        "sku": "TTM008-300G",
+        "price": 850000,
+        "image": "http://localhost:3002/products/image/TTM008_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM008-500G",
+        "price": 1417000,
+        "image": "http://localhost:3002/products/image/TTM008_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM008-G10",
+        "price": 177000,
+        "image": "http://localhost:3002/products/image/TTM008_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói (5g/gói)",
+        "sku": "TTM008-G20",
+        "price": 354000,
+        "image": "http://localhost:3002/products/image/TTM008_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM008-T10",
+        "price": 102000,
+        "image": "http://localhost:3002/products/image/TTM008_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM008-T20",
+        "price": 204000,
+        "image": "http://localhost:3002/products/image/TTM008_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Bạch Cúc An Trà - Trà Cúc Trắng",
+    "sku": "TTM009",
+    "category": "Trà thảo mộc",
+    "thumbnail": "TTM009_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM009_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM009-100G",
+        "price": 118000,
+        "image": "http://localhost:3002/products/image/TTM009_THUMB"
+      },
+      {
+        "label": "Hộp 200g",
+        "sku": "TTM009-200G",
+        "price": 210000,
+        "image": "http://localhost:3002/products/image/TTM009_THUMB"
+      },
+      {
+        "label": "Hộp 500g",
+        "sku": "TTM009-500G",
+        "price": 483000,
+        "image": "http://localhost:3002/products/image/TTM009_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM009-G10",
+        "price": 66000,
+        "image": "http://localhost:3002/products/image/TTM009_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói (5g/gói)",
+        "sku": "TTM009-G20",
+        "price": 131000,
+        "image": "http://localhost:3002/products/image/TTM009_THUMB"
+      },
+      {
+        "label": "Hộp 10 túi lọc (2g/túi)",
+        "sku": "TTM009-T10",
+        "price": 38000,
+        "image": "http://localhost:3002/products/image/TTM009_THUMB"
+      },
+      {
+        "label": "Hộp 20 túi lọc (2g/túi)",
+        "sku": "TTM009-T20",
+        "price": 76000,
+        "image": "http://localhost:3002/products/image/TTM009_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Ấm Sứ Hoa Sen Vẽ Tay – Tịnh Tâm Hương",
+    "sku": "AT022",
+    "category": "Ấm trà",
+    "thumbnail": "AT022_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/AT022_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "AT022",
+        "price": 380000,
+        "image": "http://localhost:3002/products/image/AT022_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Đường Phèn Vàng Mật Mía Viên",
+    "sku": "DK034",
+    "category": "Đồ uống kèm trà",
+    "thumbnail": "DK034_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/DK034_THUMB",
+    "variants": [
+      {
+        "label": "Túi 200g",
+        "sku": "DK034-200G",
+        "price": 25000,
+        "image": "http://localhost:3002/products/image/DK034_THUMB"
+      },
+      {
+        "label": "Túi 500g",
+        "sku": "DK034-500G",
+        "price": 55000,
+        "image": "http://localhost:3002/products/image/DK034_THUMB"
+      },
+      {
+        "label": "Túi 1kg",
+        "sku": "DK034-1000G",
+        "price": 101000,
+        "image": "http://localhost:3002/products/image/DK034_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Ngọc Nữ Thanh Trà – Trà Thanh Lọc Cơ Thể",
+    "sku": "TTM020",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM020_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM020_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 3 vị",
+        "sku": "TTM020-G10V3",
+        "price": 116000,
+        "image": "http://localhost:3002/products/image/TTM020_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM020-G10V5",
+        "price": 127000,
+        "image": "http://localhost:3002/products/image/TTM020_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 3 vị",
+        "sku": "TTM020-G20V3",
+        "price": 210000,
+        "image": "http://localhost:3002/products/image/TTM020_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM020-G20V5",
+        "price": 231000,
+        "image": "http://localhost:3002/products/image/TTM020_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Thanh Sắc Trà – Trà Thanh Tâm An Mộc",
+    "sku": "TTM002",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM002_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM002_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 3 vị",
+        "sku": "TTM002-G10V3",
+        "price": 116000,
+        "image": "http://localhost:3002/products/image/TTM002_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM002-G10V5",
+        "price": 127000,
+        "image": "http://localhost:3002/products/image/TTM002_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 3 vị",
+        "sku": "TTM002-G20V3",
+        "price": 210000,
+        "image": "http://localhost:3002/products/image/TTM002_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM002-G20V5",
+        "price": 231000,
+        "image": "http://localhost:3002/products/image/TTM002_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Hòa Mộc Trà – Trà Gạo Lứt Ngũ Hoa",
+    "sku": "TTM004",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM004_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM004_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM004-G10V5",
+        "price": 79000,
+        "image": "http://localhost:3002/products/image/TTM004_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 7 vị",
+        "sku": "TTM004-G10V7",
+        "price": 88000,
+        "image": "http://localhost:3002/products/image/TTM004_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM004-G20V5",
+        "price": 144000,
+        "image": "http://localhost:3002/products/image/TTM004_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 7 vị",
+        "sku": "TTM004-G20V7",
+        "price": 160000,
+        "image": "http://localhost:3002/products/image/TTM004_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Trà Hoa Tuyết",
+    "sku": "HQ021",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ021_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ021_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ021",
+        "price": 580000,
+        "image": "http://localhost:3002/products/image/HQ021_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Set Quà Tặng Liên Hoa Trà",
+    "sku": "HQ023",
+    "category": "Set quà tặng",
+    "thumbnail": "HQ023_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/HQ023_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "HQ023",
+        "price": 1500000,
+        "image": "http://localhost:3002/products/image/HQ023_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Ấm Gốm Cá Chép Mạ Vàng – Phú Quý Dư Niên",
+    "sku": "AT021",
+    "category": "Ấm trà",
+    "thumbnail": "AT021_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/AT021_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "AT021",
+        "price": 450000,
+        "image": "http://localhost:3002/products/image/AT021_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Ấm Tử Sa Hoa Đào – Đào Hoa Cổ Nguyệt",
+    "sku": "AT023",
+    "category": "Ấm trà",
+    "thumbnail": "AT023_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/AT023_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "AT023",
+        "price": 620000,
+        "image": "http://localhost:3002/products/image/AT023_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Ấm Sứ Chim Hạc – Hạc Vũ Trường Xuân",
+    "sku": "AT024",
+    "category": "Ấm trà",
+    "thumbnail": "AT024_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/AT024_THUMB",
+    "variants": [
+      {
+        "label": "Tiêu chuẩn",
+        "sku": "AT024",
+        "price": 410000,
+        "image": "http://localhost:3002/products/image/AT024_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Đường Phèn Trắng Tinh Khiết",
+    "sku": "DK031",
+    "category": "Đồ uống kèm trà",
+    "thumbnail": "DK031_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/DK031_THUMB",
+    "variants": [
+      {
+        "label": "Túi 200g",
+        "sku": "DK031-200G",
+        "price": 20000,
+        "image": "http://localhost:3002/products/image/DK031_THUMB"
+      },
+      {
+        "label": "Túi 500g",
+        "sku": "DK031-500G",
+        "price": 45000,
+        "image": "http://localhost:3002/products/image/DK031_THUMB"
+      },
+      {
+        "label": "Túi 1kg",
+        "sku": "DK031-1000G",
+        "price": 83000,
+        "image": "http://localhost:3002/products/image/DK031_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Đường Dừa Hữu Cơ Kết Tinh",
+    "sku": "DK033",
+    "category": "Đồ uống kèm trà",
+    "thumbnail": "DK033_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/DK033_THUMB",
+    "variants": [
+      {
+        "label": "Túi 350g",
+        "sku": "DK033-350G",
+        "price": 95000,
+        "image": "http://localhost:3002/products/image/DK033_THUMB"
+      },
+      {
+        "label": "Túi 500g",
+        "sku": "DK033-500G",
+        "price": 136000,
+        "image": "http://localhost:3002/products/image/DK033_THUMB"
+      },
+      {
+        "label": "Túi 1kg",
+        "sku": "DK033-1000G",
+        "price": 250000,
+        "image": "http://localhost:3002/products/image/DK033_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Đan Châu Trà – Trà Dưỡng Nhan Cổ Truyền",
+    "sku": "TTM021",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM021_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM021_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM021-G10V5",
+        "price": 114000,
+        "image": "http://localhost:3002/products/image/TTM021_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 7 vị",
+        "sku": "TTM021-G10V7",
+        "price": 127000,
+        "image": "http://localhost:3002/products/image/TTM021_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM021-G20V5",
+        "price": 207000,
+        "image": "http://localhost:3002/products/image/TTM021_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 7 vị",
+        "sku": "TTM021-G20V7",
+        "price": 230000,
+        "image": "http://localhost:3002/products/image/TTM021_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Bách Hoa Trà – Trà Ngũ Hoa Giảm Mụn An Mộc",
+    "sku": "TTM022",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM022_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM022_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 3 vị",
+        "sku": "TTM022-G10V3",
+        "price": 111000,
+        "image": "http://localhost:3002/products/image/TTM022_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM022-G10V5",
+        "price": 124000,
+        "image": "http://localhost:3002/products/image/TTM022_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 7 vị",
+        "sku": "TTM022-G10V7",
+        "price": 136000,
+        "image": "http://localhost:3002/products/image/TTM022_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 3 vị",
+        "sku": "TTM022-G20V3",
+        "price": 203000,
+        "image": "http://localhost:3002/products/image/TTM022_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM022-G20V5",
+        "price": 225000,
+        "image": "http://localhost:3002/products/image/TTM022_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 7 vị",
+        "sku": "TTM022-G20V7",
+        "price": 248000,
+        "image": "http://localhost:3002/products/image/TTM022_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Phúc Cốc Trà – Trà Ngũ Cốc Thanh Lọc Giữ Dáng",
+    "sku": "TTM023",
+    "category": "Trà thảo mộc mix",
+    "thumbnail": "TTM023_THUMB",
+    "imageUrl": "http://localhost:3002/products/image/TTM023_THUMB",
+    "variants": [
+      {
+        "label": "Hộp 10 gói · 3 vị",
+        "sku": "TTM023-G10V3",
+        "price": 82000,
+        "image": "http://localhost:3002/products/image/TTM023_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 5 vị",
+        "sku": "TTM023-G10V5",
+        "price": 91000,
+        "image": "http://localhost:3002/products/image/TTM023_THUMB"
+      },
+      {
+        "label": "Hộp 10 gói · 7 vị",
+        "sku": "TTM023-G10V7",
+        "price": 100000,
+        "image": "http://localhost:3002/products/image/TTM023_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 3 vị",
+        "sku": "TTM023-G20V3",
+        "price": 149000,
+        "image": "http://localhost:3002/products/image/TTM023_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 5 vị",
+        "sku": "TTM023-G20V5",
+        "price": 165000,
+        "image": "http://localhost:3002/products/image/TTM023_THUMB"
+      },
+      {
+        "label": "Hộp 20 gói · 7 vị",
+        "sku": "TTM023-G20V7",
+        "price": 182000,
+        "image": "http://localhost:3002/products/image/TTM023_THUMB"
+      }
+    ]
+  },
+  {
+    "name": "Lục Nha Trà – Trà Nụ Xanh",
+    "sku": "TTM025",
+    "category": "Trà thảo mộc",
+    "thumbnail": "6aeadc9e5881b95ced2b1383",
+    "imageUrl": "http://localhost:3002/products/image/6aeadc9e5881b95ced2b1383",
+    "variants": [
+      {
+        "label": "Hộp 10 gói (5g/gói)",
+        "sku": "TTM025-1",
+        "price": 50000,
+        "image": "http://localhost:3002/products/image/6aeadc9e5881b95ced2b1383"
+      },
+      {
+        "label": "Hộp 100g",
+        "sku": "TTM025-2",
+        "price": 120000,
+        "image": "http://localhost:3002/products/image/6aeadc9e5881b95ced2b1383"
+      }
+    ]
+  }
+]

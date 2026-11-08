@@ -4,9 +4,9 @@ import { ActivatedRoute, Router, RouterModule, convertToParamMap } from '@angula
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ProductDetail } from './product-detail';
-import { ProductService } from '../services/product-service';
-import { ReviewService } from '../services/review-service';
-import { CartService } from '../services/cart-service';
+import { ProductService } from '../../services/product-service';
+import { ReviewService } from '../../services/review-service';
+import { CartService } from '../../services/cart-service';
 
 describe('ProductDetail', () => {
   let component: ProductDetail;
@@ -95,6 +95,7 @@ describe('ProductDetail', () => {
           provide: ProductService,
           useValue: {
             getAll: () => of(products),
+            getProductBySlug: (slug: string) => of(products.find(product => product.slug === slug)),
             getCachedProducts: () => products,
           },
         },
