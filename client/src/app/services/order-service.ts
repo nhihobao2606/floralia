@@ -42,11 +42,12 @@ export interface Order {
   paymentStatus?: string;
   paymentStatusLabel?: string;
   trackingTimeline?: Array<{
-    status: Order['status'];
-    statusLabel: string;
-    notice: string;
-    createdAt: string;
+    title: string;
+    time: string;
+    completed: boolean;
   }>;
+  shippingUnit?: string;
+  trackingCode?: string;
   notes?: string[];
   notice?: string;
   customerNote?: string;
@@ -232,6 +233,19 @@ export class OrderService {
     }).pipe(
       timeout({ first: 20_000 }),
       map(res => {
+        const timeline = res.order?.trackingTimeline || [];
+        const trackingReady = res.order?.shippingUnit === 'J&T Express' &&
+          typeof res.order?.trackingCode === 'string' && res.order.trackingCode.startsWith('JT') &&
+          timeline.length === 2 &&
+          timeline[0]?.title === 'Đặt hàng thành công' &&
+          timeline[1]?.title === 'Chờ xác nhận' &&
+          timeline[0]?.time === timeline[1]?.time &&
+          timeline.every(event => event.completed === true);
+        if (res.order && !trackingReady) {
+          throw new Error(
+            `Đơn ${res.order.code || res.order.id} có thể đã được tạo, nhưng máy chủ trả về dữ liệu tracking cũ. Đừng đặt lại ngay; hãy khởi động đúng backend rồi kiểm tra đơn trong MongoDB.`
+          );
+        }
         if (res.order) this.saveOrderLocal(res.order);
         return { ...res, persisted: true };
       })

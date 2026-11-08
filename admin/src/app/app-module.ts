@@ -18,8 +18,6 @@ import { CategoryEditor } from './pages/category-manage/category-editor/category
 import { FormsModule } from '@angular/forms';
 import { AdminSidebar } from './components/admin-sidebar/admin-sidebar';
 import { CustomSelect } from './components/custom-select/custom-select';
-import { AdminOrders } from './pages/orders_manage/orders/orders';
-import { AdminOrderDetail } from './pages/orders_manage/order-detail/order-detail';
 import { AdminUsers } from './pages/users_manage/users/users';
 import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
 import { AdminUserForm } from './pages/users_manage/user-form/user-form';
@@ -38,8 +36,6 @@ import { ApiOriginInterceptor } from './services/api-origin.interceptor';
     FormsModule,
     AdminSidebar,
     CustomSelect,
-    AdminOrders,
-    AdminOrderDetail,
     AdminUsers,
     AdminUserDetail,
     AdminUserForm,

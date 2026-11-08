@@ -37,25 +37,13 @@ function normalizeOrder(order) {
   if (status === 'waiting') status = 'processing';
   if (status === 'completed') status = 'delivered';
 
-  let statusLabel = order.statusLabel;
-  if (!statusLabel) {
-    switch (status) {
-      case 'pending': statusLabel = 'Chờ xác nhận'; break;
-      case 'processing': statusLabel = 'Chờ lấy hàng'; break;
-      case 'shipping': statusLabel = 'Đang vận chuyển'; break;
-      case 'delivered': statusLabel = 'Đã giao'; break;
-      case 'cancelled': statusLabel = 'Đã hủy'; break;
-      case 'refunded': statusLabel = 'Hoàn tiền'; break;
-      default: statusLabel = 'Chờ xác nhận';
-    }
-  } else {
-    if (status === 'processing' && (statusLabel === 'Đang chuẩn bị' || statusLabel === 'ĐANG CHUẨN BỊ')) {
-      statusLabel = 'Chờ lấy hàng';
-    }
-    if (status === 'shipping' && (statusLabel === 'Đang giao hàng' || statusLabel === 'ĐANG GIAO HÀNG')) {
-      statusLabel = 'Đang vận chuyển';
-    }
-  }
+  const statusLabels = {
+    pending: 'Chờ xác nhận', processing: 'Chờ lấy hàng', shipping: 'Đang vận chuyển',
+    delivered: 'Đã giao', cancelled: 'Đã hủy', refunded: 'Đã hoàn tiền',
+    refund_pending: 'Chờ duyệt hoàn tiền', refund_approved: 'Đã duyệt hoàn tiền', completed: 'Hoàn thành'
+  };
+  // Status is the source of truth: legacy records may contain stale labels from older flows.
+  const statusLabel = statusLabels[status] || order.statusLabel || statusLabels.pending;
 
   let paymentStatus = order.paymentStatus;
   if (!paymentStatus) {
@@ -117,10 +105,15 @@ function normalizeOrder(order) {
     discount: Number(order.discount || 0),
     shippingFee: Number(order.shippingFee || 0),
     total: Number(order.total || 0),
-    shippingUnit: order.shippingUnit || 'Giao Hàng Nhanh',
+    shippingUnit: order.shippingUnit || '',
     trackingCode: order.trackingCode || '',
     notes: Array.isArray(order.notes) ? order.notes : [],
-    trackingTimeline: Array.isArray(order.trackingTimeline) ? order.trackingTimeline : []
+    trackingTimeline: Array.isArray(order.trackingTimeline) ? order.trackingTimeline.map(step => ({
+      ...step,
+      title: step.title || step.statusLabel || '',
+      time: step.time || (step.createdAt ? new Date(step.createdAt).toLocaleString('vi-VN') : ''),
+      completed: step.completed !== false
+    })) : []
   };
 }
 
@@ -422,25 +415,47 @@ async function createAdminOrder(req, res) {
 async function updateAdminOrderStatus(req, res) {
   try {
     const { id } = req.params;
-    const { status, statusLabel } = req.body;
+    const { status } = req.body;
 
-    let step = 1;
-    let label = statusLabel;
-    if (status === 'pending') { step = 1; label = label || 'Chờ xác nhận'; }
-    else if (status === 'processing') { step = 2; label = label || 'Chờ lấy hàng'; }
-    else if (status === 'shipping') { step = 3; label = label || 'Đang vận chuyển'; }
-    else if (status === 'delivered') { step = 4; label = label || 'Đã giao'; }
-    else if (status === 'cancelled') { step = 0; label = label || 'Đã hủy'; }
-
-    const updateFields = { status, statusLabel: label, step, updatedAt: new Date() };
+    const statusInfo = {
+      pending: { step: 1, label: 'Chờ xác nhận', notice: 'Đơn hàng đang chờ xác nhận.' },
+      processing: { step: 2, label: 'Chờ lấy hàng', notice: 'Đơn hàng đang chờ đơn vị vận chuyển lấy hàng.' },
+      shipping: { step: 3, label: 'Đang vận chuyển', notice: 'Đơn hàng đang được vận chuyển.' },
+      delivered: { step: 4, label: 'Đã giao', notice: 'Đơn hàng đã được giao.' },
+      completed: { step: 5, label: 'Hoàn thành', notice: 'Đơn hàng đã hoàn thành.' },
+      cancelled: { step: 0, label: 'Đã hủy', notice: 'Đơn hàng đã được hủy.' },
+      refunded: { step: 0, label: 'Đã hoàn tiền', notice: 'Đơn hàng đã được hoàn tiền.' },
+      refund_pending: { step: 0, label: 'Chờ duyệt hoàn tiền', notice: 'Yêu cầu hoàn tiền đang chờ duyệt.' },
+      refund_approved: { step: 0, label: 'Đã duyệt hoàn tiền', notice: 'Yêu cầu hoàn tiền đã được duyệt.' }
+    };
+    const info = statusInfo[status];
+    if (!info) return res.status(400).json({ success: false, message: 'Trạng thái đơn hàng không hợp lệ.' });
+    const updatedAt = new Date();
+    const updateFields = { status, statusLabel: info.label, notice: info.notice, step: info.step, updatedAt };
 
     const filter = Order.getIdFilter(id);
     if (status === 'cancelled') {
-      filter.status = { $in: ['pending', 'processing'] };
+      // Older orders used `waiting` for the same state as `processing`.
+      filter.status = { $in: ['pending', 'processing', 'waiting'] };
+    } else if (status === 'processing') {
+      filter.status = { $in: ['pending', 'waiting'] };
+    }
+    const update = { $set: updateFields };
+    if (status === 'processing') {
+      update.$push = {
+        trackingTimeline: {
+          title: 'Chờ lấy hàng',
+          time: updatedAt.toLocaleString('vi-VN', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+          }),
+          completed: true
+        }
+      };
     }
     const updated = await Order.findOneAndUpdate(
       filter,
-      { $set: updateFields }
+      update
     );
 
     if (!updated) {

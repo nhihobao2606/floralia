@@ -129,8 +129,8 @@ export class About implements AfterViewInit, OnDestroy {
     {
       name: 'Trần Cảnh Nhất Huy',
       role: 'Customer Experience Executive',
-      img: '/assets/images/hong.png',
-      facebook: 'https://www.facebook.com/share/196fzzJTGJ/?mibextid=wwXIfr',
+      img: '/assets/images/nhathuy.jpg',
+      facebook: 'https://www.facebook.com/nhuy010806?locale=vi_VN',
       instagram: 'https://www.instagram.com/__nt.th__?igsh=Y3VyZWh1ZDg3a2x2&utm_source=qr',
     },
   ];

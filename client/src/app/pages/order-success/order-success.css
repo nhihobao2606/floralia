@@ -158,6 +158,17 @@
   margin: 10px 0 46px;
   padding: 10px 0;
 }
+.tracking-card {
+  margin: -18px 0 28px;
+  padding: 22px 26px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(29, 83, 56, .06);
+}
+.tracking-card h2 { margin: 0 0 12px; color: var(--matcha); font-size: 20px; }
+.tracking-card p { margin: 6px 0; color: #556c5c; font-size: 15px; }
+.tracking-card strong { color: var(--matcha-dark); }
 .stepper-wrap {
   display: flex;
   align-items: center;

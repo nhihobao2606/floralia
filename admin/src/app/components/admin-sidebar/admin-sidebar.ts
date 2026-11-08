@@ -1,8 +1,15 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 
 export interface AdminMenuItem {
   label: string;
@@ -19,9 +26,9 @@ export interface AdminMenuItem {
   templateUrl: './admin-sidebar.html',
   styleUrl: './admin-sidebar.css',
 })
-export class AdminSidebar {
-  private readonly router = inject(Router);
 export class AdminSidebar implements OnInit, OnChanges {
+  private readonly router = inject(Router);
+
   @Input() orderBadge?: number | string | null;
   @Output() readonly logoutRequested = new EventEmitter<void>();
 
@@ -53,7 +60,7 @@ export class AdminSidebar implements OnInit, OnChanges {
 
   private updateOrderBadge(): void {
     if (this.orderBadge !== undefined && this.orderBadge !== null) {
-      const orderItem = this.menu.find(m => m.route === '/orders');
+      const orderItem = this.menu.find((m) => m.route === '/orders');
       if (orderItem) {
         orderItem.badge = this.orderBadge;
       }

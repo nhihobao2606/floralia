@@ -139,6 +139,18 @@ function sortOrdersNewestFirst(orders) {
   });
 }
 
+function normalizeClientOrder(order) {
+  if (!order) return order;
+  const status = order.status === 'waiting' ? 'processing' : order.status;
+  const labels = {
+    pending: 'Chờ xác nhận', processing: 'Chờ lấy hàng', shipping: 'Đang vận chuyển',
+    delivered: 'Đã giao', completed: 'Hoàn thành', cancelled: 'Đã hủy',
+    refunded: 'Đã hoàn tiền', refund_pending: 'Chờ duyệt hoàn tiền',
+    refund_approved: 'Đã duyệt hoàn tiền'
+  };
+  return { ...order, status, statusLabel: labels[status] || order.statusLabel || labels.pending };
+}
+
 // GET /api/orders
 async function getOrders(req, res) {
   try {
@@ -146,7 +158,7 @@ async function getOrders(req, res) {
     if (!req.userId) {
       return res.json({ success: true, orders: [] });
     }
-    const list = await getOrdersForUser(req.userId, status, q, req.authenticatedUser?.email);
+    const list = (await getOrdersForUser(req.userId, status, q, req.authenticatedUser?.email)).map(normalizeClientOrder);
     res.json({ success: true, orders: list });
   } catch (err) {
     console.error('Lỗi server khi lấy danh sách đơn hàng:', err);
@@ -208,7 +220,7 @@ async function getOrderById(req, res) {
       if (!order || isLegacyDemoOrder(order) || !req.userId || (!belongsToRequester && !order.isDemo)) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
-    res.json({ success: true, order });
+    res.json({ success: true, order: normalizeClientOrder(order) });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Lỗi server khi lấy chi tiết đơn hàng.' });
   }
@@ -343,7 +355,13 @@ async function createOrder(req, res) {
     const shippingFee = 30_000;
     const id = randomBytes(16).toString('hex');
     const createdAt = new Date();
-    const statusNotice = 'Đơn hàng đang chờ cửa hàng xác nhận';
+    const timelineTime = createdAt.toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    const statusNotice = 'Đơn hàng đang chờ xác nhận';
+    const shippingUnit = 'J&T Express';
+    const trackingCode = `JT${randomBytes(6).toString('hex').toUpperCase()}`;
     const newOrder = {
       id,
       code: `#${id.slice(-8).toUpperCase()}`,
@@ -353,11 +371,13 @@ async function createOrder(req, res) {
       createdAt,
       status: 'pending',
       isDemo: false,
-      statusLabel: 'CHỜ XÁC NHẬN',
+      statusLabel: 'Chờ xác nhận',
       step: 1,
       paymentStatus: 'unpaid',
       paymentStatusLabel: 'Chưa thanh toán',
       paymentMethod: String(body.paymentMethod || 'Thanh toán khi nhận hàng (COD)'),
+      shippingUnit,
+      trackingCode,
       ...(voucherCode ? { voucherCode, voucherDiscount } : {}),
       sender: body.sender || {},
       receiver: {
@@ -368,12 +388,10 @@ async function createOrder(req, res) {
       },
       items: verifiedItems,
       notice: statusNotice,
-      trackingTimeline: [{
-        status: 'pending',
-        statusLabel: 'CHỜ XÁC NHẬN',
-        notice: statusNotice,
-        createdAt
-      }],
+      trackingTimeline: [
+        { title: 'Đặt hàng thành công', time: timelineTime, completed: true },
+        { title: 'Chờ xác nhận', time: timelineTime, completed: true }
+      ],
       notes: [],
       ...(typeof body.customerNote === 'string' && body.customerNote.trim()
         ? { customerNote: body.customerNote.trim() }
@@ -385,8 +403,23 @@ async function createOrder(req, res) {
       total: subtotal - discount + shippingFee,
       ...(req.userId ? { userId: String(req.userId) } : {})
     };
-    await Order.create(newOrder);
-    res.json({ success: true, order: newOrder });
+    const insertResult = await Order.create(newOrder);
+    const savedOrder = await Order.getById(id);
+    const savedTimeline = savedOrder?.trackingTimeline;
+    const trackingWasPersisted = insertResult?.acknowledged === true &&
+      savedOrder?.shippingUnit === 'J&T Express' &&
+      typeof savedOrder?.trackingCode === 'string' && savedOrder.trackingCode.startsWith('JT') &&
+      Array.isArray(savedTimeline) &&
+      savedTimeline.length === 2 &&
+      savedTimeline[0]?.title === 'Đặt hàng thành công' &&
+      savedTimeline[1]?.title === 'Chờ xác nhận' &&
+      savedTimeline[0]?.time === savedTimeline[1]?.time &&
+      savedTimeline.every(event => event.completed === true);
+    if (!trackingWasPersisted) {
+      throw new Error(`Order ${id} was inserted without the expected J&T tracking fields.`);
+    }
+    console.info(`Persisted order ${id}: J&T Express tracking data and initial timeline verified.`);
+    res.json({ success: true, order: savedOrder });
 
     const postSaveUpdates = [ProductSalesService.incrementSoldCounts(verifiedItems)];
     if (voucherCode) postSaveUpdates.push(Voucher.incrementUsed(voucherCode));
@@ -432,7 +465,7 @@ async function updateOrderStatus(req, res) {
       }
       updateFields = {
         status,
-        statusLabel: 'ĐÃ HỦY',
+        statusLabel: 'Đã hủy',
         notice: 'Đơn hàng đã được hủy',
         cancelReasons: normalizedCancelReasons,
         cancelReason: summarizeCancelReasons(normalizedCancelReasons)
@@ -525,10 +558,28 @@ async function updateAdminOrderStatus(req, res) {
     if (!order || !transition || transition[0] !== status) {
       return res.status(409).json({ success: false, message: 'Không thể chuyển đơn hàng sang trạng thái này.' });
     }
-    const updated = await Order.findOneAndUpdate(
-      { id: order.id },
-      { $set: { status, statusLabel: transition[1], step: status === 'delivered' ? 5 : status === 'shipping' ? 4 : 3 } }
-    );
+    const updatedAt = new Date();
+    const update = {
+      $set: {
+        status,
+        statusLabel: transition[1],
+        step: status === 'delivered' ? 5 : status === 'shipping' ? 4 : 3,
+        updatedAt
+      }
+    };
+    if (status === 'processing') {
+      update.$push = {
+        trackingTimeline: {
+          title: 'Chờ lấy hàng',
+          time: updatedAt.toLocaleString('vi-VN', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+          }),
+          completed: true
+        }
+      };
+    }
+    const updated = await Order.findOneAndUpdate({ id: order.id, status: order.status }, update);
     res.json({ success: true, order: updated });
   } catch (err) {
     console.error('Lỗi cập nhật đơn hàng quản trị:', err);

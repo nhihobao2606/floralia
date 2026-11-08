@@ -40,6 +40,12 @@
       </div>
     </div>
 
+    <section class="tracking-card" aria-label="Thông tin vận chuyển">
+      <h2><i class="bi bi-truck"></i> Theo dõi vận chuyển</h2>
+      <p>Đơn vị vận chuyển: <strong>{{ order.shippingUnit || 'Chưa được lưu' }}</strong></p>
+      <p>Mã vận đơn: <strong>{{ order.trackingCode || 'Chưa được lưu' }}</strong></p>
+    </section>
+
     <!-- PRODUCTS TABLE (CART/ORDER-DETAIL STYLE) -->
     <div class="products-cart-card">
       <div class="cart-panel-header">

@@ -727,6 +727,7 @@ export class CheckoutComponent implements OnInit {
         total: item.total || item.price * item.quantity
       })),
       notice: 'Đơn hàng đang chờ cửa hàng xác nhận',
+      shippingUnit: 'J&T Express',
       ...(this.couponApplied && this.appliedVoucher ? { voucherCode: this.appliedVoucher.code } : {}),
       ...(this.note.trim() ? { customerNote: this.note.trim() } : {}),
       shippingFee: this.shippingFee
@@ -789,7 +790,7 @@ export class CheckoutComponent implements OnInit {
           this.isSubmitting = false;
           this.submitError = error?.name === 'TimeoutError'
             ? 'Máy chủ chưa xác nhận đơn hàng sau 20 giây. Hãy kiểm tra mục Đơn hàng của tôi trước khi thử lại để tránh tạo trùng.'
-            : error?.error?.message || 'Không thể tạo đơn hàng. Vui lòng thử lại sau.';
+            : error?.error?.message || error?.message || 'Không thể tạo đơn hàng. Vui lòng thử lại sau.';
           this.cdr.markForCheck();
         });
       }

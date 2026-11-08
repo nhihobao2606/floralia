@@ -81,6 +81,9 @@
                 <span class="order-time">{{ order.time }} {{ order.date }}</span>
               </div>
               <div class="header-right">
+                <span class="shipping-hint" *ngIf="order.status === 'pending'">
+                  <i class="bi bi-clock"></i> Đơn hàng đang chờ xác nhận
+                </span>
                 <span class="shipping-hint" *ngIf="order.status === 'completed'">
                   <i class="bi bi-check2-circle"></i> Đơn hàng đã hoàn thành
                 </span>
@@ -92,6 +95,9 @@
                 </span>
                 <span class="shipping-hint in-transit" *ngIf="order.status === 'shipping'">
                   <i class="bi bi-truck"></i> Đơn hàng đang trên đường giao
+                </span>
+                <span class="shipping-hint" *ngIf="order.status === 'cancelled'">
+                  <i class="bi bi-x-circle"></i> Đơn hàng đã được hủy
                 </span>
                 <span
                   class="status-badge"

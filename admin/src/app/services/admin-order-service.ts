@@ -50,6 +50,7 @@ export interface AdminOrder {
   slug?: string;
   userId?: string | number | null;
   voucherCode?: string;
+  voucherDiscount?: number;
   createdAt?: string;
   date: string;
   time?: string;
@@ -92,6 +93,9 @@ export interface AdminOrderListResponse {
   success: boolean;
   orders: AdminOrder[];
   total: number;
+  page?: number;
+  limit?: number;
+  stats?: AdminOrderStats;
   createdAt?: string;
   date?: string;
   time?: string;
@@ -102,10 +106,6 @@ export interface AdminOrderListResponse {
   refundImages?: string[];
   voucherCode?: string;
   voucherDiscount?: number;
-}
-  page: number;
-  limit: number;
-  stats: AdminOrderStats;
 }
 
 export interface ProductCatalogVariant {
@@ -161,6 +161,7 @@ function normalizeRawOrder(o: any): AdminOrder {
     slug: o.slug || `don-hang-${code.replace(/^#/, '').toLowerCase()}`,
     userId: o.userId || null,
     voucherCode: o.voucherCode || '',
+    voucherDiscount: Number(o.voucherDiscount ?? o.discount ?? 0),
     createdAt: o.createdAt || new Date().toISOString(),
     date: o.date || new Date().toLocaleDateString('vi-VN'),
     time: o.time || '10:00',

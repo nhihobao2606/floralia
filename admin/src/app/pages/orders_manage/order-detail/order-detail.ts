@@ -106,18 +106,7 @@ export class OrderDetail implements OnInit, OnDestroy {
 
   private ensureTimelineAndNotes(): void {
     if (!this.order) return;
-    if (!this.order.trackingTimeline || this.order.trackingTimeline.length === 0) {
-      this.order.trackingTimeline = [
-        { title: 'Đặt hàng thành công', time: `${this.order.date} ${this.order.time || ''}`, completed: true },
-        { title: 'Chờ xác nhận đơn hàng', time: `${this.order.date}`, completed: true },
-      ];
-    }
-    if (!this.order.shippingUnit) {
-      this.order.shippingUnit = 'Giao Hàng Nhanh';
-    }
-    if (!this.order.trackingCode) {
-      this.order.trackingCode = `GHN${Math.floor(1000 + Math.random() * 9000)}`;
-    }
+    if (!this.order.trackingTimeline) this.order.trackingTimeline = [];
     if (!this.order.notes) {
       this.order.notes = [];
     }
