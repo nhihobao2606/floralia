@@ -27,6 +27,7 @@ const adminProductRoutes = require('./routes/adminProductRoutes');
 const AdminProduct = require('./models/adminProduct');
 const voucherRoutes = require('./routes/voucherRoutes');
 const adminOrderRoutes = require('./routes/adminOrderRoutes');
+const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -52,6 +53,7 @@ app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/admin/dashboard', adminDashboardRoutes);
 
 async function startServer() {
     if (!process.env.MONGODB_URI) {

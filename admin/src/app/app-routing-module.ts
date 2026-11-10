@@ -14,9 +14,12 @@ import { CategoryEditor, canDeactivateCategoryEditor } from './pages/category-ma
 import { AdminUsers } from './pages/users_manage/users/users';
 import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
 import { AdminUserForm } from './pages/users_manage/user-form/user-form';
+import { Overview } from './pages/overview/overview';
 
 export const routes: Routes = [
   { path: 'admin-login', component: AdminLogin },
+  { path: 'overview', component: Overview, canActivate: [adminAuthGuard] },
+  { path: 'dashboard', redirectTo: 'overview', pathMatch: 'full' },
   { path: 'orders/:id', component: OrderDetail, canActivate: [adminAuthGuard] },
   { path: 'orders', component: Orders, canActivate: [adminAuthGuard] },
   { path: 'inventory/receive', loadComponent: () => import('./pages/inventory_manage/receive-stock/receive-stock').then(module => module.ReceiveStock), canActivate: [adminAuthGuard] },
@@ -32,8 +35,7 @@ export const routes: Routes = [
   { path: 'users/:id/edit', component: AdminUserForm, canActivate: [adminAuthGuard] },
   { path: 'users/:id', component: AdminUserDetail, canActivate: [adminAuthGuard] },
   { path: 'users', component: AdminUsers, canActivate: [adminAuthGuard] },
-  { path: '', redirectTo: 'admin-login', pathMatch: 'full' },
-  { path: '', redirectTo: 'orders', pathMatch: 'full' },
+  { path: '', redirectTo: 'overview', pathMatch: 'full' },
   { path: '**', component: Pagenotfound },
 ];
 

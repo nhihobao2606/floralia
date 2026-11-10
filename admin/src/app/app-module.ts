@@ -21,6 +21,7 @@ import { CustomSelect } from './components/custom-select/custom-select';
 import { AdminUsers } from './pages/users_manage/users/users';
 import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
 import { AdminUserForm } from './pages/users_manage/user-form/user-form';
+import { Overview } from './pages/overview/overview';
 import { ApiOriginInterceptor } from './services/api-origin.interceptor';
 
 @NgModule({
@@ -41,6 +42,7 @@ import { ApiOriginInterceptor } from './services/api-origin.interceptor';
     AdminUserForm,
     Orders,
     OrderDetail,
+    Overview,
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

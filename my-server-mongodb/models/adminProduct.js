@@ -84,8 +84,11 @@ async function getAll() {
 }
 
 async function getById(id) {
-    if (!ObjectId.isValid(id)) return null;
-    return productsCollection.findOne({ _id: new ObjectId(id) });
+    if (typeof id === 'string' && ObjectId.isValid(id) && id.length === 24) {
+        const found = await productsCollection.findOne({ _id: new ObjectId(id) });
+        if (found) return found;
+    }
+    return productsCollection.findOne({ sku: id });
 }
 
 async function getBySku(sku, exceptId) {

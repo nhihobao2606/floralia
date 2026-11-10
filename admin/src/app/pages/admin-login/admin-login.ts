@@ -88,7 +88,7 @@ export class AdminLogin {
         storage.setItem('adminToken', result.token);
         storage.setItem('adminAuthSource', 'interactive-login-v1');
         this.successMessage.set(`Xác thực thành công. Xin chào ${result.user.fullName || 'Quản trị viên'}!`);
-        void this.router.navigate(['/orders']);
+        void this.router.navigate(['/overview']);
       },
       error: (error: { status?: number; error?: { message?: string } }) => {
         this.errorMessage.set(error.status === 0

@@ -38,7 +38,7 @@ export class AdminSidebar implements OnInit, OnChanges {
   }
 
   readonly menu: AdminMenuItem[] = [
-    { label: 'Tổng quan', icon: 'bi-grid-1x2', disabled: true },
+    { label: 'Tổng quan', icon: 'bi-grid-1x2', route: '/overview', disabled: false },
     { label: 'Quản lý đơn hàng', icon: 'bi-receipt', route: '/orders', badge: 10, disabled: false },
     { label: 'Quản lý sản phẩm', icon: 'bi-box-seam', disabled: true },
     { label: 'Quản lý danh mục', icon: 'bi-tags', disabled: true },
