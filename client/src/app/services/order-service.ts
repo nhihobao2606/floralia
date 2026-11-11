@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, timeout } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 export interface OrderItem {
@@ -63,6 +63,8 @@ export interface Order {
   refundNote?: string;
   refundImages?: string[];
   userId?: string;
+  isDemo?: boolean;
+  guestOrder?: boolean;
   paymentMethod: string;
   sender?: OrderAddress;
   receiver?: OrderAddress;
@@ -76,7 +78,6 @@ export interface Order {
   refundAmount?: number;
 }
 
-export const GUEST_TRACKED_ORDER_KEY = 'floralia_guest_tracked_order_id';
 
 export function getOrderSlug(order: Pick<Order, 'id' | 'code' | 'slug'>): string {
   if (order.slug) return order.slug;
@@ -135,8 +136,6 @@ export class OrderService {
   private readonly apiUrl = 'http://localhost:3002/api/orders';
   private ordersCache: Order[] = [];
   private ordersCacheOwner: string | null = null;
-  private readonly orderListCache = new Map<string, { orders: Order[]; expiresAt: number }>();
-  private readonly orderListCacheTtlMs = 15_000;
 
   constructor(private http: HttpClient) {
     localStorage.removeItem('floralia_orders');
@@ -144,12 +143,6 @@ export class OrderService {
 
   getOrders(status?: string, query?: string): Observable<Order[]> {
     const owner = this.currentUserKey();
-    const cacheKey = JSON.stringify([owner, status || 'all', (query || '').trim()]);
-    const cached = this.orderListCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return of([...cached.orders]);
-    }
-
     return this.http.get<{ success: boolean; orders: Order[] }>(this.apiUrl, {
       params: {
         ...(status && status !== 'all' ? { status } : {}),
@@ -158,12 +151,11 @@ export class OrderService {
       headers: this.authHeaders()
     }).pipe(
       map(res => {
-        const orders = res.orders || [];
-        this.orderListCache.set(cacheKey, { orders, expiresAt: Date.now() + this.orderListCacheTtlMs });
-        if (this.orderListCache.size > 30) {
-          const oldestKey = this.orderListCache.keys().next().value;
-          if (oldestKey) this.orderListCache.delete(oldestKey);
-        }
+        // Demo orders are shared. Every real order must have this account's userId;
+        // receiver email is never used to infer ownership.
+        const orders = (res.orders || []).filter(order =>
+          order.isDemo || (!order.guestOrder && order.userId != null && String(order.userId) === owner)
+        );
         this.ordersCache = orders;
         this.ordersCacheOwner = owner;
         return this.ordersCache;
@@ -197,7 +189,6 @@ export class OrderService {
   }
 
   saveOrderLocal(order: Order): Order {
-    this.orderListCache.clear();
     const owner = this.currentUserKey();
     if (this.ordersCacheOwner !== owner) {
       this.ordersCache = [];

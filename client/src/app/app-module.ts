@@ -32,6 +32,7 @@ import { WishlistPage } from './pages/wishlist/wishlist-page';
 import { LogoutConfirmation } from './components/logout-confirmation/logout-confirmation';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 import { PasswordRecovery } from './pages/password-recovery/password-recovery';
+import { GuestOrderTracking } from './pages/guest-order-tracking/guest-order-tracking';
 import { OrderReorderDialog } from './components/order-reorder-dialog/order-reorder-dialog';
 import { AuthSessionInterceptor } from './services/auth-session.interceptor';
 
@@ -58,6 +59,7 @@ registerLocaleData(localeVi);
     Orders,
     OrderDetail,
     OrderSuccess,
+    GuestOrderTracking,
     About,
     SupportPage,
     ContactPage,

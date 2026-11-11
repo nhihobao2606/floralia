@@ -4,40 +4,28 @@ const ProductSalesService = require('../models/product-sales-service');
 const AdminProduct = require('../models/adminProduct');
 const User = require('../models/user');
 const Voucher = require('../models/voucher');
-const { randomBytes } = require('crypto');
+const { randomBytes, createHash, timingSafeEqual } = require('crypto');
 const { ObjectId } = require('mongodb');
+
+const GUEST_TRACKING_ACTIVE_STATUSES = new Set(['pending', 'processing', 'waiting', 'shipping']);
+const GUEST_OTP_TTL_MS = 5 * 60 * 1000;
+const GUEST_OTP_COOLDOWN_MS = 60 * 1000;
+const GUEST_OTP_MAX_ATTEMPTS = 5;
+const guestTrackingChallenges = new Map();
+const guestOtpCooldowns = new Map();
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-async function getOrdersForUser(userId, status, query, user = null) {
-  // Include legacy orders that can only be associated with the user by email.
-  const userEmail = typeof user === 'string' ? user : user?.email;
-  const emailOrderFilter = userEmail
-    ? {
-        $and: [
-          { $or: [{ userId: { $exists: false } }, { userId: null }, { userId: '' }] },
-          {
-            'receiver.email': {
-              $regex: `^${escapeRegex(String(userEmail).trim())}$`,
-              $options: 'i'
-            }
-          }
-        ]
-      }
-    : null;
+async function getOrdersForUser(userId, status, query) {
+  // Demo orders are shared; all other orders belong only to their exact userId.
+  // Receiver email is contact information and never establishes ownership.
   const userIdMatches = [{ userId: String(userId) }];
   if (typeof userId === 'string' && ObjectId.isValid(userId) && userId.length === 24) {
     userIdMatches.push({ userId: new ObjectId(userId) });
   }
-  const orderOwnerMatches = [
-    ...userIdMatches,
-    { isDemo: true }
-  ];
-  if (emailOrderFilter) {
-    orderOwnerMatches.push(emailOrderFilter);
-  }
+  const orderOwnerMatches = [...userIdMatches, { isDemo: true }];
   const filters = [];
 
   if (status && status !== 'all') {
@@ -66,21 +54,205 @@ async function getOrdersForUser(userId, status, query, user = null) {
   return Order.getAll(
     { $and: [{ $or: orderOwnerMatches }, ...filters] },
     { sort: { createdAt: -1 } }
-  ).then(orders => orders.filter(order => !isLegacyDemoOrder(order)));
+  ).then(orders => orders.filter(order =>
+    order.isDemo || (
+      !order.guestOrder && !isLegacyDemoOrder(order) &&
+      userIdMatches.some(condition => String(order.userId) === String(condition.userId))
+    )
+  ));
 }
 
 function belongsToUser(order, userId) {
   return Boolean(order?.userId && userId && String(order.userId) === String(userId));
 }
 
-function belongsToUserEmail(order, userEmail) {
-  return Boolean(
-    order && !order.userId && userEmail && order.receiver?.email &&
-    String(order.receiver.email).trim().toLowerCase() === String(userEmail).trim().toLowerCase()
-  );
-}
 function isLegacyDemoOrder(order) {
   return /^#?FL00\d+$/i.test(String(order?.id || order?.code || ''));
+}
+
+function normalizeVietnamPhone(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  const local = digits.startsWith('84') ? `0${digits.slice(2)}` : digits;
+  return /^(0)(3|5|7|8|9)\d{8}$/.test(local) ? local : null;
+}
+
+function isActiveGuestOrder(order) {
+  return order && GUEST_TRACKING_ACTIVE_STATUSES.has(String(order.status || '').toLowerCase());
+}
+
+function publicGuestTrackingOrder(order) {
+  return {
+    id: order.id,
+    code: order.code || order.orderCode || order.id,
+    status: order.status,
+    statusLabel: order.statusLabel,
+    createdAt: order.createdAt,
+    date: order.date,
+    time: order.time,
+    trackingCode: order.trackingCode || '',
+    trackingTimeline: Array.isArray(order.trackingTimeline) ? order.trackingTimeline : [],
+    notice: order.notice || '',
+    items: (order.items || []).map(item => ({
+      name: item.name,
+      quantity: item.quantity,
+      image: item.image || ''
+    }))
+  };
+}
+
+function normalizeOrderLookup(value) {
+  return String(value || '').trim().replace(/^#/, '').toLowerCase();
+}
+
+async function findActiveGuestOrders(query) {
+  const phone = normalizeVietnamPhone(query);
+  if (phone) {
+    const international = `84${phone.slice(1)}`;
+    const orders = await Order.getAll({
+      status: { $in: [...GUEST_TRACKING_ACTIVE_STATUSES] },
+      userId: { $in: [null, ''] },
+      'receiver.phone': { $in: [phone, `+${international}`, international] }
+    }, { sort: { createdAt: -1 } });
+    return orders.filter(order => normalizeVietnamPhone(order.receiver?.phone) === phone);
+  }
+
+  const lookup = normalizeOrderLookup(query);
+  if (!lookup || lookup.length > 80) return [];
+  const upperLookup = lookup.toUpperCase();
+  const codeVariants = [...new Set([lookup, upperLookup, `#${lookup}`, `#${upperLookup}`])];
+  const idVariants = [...new Set([lookup, upperLookup])];
+  const orders = await Order.getAll({
+    status: { $in: [...GUEST_TRACKING_ACTIVE_STATUSES] },
+    userId: { $in: [null, ''] },
+    $or: [
+      { code: { $in: codeVariants } },
+      { orderCode: { $in: codeVariants } },
+      { id: { $in: idVariants } }
+    ]
+  }, { limit: 10 });
+  return orders.filter(isActiveGuestOrder);
+}
+
+async function sendGuestTrackingOtp(phone, otp) {
+  const mode = String(process.env.SMS_OTP_MODE || '').toLowerCase();
+  if (process.env.NODE_ENV !== 'production' && (mode === 'console' || !mode)) {
+    console.error(`[DEMO OTP] Tra cứu đơn — gửi tới ***${phone.slice(-4)} — mã: ${otp}`);
+    return;
+  }
+  throw new Error('SMS OTP delivery is not configured. Set SMS_OTP_MODE=console for local demo or configure an SMS provider.');
+}
+
+function maskPhone(phone) {
+  return `${phone.slice(0, 3)}****${phone.slice(-3)}`;
+}
+
+function pruneGuestOtpState(now = Date.now()) {
+  for (const [key, challenge] of guestTrackingChallenges) {
+    if (challenge.expiresAt <= now) guestTrackingChallenges.delete(key);
+  }
+  for (const [key, cooldownUntil] of guestOtpCooldowns) {
+    if (cooldownUntil <= now) guestOtpCooldowns.delete(key);
+  }
+}
+
+async function requestGuestTrackingOtp(req, res) {
+  try {
+    const query = String(req.body?.query || '').trim();
+    if (!query || query.length > 80) {
+      return res.status(400).json({ success: false, message: 'Nhập số điện thoại hoặc mã đơn hợp lệ.' });
+    }
+    const lookupType = normalizeVietnamPhone(query) ? 'phone' : 'order-code';
+    console.error(`[Guest order tracking] OTP request received (lookup: ${lookupType}).`);
+    const matches = await findActiveGuestOrders(query);
+    const phone = normalizeVietnamPhone(matches[0]?.receiver?.phone);
+    // Keep the response neutral so the endpoint cannot be used to enumerate orders.
+    if (!phone || !matches.length) {
+      console.error(`[Guest order tracking] No active guest order matched (${lookupType}); OTP not sent.`);
+      return res.json({
+        success: true,
+        flowVersion: 'guest-tracking-otp-v2',
+        challengeId: null,
+        phoneHint: '',
+        expiresInSeconds: 0
+      });
+    }
+
+    const now = Date.now();
+    pruneGuestOtpState(now);
+    if ((guestOtpCooldowns.get(phone) || 0) > now) {
+      console.error(`[Guest order tracking] OTP cooldown active for ***${phone.slice(-4)}.`);
+      return res.json({
+        success: true,
+        flowVersion: 'guest-tracking-otp-v2',
+        reason: 'cooldown',
+        challengeId: null,
+        phoneHint: '',
+        expiresInSeconds: 0
+      });
+    }
+
+    const otp = String(randomBytes(4).readUInt32BE(0) % 1_000_000).padStart(6, '0');
+    const challengeId = randomBytes(24).toString('hex');
+    await sendGuestTrackingOtp(phone, otp);
+    console.error(`[Guest order tracking] Demo OTP issued for ***${phone.slice(-4)}.`);
+    guestTrackingChallenges.set(challengeId, {
+      phone,
+      query: normalizeVietnamPhone(query) ? null : normalizeOrderLookup(query),
+      otpHash: createHash('sha256').update(`${challengeId}:${otp}`).digest('hex'),
+      attempts: 0,
+      expiresAt: now + GUEST_OTP_TTL_MS
+    });
+    guestOtpCooldowns.set(phone, now + GUEST_OTP_COOLDOWN_MS);
+    return res.json({
+      success: true,
+      flowVersion: 'guest-tracking-otp-v2',
+      challengeId,
+      phoneHint: maskPhone(phone),
+      expiresInSeconds: GUEST_OTP_TTL_MS / 1000
+    });
+  } catch (error) {
+    console.error('Không thể gửi OTP tra cứu đơn hàng:', error.message);
+    const status = error.message.includes('not configured') ? 503 : 500;
+    return res.status(status).json({
+      success: false,
+      message: status === 503 ? 'Dịch vụ gửi SMS OTP chưa được cấu hình.' : 'Không thể gửi mã OTP lúc này.'
+    });
+  }
+}
+
+async function verifyGuestTrackingOtp(req, res) {
+  try {
+    const challengeId = String(req.body?.challengeId || '');
+    const otp = String(req.body?.otp || '').trim();
+    const now = Date.now();
+    pruneGuestOtpState(now);
+    const challenge = guestTrackingChallenges.get(challengeId);
+    if (!challenge || !/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ success: false, message: 'Mã OTP không hợp lệ hoặc đã hết hạn.' });
+    }
+    challenge.attempts++;
+    const candidate = createHash('sha256').update(`${challengeId}:${otp}`).digest('hex');
+    const valid = candidate.length === challenge.otpHash.length &&
+      timingSafeEqual(Buffer.from(candidate), Buffer.from(challenge.otpHash));
+    if (!valid) {
+      if (challenge.attempts >= GUEST_OTP_MAX_ATTEMPTS) guestTrackingChallenges.delete(challengeId);
+      return res.status(400).json({ success: false, message: 'Mã OTP không chính xác.' });
+    }
+
+    guestTrackingChallenges.delete(challengeId);
+    const orders = await findActiveGuestOrders(challenge.query || challenge.phone);
+    const ownedOrders = orders.filter(order =>
+      !order.userId && normalizeVietnamPhone(order.receiver?.phone) === challenge.phone
+    );
+    return res.json({
+      success: true,
+      flowVersion: 'guest-tracking-otp-v2',
+      orders: ownedOrders.map(publicGuestTrackingOrder)
+    });
+  } catch (error) {
+    console.error('Không thể xác thực OTP tra cứu đơn hàng:', error);
+    return res.status(500).json({ success: false, message: 'Không thể xác thực mã OTP lúc này.' });
+  }
 }
 
 function getAvailableStock(product, item) {
@@ -158,7 +330,7 @@ async function getOrders(req, res) {
     if (!req.userId) {
       return res.json({ success: true, orders: [] });
     }
-    const list = (await getOrdersForUser(req.userId, status, q, req.authenticatedUser?.email)).map(normalizeClientOrder);
+    const list = (await getOrdersForUser(req.userId, status, q)).map(normalizeClientOrder);
     res.json({ success: true, orders: list });
   } catch (err) {
     console.error('Lỗi server khi lấy danh sách đơn hàng:', err);
@@ -182,7 +354,7 @@ async function getAdminOrdersForUser(req, res) {
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
     }
-    const orders = sortOrdersNewestFirst(await getOrdersForUser(user._id?.toString() || String(user.id), 'all', '', user));
+    const orders = sortOrdersNewestFirst(await getOrdersForUser(user._id?.toString() || String(user.id), 'all', ''));
     for (const order of orders) {
       order.items = await Promise.all((order.items || []).map(async item => {
         const currentImage = typeof item.image === 'string' ? item.image.trim() : '';
@@ -215,9 +387,8 @@ async function getOrderById(req, res) {
     const order = id.startsWith('don-hang-')
       ? await Order.getBySlug(id)
       : await Order.getById(id);
-    const belongsToRequester = belongsToUser(order, req.userId) ||
-      belongsToUserEmail(order, req.authenticatedUser?.email);
-      if (!order || isLegacyDemoOrder(order) || !req.userId || (!belongsToRequester && !order.isDemo)) {
+    const belongsToRequester = belongsToUser(order, req.userId);
+      if (!order || (!order.isDemo && (order.guestOrder || isLegacyDemoOrder(order) || !belongsToRequester)) || !req.userId) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
     res.json({ success: true, order: normalizeClientOrder(order) });
@@ -371,6 +542,7 @@ async function createOrder(req, res) {
       createdAt,
       status: 'pending',
       isDemo: false,
+      guestOrder: !req.userId,
       statusLabel: 'Chờ xác nhận',
       step: 1,
       paymentStatus: 'unpaid',
@@ -451,8 +623,7 @@ async function updateOrderStatus(req, res) {
     const canCompleteSharedDemo = Boolean(
       order && order.isDemo && order.status === 'delivered' && status === 'completed' && req.userId
     );
-    const belongsToRequester = belongsToUser(order, req.userId) ||
-      belongsToUserEmail(order, req.authenticatedUser?.email);
+    const belongsToRequester = belongsToUser(order, req.userId);
       if (isLegacyDemoOrder(order) || (!belongsToRequester && !canCancelSharedDemo && !canCompleteSharedDemo)) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
     }
@@ -616,5 +787,7 @@ module.exports = {
   createOrder,
   updateOrderStatus,
   updateAdminOrderStatus,
-  approveRefund
+  approveRefund,
+  requestGuestTrackingOtp,
+  verifyGuestTrackingOtp
 };

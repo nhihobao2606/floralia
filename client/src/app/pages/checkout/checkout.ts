@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { GUEST_TRACKED_ORDER_KEY, getOrderSlug, OrderService, Order } from '../../services/order-service';
+import { getOrderSlug, OrderService, Order } from '../../services/order-service';
 import { CartService } from '../../services/cart-service';
 import { AvailableVoucher, CheckoutProduct, ProductService, ValidatedVoucher } from '../../services/product-service';
 import { forkJoin } from 'rxjs';
@@ -28,12 +28,22 @@ interface CheckoutItem {
 export class CheckoutComponent implements OnInit {
   isSubmitting = false;
   submitError = '';
+  addressValidationAttempted = false;
   fullName = '';
   email = '';
   phone = '';
   street = '';
   city = '';
   ward = '';
+  isLoggedIn = false;
+  checkoutProvinces: any[] = [];
+  checkoutWards: any[] = [];
+  checkoutProvince: any = null;
+  checkoutWard: any = null;
+  checkoutProvinceDropdownOpen = false;
+  checkoutWardDropdownOpen = false;
+  checkoutLoadingProvinces = false;
+  checkoutLoadingWards = false;
   note = '';
 
   hasAddress = false; // Whether user has any saved address or has filled address manually
@@ -100,6 +110,7 @@ export class CheckoutComponent implements OnInit {
     this.addressLoadError = '';
     const raw = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    this.isLoggedIn = !!token;
     let user: any = null;
 
     if (raw) {
@@ -126,6 +137,7 @@ export class CheckoutComponent implements OnInit {
               this.savedAddresses = [];
               this.hasAddress = false;
               this.isEditingAddress = true;
+              this.loadCheckoutProvinces();
             }
             this.cdr.markForCheck();
           });
@@ -138,13 +150,96 @@ export class CheckoutComponent implements OnInit {
               this.savedAddresses = [];
               this.hasAddress = false;
               this.isEditingAddress = true;
+              this.loadCheckoutProvinces();
             }
             this.cdr.markForCheck();
           });
         }
       });
     }
-    if (!token) this.isEditingAddress = true;
+    if (!token) {
+      this.isEditingAddress = true;
+      this.loadCheckoutProvinces();
+    }
+  }
+
+  private loadCheckoutProvinces(): void {
+    if (this.checkoutLoadingProvinces || this.checkoutProvinces.length) return;
+    this.checkoutLoadingProvinces = true;
+    this.http.get<any[]>('https://provinces.open-api.vn/api/v2/p/').subscribe({
+      next: provinces => this.ngZone.run(() => {
+        this.checkoutProvinces = (provinces || []).map(({ code, name }) => ({ code, name }));
+        this.checkoutLoadingProvinces = false;
+        this.cdr.markForCheck();
+      }),
+      error: () => this.ngZone.run(() => {
+        this.checkoutLoadingProvinces = false;
+        this.addressLoadError = 'Không tải được danh sách tỉnh/thành. Vui lòng thử lại.';
+        this.cdr.markForCheck();
+      })
+    });
+  }
+
+  toggleCheckoutProvinceDropdown(): void {
+    this.checkoutProvinceDropdownOpen = !this.checkoutProvinceDropdownOpen;
+    this.checkoutWardDropdownOpen = false;
+    if (this.checkoutProvinceDropdownOpen) this.loadCheckoutProvinces();
+  }
+
+  selectCheckoutProvince(province: any): void {
+    this.checkoutProvince = province;
+    this.city = province.name;
+    this.checkoutWard = null;
+    this.ward = '';
+    this.checkoutWards = [];
+    this.checkoutProvinceDropdownOpen = false;
+    this.checkoutWardDropdownOpen = false;
+    this.checkoutLoadingWards = true;
+    this.http.get<any[]>(`https://provinces.open-api.vn/api/v2/w/?province=${province.code}`).subscribe({
+      next: wards => this.ngZone.run(() => {
+        this.checkoutWards = (wards || []).map(({ code, name }) => ({ code, name }));
+        this.checkoutLoadingWards = false;
+        this.cdr.markForCheck();
+      }),
+      error: () => this.ngZone.run(() => {
+        this.checkoutLoadingWards = false;
+        this.addressLoadError = 'Không tải được danh sách phường/xã. Vui lòng thử lại.';
+        this.cdr.markForCheck();
+      })
+    });
+  }
+
+  toggleCheckoutWardDropdown(): void {
+    if (!this.checkoutProvince || this.checkoutLoadingWards || !this.checkoutWards.length) return;
+    this.checkoutWardDropdownOpen = !this.checkoutWardDropdownOpen;
+    this.checkoutProvinceDropdownOpen = false;
+  }
+
+  selectCheckoutWard(ward: any): void {
+    this.checkoutWard = ward;
+    this.ward = ward.name;
+    this.checkoutWardDropdownOpen = false;
+  }
+
+  showAddressFieldError(field: 'fullName' | 'phone' | 'street' | 'province' | 'ward' | 'email'): boolean {
+    if (!this.addressValidationAttempted) return false;
+    switch (field) {
+      case 'fullName': return !this.fullName.trim() || this.fullName.trim().length > 60;
+      case 'phone': return !/^(0|\+84)(3|5|7|8|9)\d{8}$/.test(this.phone.trim());
+      case 'street': return !this.street.trim() || this.street.trim().length > 180;
+      case 'province': return !(this.hasAddress && !this.isEditingAddress ? this.city.trim() : this.checkoutProvince?.name);
+      case 'ward': return !(this.hasAddress && !this.isEditingAddress ? this.ward.trim() : this.checkoutWard?.name);
+      case 'email': return !!this.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.email.trim());
+    }
+  }
+
+  private checkoutAddressIsValid(): boolean {
+    return !this.showAddressFieldError('fullName') &&
+      !this.showAddressFieldError('phone') &&
+      !this.showAddressFieldError('street') &&
+      !this.showAddressFieldError('province') &&
+      !this.showAddressFieldError('ward') &&
+      !this.showAddressFieldError('email');
   }
 
   applyAddress(addr: any): void {
@@ -539,6 +634,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   applyCoupon(): void {
+    if (!this.isLoggedIn) return;
     const code = this.couponCode.trim().toUpperCase();
     if (!code) {
       this.couponMessage = 'Vui lòng nhập mã voucher.';
@@ -574,6 +670,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   openVoucherModal(): void {
+    if (!this.isLoggedIn) return;
     this.showVoucherModal = true;
     this.voucherListLoading = true;
     this.voucherListError = '';
@@ -683,15 +780,10 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    if (
-      !this.fullName.trim() ||
-      !/^(0|\+84)(3|5|7|8|9)\d{8}$/.test(this.phone.trim()) ||
-      !this.street.trim() ||
-      !this.city.trim() ||
-      !this.ward.trim()
-    ) {
-      this.submitError = 'Vui lòng nhập họ tên, số điện thoại hợp lệ, số nhà/tên đường, tỉnh/thành phố và phường/xã.';
-      this.isEditingAddress = true;
+    this.addressValidationAttempted = true;
+    if (!this.checkoutAddressIsValid()) {
+      this.submitError = 'Vui lòng kiểm tra và bổ sung các thông tin nhận hàng được đánh dấu.';
+      if (!this.hasAddress) this.isEditingAddress = true;
       return;
     }
     if (this.items.length === 0) {
@@ -778,9 +870,6 @@ export class CheckoutComponent implements OnInit {
           sessionStorage.removeItem('checkout_items');
           sessionStorage.removeItem('checkout_shipping_fee');
           this.cartService.clearCart();
-          const targetId = response.order.id;
-          localStorage.setItem(GUEST_TRACKED_ORDER_KEY, targetId);
-          window.dispatchEvent(new Event('guest-order-tracked'));
           this.router.navigate(['/order-success', getOrderSlug(response.order)]);
           this.cdr.markForCheck();
         });

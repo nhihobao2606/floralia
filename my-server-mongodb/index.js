@@ -82,6 +82,8 @@ async function startServer() {
         await db.collection('Users').createIndex({ email: 1 }, { unique: true });
         await db.collection('Orders').createIndex({ id: 1 });
         await db.collection('Orders').createIndex({ code: 1 });
+        await db.collection('Orders').createIndex({ orderCode: 1 });
+        await db.collection('Orders').createIndex({ 'receiver.phone': 1, status: 1, createdAt: -1 });
         await db.collection('Orders').createIndex({ userId: 1, createdAt: -1 });
         await db.collection('Orders').createIndex({ userId: 1, status: 1, createdAt: -1 });
         await db.collection('Orders').createIndex({ createdAt: -1 });

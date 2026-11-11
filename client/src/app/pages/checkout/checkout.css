@@ -284,6 +284,18 @@
 .form-input:focus {
   border-color: var(--matcha);
 }
+.form-input.invalid,
+.checkout-address-select-trigger.invalid {
+  border-color: #c64b52;
+  box-shadow: 0 0 0 2px rgba(198, 75, 82, .1);
+}
+.checkout-field-error {
+  display: block;
+  margin-top: 5px;
+  color: #b5424a;
+  font-size: 12px;
+  line-height: 1.4;
+}
 
 /* Address row with Change button */
 .address-row {
@@ -544,6 +556,49 @@
 
 .discount-val {
   color: #c9475a !important;
+}
+
+.checkout-login-prompt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid #dce8d8;
+  border-radius: 10px;
+  background: #f6faf3;
+  color: var(--ink);
+}
+.checkout-login-prompt > .bi {
+  flex: 0 0 auto;
+  color: var(--matcha);
+  font-size: 21px;
+}
+.checkout-login-prompt-copy {
+  flex: 1;
+  min-width: 0;
+}
+.checkout-login-prompt-copy strong {
+  display: block;
+  font-size: 13.5px;
+}
+.checkout-login-prompt-copy p {
+  margin: 3px 0 0;
+  color: #627469;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.checkout-login-prompt a {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 7px;
+  background: var(--matcha);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.checkout-login-prompt a:hover {
+  background: var(--matcha-2);
 }
 
 .checkout-voucher-tools {

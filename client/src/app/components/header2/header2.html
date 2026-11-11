@@ -120,13 +120,9 @@
     </div>
   </nav>
 
-  <a
-    *ngIf="guestTrackedOrderId"
-    class="guest-order-tracker"
-    [routerLink]="['/orders', guestTrackedOrderId]"
-    aria-label="Theo dõi đơn hàng gần nhất">
+  <a class="guest-order-tracker" routerLink="/guest-order-tracking" aria-label="Tra cứu đơn hàng">
     <i class="bi bi-truck" aria-hidden="true"></i>
-    <span>Theo dõi đơn hàng</span>
+    <span>Tra cứu đơn hàng</span>
   </a>
 
   <!-- CÁC NÚT CỐ ĐỊNH -->

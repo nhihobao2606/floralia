@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GUEST_TRACKED_ORDER_KEY, getOrderSlug, Order, OrderService } from '../../services/order-service';
+import { getOrderSlug, Order, OrderService } from '../../services/order-service';
 import { ProductService } from '../../services/product-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 
@@ -34,6 +34,11 @@ export class OrderSuccess implements OnInit {
     this.route.params.subscribe(params => {
       const id = params['id'] || '';
       this.order = this.orderService.getOrderByIdSync(id);
+      const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+      if (!currentUser && this.order) {
+        this.loading = false;
+        return;
+      }
       this.loadOrder(id);
     });
   }
@@ -45,8 +50,6 @@ export class OrderSuccess implements OnInit {
         this.order = order;
         this.loading = false;
         if (order) {
-          localStorage.setItem(GUEST_TRACKED_ORDER_KEY, order.id);
-          window.dispatchEvent(new Event('guest-order-tracked'));
         } else {
           this.pageError = 'Không tìm thấy đơn hàng.';
         }
@@ -59,6 +62,11 @@ export class OrderSuccess implements OnInit {
   }
 
   trackOrder(): void {
+    const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+    if (!currentUser) {
+      this.router.navigate(['/guest-order-tracking']);
+      return;
+    }
     if (this.order) {
       this.router.navigate(['/orders', getOrderSlug(this.order)]);
     } else {

@@ -14,7 +14,7 @@
         <div class="info-card">
           <div class="card-header-bar">
             <h2 class="card-title">Thông tin nhận hàng</h2>
-            <button type="button" class="btn-change-address-main" (click)="openAddressModal()">
+            <button type="button" class="btn-change-address-main" *ngIf="isLoggedIn" (click)="openAddressModal()">
               <i class="bi" [ngClass]="savedAddresses.length ? 'bi-geo-alt' : 'bi-plus-circle'"></i>
               {{ savedAddresses.length ? 'Thay đổi địa chỉ' : 'Thêm địa chỉ' }}
             </button>
@@ -54,17 +54,26 @@
             <div class="form-row-3">
               <div class="form-group">
                 <label class="form-label">HỌ VÀ TÊN <span class="req">*</span></label>
-                <input type="text" class="form-input" [(ngModel)]="fullName" placeholder="Nhập họ và tên" autocomplete="name" required>
+                <input type="text" class="form-input" [class.invalid]="showAddressFieldError('fullName')"
+                  [attr.aria-invalid]="showAddressFieldError('fullName')" [(ngModel)]="fullName"
+                  placeholder="Nhập họ và tên" autocomplete="name" maxlength="60" required>
+                <small class="checkout-field-error" *ngIf="showAddressFieldError('fullName')">Họ tên là bắt buộc và tối đa 60 ký tự.</small>
               </div>
 
               <div class="form-group">
-                <label class="form-label">EMAIL</label>
-                <input type="email" class="form-input" [(ngModel)]="email" placeholder="Nhập email">
+                <label class="form-label">EMAIL (TÙY CHỌN)</label>
+                <input type="email" class="form-input" [class.invalid]="showAddressFieldError('email')"
+                  [attr.aria-invalid]="showAddressFieldError('email')" [(ngModel)]="email"
+                  placeholder="Nhập email nếu muốn" autocomplete="email" maxlength="254">
+                <small class="checkout-field-error" *ngIf="showAddressFieldError('email')">Email không đúng định dạng.</small>
               </div>
 
               <div class="form-group">
                 <label class="form-label">SỐ ĐIỆN THOẠI <span class="req">*</span></label>
-                <input type="tel" class="form-input" [(ngModel)]="phone" placeholder="Nhập số điện thoại" autocomplete="tel" required>
+                <input type="tel" class="form-input" [class.invalid]="showAddressFieldError('phone')"
+                  [attr.aria-invalid]="showAddressFieldError('phone')" [(ngModel)]="phone"
+                  placeholder="Nhập số điện thoại" autocomplete="tel" pattern="(0|\+84)(3|5|7|8|9)[0-9]{8}" required>
+                <small class="checkout-field-error" *ngIf="showAddressFieldError('phone')">Nhập số điện thoại hợp lệ, ví dụ 0912345678.</small>
               </div>
             </div>
 
@@ -72,7 +81,10 @@
             <div class="address-row">
               <div class="form-group flex-1">
                 <label class="form-label">ĐỊA CHỈ (SỐ NHÀ, TÊN ĐƯỜNG) <span class="req">*</span></label>
-                <input type="text" class="form-input" [(ngModel)]="street" placeholder="Nhập số nhà, tên đường" autocomplete="street-address" required>
+                <input type="text" class="form-input" [class.invalid]="showAddressFieldError('street')"
+                  [attr.aria-invalid]="showAddressFieldError('street')" [(ngModel)]="street"
+                  placeholder="Nhập số nhà, tên đường" autocomplete="street-address" maxlength="180" required>
+                <small class="checkout-field-error" *ngIf="showAddressFieldError('street')">Địa chỉ là bắt buộc và tối đa 180 ký tự.</small>
               </div>
             </div>
 
@@ -80,12 +92,38 @@
             <div class="form-row-2">
               <div class="form-group">
                 <label class="form-label">TỈNH / THÀNH PHỐ <span class="req">*</span></label>
-                <input type="text" class="form-input" [(ngModel)]="city" placeholder="Nhập tỉnh / thành phố" autocomplete="address-level1" required>
+                <div class="checkout-address-select">
+                  <button type="button" class="checkout-address-select-trigger" [class.placeholder]="!checkoutProvince"
+                    [class.open]="checkoutProvinceDropdownOpen" [class.invalid]="showAddressFieldError('province')"
+                    [attr.aria-invalid]="showAddressFieldError('province')" [attr.aria-expanded]="checkoutProvinceDropdownOpen"
+                    (click)="toggleCheckoutProvinceDropdown()">
+                    <span>{{ checkoutProvince?.name || '– Chọn Tỉnh / Thành phố –' }}</span><i class="bi bi-chevron-down"></i>
+                  </button>
+                  <div class="checkout-address-select-menu" *ngIf="checkoutProvinceDropdownOpen">
+                    <button type="button" *ngFor="let province of checkoutProvinces" [attr.aria-selected]="checkoutProvince?.code === province.code" (click)="selectCheckoutProvince(province)">{{ province.name }}</button>
+                    <p *ngIf="checkoutLoadingProvinces">Đang tải tỉnh/thành…</p>
+                    <p *ngIf="!checkoutLoadingProvinces && !checkoutProvinces.length">Không tải được danh sách.</p>
+                  </div>
+                </div>
+                <small class="checkout-field-error" *ngIf="showAddressFieldError('province')">Vui lòng chọn tỉnh/thành phố.</small>
               </div>
 
               <div class="form-group">
                 <label class="form-label">PHƯỜNG / XÃ <span class="req">*</span></label>
-                <input type="text" class="form-input" [(ngModel)]="ward" placeholder="Nhập phường / xã" autocomplete="address-level2" required>
+                <div class="checkout-address-select">
+                  <button type="button" class="checkout-address-select-trigger" [class.placeholder]="!checkoutWard"
+                    [class.open]="checkoutWardDropdownOpen" [class.invalid]="showAddressFieldError('ward')"
+                    [attr.aria-invalid]="showAddressFieldError('ward')" [disabled]="!checkoutProvince || checkoutLoadingWards || !checkoutWards.length"
+                    [attr.aria-expanded]="checkoutWardDropdownOpen" (click)="toggleCheckoutWardDropdown()">
+                    <span>{{ checkoutWard?.name || '– Chọn Phường / Xã –' }}</span><i class="bi bi-chevron-down"></i>
+                  </button>
+                  <div class="checkout-address-select-menu" *ngIf="checkoutWardDropdownOpen">
+                    <button type="button" *ngFor="let ward of checkoutWards" [attr.aria-selected]="checkoutWard?.code === ward.code" (click)="selectCheckoutWard(ward)">{{ ward.name }}</button>
+                    <p *ngIf="checkoutLoadingWards">Đang tải phường/xã…</p>
+                  </div>
+                  <small class="checkout-address-select-hint" *ngIf="checkoutLoadingWards">Đang tải danh sách phường/xã…</small>
+                </div>
+                <small class="checkout-field-error" *ngIf="showAddressFieldError('ward')">Vui lòng chọn phường/xã.</small>
               </div>
             </div>
           </div>
@@ -149,7 +187,15 @@
 
           <!-- Pricing breakdown -->
           <div class="pricing-breakdown">
-            <div class="checkout-voucher-tools">
+            <aside class="checkout-login-prompt" *ngIf="!isLoggedIn">
+              <i class="bi bi-person-circle" aria-hidden="true"></i>
+              <div class="checkout-login-prompt-copy">
+                <strong>Đăng nhập để nhận thêm ưu đãi</strong>
+                <p>Dùng voucher và theo dõi, quản lý đơn hàng thuận tiện trong tài khoản của bạn.</p>
+              </div>
+              <a routerLink="/login" [queryParams]="{ returnUrl: '/checkout' }">Đăng nhập</a>
+            </aside>
+            <div class="checkout-voucher-tools" *ngIf="isLoggedIn">
               <form class="checkout-voucher-form" (ngSubmit)="applyCoupon()">
                 <input type="text" name="couponCode" [(ngModel)]="couponCode" placeholder="Mã giảm giá"
                   aria-label="Mã giảm giá" maxlength="24" autocomplete="off">
@@ -308,9 +354,6 @@
         <div class="empty-addresses-state" *ngIf="savedAddresses.length === 0">
           <i class="bi bi-geo-alt"></i>
           <p>Bạn chưa lưu địa chỉ nào trong sổ địa chỉ.</p>
-          <button type="button" class="btn-manage-addresses" (click)="openAddAddressModal()">
-            <i class="bi bi-plus-circle"></i> Thêm địa chỉ mới
-          </button>
         </div>
       </div>
 
@@ -413,7 +456,7 @@
   </div>
 
   <!-- ================= MODAL HIỂN THỊ MÃ QR THANH TOÁN ================= -->
-  <div class="modal-backdrop" *ngIf="showVoucherModal" (click)="showVoucherModal = false">
+  <div class="modal-backdrop" *ngIf="isLoggedIn && showVoucherModal" (click)="showVoucherModal = false">
     <section class="modal-dialog-card voucher-picker-modal" role="dialog" aria-modal="true"
       aria-labelledby="checkout-voucher-title" (click)="$event.stopPropagation()">
       <div class="modal-header">

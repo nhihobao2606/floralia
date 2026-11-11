@@ -1,0 +1,54 @@
+<main class="guest-tracking-page">
+  <section class="guest-tracking-card">
+    <div class="guest-tracking-icon"><i class="bi bi-truck"></i></div>
+    <p class="guest-tracking-eyebrow">HỖ TRỢ ĐƠN HÀNG</p>
+    <h1>Tra cứu đơn hàng</h1>
+    <p class="guest-tracking-intro">Nhập số điện thoại đặt hàng hoặc mã đơn. Chúng tôi sẽ gửi mã OTP đến số điện thoại của đơn để xác minh.</p>
+
+    <form *ngIf="!challengeId" (ngSubmit)="requestOtp()" class="guest-tracking-form">
+      <label for="orderLookup">Số điện thoại hoặc mã đơn</label>
+      <input id="orderLookup" name="query" [(ngModel)]="query" maxlength="80"
+        placeholder="Ví dụ: 0912 345 678 hoặc #A1B2C3D4" autocomplete="off" required>
+      <button type="submit" [disabled]="loading || !query.trim()">
+        <i class="bi" [ngClass]="loading ? 'bi-hourglass-split' : 'bi-chat-dots'"></i>
+        {{ loading ? 'Đang gửi mã…' : 'Gửi mã OTP' }}
+      </button>
+    </form>
+
+    <form *ngIf="challengeId" (ngSubmit)="verifyOtp()" class="guest-tracking-form">
+      <label for="trackingOtp">Mã OTP đã gửi đến {{ phoneHint }}</label>
+      <input id="trackingOtp" name="otp" [(ngModel)]="otp" inputmode="numeric" autocomplete="one-time-code"
+        maxlength="6" placeholder="Nhập mã 6 chữ số" required>
+      <button type="submit" [disabled]="loading || otp.length !== 6">
+        <i class="bi" [ngClass]="loading ? 'bi-hourglass-split' : 'bi-shield-check'"></i>
+        {{ loading ? 'Đang xác minh…' : 'Xác minh và xem đơn' }}
+      </button>
+      <button type="button" class="guest-tracking-secondary" (click)="challengeId = ''; otp = ''; info = ''; error = ''">Dùng số điện thoại hoặc mã đơn khác</button>
+    </form>
+
+    <p class="guest-tracking-message" *ngIf="info" role="status"><i class="bi bi-info-circle"></i>{{ info }}</p>
+    <p class="guest-tracking-error" *ngIf="error" role="alert"><i class="bi bi-exclamation-circle"></i>{{ error }}</p>
+    <p class="guest-tracking-demo-note">Bản demo đồ án: OTP được in trong cửa sổ terminal đang chạy backend.</p>
+  </section>
+
+  <section class="guest-tracking-results" *ngIf="orders.length">
+    <h2>Đơn hàng đang hoạt động</h2>
+    <article class="guest-order-card" *ngFor="let order of orders">
+      <header class="guest-order-heading">
+        <div><span>Mã đơn</span><strong>{{ order.code }}</strong></div>
+        <span class="guest-order-status">{{ order.statusLabel }}</span>
+      </header>
+      <p class="guest-order-date" *ngIf="formatDate(order)">Đặt lúc {{ formatDate(order) }}</p>
+      <p class="guest-order-notice" *ngIf="order.notice">{{ order.notice }}</p>
+      <div class="guest-order-items" *ngIf="order.items.length">
+        <div *ngFor="let item of order.items"><span>{{ item.name }}</span><strong>×{{ item.quantity }}</strong></div>
+      </div>
+      <p class="guest-tracking-code" *ngIf="order.trackingCode">Mã vận đơn: <strong>{{ order.trackingCode }}</strong></p>
+      <ol class="guest-order-timeline" *ngIf="order.trackingTimeline.length">
+        <li *ngFor="let step of order.trackingTimeline" [class.completed]="step.completed">
+          <span class="timeline-dot"></span><span>{{ step.title }}</span><time>{{ step.time }}</time>
+        </li>
+      </ol>
+    </article>
+  </section>
+</main>

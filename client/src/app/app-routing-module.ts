@@ -23,6 +23,7 @@ import { WishlistPage } from './pages/wishlist/wishlist-page';
 import { authGuard } from './classes/auth.guard';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 import { PasswordRecovery } from './pages/password-recovery/password-recovery';
+import { GuestOrderTracking } from './pages/guest-order-tracking/guest-order-tracking';
 
 const routes: Routes = [
   { path: '', component: Homepage, pathMatch: 'full' },
@@ -71,6 +72,7 @@ const routes: Routes = [
   { path: 'order-detail/:id', component: OrderDetail, canActivate: [authGuard] },
   { path: 'order-success', component: OrderSuccess },
   { path: 'order-success/:id', component: OrderSuccess },
+  { path: 'guest-order-tracking', component: GuestOrderTracking },
 
   { path: ':categorySlug/:productSlug', component: ProductDetail },
   { path: '**', component: Pagenotfound },
