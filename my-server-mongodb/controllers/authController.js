@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const PasswordResetService = require('../services/password-reset-service');
+const PasswordResetService = require('../models/password-reset-service');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
