@@ -56,7 +56,8 @@
                 <label class="form-label">HỌ VÀ TÊN <span class="req">*</span></label>
                 <input type="text" class="form-input" [class.invalid]="showAddressFieldError('fullName')"
                   [attr.aria-invalid]="showAddressFieldError('fullName')" [(ngModel)]="fullName"
-                  placeholder="Nhập họ và tên" autocomplete="name" maxlength="60" required>
+                  (ngModelChange)="onAddressDetailsChanged()" placeholder="Nhập họ và tên"
+                  autocomplete="name" maxlength="60" required>
                 <small class="checkout-field-error" *ngIf="showAddressFieldError('fullName')">Họ tên là bắt buộc và tối đa 60 ký tự.</small>
               </div>
 
@@ -64,7 +65,8 @@
                 <label class="form-label">EMAIL (TÙY CHỌN)</label>
                 <input type="email" class="form-input" [class.invalid]="showAddressFieldError('email')"
                   [attr.aria-invalid]="showAddressFieldError('email')" [(ngModel)]="email"
-                  placeholder="Nhập email nếu muốn" autocomplete="email" maxlength="254">
+                  (ngModelChange)="onAddressDetailsChanged()" placeholder="Nhập email nếu muốn"
+                  autocomplete="email" maxlength="254">
                 <small class="checkout-field-error" *ngIf="showAddressFieldError('email')">Email không đúng định dạng.</small>
               </div>
 
@@ -72,7 +74,8 @@
                 <label class="form-label">SỐ ĐIỆN THOẠI <span class="req">*</span></label>
                 <input type="tel" class="form-input" [class.invalid]="showAddressFieldError('phone')"
                   [attr.aria-invalid]="showAddressFieldError('phone')" [(ngModel)]="phone"
-                  placeholder="Nhập số điện thoại" autocomplete="tel" pattern="(0|\+84)(3|5|7|8|9)[0-9]{8}" required>
+                  (ngModelChange)="onAddressDetailsChanged()" placeholder="Nhập số điện thoại"
+                  autocomplete="tel" maxlength="10" pattern="0(3|5|7|8|9)[0-9]{8}" required>
                 <small class="checkout-field-error" *ngIf="showAddressFieldError('phone')">Nhập số điện thoại hợp lệ, ví dụ 0912345678.</small>
               </div>
             </div>
@@ -83,7 +86,8 @@
                 <label class="form-label">ĐỊA CHỈ (SỐ NHÀ, TÊN ĐƯỜNG) <span class="req">*</span></label>
                 <input type="text" class="form-input" [class.invalid]="showAddressFieldError('street')"
                   [attr.aria-invalid]="showAddressFieldError('street')" [(ngModel)]="street"
-                  placeholder="Nhập số nhà, tên đường" autocomplete="street-address" maxlength="180" required>
+                  (ngModelChange)="onAddressDetailsChanged()" placeholder="Nhập số nhà, tên đường"
+                  autocomplete="street-address" maxlength="180" required>
                 <small class="checkout-field-error" *ngIf="showAddressFieldError('street')">Địa chỉ là bắt buộc và tối đa 180 ký tự.</small>
               </div>
             </div>
@@ -126,6 +130,57 @@
                 <small class="checkout-field-error" *ngIf="showAddressFieldError('ward')">Vui lòng chọn phường/xã.</small>
               </div>
             </div>
+
+            <section class="guest-account-option" *ngIf="!isLoggedIn">
+              <label class="guest-account-check">
+                <input type="checkbox" [(ngModel)]="demoCreateAccount"
+                  [disabled]="!canDemoCreateAccount || demoAccountReady">
+                <span>Tạo tài khoản với thông tin này để theo dõi đơn hàng dễ hơn</span>
+              </label>
+              <small class="guest-account-hint" *ngIf="!canDemoCreateAccount">
+                Điền họ tên, email, số điện thoại và địa chỉ hợp lệ để bật tùy chọn này.
+              </small>
+              <div class="guest-account-password"
+                *ngIf="demoCreateAccount && canDemoCreateAccount && !demoAccountReady">
+                <label class="form-label" for="guest-demo-password">MẬT KHẨU <span class="req">*</span></label>
+                <div class="guest-account-password-field">
+                  <input id="guest-demo-password" [type]="showDemoAccountPassword ? 'text' : 'password'"
+                    class="form-input" [(ngModel)]="demoAccountPassword" placeholder="Nhập mật khẩu"
+                    autocomplete="new-password" required>
+                  <button type="button" class="guest-account-password-toggle"
+                    (click)="showDemoAccountPassword = !showDemoAccountPassword"
+                    [attr.aria-label]="showDemoAccountPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+                    <i class="bi" [ngClass]="showDemoAccountPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                  </button>
+                </div>
+                <label class="form-label" for="guest-demo-confirm-password">
+                  XÁC NHẬN MẬT KHẨU <span class="req">*</span>
+                </label>
+                <div class="guest-account-password-field">
+                  <input id="guest-demo-confirm-password" [type]="showDemoAccountConfirmPassword ? 'text' : 'password'"
+                    class="form-input" [(ngModel)]="demoAccountConfirmPassword" placeholder="Nhập lại mật khẩu"
+                    autocomplete="new-password" required>
+                  <button type="button" class="guest-account-password-toggle"
+                    (click)="showDemoAccountConfirmPassword = !showDemoAccountConfirmPassword"
+                    [attr.aria-label]="showDemoAccountConfirmPassword ? 'Ẩn xác nhận mật khẩu' : 'Hiện xác nhận mật khẩu'">
+                    <i class="bi" [ngClass]="showDemoAccountConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                  </button>
+                </div>
+                <small class="guest-account-validation"
+                  *ngIf="demoAccountConfirmPassword && demoAccountPassword !== demoAccountConfirmPassword" role="alert">
+                  Mật khẩu xác nhận chưa khớp.
+                </small>
+                <small class="guest-account-demo-note">Bản demo: mật khẩu chưa được dùng để tạo tài khoản.</small>
+                <button type="button" class="guest-account-demo-submit" [disabled]="!canCompleteDemoAccount"
+                  (click)="completeDemoAccount()">
+                  Tạo tài khoản &amp; đăng nhập (demo)
+                </button>
+              </div>
+              <div class="guest-account-ready" *ngIf="demoAccountReady" role="status">
+                <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                <span>Đăng ký và đăng nhập demo thành công. Bạn có thể chọn voucher trước khi đặt hàng.</span>
+              </div>
+            </section>
           </div>
 
           <!-- GHI CHÚ ĐƠN HÀNG -->
@@ -187,10 +242,10 @@
 
           <!-- Pricing breakdown -->
           <div class="pricing-breakdown">
-            <aside class="checkout-login-prompt" *ngIf="!isLoggedIn">
+            <aside class="checkout-login-prompt" *ngIf="!isLoggedIn && !demoAccountReady">
               <i class="bi bi-person-circle" aria-hidden="true"></i>
               <div class="checkout-login-prompt-copy">
-                <strong>Đăng nhập để nhận thêm ưu đãi</strong>
+                <strong>Đã có tài khoản? Đăng nhập để nhận thêm ưu đãi</strong>
                 <p>Dùng voucher và theo dõi, quản lý đơn hàng thuận tiện trong tài khoản của bạn.</p>
               </div>
               <a routerLink="/login" [queryParams]="{ returnUrl: '/checkout' }">Đăng nhập</a>
@@ -210,6 +265,22 @@
               </button>
               <p class="checkout-voucher-message" [class.error]="!couponApplied" *ngIf="couponMessage" role="status">
                 {{ couponMessage }}
+              </p>
+            </div>
+            <div class="checkout-voucher-tools demo-voucher-tools" *ngIf="demoAccountReady">
+              <div class="demo-voucher-card" [class.applied]="demoVoucherApplied">
+                <div class="demo-voucher-copy">
+                  <strong><i class="bi bi-ticket-perforated"></i> DEMO10</strong>
+                  <span>Voucher minh họa · Giảm 10%</span>
+                </div>
+                <button type="button" [disabled]="demoVoucherApplied" (click)="applyDemoVoucher()">
+                  {{ demoVoucherApplied ? 'Đã áp dụng' : 'Áp dụng' }}
+                </button>
+              </div>
+              <p class="demo-voucher-note">
+                {{ demoVoucherApplied
+                  ? 'Voucher demo đã được chọn. Số tiền đơn hàng không thay đổi.'
+                  : 'Tạo tài khoản demo xong, chọn voucher tại đây trước khi đặt hàng.' }}
               </p>
             </div>
             <div class="price-row subtotal-row">
@@ -257,10 +328,10 @@
             </label>
 
             <!-- 2. Paypal -->
-            <label class="pm-item" [class.selected]="paymentMethod === 'paypal'">
-              <input type="radio" name="paymentMethod" value="paypal" [(ngModel)]="paymentMethod" (change)="onPaymentMethodChange()">
+            <label class="pm-item" [class.selected]="paymentMethod === 'momo'">
+              <input type="radio" name="paymentMethod" value="momo" [(ngModel)]="paymentMethod" (change)="onPaymentMethodChange()">
               <span class="custom-radio"></span>
-              <span class="pm-text">Paypal</span>
+              <span class="pm-text">MoMo</span>
             </label>
 
             <!-- 3. VnPay -->
@@ -270,18 +341,22 @@
               <span class="pm-text">VnPay</span>
             </label>
 
-            <!-- Khối quét mã QR - chỉ hiện khi chọn Paypal hoặc VnPay -->
-            <div class="common-qr-preview-card" *ngIf="paymentMethod === 'paypal' || paymentMethod === 'vnpay'">
+            <!-- Khối quét mã QR - chỉ hiện khi chọn MoMo hoặc VnPay -->
+            <div class="common-qr-preview-card" *ngIf="paymentMethod === 'momo' || paymentMethod === 'vnpay'">
               <div class="qr-thumbnail-box" (click)="openQRModal()" title="Bấm để phóng to mã QR">
-                <img src="/assets/images/payment-qr.png" alt="Mã QR thanh toán" class="qr-thumb-img">
-                <span class="qr-zoom-hint"><i class="bi bi-arrows-fullscreen"></i> Phóng to</span>
+                <img *ngIf="isMomoPayment" src="/assets/images/momo-qr-code.png" alt="Mã QR MoMo" class="qr-thumb-img">
+                <img *ngIf="!isMomoPayment" src="/assets/images/vnpay-qr.png" alt="Mã QR VNPay" class="qr-thumb-img">
+                <span class="qr-zoom-hint"><i class="bi bi-arrows-fullscreen"></i> Xem thông tin</span>
               </div>
               <div class="qr-text-info">
                 <div class="qr-recipient">
-                  <strong>Floralia</strong>
+                  <strong>{{ paymentBeneficiary }}</strong>
+                </div>
+                <div class="qr-amount-row">
+                  <span>Ví / Cổng thanh toán: <strong>{{ paymentProviderLabel }}</strong></span>
                 </div>
                 <div class="qr-stk-row">
-                  <span>STK: <code>PSP2605813700000226</code></span>
+                  <span>{{ paymentIdentifierLabel }}: <code>{{ paymentIdentifierValue }}</code></span>
                   <button type="button" class="btn-copy-stk" (click)="copyAccountNumber()">
                     <i class="bi" [ngClass]="copiedText ? 'bi-check-lg' : 'bi-clipboard'"></i>
                     {{ copiedText ? 'Đã chép' : 'Sao chép' }}
@@ -290,9 +365,10 @@
                 <div class="qr-amount-row">
                   <span>Số tiền: <strong>{{ formatPrice(total) }}</strong></span>
                 </div>
-                <div class="qr-amount-row">
+                <div class="qr-amount-row" *ngIf="isMomoPayment">
                   <span>Nội dung CK: <strong>FLORALIA</strong></span>
                 </div>
+                <p class="qr-preview-instruction">{{ paymentInstruction }}</p>
                 <button type="button" class="btn-open-qr-popup" (click)="openQRModal()">
                   <i class="bi bi-qr-code-scan"></i> Xem mã QR thanh toán
                 </button>
@@ -389,8 +465,8 @@
             </label>
             <label class="checkout-add-address-field">
               <span>Số điện thoại <b>*</b></span>
-              <input name="addAddressPhone" [(ngModel)]="addAddressPhone" required inputmode="tel"
-                placeholder="0912 345 678">
+              <input name="addAddressPhone" [(ngModel)]="addAddressPhone" required inputmode="tel" maxlength="10" pattern="0(3|5|7|8|9)[0-9]{8}"
+                placeholder="0912345678">
             </label>
             <label class="checkout-add-address-field full-width">
               <span>Địa chỉ (số nhà, tên đường) <b>*</b></span>
@@ -502,7 +578,7 @@
   <div class="modal-backdrop" *ngIf="showQRModal" (click)="closeQRModal()">
     <div class="modal-dialog-card qr-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3 class="modal-title"><i class="bi bi-qr-code-scan"></i> Mã QR Thanh Toán</h3>
+        <h3 class="modal-title"><i class="bi bi-qr-code-scan"></i> Thanh toán {{ selectedPaymentName }}</h3>
         <button type="button" class="btn-close-modal" (click)="closeQRModal()" aria-label="Đóng">
           <i class="bi bi-x-lg"></i>
         </button>
@@ -510,22 +586,22 @@
 
       <div class="modal-body qr-modal-body">
         <div class="qr-full-image-wrap">
-          <img src="/assets/images/payment-qr.png" alt="Mã QR thanh toán" class="qr-full-img">
+          <img [src]="paymentQrImage" [alt]="'Mã QR ' + selectedPaymentName" class="qr-full-img">
         </div>
 
         <div class="qr-account-info-card">
           <div class="info-row">
             <span class="label">Người thụ hưởng:</span>
-            <strong class="value highlight">Floralia</strong>
+            <strong class="value highlight">{{ paymentBeneficiary }}</strong>
           </div>
           <div class="info-row">
             <span class="label">Ví / Ngân hàng:</span>
-            <span class="value">MoMo / VietQR</span>
+            <span class="value">{{ paymentProviderLabel }}</span>
           </div>
           <div class="info-row stk-row">
-            <span class="label">Số tài khoản:</span>
+            <span class="label">{{ paymentIdentifierLabel }}:</span>
             <div class="stk-copy-box">
-              <strong class="value code">PSP2605813700000226</strong>
+              <strong class="value code">{{ paymentIdentifierValue }}</strong>
               <button type="button" class="btn-copy-chip" (click)="copyAccountNumber()">
                 <i class="bi" [ngClass]="copiedText ? 'bi-check-lg' : 'bi-clipboard'"></i>
                 {{ copiedText ? 'Đã chép' : 'Sao chép' }}
@@ -536,21 +612,15 @@
             <span class="label">Số tiền:</span>
             <strong class="value price">{{ formatPrice(total) }}</strong>
           </div>
-          <div class="info-row">
+          <div class="info-row" *ngIf="isMomoPayment">
             <span class="label">Nội dung CK:</span>
             <span class="value note">FLORALIA</span>
           </div>
         </div>
 
         <p class="qr-instruction">
-          <i class="bi bi-info-circle"></i> Mở ứng dụng MoMo hoặc ngân hàng bất kỳ để quét mã QR và thanh toán.
+          <i class="bi bi-info-circle"></i> {{ paymentInstruction }}
         </p>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn-confirm-qr-done" (click)="closeQRModal()">
-          <i class="bi bi-check2"></i> Đã quét mã xong
-        </button>
       </div>
     </div>
   </div>

@@ -20,3 +20,6 @@ body {
 }
 h1, h2, h3 { font-family: 'Lora', serif; }
 a { text-decoration: none; }
+
+.out-of-stock-overlay { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; background: rgba(0, 0, 0, .52); color: #fff; font-size: clamp(18px, 2vw, 25px); font-weight: 700; pointer-events: none; }
+.product-img > .sale-heart { z-index: 4; }

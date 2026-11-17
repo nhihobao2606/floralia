@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import {
   AdminBlogListRow,
   AdminBlogService,
@@ -18,7 +19,7 @@ const EMPTY_STATS: BlogStats = { total: 0, published: 0, draft: 0, archived: 0, 
 @Component({
   selector: 'app-articles',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminSidebar],
+  imports: [CommonModule, FormsModule, AdminSidebar, AdminLogoutDialog, RouterLink],
   templateUrl: './articles.html',
   styleUrl: './articles.css',
 })

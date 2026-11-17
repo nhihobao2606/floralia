@@ -16,8 +16,8 @@
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at 6% 6%, rgba(207, 227, 200, .45), transparent 30%),
-    radial-gradient(circle at 96% 70%, rgba(251, 230, 234, .5), transparent 30%),
+    radial-gradient(circle at 6% 6%, rgba(207, 227, 200, .5), transparent 30%),
+    radial-gradient(circle at 96% 70%, rgba(251, 230, 234, .55), transparent 30%),
     var(--page-bg);
 }
 
@@ -26,7 +26,7 @@ a { text-decoration: none; color: inherit; }
 
 .orders-page {
   min-height: 80vh;
-  padding: 42px 0 80px;
+  padding: 46px 0 80px;
 }
 
 /* ================= PAGE HEADING ================= */
@@ -36,16 +36,14 @@ a { text-decoration: none; color: inherit; }
 .eyebrow {
   margin: 0 0 6px;
   font-size: 13px;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--muted);
-  font-weight: 500;
 }
 .page-heading h1 {
   margin: 0;
-  font: 700 clamp(30px, 3.8vw, 42px) 'Lora', serif;
+  font: 600 clamp(32px, 4vw, 44px) 'Lora', serif;
   color: var(--matcha);
-  letter-spacing: -0.5px;
 }
 
 /* ================= 2-COLUMN LAYOUT ================= */
@@ -462,12 +460,14 @@ a { text-decoration: none; color: inherit; }
 }
 .old-price {
   font-size: 13.5px;
+  font-family: 'Roboto', sans-serif;
   color: #9eb1a4;
   text-decoration: line-through;
 }
 .curr-price {
   font-size: 16px;
   font-weight: 600;
+  font-family: 'Roboto', sans-serif;
   color: var(--ink);
 }
 
@@ -520,7 +520,7 @@ a { text-decoration: none; color: inherit; }
   font-size: 21px;
   font-weight: 700;
   color: var(--matcha);
-  font-family: 'Lora', serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 .action-buttons-group {

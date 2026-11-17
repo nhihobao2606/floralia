@@ -20,10 +20,11 @@ import { SupportPage } from './pages/support/support-page';
 import { ContactPage } from './pages/contact/contact-page';
 import { MixTeaPage } from './pages/mix-tea/mix-tea-page';
 import { WishlistPage } from './pages/wishlist/wishlist-page';
-import { authGuard } from './classes/auth.guard';
+import { authGuard, guestOnlyGuard } from './classes/auth.guard';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 import { PasswordRecovery } from './pages/password-recovery/password-recovery';
 import { GuestOrderTracking } from './pages/guest-order-tracking/guest-order-tracking';
+import { GuestOrderDetail } from './pages/guest-order-detail/guest-order-detail';
 
 const routes: Routes = [
   { path: '', component: Homepage, pathMatch: 'full' },
@@ -53,6 +54,7 @@ const routes: Routes = [
   { path: 'products', component: ProductListComponent },
   { path: 'product/:slug', component: ProductDetail },
   { path: 'products/:slug', component: ProductDetail },
+  { path: 'products/:categorySlug/:productSlug', component: ProductDetail },
 
   // Blog & Khuyến mãi
   { path: 'blog', component: BlogComponent },
@@ -72,9 +74,10 @@ const routes: Routes = [
   { path: 'order-detail/:id', component: OrderDetail, canActivate: [authGuard] },
   { path: 'order-success', component: OrderSuccess },
   { path: 'order-success/:id', component: OrderSuccess },
-  { path: 'guest-order-tracking', component: GuestOrderTracking },
+  { path: 'guest-order-tracking', component: GuestOrderTracking, canActivate: [guestOnlyGuard] },
+  { path: 'guest-order-detail/:id', component: GuestOrderDetail, canActivate: [guestOnlyGuard] },
 
-  { path: ':categorySlug/:productSlug', component: ProductDetail },
+  { path: 'products/:categorySlug/:productSlug', component: ProductDetail },
   { path: '**', component: Pagenotfound },
 ];
 

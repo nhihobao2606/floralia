@@ -1,14 +1,6 @@
 <div class="editorial-about-page">
   <!-- ================= BREADCRUMB ================= -->
-  <nav class="editorial-breadcrumb" aria-label="breadcrumb">
-    <div class="container">
-      <ol class="breadcrumb-nav">
-        <li><a routerLink="/home">TRANG CHỦ</a></li>
-        <li class="sep">/</li>
-        <li class="active" aria-current="page">GIỚI THIỆU</li>
-      </ol>
-    </div>
-  </nav>
+  <app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Giới thiệu' }]"></app-breadcrumb>
 
   <!-- ================= CÂU CHUYỆN THƯƠNG HIỆU ================= -->
   <section id="story" class="brand-story-section">

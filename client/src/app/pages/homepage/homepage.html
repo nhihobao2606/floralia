@@ -164,10 +164,11 @@
   <div class="product-card">
     <div class="product-img">
       <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
-      <span class="sale-badge" *ngIf="hasDiscount(p) || p.isSale || p.discount > 0">-{{ getDiscount(p) }}%</span>
-      <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products() }">
+      <span class="sale-badge" *ngIf="getDiscount(p) > 0">-{{ getDiscount(p) }}%</span>
+      <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products(), selectedVariantSku: getDisplayVariant(p)?.sku }">
         <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
       </a>
+      <span class="out-of-stock-overlay" *ngIf="!hasStock(p)">H&#7870;T H&#192;NG</span>
       <button class="sale-heart" type="button" aria-label="Yêu thích"
               [class.on]="isWished(p)" (click)="toggleWish(p)">
         <i class="bi" [ngClass]="isWished(p) ? 'bi-heart-fill' : 'bi-heart'"></i>
@@ -175,17 +176,20 @@
     </div>
 
     <div class="product-info">
-      <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products() }" class="sale-name">{{ getProductName(p) }}</a>
+      <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products(), selectedVariantSku: getDisplayVariant(p)?.sku }" class="sale-name">{{ getProductName(p) }}</a>
 
       <div class="sale-rating">
         <i *ngFor="let s of stars" class="bi"
            [ngClass]="s <= getRating(p) ? 'bi-star-fill' : 'bi-star'"></i>
-        <small>({{ getRatingCount(p) }})</small>
+        <small>{{ formatRatingAverage(p) }} ({{ getRatingCount(p) }})</small>
       </div>
-      <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ p.sold || 0 }}</div>
+      <div class="sale-meta-row">
+        <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ p.sold || 0 }}</div>
+        <span class="sale-variant-pill" *ngIf="getDisplayVariantLabel(p)">{{ getDisplayVariantLabel(p) }}</span>
+      </div>
 
       <div class="sale-price">
-        <span class="sale-current">{{ formatPrice(getProductPrice(p)) }}</span>
+        <span class="sale-current"><small class="price-from-prefix" *ngIf="shouldShowFromPrefix(p)">Từ </small>{{ formatPrice(getProductPrice(p)) }}</span>
         <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
       </div>
 
@@ -214,7 +218,7 @@
       <div>
         <p class="cart-add-eyebrow">THÊM VÀO GIỎ HÀNG</p>
         <h2 id="home-cart-add-title">{{ getProductName(product) }}</h2>
-        <strong>{{ cartPopupPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
+        <strong>{{ cartPopupPrice | vnd }}</strong>
       </div>
     </div>
     <div class="cart-add-variants" *ngIf="product.variants?.length">

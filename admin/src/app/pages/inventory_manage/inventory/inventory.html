@@ -1,29 +1,53 @@
 <div class="inventory-layout">
   <app-admin-sidebar [orderBadge]="unreadNotificationsCount" (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
   <main class="inventory-main">
-    <header class="topbar">
+    <header class="topbar admin-standard-topbar">
       <h1>Quản lý tồn kho</h1>
       <div class="topbar-right">
-        <button class="topbar-bell" type="button" aria-label="Thông báo"><i class="bi bi-bell"></i></button>
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell"></i>
+          <span class="bell-badge" *ngIf="unreadNotificationsCount">{{ unreadNotificationsCount }}</span>
+        </button>
         <div class="admin-account">
-          <span class="account-avatar">{{ adminName.charAt(0).toUpperCase() }}</span>
-          <span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span>
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile"><strong>{{ adminName || 'Admin Floralia' }}</strong><small>Quản trị viên</small></a>
           <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
         </div>
       </div>
     </header>
 
-    <section class="page-content">
-      <section class="welcome-banner">
-        <div><h2>Chào mừng trở lại, {{ adminName }}</h2><p>Quản lý tồn kho: Theo dõi số lượng còn lại và cập nhật khi nhập thêm hàng để website hiển thị chính xác.</p></div>
-        <div class="banner-actions"><button class="button button-light" type="button" (click)="exportCsv()"><i class="bi bi-download"></i> Xuất file</button><button class="button button-primary" type="button" (click)="goToReceiveStock()"><i class="bi bi-plus-lg"></i> Nhập hàng</button></div>
+    <section class="page-content admin-standard-page-content">
+      <section class="welcome-card admin-standard-hero">
+        <div class="welcome-info">
+          <p class="admin-standard-hero-kicker">KHÔNG GIAN TỒN KHO FLORALIA</p>
+          <h2 class="admin-standard-hero-title">Chào mừng trở lại, {{ adminName }}</h2>
+          <p class="admin-standard-hero-description">Theo dõi số lượng tồn và cập nhật hàng nhập để thông tin sản phẩm luôn chính xác.</p>
+        </div>
+        <div class="welcome-actions admin-standard-hero-actions">
+          <button class="button button-light admin-standard-hero-action admin-standard-hero-action-secondary" type="button" (click)="exportCsv()"><i class="bi bi-download"></i> Xuất file</button>
+          <button class="button button-primary admin-standard-hero-action" type="button" (click)="goToReceiveStock()"><i class="bi bi-plus-lg"></i> Nhập hàng</button>
+        </div>
       </section>
 
-      <section class="metric-grid" aria-label="Tổng quan tồn kho">
-        <button class="metric-card" type="button" (click)="setStockFilter('all')"><span>Tổng sản phẩm</span><strong>{{ products.length }}</strong></button>
-        <button class="metric-card" type="button" (click)="setStockFilter('available')"><span>Tổng số lượng tồn</span><strong>{{ totalStock }}</strong></button>
-        <button class="metric-card warning" type="button" (click)="setStockFilter('low')"><span>Sắp hết hàng</span><strong>{{ lowStockCount }}</strong></button>
-        <button class="metric-card danger" type="button" (click)="setStockFilter('out')"><span>Hết hàng</span><strong>{{ outOfStockCount }}</strong></button>
+      <section class="metric-grid stats-grid inventory-stats-grid" aria-label="Tổng quan tồn kho">
+        <button class="metric-card stat-card" type="button" (click)="setStockFilter('all')">
+          <span class="stat-icon total-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Tổng sản phẩm</span><strong>{{ products.length }}</strong></div>
+        </button>
+        <button class="metric-card stat-card" type="button" (click)="setStockFilter('available')">
+          <span class="stat-icon available-icon"><i class="bi bi-boxes" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Tổng số lượng tồn</span><strong>{{ totalStock }}</strong></div>
+        </button>
+        <button class="metric-card stat-card warning" type="button" (click)="setStockFilter('low')">
+          <span class="stat-icon warning-icon"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Sắp hết hàng</span><strong>{{ lowStockCount }}</strong></div>
+        </button>
+        <button class="metric-card stat-card danger" type="button" (click)="setStockFilter('out')">
+          <span class="stat-icon danger-icon"><i class="bi bi-x-circle" aria-hidden="true"></i></span>
+          <div><span class="stat-label">Hết hàng</span><strong>{{ outOfStockCount }}</strong></div>
+        </button>
       </section>
 
       <div *ngIf="actionMessage" class="notice success-notice" role="status"><i class="bi bi-check-circle"></i> {{ actionMessage }}</div>
@@ -48,39 +72,57 @@
         <section class="table-card">
           <div class="table-toolbar"><div><strong>Danh sách sản phẩm</strong><span>{{ filteredProducts.length }} sản phẩm</span></div><button class="button button-outline" type="button" (click)="loadInventory()" [disabled]="loading"><i class="bi bi-arrow-clockwise"></i> Làm mới</button></div>
           <div class="table-scroll">
-            <table><thead><tr><th>Mã SP</th><th>Tên sản phẩm</th><th>Danh mục</th><th class="number-col">Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <table><thead><tr><th class="selection-column"><span class="sr-only">Chọn</span></th><th>Mã SP</th><th>Tên sản phẩm</th><th>Danh mục</th><th class="number-col">Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
               <tbody>
-                <tr *ngIf="loading"><td colspan="6" class="empty-state">Đang tải dữ liệu tồn kho…</td></tr>
-                <tr *ngIf="!loading && !loadError && visibleProducts.length === 0"><td colspan="6" class="empty-state">Không tìm thấy sản phẩm phù hợp.</td></tr>
-                <tr *ngFor="let product of visibleProducts">
-                  <td class="sku-cell">{{ product.sku }}</td>
+                <tr *ngIf="loading"><td colspan="7" class="empty-state">Đang tải dữ liệu tồn kho…</td></tr>
+                <tr *ngIf="!loading && !loadError && visibleProducts.length === 0"><td colspan="7" class="empty-state">Không tìm thấy sản phẩm phù hợp.</td></tr>
+                <ng-container *ngFor="let product of visibleProducts"><tr>
+                  <td class="selection-column"><input class="variant-checkbox" type="checkbox" [checked]="isProductSelected(product)" [indeterminate]="isProductPartiallySelected(product)" [attr.aria-label]="'Chọn tất cả phân loại của ' + product.name" (change)="toggleProductSelection(product)"></td>
+                  <td class="sku-cell"><button *ngIf="hasVariants(product)" class="expand-toggle" type="button" [attr.aria-expanded]="isExpanded(product)" [attr.aria-label]="(isExpanded(product) ? 'Thu gọn ' : 'Mở rộng ') + product.sku" (click)="toggleExpanded(product)"><i class="bi" [class.bi-chevron-right]="!isExpanded(product)" [class.bi-chevron-down]="isExpanded(product)"></i></button>{{ product.sku }}</td>
                   <td><div class="product-cell"><img [src]="imageUrl(product.imageUrl)" [alt]="product.name"><div><strong>{{ product.name }}</strong><small>{{ product.variants?.length ? product.variants.length + ' phân loại' : (product.category || 'Chưa phân loại') }}</small></div></div></td>
                   <td>{{ product.category || '—' }}</td>
                   <td class="number-col" [class.stock-low]="product.stock > 0 && product.stock < lowStockThreshold" [class.stock-out]="product.stock === 0">{{ product.stock }}</td>
-                  <td><span class="status-pill" [class.status-low]="product.stock > 0 && product.stock < lowStockThreshold" [class.status-out]="product.stock === 0">{{ statusLabel(product.stock) }}</span></td>
-                  <td><button class="row-action" type="button" (click)="openAdjustment(product, 'add')">Điều chỉnh</button></td>
-                </tr>
+                  <td><span class="status-pill" [class.status-low]="lowVariantCount(product) > 0 || (product.stock > 0 && product.stock < lowStockThreshold)" [class.status-out]="outVariantCount(product) === (product.variants?.length || 1)">{{ productStatus(product) }}</span><small *ngIf="lowVariantCount(product)" class="variant-alert">{{ lowVariantCount(product) }} loại sắp hết</small><small *ngIf="outVariantCount(product) && outVariantCount(product) < (product.variants?.length || 1)" class="variant-alert variant-alert-out">{{ outVariantCount(product) }} loại hết hàng</small></td>
+                  <td><button class="row-action" type="button" (click)="adjustProductStock(product)">Điều chỉnh</button></td>
+                </tr><tr *ngIf="isExpanded(product) && hasVariants(product)" class="variant-detail-heading"><td colspan="7">Chi tiết phân loại · {{ product.sku }}</td></tr><tr *ngFor="let variant of (isExpanded(product) && hasVariants(product) ? product.variants : [])" class="variant-detail-row"><td class="selection-column"><input class="variant-checkbox" type="checkbox" [checked]="isVariantSelected(product, variant.sku)" [attr.aria-label]="'Chọn phân loại ' + variant.label" (change)="toggleVariantSelection(product, variant.sku)"></td><td class="sku-cell">{{ variant.sku }}</td><td><span class="variant-name">{{ variant.label }}</span></td><td></td><td class="number-col" [class.stock-low]="variant.stock > 0 && variant.stock < lowStockThreshold" [class.stock-out]="variant.stock === 0">{{ variant.stock }}</td><td><span class="status-pill" [class.status-low]="variant.stock > 0 && variant.stock < lowStockThreshold" [class.status-out]="variant.stock === 0">{{ statusLabel(variant.stock) }}</span></td><td><button class="row-action" type="button" (click)="openVariantAdjustment(product, variant)">Điều chỉnh</button></td></tr></ng-container>
               </tbody>
             </table>
           </div>
-          <footer class="table-footer"><span>Hiển thị {{ filteredProducts.length ? (currentPage - 1) * pageSize + 1 : 0 }}–{{ (currentPage - 1) * pageSize + visibleProducts.length }} trong số {{ filteredProducts.length }} sản phẩm</span><div class="pagination"><button type="button" aria-label="Trang trước" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button><button type="button" class="current-page">{{ currentPage }}</button><button type="button" aria-label="Trang sau" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages">›</button></div></footer>
+          <footer class="table-footer"><span>Hiển thị {{ filteredProducts.length ? (currentPage - 1) * pageSize + 1 : 0 }}–{{ (currentPage - 1) * pageSize + visibleProducts.length }} trong số {{ filteredProducts.length }} sản phẩm</span><nav class="pagination" aria-label="Phân trang tồn kho"><button type="button" aria-label="Trang trước" (click)="goToPage(currentPage - 1)" [disabled]="currentPage <= 1"><i class="bi bi-chevron-left" aria-hidden="true"></i></button><button *ngFor="let page of pages" type="button" [class.current]="currentPage === page" [attr.aria-current]="currentPage === page ? 'page' : null" (click)="goToPage(page)">{{ page }}</button><button type="button" aria-label="Trang sau" (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages"><i class="bi bi-chevron-right" aria-hidden="true"></i></button></nav></footer>
         </section>
       </div>
     </section>
   </main>
 </div>
 
+<div *ngIf="selectedVariantCount" class="inventory-bulk-bar" role="region" aria-label="Thao tác phân loại đã chọn"><span><strong>{{ selectedVariantCount }}</strong> phân loại đã chọn</span><button class="bulk-clear-button" type="button" (click)="clearSelection()">Bỏ chọn</button><button class="button button-primary" type="button" (click)="openBulkAdjustment()"><i class="bi bi-sliders"></i> Điều chỉnh hàng loạt</button></div>
+
 <div class="modal-backdrop" *ngIf="adjustingProduct" (click)="closeAdjustment()">
   <section class="adjustment-modal" role="dialog" aria-modal="true" aria-labelledby="adjust-title" (click)="$event.stopPropagation()">
     <header class="modal-heading"><h2 id="adjust-title">Điều chỉnh tồn kho</h2><button type="button" aria-label="Đóng" (click)="closeAdjustment()">×</button></header>
     <div class="modal-product"><img [src]="imageUrl(adjustingProduct.imageUrl)" [alt]="adjustingProduct.name"><div><strong>{{ adjustingProduct.name }}</strong><small>{{ adjustingVariant ? adjustingVariant.label + ' · ' + adjustingVariant.sku : (adjustingProduct.variants?.length ? 'Vui lòng chọn phân loại' : adjustingProduct.sku) }}</small></div><span *ngIf="adjustingStock !== null" class="status-pill" [class.status-low]="adjustingStock > 0 && adjustingStock < lowStockThreshold" [class.status-out]="adjustingStock === 0">{{ statusLabel(adjustingStock) }}</span></div>
-    <label *ngIf="adjustingProduct.variants?.length" class="variant-field">Phân loại<select [ngModel]="adjustmentVariantSku" (ngModelChange)="selectAdjustmentVariant($event)"><option value="">Chọn phân loại</option><option *ngFor="let variant of adjustingProduct.variants" [value]="variant.sku">{{ variant.label }}</option></select></label>
+    <div *ngIf="showMultiAdjustment(adjustingProduct)" class="bulk-variant-list"><div class="bulk-variant-title"><strong>Cập nhật từng phân loại</strong><span>{{ adjustmentLines.length }} phân loại</span></div><div class="bulk-variant-row" *ngFor="let line of adjustmentLines"><div class="bulk-variant-identity"><strong>{{ line.label }}</strong><small>{{ line.sku }} · Hiện có {{ line.current }}</small></div><label>Số lượng {{ adjustmentType === 'add' ? 'nhập thêm' : 'giảm bớt' }}<input type="number" min="1" step="1" [(ngModel)]="line.amount"></label><label>Lý do điều chỉnh<input type="text" maxlength="160" placeholder="Kiểm kê lại, hàng hỏng…" [(ngModel)]="line.reason"></label><small class="bulk-projection">Tồn mới: <strong>{{ nextStock(line) }}</strong></small></div></div>
+    <label *ngIf="!showMultiAdjustment(adjustingProduct) && adjustingProduct.variants?.length && !singleVariantAdjustment" class="variant-field">Phân loại<select [ngModel]="adjustmentVariantSku" (ngModelChange)="selectAdjustmentVariant($event)"><option value="">Chọn phân loại</option><option *ngFor="let variant of adjustingProduct.variants" [value]="variant.sku">{{ variant.label }}</option></select></label>
     <div class="adjustment-tabs"><button type="button" [class.selected]="adjustmentType === 'add'" (click)="adjustmentType = 'add'">Nhập thêm</button><button type="button" [class.selected]="adjustmentType === 'subtract'" (click)="adjustmentType = 'subtract'">Giảm bớt</button></div>
-    <div class="adjustment-fields"><label>Số lượng {{ adjustmentType === 'add' ? 'nhập thêm' : 'giảm bớt' }}<input type="number" min="1" step="1" [(ngModel)]="adjustmentAmount"></label><label>Tồn kho hiện tại → mới<div class="stock-preview"><span>{{ adjustingStock ?? '—' }}</span><i class="bi bi-arrow-right"></i><strong [class.stock-out]="adjustedStock !== null && adjustedStock < 0">{{ adjustedStock ?? '—' }}</strong></div></label></div>
-    <label class="reason-field">Lý do<input type="text" maxlength="160" placeholder="Nhập hàng từ nhà cung cấp" [(ngModel)]="adjustmentReason"></label>
+    <div *ngIf="!showMultiAdjustment(adjustingProduct)"><div class="adjustment-fields"><label>Số lượng {{ adjustmentType === 'add' ? 'nhập thêm' : 'giảm bớt' }}<input type="number" min="1" step="1" [(ngModel)]="adjustmentAmount"></label><label>Tồn kho hiện tại → mới<div class="stock-preview"><span>{{ adjustingStock ?? '—' }}</span><i class="bi bi-arrow-right"></i><strong [class.stock-out]="adjustedStock !== null && adjustedStock < 0">{{ adjustedStock ?? '—' }}</strong></div></label></div><label class="reason-field">Lý do<input type="text" maxlength="160" placeholder="Nhập hàng từ nhà cung cấp" [(ngModel)]="adjustmentReason"></label></div>
     <p *ngIf="actionError" class="modal-error" role="alert">{{ actionError }}</p>
-    <footer class="modal-footer"><button class="button button-outline" type="button" (click)="closeAdjustment()" [disabled]="saving">Hủy</button><button class="button button-primary" type="button" (click)="saveAdjustment()" [disabled]="saving || adjustmentAmount < 1 || adjustedStock === null || adjustedStock < 0">{{ saving ? 'Đang lưu…' : 'Lưu cập nhật' }}</button></footer>
+    <footer class="modal-footer"><button class="button button-outline" type="button" (click)="closeAdjustment()" [disabled]="saving">Hủy</button><button class="button button-primary" type="button" (click)="saveAdjustment()" [disabled]="saving || (showMultiAdjustment(adjustingProduct) ? adjustmentLines.some(line => line.amount < 1 || nextStock(line) < 0) : adjustmentAmount < 1 || adjustedStock === null || adjustedStock < 0)">{{ saving ? 'Đang lưu…' : 'Lưu cập nhật' }}</button></footer>
   </section>
 </div>
 
-<div class="modal-backdrop logout-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()"><section class="logout-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><h2>Đăng xuất</h2><p>Bạn có chắc muốn đăng xuất khỏi trang quản trị?</p><footer class="modal-footer"><button class="button button-outline" type="button" (click)="cancelLogoutConfirmation()">Ở lại</button><button class="button button-primary" type="button" (click)="confirmLogout()">Đăng xuất</button></footer></section></div>
+<div class="modal-backdrop bulk-edit-backdrop" *ngIf="bulkEditOpen" (click)="closeBulkAdjustment()">
+  <section class="adjustment-modal bulk-edit-modal" role="dialog" aria-modal="true" aria-labelledby="bulk-edit-title" (click)="$event.stopPropagation()">
+    <header class="modal-heading"><div><h2 id="bulk-edit-title">Điều chỉnh hàng loạt</h2><small>{{ bulkLines.length }} phân loại được chọn</small></div><button type="button" aria-label="Đóng" (click)="closeBulkAdjustment()">×</button></header>
+    <div class="bulk-quick-fill"><label>Kiểu điều chỉnh<select [(ngModel)]="bulkMode"><option value="add">Nhập thêm (+)</option><option value="subtract">Giảm bớt (-)</option><option value="set">Cập nhật tồn thực tế (=)</option></select></label><label>Lý do chung<input type="text" maxlength="160" placeholder="Ví dụ: Nhập hàng đợt 17/11" [(ngModel)]="bulkReason"></label><button class="button button-outline" type="button" (click)="applyBulkReason()">Áp dụng lý do</button></div>
+    <div class="bulk-grid-wrap"><table class="bulk-edit-grid"><thead><tr><th>SKU / Phân loại</th><th>Tồn hiện tại</th><th>{{ bulkMode === 'add' ? 'Nhập thêm' : bulkMode === 'subtract' ? 'Giảm bớt' : 'Tồn thực tế mới' }}</th><th>Tồn dự kiến</th><th>Lý do</th></tr></thead><tbody><tr *ngFor="let line of bulkLines" [class.invalid-bulk-line]="isInvalidBulkLine(line)"><td><strong>{{ line.sku }}</strong><small>{{ line.label }} · {{ line.productSku }}</small></td><td>{{ line.current }}</td><td><input type="number" [min]="bulkMode === 'set' ? 0 : 1" step="1" [(ngModel)]="line.amount" [attr.aria-label]="'Số lượng cho ' + line.sku"></td><td class="bulk-stock-preview">{{ bulkProjectedStock(line) }}</td><td><input type="text" maxlength="160" placeholder="Lý do" [(ngModel)]="line.reason" [attr.aria-label]="'Lý do cho ' + line.sku"></td></tr></tbody></table></div>
+    <p *ngIf="bulkLines.some(line => isInvalidBulkLine(line))" class="modal-error" role="alert">Kiểm tra các dòng tô đỏ: số lượng phải là số nguyên hợp lệ và tồn dự kiến không được âm.</p>
+    <p *ngIf="actionError" class="modal-error" role="alert">{{ actionError }}</p>
+    <footer class="modal-footer"><button class="button button-outline" type="button" (click)="closeBulkAdjustment()" [disabled]="saving">Hủy</button><button class="button button-primary" type="button" (click)="saveBulkAdjustment()" [disabled]="saving || !bulkLines.length || bulkLines.some(line => isInvalidBulkLine(line))">{{ saving ? 'Đang cập nhật…' : 'Xác nhận cập nhật (' + bulkLines.length + ' phân loại)' }}</button></footer>
+  </section>
+</div>
+
+<app-admin-logout-dialog
+  [visible]="logoutConfirmationVisible"
+  (cancelled)="cancelLogoutConfirmation()"
+  (confirmed)="confirmLogout()"
+></app-admin-logout-dialog>

@@ -6,10 +6,12 @@ import { ProductNavigationService } from '../../services/product-navigation-serv
 import { BlogService } from '../../services/blog-service';
 import { Products } from '../../classes/Products';
 import { Blog } from '../../classes/Blog';
+import { blogImageSource } from '../../classes/blog-image';
 import { blogDetailLink } from '../../classes/blog-url';
 import { CartService } from '../../services/cart-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { BuyNowService } from '../../services/buy-now-service';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 @Component({
   selector: 'app-homepage',
@@ -100,7 +102,9 @@ export class Homepage implements OnInit {
     }
     if (!this.hasStock(product)) return;
     this.cartPopupProduct = product;
+    const preferredVariant = this.getDisplayVariant(product);
     this.cartPopupVariant =
+      (preferredVariant && preferredVariant.stock > 0 ? preferredVariant : null) ??
       product.variants?.find(option => option.isDefault && option.stock > 0) ??
       product.variants?.find(option => option.stock > 0) ??
       product.variants?.find(option => option.isDefault) ??
@@ -146,7 +150,7 @@ export class Homepage implements OnInit {
   }
 
   buyNow(product: Products): void {
-    this.buyNowService.open(product, this.getProductImage(product));
+    this.buyNowService.open(product, this.getProductImage(product), this.getDisplayVariant(product));
   }
   
 
@@ -199,6 +203,9 @@ export class Homepage implements OnInit {
         this.loading.set(false);
       },
     });
+    this.productService.productsChanges$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refreshProducts());
 
     // Lấy trực tiếp các bài viết từ cùng API với trang blog.
     this.blogsLoading.set(true);
@@ -215,13 +222,30 @@ export class Homepage implements OnInit {
     });
   }
 
+  private refreshProducts(): void {
+    this.productService.getAll().subscribe({
+      next: (response: any) => {
+        const source: Products[] = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data) ? response.data
+            : Array.isArray(response?.products) ? response.products : [];
+        const list = source.map(product => {
+          const variant = product.variants?.find(option => option.isDefault) ?? product.variants?.[0];
+          return variant ? { ...product, price: variant.price } : product;
+        });
+        this.products.set(list);
+        const featured = list.filter(product => product.featured === true);
+        this.featured.set((featured.length ? featured : list).slice(0, 8));
+        this.bestSelling.set([...list]
+          .sort((a, b) => Number(b.sold || 0) - Number(a.sold || 0))
+          .slice(0, 4));
+      },
+      error: error => console.error('Không thể làm mới sản phẩm:', error),
+    });
+  }
+
   getBlogImg(blog: Blog): string {
-    if (blog.imageData) {
-      if (blog.imageData.startsWith('data:image/')) return blog.imageData;
-      const mime = blog.imageMimeType || 'image/jpeg';
-      return `data:${mime};base64,${blog.imageData}`;
-    }
-    return blog.image || '/assets/images/bl1.jpg';
+    return blogImageSource(blog);
   }
 
   getProductName(product: Products): string {
@@ -231,26 +255,53 @@ export class Homepage implements OnInit {
 
   getProductPrice(product: Products): number {
     const p: any = product;
-    return Number(p.price ?? p.minPrice ?? p.productPrice ?? 0);
+    return Number(this.getDisplayVariant(product)?.price ?? p.price ?? p.minPrice ?? p.productPrice ?? 0);
   }
 
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+    return formatVietnameseDong(price);
   }
 
   hasDiscount(product: Products): boolean {
-    const p: any = product;
-    return Number(p.oldPrice || 0) > this.getProductPrice(product);
+    return this.getDisplayOldPrice(product) > this.getProductPrice(product);
   }
 
   getOldPrice(product: Products): number {
     const p: any = product;
-    return Number(p.oldPrice || 0);
+    return this.getDisplayOldPrice(product);
+  }
+
+  getDisplayVariant(product: Products): Products['variants'][number] | null {
+    const variants = product.variants ?? [];
+    if (!variants.length) return null;
+    const inStock = variants.filter(variant => Number(variant.stock) > 0);
+    const pool = inStock.length ? inStock : variants;
+    return pool.reduce((lowest, variant) =>
+      Number(variant.price) < Number(lowest.price) ? variant : lowest, pool[0]);
+  }
+
+  getDisplayVariantLabel(product: Products): string {
+    return this.getDisplayVariant(product)?.label || '';
+  }
+
+  shouldShowFromPrefix(product: Products): boolean {
+    return (product.variants?.length ?? 0) > 1;
+  }
+
+  private getDisplayOldPrice(product: Products): number {
+    const variant = this.getDisplayVariant(product);
+    const price = Number(variant?.price ?? product.price ?? 0);
+    const oldPrice = Number(variant?.oldPrice ?? product.oldPrice ?? 0);
+    return oldPrice > price ? oldPrice : 0;
+  }
+
+  formatRatingAverage(product: Products): string {
+    return Number(product.ratingAverage || 0).toFixed(1);
   }
 
   getDiscount(product: Products): number {
     const p: any = product;
-    if (p.discount) return Number(p.discount);
+    if (!p.variants?.length && p.discount) return Number(p.discount);
 
     const oldPrice = this.getOldPrice(product);
     const price = this.getProductPrice(product);

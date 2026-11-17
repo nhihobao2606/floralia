@@ -9,7 +9,7 @@ function totalStock(product) {
         : Math.max(0, Number(product.stock) || 0);
 }
 
-function normalizeClientProduct(product) {
+async function normalizeClientProduct(product, assetKeys, productAssets = null) {
     const isOutOfStock =
         product.status === 'out-of-stock' ||
         product.status === 'inactive' ||
@@ -31,24 +31,92 @@ function normalizeClientProduct(product) {
         }
     }
 
-    const thumbnail = product.thumbnail;
+    const baseSku = String(product.sku || '').split('-')[0].trim();
+    const skuAssets = productAssets || await Product.getProductAssetsBySku(baseSku);
+    const canonicalThumbnail = skuAssets.find(asset => asset.assetId === `${baseSku}_THUMB`);
+    const canonicalGallery = skuAssets
+        .map(asset => {
+            const prefix = `${baseSku}_IMG_`;
+            const suffix = String(asset.assetId || '').startsWith(prefix) ? String(asset.assetId).slice(prefix.length) : '';
+            return { ...asset, index: /^\d+$/.test(suffix) ? Number(suffix) : 0 };
+        })
+        .filter(asset => asset.index >= 1)
+        .sort((left, right) => left.index - right.index)
+        .map(asset => String(asset.assetId));
+    const hasCanonicalImages = canonicalGallery.length > 0;
+    const thumbnail = canonicalThumbnail?.assetId || product.thumbnail;
+    // THUMB serves cards; product detail uses full-size IMG_1, IMG_2...
+    const images = hasCanonicalImages ? canonicalGallery : [...new Set((Array.isArray(product.images) ? product.images : [])
+        .filter(Boolean)
+        .map(String))];
+    let resolvedAssetKeys = assetKeys;
+    if (!resolvedAssetKeys) {
+        const assets = await Product.getAssetsByThumbnails([thumbnail, ...images]);
+        resolvedAssetKeys = new Map();
+        for (const asset of assets) {
+            const key = String(asset.assetId || asset._id || '');
+            if (asset.assetId) resolvedAssetKeys.set(String(asset.assetId), key);
+            if (asset._id) resolvedAssetKeys.set(String(asset._id), key);
+        }
+    }
+    const seenImages = new Set();
+    if (thumbnail) seenImages.add(resolvedAssetKeys.get(String(thumbnail)) || String(thumbnail));
+    const uniqueImages = images.filter(image => {
+        if (String(image) === String(thumbnail || '')) return false;
+        const key = resolvedAssetKeys.get(String(image)) || String(image);
+        if (seenImages.has(key)) return false;
+        seenImages.add(key);
+        return true;
+    });
     return {
         ...product,
+        imageData: null,
+        imageMimeType: null,
+        images: uniqueImages,
         status,
         isActive: true,
         stock,
         variants,
         imageId: thumbnail ? String(thumbnail) : null,
         imageUrl: thumbnail
-            ? `/products/image/${encodeURIComponent(String(thumbnail))}`
+            ? `/products/image/${encodeURIComponent(String(thumbnail))}?v=${Date.now()}`
             : null
     };
+}
+
+async function normalizeClientProducts(products) {
+    const references = products.flatMap(product => [
+        product.thumbnail,
+        ...(Array.isArray(product.images) ? product.images : [])
+    ]).filter(Boolean);
+    const assets = await Product.getAssetsByThumbnails(references);
+    const assetKeys = new Map();
+    for (const asset of assets) {
+        const key = String(asset.assetId || asset._id || '');
+        if (asset.assetId) assetKeys.set(String(asset.assetId), key);
+        if (asset._id) assetKeys.set(String(asset._id), key);
+    }
+    const productAssets = await Product.getProductAssetsBySkus(products.map(product => product.sku));
+    const assetsBySku = new Map();
+    const baseSkus = products.map(product => String(product.sku || '').split('-')[0].trim()).sort((a, b) => b.length - a.length);
+    for (const asset of productAssets) {
+        const assetId = String(asset.assetId || '');
+        const sku = baseSkus.find(candidate => assetId.startsWith(`${candidate}_`)) || String(asset.productSku || '');
+        const list = assetsBySku.get(sku) || [];
+        list.push(asset);
+        assetsBySku.set(sku, list);
+    }
+    return Promise.all(products.map(product => normalizeClientProduct(
+        product,
+        assetKeys,
+        assetsBySku.get(String(product.sku || '').split('-')[0].trim()) || []
+    )));
 }
 
 async function getClientProducts(req, res) {
     try {
         const products = await Product.getAll();
-        const normalizedProducts = products.map(normalizeClientProduct);
+        const normalizedProducts = await normalizeClientProducts(products);
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.json(normalizedProducts);
     } catch (error) {
@@ -83,4 +151,4 @@ function streamProductEvents(req, res) {
     });
 }
 
-module.exports = { getClientProducts, getProductVersion, streamProductEvents, normalizeClientProduct };
+module.exports = { getClientProducts, getProductVersion, streamProductEvents, normalizeClientProduct, normalizeClientProducts };

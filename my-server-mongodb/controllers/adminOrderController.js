@@ -1,8 +1,12 @@
 const { ObjectId } = require('mongodb');
+const { randomBytes } = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const Order = require('../models/order');
 const Product = require('../models/product');
+const ProductSalesService = require('../models/product-sales-service');
+const AdminProduct = require('../models/adminProduct');
+const { cancelOrderAndRestoreStock } = require('../models/order-cancellation-service');
 
 function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -27,6 +31,8 @@ function normalizeOrder(order) {
       variant: it.variant || 'Tiêu chuẩn',
       price: Number(it.price || 0),
       oldPrice: Number(it.oldPrice || it.price || 0),
+      salePrice: Number(it.salePrice ?? it.price ?? 0),
+      productDiscount: Number(it.productDiscount || 0),
       quantity: Number(it.quantity || 1),
       total: Number(it.total || (Number(it.price || 0) * Number(it.quantity || 1))),
       image: img
@@ -102,6 +108,7 @@ function normalizeOrder(order) {
     },
     items,
     subtotal: Number(order.subtotal || 0),
+    productDiscount: Number(order.productDiscount || 0),
     discount: Number(order.discount || 0),
     shippingFee: Number(order.shippingFee || 0),
     total: Number(order.total || 0),
@@ -255,15 +262,17 @@ async function getAdminOrderById(req, res) {
 async function createAdminOrder(req, res) {
   try {
     const data = req.body || {};
-    const hex = Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
-    const code = data.code || `#FL${hex}`;
-    const cleanId = code.replace(/^#/, '');
-    const id = data.id || `FL${hex}`;
-    const slug = `don-hang-${cleanId.toLowerCase()}`;
-
     const now = new Date();
-    const dateStr = data.date || now.toLocaleDateString('vi-VN');
-    const timeStr = data.time || now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    const id = randomBytes(16).toString('hex');
+    const code = `#${id.slice(-8).toUpperCase()}`;
+    const cleanId = code.slice(1);
+    const slug = `don-hang-${cleanId.toLowerCase()}`;
+    const dateStr = now.toLocaleDateString('vi-VN');
+    const timeStr = now.toLocaleTimeString('vi-VN');
+    const timelineTime = now.toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
 
     // Lấy thông tin chi tiết sản phẩm từ MongoDB Product
     let allProducts = [];
@@ -281,8 +290,36 @@ async function createAdminOrder(req, res) {
       } catch (e) {}
     }
 
+    if (!Array.isArray(data.items) || data.items.length === 0 || data.items.length > 50) {
+      return res.status(400).json({ success: false, message: 'Đơn hàng cần có từ 1 đến 50 dòng sản phẩm.' });
+    }
+    const requestedBySku = new Map();
+    for (const item of data.items) {
+      const sku = String(item?.sku || '').trim();
+      const quantity = Number(item?.quantity);
+      if (!sku || !Number.isSafeInteger(quantity) || quantity < 1) {
+        return res.status(400).json({ success: false, message: 'SKU và số lượng sản phẩm không hợp lệ.' });
+      }
+      requestedBySku.set(sku, (requestedBySku.get(sku) || 0) + quantity);
+    }
+    for (const [sku, quantity] of requestedBySku) {
+      const product = allProducts.find(item => item.sku === sku || item.variants?.some(variant => variant.sku === sku));
+      if (!product) return res.status(400).json({ success: false, message: `Không tìm thấy sản phẩm ${sku}.` });
+      const variant = product.variants?.find(item => item.sku === sku);
+      if (product.variants?.length && !variant) {
+        return res.status(400).json({
+          success: false,
+          message: `SKU ${sku} c\u1ea7n l\u00e0 m\u00e3 ph\u00e2n lo\u1ea1i c\u1ee5 th\u1ec3.`
+        });
+      }
+      const stock = Number(variant?.stock ?? product.stock);
+      if (Number.isFinite(stock) && quantity > stock) {
+        return res.status(400).json({ success: false, message: `SKU ${sku} chỉ còn ${stock} sản phẩm trong kho.` });
+      }
+    }
+
     const enrichedItems = (data.items || []).map(it => {
-      const foundProd = allProducts.find(p => (p.name && p.name === it.name) || (p.title && p.title === it.name) || (p.sku && p.sku === it.sku));
+      const foundProd = allProducts.find(p => (p.name && p.name === it.name) || (p.title && p.title === it.name) || (p.sku && p.sku === it.sku) || p.variants?.some(variant => variant.sku === it.sku));
       let image = it.image;
       let sku = it.sku || '';
       let prodSlug = it.slug || '';
@@ -322,7 +359,10 @@ async function createAdminOrder(req, res) {
       }
 
       const itemQty = Number(it.quantity || 1);
-      const itemPrice = Number(it.price || 0);
+      const matchedVariant = foundProd?.variants?.find(v => v.sku === it.sku || v.label === it.variant);
+      const salePrice = Number(matchedVariant?.price ?? foundProd?.price ?? it.price ?? 0);
+      const itemPrice = Number(matchedVariant?.oldPrice || foundProd?.oldPrice || salePrice);
+      const productDiscount = Math.max(0, itemPrice - salePrice) * itemQty;
 
       return {
         sku,
@@ -333,79 +373,99 @@ async function createAdminOrder(req, res) {
         name: it.name,
         image,
         variant: it.variant || 'Tiêu chuẩn',
-        oldPrice: Number(oldPrice || itemPrice),
+        oldPrice: itemPrice,
         price: itemPrice,
+        salePrice,
+        productDiscount,
         quantity: itemQty,
-        total: Number(it.total || (itemPrice * itemQty))
+        total: itemPrice * itemQty
       };
     });
 
-    const subtotal = Number(data.subtotal || enrichedItems.reduce((sum, it) => sum + it.total, 0));
-    const discount = Number(data.discount || 0);
+    const subtotal = enrichedItems.reduce((sum, item) => sum + item.total, 0);
+    const productDiscount = enrichedItems.reduce((sum, item) => sum + item.productDiscount, 0);
+    const saleSubtotal = Math.max(0, subtotal - productDiscount);
+    const requestedDiscount = Number(data.discount || 0);
     const shippingFee = Number(data.shippingFee || 0);
-    const total = Number(data.total || (subtotal - discount + shippingFee));
-
-    const status = data.status || 'pending';
-    const statusLabels = {
-      pending: 'Chờ xác nhận',
-      processing: 'Chờ lấy hàng',
-      shipping: 'Đang vận chuyển',
-      delivered: 'Đã giao',
-      cancelled: 'Đã hủy'
-    };
-    const statusSteps = { pending: 1, processing: 2, shipping: 3, delivered: 4, cancelled: 0 };
-    const statusLabel = data.statusLabel || statusLabels[status] || 'Chờ xác nhận';
-    const paymentStatus = data.paymentStatus || 'unpaid';
-    const paymentStatusLabels = { paid: 'Đã thanh toán', unpaid: 'Chưa thanh toán', refunded: 'Hoàn tiền' };
-    const trackingCode = data.trackingCode || `GHN${Math.floor(1000 + Math.random() * 9000)}`;
-
+    if (!Number.isSafeInteger(requestedDiscount) || requestedDiscount < 0 || !Number.isSafeInteger(shippingFee) || shippingFee < 0) {
+      return res.status(400).json({ success: false, message: 'Phí vận chuyển và giảm giá phải là số nguyên không âm.' });
+    }
+    const discount = productDiscount + Math.min(requestedDiscount, saleSubtotal);
+    const total = subtotal - discount + shippingFee;
+    const status = 'pending';
+    const paymentStatus = data.paymentStatus === 'paid' ? 'paid' : 'unpaid';
+    const paymentStatusLabels = { paid: '\u0110\u00e3 thanh to\u00e1n', unpaid: 'Ch\u01b0a thanh to\u00e1n' };
+    const paymentMethod = data.paymentMethod === 'COD'
+      ? 'Thanh to\u00e1n khi nh\u1eadn h\u00e0ng (COD)'
+      : (data.paymentMethod || 'Thanh to\u00e1n khi nh\u1eadn h\u00e0ng (COD)');
+    const trackingCode = `JT${randomBytes(6).toString('hex').toUpperCase()}`;
     const receiver = data.receiver || {};
 
-    // Thứ tự các trường lưu vào MongoDB theo đúng chuẩn ảnh mẫu của khách hàng
+    // Keep the persisted field order and guest-order shape aligned with checkout orders.
     const orderDoc = {
       id,
       code,
       slug,
       date: dateStr,
       time: timeStr,
+      createdAt: now,
       status,
-      statusLabel,
-      step: typeof data.step === 'number' ? data.step : (statusSteps[status] ?? 1),
-      notice: data.notice || 'Đơn hàng đã được tạo thành công',
-      paymentMethod: data.paymentMethod || 'COD',
+      isDemo: false,
+      guestOrder: true,
+      inventoryDeducted: true,
+      soldCounted: true,
+      statusLabel: 'Ch\u1edd x\u00e1c nh\u1eadn',
+      step: 1,
       paymentStatus,
-      paymentStatusLabel: data.paymentStatusLabel || paymentStatusLabels[paymentStatus] || 'Chưa thanh toán',
+      paymentStatusLabel: paymentStatusLabels[paymentStatus],
+      paymentMethod,
+      shippingUnit: data.shippingUnit || 'J&T Express',
+      trackingCode,
       sender: {
         name: 'Floralia Herbal Tea',
-        address: '11A Bế Văn Đàn, Dĩ An, Bình Dương',
+        address: '11A B\u1ebf V\u0103n \u0110\u00e0n, D\u0129 An, B\u00ecnh D\u01b0\u01a1ng',
         email: 'floralia@gmail.com',
         phone: '0901 234 567'
       },
       receiver: {
-        name: receiver.name || 'Khách hàng',
-        phone: receiver.phone || '',
-        email: receiver.email || '',
+        name: receiver.name || 'Kh\u00e1ch h\u00e0ng',
         address: receiver.address || '',
-        customerId: receiver.customerId || ''
+        email: receiver.email || '',
+        phone: receiver.phone || ''
       },
       items: enrichedItems,
+      notice: '\u0110\u01a1n h\u00e0ng \u0111ang ch\u1edd x\u00e1c nh\u1eadn',
+      trackingTimeline: [
+        { title: '\u0110\u1eb7t h\u00e0ng th\u00e0nh c\u00f4ng', time: timelineTime, completed: true },
+        { title: 'Ch\u1edd x\u00e1c nh\u1eadn', time: timelineTime, completed: true }
+      ],
+      notes: [],
+      ...(typeof data.customerNote === 'string' && data.customerNote.trim() ? { customerNote: data.customerNote.trim() } : {}),
       subtotal,
+      productDiscount,
       discount,
       shippingFee,
       total,
-      shippingUnit: data.shippingUnit || 'Giao Hàng Nhanh',
-      trackingCode,
-      trackingTimeline: [
-        { title: 'Tạo đơn hàng thành công', time: `${dateStr} - ${timeStr}`, completed: true }
-      ],
-      notes: [],
-      createdAt: now,
-      updatedAt: now
+      ...(typeof data.source === 'string' && data.source.trim() ? { source: data.source.trim() } : {})
     };
 
-    const result = await Order.create(orderDoc);
+    const result = await Product.withTransaction(async session => {
+      await Product.deductStockBulk(enrichedItems, session);
+      await ProductSalesService.incrementSoldCounts(enrichedItems, session);
+      const inserted = await Order.create(orderDoc, { session });
+      if (inserted?.acknowledged !== true) throw new Error(`MongoDB did not acknowledge order ${id}.`);
+      return inserted;
+    });
+    AdminProduct.notifyProductChanged('sold');
     res.status(201).json({ success: true, order: normalizeOrder({ ...orderDoc, _id: result.insertedId }) });
   } catch (err) {
+    if (err.code === 'INSUFFICIENT_STOCK') {
+      return res.status(409).json({
+        success: false,
+        code: err.code,
+        message: `T\u1ed3n kho SKU ${err.sku} v\u1eeba thay \u0111\u1ed5i. Vui l\u00f2ng ki\u1ec3m tra l\u1ea1i t\u1ed3n kho.`
+      });
+    }
     console.error('Lỗi createAdminOrder:', err);
     res.status(500).json({ success: false, message: 'Lỗi server khi tạo đơn hàng.' });
   }
@@ -416,6 +476,7 @@ async function updateAdminOrderStatus(req, res) {
   try {
     const { id } = req.params;
     const { status } = req.body;
+    const currentOrder = status === 'cancelled' ? await Order.getById(id) : null;
 
     const statusInfo = {
       pending: { step: 1, label: 'Chờ xác nhận', notice: 'Đơn hàng đang chờ xác nhận.' },
@@ -453,10 +514,10 @@ async function updateAdminOrderStatus(req, res) {
         }
       };
     }
-    const updated = await Order.findOneAndUpdate(
-      filter,
-      update
-    );
+    const canCancelCurrentOrder = currentOrder && ['pending', 'processing', 'waiting'].includes(currentOrder.status);
+    const updated = status === 'cancelled' && canCancelCurrentOrder
+      ? await cancelOrderAndRestoreStock(currentOrder, updateFields)
+      : await Order.findOneAndUpdate(filter, update);
 
     if (!updated) {
       if (status === 'cancelled') {

@@ -3,11 +3,13 @@
     <div class="login-form-container">
 
       <div class="form-heading">
-        <h2>Đăng ký</h2>
-        <p class="form-description">Tạo tài khoản để bắt đầu hành trình trà thảo mộc cùng Floralia.</p>
+        <h2>{{ otpStep ? 'Xác thực tài khoản' : 'Đăng ký' }}</h2>
+        <p class="form-description">
+          {{ otpStep ? 'Nhập mã xác thực để hoàn tất tạo tài khoản Floralia.' : 'Tạo tài khoản để bắt đầu hành trình trà thảo mộc cùng Floralia.' }}
+        </p>
       </div>
 
-      <form (ngSubmit)="signup(signupForm)" #signupForm="ngForm" novalidate>
+      <form *ngIf="!otpStep" (ngSubmit)="signup(signupForm)" #signupForm="ngForm" novalidate>
 
         <!-- Họ tên -->
         <div class="form-field">
@@ -31,27 +33,35 @@
           </div>
         </div>
 
-        <!-- Email -->
+        <!-- Optional email -->
         <div class="form-field">
-          <label for="signupEmail">Email <span class="req">*</span></label>
+          <label for="signupEmail">Email <span class="optional-label">(không bắt buộc)</span></label>
           <div class="input-wrapper"
                [class.is-invalid]="(emailCtrl.invalid && (emailCtrl.touched || signupForm.submitted)) || emailTaken"
-               [class.is-valid]="emailCtrl.valid && emailCtrl.touched && !emailTaken">
+               [class.is-valid]="emailCtrl.valid && emailCtrl.touched && email && emailAvailable && !emailTaken">
             <i class="bi bi-envelope"></i>
             <input type="email" id="signupEmail" name="email" [(ngModel)]="email" #emailCtrl="ngModel"
-                   (ngModelChange)="emailTaken = false"
-                   required [pattern]="emailPattern"
-                   placeholder="Nhập địa chỉ email" autocomplete="email">
-            <i class="bi bi-check-circle-fill state-icon ok" *ngIf="emailCtrl.valid && emailCtrl.touched && !emailTaken"></i>
+                   (ngModelChange)="onEmailChanged()" (blur)="checkEmailAvailabilityNow()"
+                   [pattern]="emailPattern"
+                   placeholder="Nhập email (nếu có)" autocomplete="email">
+            <i class="bi bi-check-circle-fill state-icon ok"
+               *ngIf="emailCtrl.valid && emailCtrl.touched && email && emailAvailable && !emailTaken"></i>
           </div>
           <div class="field-error" *ngIf="emailCtrl.invalid && (emailCtrl.touched || signupForm.submitted)">
             <i class="bi bi-exclamation-circle"></i>
-            <span *ngIf="emailCtrl.errors?.['required']">Vui lòng nhập email.</span>
-            <span *ngIf="!emailCtrl.errors?.['required'] && emailCtrl.errors?.['pattern']">Email chưa đúng định dạng (ví dụ: ten@gmail.com).</span>
+            <span>Email chưa đúng định dạng (ví dụ: ten@gmail.com).</span>
           </div>
-          <div class="field-error" *ngIf="emailTaken && emailCtrl.valid">
+          <div class="field-error" *ngIf="emailTaken">
             <i class="bi bi-exclamation-circle"></i>
-            <span>Email này đã được đăng ký. Hãy dùng email khác hoặc đăng nhập.</span>
+            <span>Email này đã được sử dụng cho tài khoản khác.</span>
+          </div>
+          <small class="email-hint" *ngIf="emailChecking" role="status">Đang kiểm tra email...</small>
+          <small class="email-hint email-available" *ngIf="emailAvailable && !emailTaken" role="status">
+            Email này có thể sử dụng.
+          </small>
+          <div class="field-error" *ngIf="emailCheckError" role="alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>{{ emailCheckError }}</span>
           </div>
         </div>
 
@@ -59,18 +69,23 @@
         <div class="form-field">
           <label for="phone">Số điện thoại <span class="req">*</span></label>
           <div class="input-wrapper"
-               [class.is-invalid]="phoneCtrl.invalid && (phoneCtrl.touched || signupForm.submitted)"
-               [class.is-valid]="phoneCtrl.valid && phoneCtrl.touched">
+               [class.is-invalid]="(phoneCtrl.invalid && (phoneCtrl.touched || signupForm.submitted)) || phoneTaken"
+               [class.is-valid]="phoneCtrl.valid && phoneCtrl.touched && !phoneTaken">
             <i class="bi bi-telephone"></i>
             <input type="tel" id="phone" name="phone" [(ngModel)]="phone" #phoneCtrl="ngModel"
-                   required [pattern]="phonePattern" maxlength="12"
+                   required [pattern]="phonePattern" maxlength="10"
+                   (ngModelChange)="onPhoneChanged()" (blur)="checkPhoneAvailabilityOnBlur()"
                    placeholder="Nhập số điện thoại" autocomplete="tel">
-            <i class="bi bi-check-circle-fill state-icon ok" *ngIf="phoneCtrl.valid && phoneCtrl.touched"></i>
+            <i class="bi bi-check-circle-fill state-icon ok" *ngIf="phoneCtrl.valid && phoneCtrl.touched && !phoneTaken"></i>
           </div>
           <div class="field-error" *ngIf="phoneCtrl.invalid && (phoneCtrl.touched || signupForm.submitted)">
             <i class="bi bi-exclamation-circle"></i>
             <span *ngIf="phoneCtrl.errors?.['required']">Vui lòng nhập số điện thoại.</span>
             <span *ngIf="!phoneCtrl.errors?.['required'] && phoneCtrl.errors?.['pattern']">Số điện thoại chưa hợp lệ (ví dụ: 0912345678).</span>
+          </div>
+          <div class="field-error" *ngIf="phoneTaken" role="alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>Số điện thoại này đã được đăng ký.</span>
           </div>
         </div>
 
@@ -118,16 +133,69 @@
             <span *ngIf="confirmPassword && mismatch">Mật khẩu xác nhận không khớp.</span>
           </div>
         </div>
+        <div class="terms-field">
+          <label class="terms-check" for="termsAccepted">
+            <input type="checkbox" id="termsAccepted" name="termsAccepted" [(ngModel)]="termsAccepted" #termsCtrl="ngModel" required>
+            <span>Tôi đồng ý với
+              <a routerLink="/terms" target="_blank" rel="noopener">Điều khoản dịch vụ</a>
+              và
+              <a routerLink="/privacy" target="_blank" rel="noopener">Chính sách bảo mật</a>
+              của Floralia <span class="req">*</span>
+            </span>
+          </label>
+          <div class="field-error" *ngIf="termsCtrl.invalid && (termsCtrl.touched || signupForm.submitted)">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.</span>
+          </div>
+        </div>
+
         <div class="notice-message" *ngIf="notice" role="status">
           <i class="bi bi-info-circle"></i>
           <span>{{ notice }}</span>
         </div>
 
-        <button type="submit" class="btn-login" >Đăng ký</button>
+        <button type="submit" class="btn-login" [disabled]="isCheckingAvailability">
+          {{ isCheckingAvailability ? 'Đang kiểm tra...' : 'Tiếp tục xác thực' }}
+        </button>
       </form>
-      <div class="form-divider"><span>hoặc tiếp tục với</span></div>
+      <form *ngIf="otpStep" class="otp-form" (ngSubmit)="verifyOtp(otpForm)" #otpForm="ngForm" novalidate>
+        <div class="demo-otp-notice" role="status">
+          <i class="bi bi-info-circle"></i>
+          <div>
+            <strong>Mã OTP demo: <span class="demo-otp-code">{{ demoOtp }}</span></strong>
+            <p>Mã được hiển thị tại đây để mô phỏng SMS, không gửi tin nhắn hoặc email thật.</p>
+          </div>
+        </div>
 
-      <div class="social-login">
+        <div class="form-field">
+          <label for="signupOtp">Mã xác thực <span class="req">*</span></label>
+          <div class="input-wrapper" [class.is-invalid]="otpCtrl.invalid && (otpCtrl.touched || otpForm.submitted)">
+            <i class="bi bi-shield-check"></i>
+            <input type="text" id="signupOtp" name="otp" [(ngModel)]="enteredOtp" #otpCtrl="ngModel"
+                   required pattern="^[0-9]{6}$" minlength="6" maxlength="6" inputmode="numeric"
+                   autocomplete="one-time-code" placeholder="Nhập mã gồm 6 chữ số">
+          </div>
+          <div class="field-error" *ngIf="otpCtrl.invalid && (otpCtrl.touched || otpForm.submitted)">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>Vui lòng nhập mã xác thực gồm 6 chữ số.</span>
+          </div>
+          <div class="field-error" *ngIf="otpError" role="alert">
+            <i class="bi bi-exclamation-circle"></i><span>{{ otpError }}</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" [disabled]="isCreatingAccount">
+          {{ isCreatingAccount ? 'Đang tạo tài khoản...' : 'Xác nhận và đăng ký' }}
+        </button>
+        <div class="otp-actions">
+          <button type="button" (click)="resendDemoOtp()" [disabled]="isCreatingAccount">Tạo mã demo mới</button>
+          <button type="button" (click)="backToSignup()" [disabled]="isCreatingAccount">Quay lại thông tin</button>
+        </div>
+      </form>
+
+      <div class="form-divider" *ngIf="!otpStep"><span>hoặc tiếp tục với</span></div>
+
+      <div class="social-login" *ngIf="!otpStep">
         <button type="button" class="btn-social" (click)="socialLogin('facebook')">
           <i class="bi bi-facebook" style="color:#1877f2"></i>
           <span>Facebook</span>
@@ -143,7 +211,7 @@
         </button>
       </div>
 
-      <div class="signup-text">
+      <div class="signup-text" *ngIf="!otpStep">
         Bạn đã có tài khoản?
         <button type="button" (click)="goToLogin()">Đăng nhập</button>
       </div>

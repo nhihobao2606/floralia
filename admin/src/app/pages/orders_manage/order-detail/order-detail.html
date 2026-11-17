@@ -3,21 +3,25 @@
 
   <main class="admin-main">
     <header class="topbar">
-      <div class="topbar-title-group">
-        <h1>Quản lý đơn hàng / Chi tiết đơn hàng</h1>
+      <div class="breadcrumbs">
+        <a routerLink="/orders">Quản lý đơn hàng</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <strong>Chi tiết đơn hàng</strong>
       </div>
       <div class="topbar-right">
         <button class="topbar-bell" type="button" aria-label="Thông báo">
           <i class="bi bi-bell" aria-hidden="true"></i>
-          <span class="bell-badge">{{ notificationCount }}</span>
+          <span class="bell-badge">{{ notificationCount || 3 }}</span>
         </button>
 
         <div class="admin-account">
-          <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
-          <span class="account-copy">
-            <strong>{{ adminName }}</strong>
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar" aria-hidden="true">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
             <small>Quản trị viên</small>
-          </span>
+          </a>
           <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
             <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
             Đăng xuất
@@ -73,7 +77,7 @@
               type="button"
               [disabled]="ord.status !== 'pending'"
               (click)="confirmOrder()">
-              Chờ xác nhận
+              Xác nhận
             </button>
             <button
               class="banner-btn btn-cancel-order"
@@ -359,15 +363,8 @@
   </section>
 </div>
 
-<!-- Modal: Đăng xuất -->
-<div *ngIf="logoutConfirmationVisible" class="modal-backdrop" (click)="cancelLogoutConfirmation()">
-  <section class="logout-modal-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-    <div class="logout-icon"><i class="bi bi-box-arrow-right"></i></div>
-    <h2>Xác nhận đăng xuất</h2>
-    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị Floralia?</p>
-    <div class="modal-footer justify-center">
-      <button class="secondary-button" type="button" (click)="cancelLogoutConfirmation()">Hủy</button>
-      <button class="primary-button" type="button" (click)="confirmLogout()">Đăng xuất</button>
-    </div>
-  </section>
-</div>
+<app-admin-logout-dialog
+  [visible]="logoutConfirmationVisible"
+  (cancelled)="cancelLogoutConfirmation()"
+  (confirmed)="confirmLogout()"
+></app-admin-logout-dialog>

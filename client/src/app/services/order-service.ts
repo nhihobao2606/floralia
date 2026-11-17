@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, timeout } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { formatVietnameseDong } from '../shared/vnd-format';
 
 export interface OrderItem {
   sku: string;
@@ -76,6 +77,14 @@ export interface Order {
   shippingFee: number;
   total: number;
   refundAmount?: number;
+}
+
+function normalizeOrderShipping(order: Order): Order {
+  return {
+    ...order,
+    shippingUnit: order.shippingUnit || '',
+    trackingCode: order.trackingCode || ''
+  };
 }
 
 
@@ -155,7 +164,7 @@ export class OrderService {
         // receiver email is never used to infer ownership.
         const orders = (res.orders || []).filter(order =>
           order.isDemo || (!order.guestOrder && order.userId != null && String(order.userId) === owner)
-        );
+        ).map(normalizeOrderShipping);
         this.ordersCache = orders;
         this.ordersCacheOwner = owner;
         return this.ordersCache;
@@ -189,6 +198,7 @@ export class OrderService {
   }
 
   saveOrderLocal(order: Order): Order {
+    order = normalizeOrderShipping(order);
     const owner = this.currentUserKey();
     if (this.ordersCacheOwner !== owner) {
       this.ordersCache = [];
@@ -219,26 +229,13 @@ export class OrderService {
   }
 
   createOrder(orderData: Partial<Order>): Observable<{ success: boolean; order: Order; persisted: boolean }> {
-    return this.http.post<{ success: boolean; order: Order }>(this.apiUrl, orderData, {
+    return this.http.post<{ success: boolean; order: Order; persisted?: boolean }>(this.apiUrl, orderData, {
       headers: this.authHeaders()
     }).pipe(
       timeout({ first: 20_000 }),
       map(res => {
-        const timeline = res.order?.trackingTimeline || [];
-        const trackingReady = res.order?.shippingUnit === 'J&T Express' &&
-          typeof res.order?.trackingCode === 'string' && res.order.trackingCode.startsWith('JT') &&
-          timeline.length === 2 &&
-          timeline[0]?.title === 'Đặt hàng thành công' &&
-          timeline[1]?.title === 'Chờ xác nhận' &&
-          timeline[0]?.time === timeline[1]?.time &&
-          timeline.every(event => event.completed === true);
-        if (res.order && !trackingReady) {
-          throw new Error(
-            `Đơn ${res.order.code || res.order.id} có thể đã được tạo, nhưng máy chủ trả về dữ liệu tracking cũ. Đừng đặt lại ngay; hãy khởi động đúng backend rồi kiểm tra đơn trong MongoDB.`
-          );
-        }
-        if (res.order) this.saveOrderLocal(res.order);
-        return { ...res, persisted: true };
+        if (res.order?.id) this.saveOrderLocal(res.order);
+        return { ...res, persisted: res.persisted ?? Boolean(res.order?.id) };
       })
     );
   }
@@ -297,6 +294,6 @@ export class OrderService {
   }
 
   formatPrice(num: number): string {
-    return (num || 0).toLocaleString('vi-VN') + '?';
+    return formatVietnameseDong(num);
   }
 }

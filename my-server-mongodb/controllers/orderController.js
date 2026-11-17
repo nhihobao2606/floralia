@@ -1,6 +1,7 @@
 const Order = require('../models/order');
 const Product = require('../models/product');
 const ProductSalesService = require('../models/product-sales-service');
+const { cancelOrderAndRestoreStock } = require('../models/order-cancellation-service');
 const AdminProduct = require('../models/adminProduct');
 const User = require('../models/user');
 const Voucher = require('../models/voucher');
@@ -13,6 +14,7 @@ const GUEST_OTP_COOLDOWN_MS = 60 * 1000;
 const GUEST_OTP_MAX_ATTEMPTS = 5;
 const guestTrackingChallenges = new Map();
 const guestOtpCooldowns = new Map();
+const guestOrderActions = new Map();
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -66,6 +68,12 @@ function belongsToUser(order, userId) {
   return Boolean(order?.userId && userId && String(order.userId) === String(userId));
 }
 
+function canReplayOrderForRequester(order, req) {
+  return req.userId
+    ? belongsToUser(order, req.userId)
+    : Boolean(order?.guestOrder && !order.userId);
+}
+
 function isLegacyDemoOrder(order) {
   return /^#?FL00\d+$/i.test(String(order?.id || order?.code || ''));
 }
@@ -89,13 +97,32 @@ function publicGuestTrackingOrder(order) {
     createdAt: order.createdAt,
     date: order.date,
     time: order.time,
+    paymentMethod: order.paymentMethod || '',
+    shippingUnit: order.shippingUnit || '',
     trackingCode: order.trackingCode || '',
     trackingTimeline: Array.isArray(order.trackingTimeline) ? order.trackingTimeline : [],
     notice: order.notice || '',
+    receiver: {
+      name: order.receiver?.name || '',
+      phone: order.receiver?.phone || '',
+      email: order.receiver?.email || '',
+      address: order.receiver?.address || ''
+    },
+    subtotal: Number(order.subtotal || 0),
+    productDiscount: Number(order.productDiscount ?? order.discount ?? 0),
+    voucherDiscount: Number(order.voucherDiscount || 0),
+    voucherCode: order.voucherCode || '',
+    shippingFee: Number(order.shippingFee || 0),
+    total: Number(order.total || 0),
     items: (order.items || []).map(item => ({
+      sku: item.sku || '',
       name: item.name,
       quantity: item.quantity,
-      image: item.image || ''
+      image: item.image || '',
+      variant: item.variant || '',
+      price: Number(item.salePrice ?? item.price ?? item.oldPrice ?? 0),
+      oldPrice: Number(item.oldPrice || 0),
+      total: Number(item.total ?? ((item.salePrice ?? item.price ?? item.oldPrice ?? 0) * item.quantity) ?? 0)
     }))
   };
 }
@@ -152,6 +179,9 @@ function pruneGuestOtpState(now = Date.now()) {
   }
   for (const [key, cooldownUntil] of guestOtpCooldowns) {
     if (cooldownUntil <= now) guestOtpCooldowns.delete(key);
+  }
+  for (const [key, access] of guestOrderActions) {
+    if (access.expiresAt <= now) guestOrderActions.delete(key);
   }
 }
 
@@ -244,14 +274,62 @@ async function verifyGuestTrackingOtp(req, res) {
     const ownedOrders = orders.filter(order =>
       !order.userId && normalizeVietnamPhone(order.receiver?.phone) === challenge.phone
     );
+    const guestAccessToken = ownedOrders.length ? randomBytes(32).toString('hex') : null;
+    if (guestAccessToken) {
+      guestOrderActions.set(guestAccessToken, {
+        orderIds: new Set(ownedOrders.map(order => String(order.id))),
+        expiresAt: now + 30 * 60 * 1000
+      });
+    }
     return res.json({
       success: true,
       flowVersion: 'guest-tracking-otp-v2',
+      guestAccessToken,
       orders: ownedOrders.map(publicGuestTrackingOrder)
     });
   } catch (error) {
     console.error('Không thể xác thực OTP tra cứu đơn hàng:', error);
     return res.status(500).json({ success: false, message: 'Không thể xác thực mã OTP lúc này.' });
+  }
+}
+
+async function cancelGuestOrder(req, res) {
+  try {
+    const id = String(req.params.id || '');
+    const accessToken = String(req.get('x-guest-order-token') || '');
+    const access = guestOrderActions.get(accessToken);
+    if (!accessToken || !access || access.expiresAt <= Date.now() || !access.orderIds.has(id)) {
+      if (accessToken && access?.expiresAt <= Date.now()) guestOrderActions.delete(accessToken);
+      return res.status(403).json({ success: false, message: 'Phiên xác minh đã hết hạn. Vui lòng xác minh OTP lại.' });
+    }
+
+    const cancelReasons = normalizeCancelReasons(req.body?.cancelReasons, req.body?.cancelReason);
+    if (!cancelReasons) {
+      return res.status(400).json({ success: false, message: 'Vui lòng chọn lý do hủy đơn.' });
+    }
+
+    const updated = await Order.findOneAndUpdate(
+      {
+        id,
+        guestOrder: true,
+        userId: { $in: [null, ''] },
+        status: { $in: ['pending', 'processing', 'waiting'] }
+      },
+      { $set: {
+        status: 'cancelled',
+        statusLabel: 'Đã hủy',
+        notice: 'Đơn hàng đã được hủy',
+        cancelReasons,
+        cancelReason: summarizeCancelReasons(cancelReasons)
+      } }
+    );
+    if (!updated) {
+      return res.status(409).json({ success: false, message: 'Đơn không còn ở trạng thái có thể hủy hoặc đã được cập nhật. Vui lòng tải lại trang.' });
+    }
+    return res.json({ success: true, order: publicGuestTrackingOrder(updated) });
+  } catch (error) {
+    console.error('Không thể hủy đơn guest:', error);
+    return res.status(500).json({ success: false, message: 'Không thể hủy đơn hàng lúc này. Vui lòng thử lại.' });
   }
 }
 
@@ -314,13 +392,21 @@ function sortOrdersNewestFirst(orders) {
 function normalizeClientOrder(order) {
   if (!order) return order;
   const status = order.status === 'waiting' ? 'processing' : order.status;
+  const shippingUnit = order.shippingUnit || '';
+  const trackingCode = order.trackingCode || '';
   const labels = {
     pending: 'Chờ xác nhận', processing: 'Chờ lấy hàng', shipping: 'Đang vận chuyển',
     delivered: 'Đã giao', completed: 'Hoàn thành', cancelled: 'Đã hủy',
     refunded: 'Đã hoàn tiền', refund_pending: 'Chờ duyệt hoàn tiền',
     refund_approved: 'Đã duyệt hoàn tiền'
   };
-  return { ...order, status, statusLabel: labels[status] || order.statusLabel || labels.pending };
+  return {
+    ...order,
+    shippingUnit,
+    trackingCode,
+    status,
+    statusLabel: labels[status] || order.statusLabel || labels.pending
+  };
 }
 
 // GET /api/orders
@@ -479,7 +565,7 @@ async function createOrder(req, res) {
       }
 
       verifiedItems.push({
-        sku: item.sku,
+        sku: variant?.sku || item.sku,
         slug: product.slug || '',
         productId: product._id?.toString() || '',
         category: product.category || '',
@@ -543,6 +629,8 @@ async function createOrder(req, res) {
       status: 'pending',
       isDemo: false,
       guestOrder: !req.userId,
+      inventoryDeducted: true,
+      soldCounted: true,
       statusLabel: 'Chờ xác nhận',
       step: 1,
       paymentStatus: 'unpaid',
@@ -575,39 +663,39 @@ async function createOrder(req, res) {
       total: subtotal - discount + shippingFee,
       ...(req.userId ? { userId: String(req.userId) } : {})
     };
-    const insertResult = await Order.create(newOrder);
-    const savedOrder = await Order.getById(id);
-    const savedTimeline = savedOrder?.trackingTimeline;
-    const trackingWasPersisted = insertResult?.acknowledged === true &&
-      savedOrder?.shippingUnit === 'J&T Express' &&
-      typeof savedOrder?.trackingCode === 'string' && savedOrder.trackingCode.startsWith('JT') &&
-      Array.isArray(savedTimeline) &&
-      savedTimeline.length === 2 &&
-      savedTimeline[0]?.title === 'Đặt hàng thành công' &&
-      savedTimeline[1]?.title === 'Chờ xác nhận' &&
-      savedTimeline[0]?.time === savedTimeline[1]?.time &&
-      savedTimeline.every(event => event.completed === true);
-    if (!trackingWasPersisted) {
-      throw new Error(`Order ${id} was inserted without the expected J&T tracking fields.`);
-    }
-    console.info(`Persisted order ${id}: J&T Express tracking data and initial timeline verified.`);
-    res.json({ success: true, order: savedOrder });
 
-    const postSaveUpdates = [ProductSalesService.incrementSoldCounts(verifiedItems)];
-    if (voucherCode) postSaveUpdates.push(Voucher.incrementUsed(voucherCode));
-    Promise.all(postSaveUpdates)
-      .then(([missingSkus]) => {
-        missingSkus.forEach(sku => {
-          console.error(`Không tìm thấy sản phẩm SKU "${sku}" để cập nhật số lượng đã bán.`);
-        });
-        AdminProduct.notifyProductChanged('sold');
-      })
-      .catch(error => {
-        console.error('Không thể cập nhật thống kê sau khi lưu đơn hàng:', error);
+    const insertResult = await Product.withTransaction(async session => {
+      await Product.deductStockBulk(verifiedItems, session);
+      await ProductSalesService.incrementSoldCounts(verifiedItems, session);
+      const result = await Order.create(newOrder, { session });
+      if (result?.acknowledged !== true) {
+        throw new Error(`MongoDB did not acknowledge order ${id}.`);
+      }
+      return result;
+    });
+    console.info(`Persisted order ${id} with its initial tracking timeline.`);
+    res.json({ success: true, order: newOrder, persisted: true });
+
+    AdminProduct.notifyProductChanged('sold');
+    if (voucherCode) {
+      Voucher.incrementUsed(voucherCode).catch(error => {
+        console.error('Could not update voucher usage after saving order:', error);
       });
+    }
   } catch (err) {
+    if (err.code === 'INSUFFICIENT_STOCK') {
+      return res.status(409).json({
+        success: false,
+        code: err.code,
+        message: `T\u1ed3n kho SKU ${err.sku} v\u1eeba thay \u0111\u1ed5i. Vui l\u00f2ng t\u1ea3i l\u1ea1i gi\u1ecf h\u00e0ng v\u00e0 th\u1eed l\u1ea1i.`
+      });
+    }
+    if (res.headersSent) {
+      console.error('A post-save order operation failed after success was sent:', err);
+      return;
+    }
     console.error('Lỗi khi lưu đơn hàng hoặc cập nhật số lượng đã bán:', err);
-    res.status(500).json({ success: false, message: 'Lỗi server khi tạo đơn hàng.' });
+    res.status(500).json({ success: false, code: 'ORDER_CREATE_FAILED', message: 'Không thể lưu đơn hàng vào hệ thống. Đơn chưa được xác nhận; vui lòng thử lại.' });
   }
 }
 
@@ -641,7 +729,7 @@ async function updateOrderStatus(req, res) {
         cancelReasons: normalizedCancelReasons,
         cancelReason: summarizeCancelReasons(normalizedCancelReasons)
       };
-    } else if (status === 'refund_pending' && order.status === 'delivered') {
+    } else if (status === 'refund_pending' && ['delivered', 'completed'].includes(order.status)) {
       if (
         typeof refundReason !== 'string' || !refundReason.trim() ||
         !Array.isArray(refundImages) || refundImages.length > 5 ||
@@ -665,12 +753,16 @@ async function updateOrderStatus(req, res) {
       });
     }
 
-    const updated = await Order.findOneAndUpdate(
-      { id: order.id },
-      { $set: updateFields }
-    );
+    const updated = status === 'cancelled'
+      ? await cancelOrderAndRestoreStock(order, updateFields)
+      : await Order.findOneAndUpdate({ id: order.id }, { $set: updateFields });
     if (!updated) {
-      return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng.' });
+      return res.status(status === 'cancelled' ? 409 : 404).json({
+        success: false,
+        message: status === 'cancelled'
+          ? '\u0110\u01a1n h\u00e0ng \u0111\u00e3 \u0111\u01b0\u1ee3c c\u1eadp nh\u1eadt. Vui l\u00f2ng t\u1ea3i l\u1ea1i.'
+          : 'Kh\u00f4ng t\u00ecm th\u1ea5y \u0111\u01a1n h\u00e0ng.'
+      });
     }
     res.json({ success: true, order: updated });
   } catch (err) {
@@ -789,5 +881,6 @@ module.exports = {
   updateAdminOrderStatus,
   approveRefund,
   requestGuestTrackingOtp,
-  verifyGuestTrackingOtp
+  verifyGuestTrackingOtp,
+  cancelGuestOrder
 };

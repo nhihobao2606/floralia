@@ -1,9 +1,5 @@
 <!-- Banner -->
-<nav class="shop-breadcrumb" aria-label="Điều hướng">
-  <a routerLink="/home">Trang chủ</a>
-  <i class="bi bi-chevron-right" aria-hidden="true"></i>
-  <span>Sản phẩm</span>
-</nav>
+<app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Sản phẩm' }]"></app-breadcrumb>
 
 <section class="shop-hero">
   <div class="container shop-hero-inner">
@@ -123,8 +119,8 @@
                 <div>
                   <h6><a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products }">{{ p.name }}</a></h6>
                   <p>
-                    {{ p.price | currency:'VND':'symbol':'1.0-0':'vi' }}
-                    <del *ngIf="p.oldPrice">{{ p.oldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</del>
+                    {{ p.price | vnd }}
+                    <del *ngIf="p.oldPrice">{{ p.oldPrice | vnd }}</del>
                   </p>
                 </div>
               </div>
@@ -179,9 +175,9 @@
 
              <div class="sale-price">
                <span class="sale-current">
-                 <small class="price-from-prefix" *ngIf="shouldShowFromPrefix(item)">Từ </small>{{ getDisplayPrice(item) | currency:'VND':'symbol':'1.0-0':'vi' }}
+                 <small class="price-from-prefix" *ngIf="shouldShowFromPrefix(item)">Từ </small>{{ getDisplayPrice(item) | vnd }}
                </span>
-               <span class="sale-old" *ngIf="getDisplayOldPrice(item) > 0">{{ getDisplayOldPrice(item) | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+               <span class="sale-old" *ngIf="getDisplayOldPrice(item) > 0">{{ getDisplayOldPrice(item) | vnd }}</span>
              </div>
 
              <div class="product-actions">
@@ -207,47 +203,50 @@
           </div>
         </div>
 
-        <nav
-          *ngIf="!loading && filteredProducts.length > 0"
-          class="pagination"
-          aria-label="Phân trang sản phẩm">
-          <span class="pagination-summary">
-            Trang {{ currentPage }} / {{ totalPages }}
-          </span>
-          <div class="pagination-controls">
-            <button
-              type="button"
-              class="pagination-arrow"
-              aria-label="Trang trước"
-              [disabled]="currentPage === 1"
-              (click)="goToPage(currentPage - 1)">
-              <i class="bi bi-chevron-left" aria-hidden="true"></i>
-            </button>
-            <ng-container *ngFor="let page of pageItems">
-              <button
-                *ngIf="page !== 'ellipsis'; else ellipsis"
-                type="button"
-                class="pagination-page"
-                [class.active]="currentPage === page"
-                [attr.aria-current]="currentPage === page ? 'page' : null"
-                [attr.aria-label]="'Trang ' + page"
-                (click)="goToPage(page)">
-                {{ page }}
-              </button>
-              <ng-template #ellipsis>
-                <span class="pagination-ellipsis" aria-hidden="true">…</span>
-              </ng-template>
-            </ng-container>
-            <button
-              type="button"
-              class="pagination-arrow"
-              aria-label="Trang sau"
-              [disabled]="currentPage === totalPages"
-              (click)="goToPage(currentPage + 1)">
-              <i class="bi bi-chevron-right" aria-hidden="true"></i>
-            </button>
-          </div>
-        </nav>
+        <div class="pagination-wrapper" *ngIf="!loading && totalPages > 1">
+          <nav aria-label="Phân trang sản phẩm">
+            <ul class="pagination-list">
+              <li class="page-item">
+                <button
+                  type="button"
+                  class="page-btn nav-btn"
+                  aria-label="Trang trước"
+                  [disabled]="currentPage === 1"
+                  (click)="goToPage(currentPage - 1)">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </button>
+              </li>
+              <ng-container *ngFor="let page of pageItems">
+                <li class="page-item" *ngIf="page !== 'ellipsis'; else ellipsis">
+                  <button
+                    type="button"
+                    class="page-btn number-btn"
+                    [class.active]="currentPage === page"
+                    [attr.aria-current]="currentPage === page ? 'page' : null"
+                    [attr.aria-label]="'Trang ' + page"
+                    (click)="goToPage(page)">
+                    {{ page }}
+                  </button>
+                </li>
+                <ng-template #ellipsis>
+                  <li class="page-item">
+                    <span class="pagination-ellipsis" aria-hidden="true">…</span>
+                  </li>
+                </ng-template>
+              </ng-container>
+              <li class="page-item">
+                <button
+                  type="button"
+                  class="page-btn nav-btn"
+                  aria-label="Trang sau"
+                  [disabled]="currentPage === totalPages"
+                  (click)="goToPage(currentPage + 1)">
+                  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </section>
 
     </div>
@@ -287,8 +286,8 @@
         <p class="cart-add-eyebrow">THÊM VÀO GIỎ HÀNG</p>
         <h2 id="cart-add-title">{{ product.name }}</h2>
         <div class="cart-add-price">
-          <strong>{{ cartPopupPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
-          <del *ngIf="cartPopupOldPrice > cartPopupPrice">{{ cartPopupOldPrice | currency:'VND':'symbol':'1.0-0':'vi' }}</del>
+          <strong>{{ cartPopupPrice | vnd }}</strong>
+          <del *ngIf="cartPopupOldPrice > cartPopupPrice">{{ cartPopupOldPrice | vnd }}</del>
         </div>
       </div>
     </div>

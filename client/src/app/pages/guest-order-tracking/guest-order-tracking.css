@@ -31,6 +31,8 @@
 .guest-order-items { display: grid; gap: 7px; padding: 12px 0; border-top: 1px solid #edf1eb; border-bottom: 1px solid #edf1eb; }
 .guest-order-items div { display: flex; justify-content: space-between; gap: 12px; color: #56675a; font-size: 12px; }
 .guest-order-items strong { flex: 0 0 auto; }
+.guest-order-open { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; margin-top: 14px; padding: 0 15px; border: 1px solid #cfe0c8; border-radius: 24px; background: #f1f7ee; color: #2f7043; font: 600 13px 'Roboto', sans-serif; cursor: pointer; transition: .18s; }
+.guest-order-open:hover { border-color: #397347; background: #397347; color: #fff; }
 .guest-tracking-code { margin: 12px 0; color: #647668; font-size: 12px; }
 .guest-tracking-code strong { color: #355f3e; }
 .guest-order-timeline { display: grid; gap: 0; margin: 14px 0 0; padding: 0; list-style: none; }

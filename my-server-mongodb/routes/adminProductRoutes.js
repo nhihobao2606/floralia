@@ -6,7 +6,8 @@ const {
     getAdminProduct,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    deleteProductsBulk
 } = require('../controllers/adminProductController');
 const {
     getAdminCategories,
@@ -28,6 +29,7 @@ router.get('/', getAdminProducts);
 router.post('/', createProduct);
 router.get('/:id', getAdminProduct);
 router.put('/:id', updateProduct);
+router.delete('/bulk', deleteProductsBulk);
 router.delete('/:id', deleteProduct);
 
 module.exports = router;

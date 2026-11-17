@@ -30,7 +30,10 @@ export class Products implements OnInit, OnDestroy {
   listError = '';
   actionError = '';
   pendingDelete: AdminProduct | null = null;
+  pendingDeleteProducts: AdminProduct[] = [];
+  selectedProductIds = new Set<string>();
   deleting = false;
+  deletingSelected = false;
   logoutConfirmationVisible = false;
   adminName = 'Admin';
   private requestId = 0;
@@ -62,6 +65,8 @@ export class Products implements OnInit, OnDestroy {
   get pageStart(): number { return this.total ? (this.currentPage - 1) * this.pageSize + 1 : 0; }
   get pageEnd(): number { return Math.min(this.currentPage * this.pageSize, this.total); }
   get pageNumbers(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i + 1); }
+  get allVisibleSelected(): boolean { return this.products.length > 0 && this.products.every(product => this.selectedProductIds.has(this.selectionId(product))); }
+  get selectedCount(): number { return this.selectedProductIds.size; }
 
   private readAdminName(): void {
     try {
@@ -160,6 +165,45 @@ export class Products implements OnInit, OnDestroy {
     void this.router.navigate(['/admin-login']);
   }
   editProduct(product: AdminProduct): void { void this.router.navigate(['/products', product._id, 'edit']); }
+  private selectionId(product: AdminProduct): string { return product._id || product.sku; }
+  isProductSelected(product: AdminProduct): boolean { return this.selectedProductIds.has(this.selectionId(product)); }
+  toggleProductSelection(product: AdminProduct): void {
+    const next = new Set(this.selectedProductIds); const id = this.selectionId(product);
+    next.has(id) ? next.delete(id) : next.add(id); this.selectedProductIds = next;
+  }
+  toggleSelectAllVisible(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked; const next = new Set(this.selectedProductIds);
+    this.products.forEach(product => { const id = this.selectionId(product); checked ? next.add(id) : next.delete(id); });
+    this.selectedProductIds = next;
+  }
+  requestDeleteSelected(): void {
+    const selected = this.allProducts.filter(product => this.selectedProductIds.has(this.selectionId(product)));
+    if (!selected.length) return;
+    this.pendingDeleteProducts = selected; this.actionError = '';
+  }
+  cancelDeleteSelected(): void { if (!this.deletingSelected) this.pendingDeleteProducts = []; }
+  confirmDeleteSelected(): void {
+    if (!this.pendingDeleteProducts.length || this.deletingSelected) return;
+    const products = [...this.pendingDeleteProducts];
+    if (products.some(product => !product._id)) { this.actionError = 'Một số sản phẩm thiếu mã định danh nên không thể xóa.'; return; }
+    this.deletingSelected = true; this.actionError = '';
+    this.service.deleteMany(products.map(product => product._id!)).subscribe({
+      next: () => {
+        const deletedIds = new Set(products.map(product => this.selectionId(product)));
+        this.allProducts = this.allProducts.filter(product => !deletedIds.has(this.selectionId(product)));
+        products.forEach(product => { if (product._id) this.service.removeCachedProduct(product._id); });
+        this.selectedProductIds = new Set([...this.selectedProductIds].filter(id => !deletedIds.has(id)));
+        this.pendingDeleteProducts = []; this.deletingSelected = false;
+        if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+        this.applyLocalFilters(); this.loadProducts(); this.changeDetector.markForCheck();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.deletingSelected = false;
+        this.actionError = error.error?.message || 'Không thể xóa các sản phẩm đã chọn.';
+        this.changeDetector.markForCheck();
+      },
+    });
+  }
   imageSource(product: AdminProduct): string {
     const image = product.imageUrl || product.thumbnail;
     if (!image) return '/assets/logo.png';
@@ -196,6 +240,7 @@ export class Products implements OnInit, OnDestroy {
         this.pendingDelete = null;
         this.deleting = false;
         this.allProducts = this.allProducts.filter(product => product._id !== deletedId);
+        if (deletedId) { const selected = new Set(this.selectedProductIds); selected.delete(deletedId); this.selectedProductIds = selected; }
         if (deletedId) this.service.removeCachedProduct(deletedId);
         if (this.products.length === 1 && this.currentPage > 1) this.currentPage--;
         this.changeDetector.markForCheck();

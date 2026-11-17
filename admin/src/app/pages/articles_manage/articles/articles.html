@@ -2,29 +2,37 @@
   <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
 
   <main class="admin-main">
-    <header class="topbar">
+    <header class="topbar admin-standard-topbar">
       <h1>Quản lý bài viết</h1>
-      <div class="admin-account">
-        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
-        <span class="account-copy">
-          <strong>{{ adminName }}</strong>
-          <small>Quản trị viên</small>
-        </span>
-        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
-          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-          Đăng xuất
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
         </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar" aria-hidden="true">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            Đăng xuất
+          </button>
+        </div>
       </div>
     </header>
 
-    <section class="page-content">
-      <section class="welcome-card">
+    <section class="page-content admin-standard-page-content">
+      <section class="welcome-card admin-standard-hero">
         <div>
-          <p class="welcome-kicker">KHÔNG GIAN NỘI DUNG FLORALIA</p>
-          <h2>Chào mừng trở lại, {{ adminName }}</h2>
-          <p>Hôm nay bạn muốn chia sẻ câu chuyện trà thảo mộc nào với khách hàng?</p>
+          <p class="welcome-kicker admin-standard-hero-kicker">KHÔNG GIAN NỘI DUNG FLORALIA</p>
+          <h2 class="admin-standard-hero-title">Chào mừng trở lại, {{ adminName }}</h2>
+          <p class="admin-standard-hero-description">Chia sẻ câu chuyện trà thảo mộc và cập nhật nội dung hữu ích cho khách hàng.</p>
         </div>
-        <button class="primary-button" type="button" (click)="openCreateModal()">
+        <button class="primary-button admin-standard-hero-action" type="button" (click)="openCreateModal()">
           <i class="bi bi-plus-lg" aria-hidden="true"></i>
           Thêm bài viết
         </button>
@@ -163,22 +171,11 @@
   </main>
 </div>
 
-<div *ngIf="logoutConfirmationVisible" class="logout-confirm-backdrop" (click)="cancelLogoutConfirmation()">
-  <section
-    class="logout-confirm-dialog"
-    role="alertdialog"
-    aria-modal="true"
-    aria-labelledby="logoutConfirmTitle"
-    (click)="$event.stopPropagation()">
-    <span class="logout-confirm-icon"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></span>
-    <h2 id="logoutConfirmTitle">Xác nhận đăng xuất</h2>
-    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
-    <div class="logout-confirm-actions">
-      <button type="button" class="logout-cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button>
-      <button type="button" class="logout-submit-button" (click)="confirmLogout()">Đăng xuất</button>
-    </div>
-  </section>
-</div>
+<app-admin-logout-dialog
+  [visible]="logoutConfirmationVisible"
+  (cancelled)="cancelLogoutConfirmation()"
+  (confirmed)="confirmLogout()"
+></app-admin-logout-dialog>
 
 <div *ngIf="pendingDeleteArticle as article" class="delete-confirm-backdrop" (click)="cancelDelete()">
   <section

@@ -1,0 +1,15 @@
+<div *ngIf="visible" class="unsaved-changes-backdrop" (click)="stay.emit()">
+  <section class="unsaved-changes-dialog" role="alertdialog" aria-modal="true" aria-labelledby="unsavedChangesTitle" (click)="$event.stopPropagation()">
+    <span class="unsaved-changes-icon"><i class="bi bi-exclamation-lg" aria-hidden="true"></i></span>
+    <h2 id="unsavedChangesTitle">Bạn có thay đổi chưa lưu</h2>
+    <p>Bạn có muốn lưu thay đổi trước khi rời khỏi trang này không?</p>
+    <div class="unsaved-changes-actions">
+      <button type="button" [disabled]="saving" (click)="stay.emit()">Ở lại</button>
+      <button type="button" class="unsaved-discard-button" [disabled]="saving" (click)="discard.emit()">Không lưu</button>
+      <button type="button" class="unsaved-save-button" [disabled]="saving" (click)="saveAndLeave.emit()">
+        {{ saving ? 'Đang lưu...' : 'Lưu và rời trang' }}
+      </button>
+    </div>
+    <p *ngIf="error" class="unsaved-changes-error" role="alert">{{ error }}</p>
+  </section>
+</div>

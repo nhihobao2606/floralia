@@ -1,18 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
+import { CustomSelect, CustomSelectOption } from '../../../components/custom-select/custom-select';
 import { AdminNotificationService } from '../../../services/admin-notification-service';
 import { AdminInventoryService, InventoryProduct } from '../../../services/admin-inventory-service';
+import { UnsavedChangesDialog } from '../../../components/unsaved-changes-dialog/unsaved-changes-dialog';
 
 interface ReceiveLine { productSku: string; variantSku: string; quantity: number | null; }
 
 @Component({
   selector: 'app-receive-stock',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminSidebar, RouterLink],
+  imports: [CommonModule, FormsModule, AdminSidebar, AdminLogoutDialog, RouterLink, CustomSelect, UnsavedChangesDialog],
   templateUrl: './receive-stock.html',
   styleUrl: './receive-stock.css',
 })
@@ -26,6 +29,10 @@ export class ReceiveStock implements OnInit {
   errorMessage = '';
   loadError = '';
   logoutConfirmationVisible = false;
+  exitPromptVisible = false;
+  private lastSavedSnapshot = '';
+  private resolveCanDeactivate?: (allowNavigation: boolean) => void;
+  private pendingLogout = false;
 
   constructor(
     private readonly inventoryService: AdminInventoryService,
@@ -35,14 +42,16 @@ export class ReceiveStock implements OnInit {
   ) {}
 
   get unreadNotificationsCount(): number { return this.notificationService.unreadCount; }
+  get productOptions(): CustomSelectOption[] { return this.products.map(product => ({ label: product.name, value: product.sku })); }
 
   ngOnInit(): void {
     this.readAdminName();
     this.loading = true;
     this.inventoryService.getAll().subscribe({
-      next: products => { this.products = products || []; this.loading = false; this.changeDetector.markForCheck(); },
+      next: products => { this.products = products || []; this.loading = false; this.lastSavedSnapshot = this.formSnapshot(); this.changeDetector.markForCheck(); },
       error: error => {
         this.loading = false;
+        this.lastSavedSnapshot = this.formSnapshot();
         if (error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403)) { this.logout(); return; }
         this.loadError = error?.error?.message || 'Không thể tải danh sách sản phẩm.';
         this.changeDetector.markForCheck();
@@ -51,6 +60,7 @@ export class ReceiveStock implements OnInit {
   }
 
   get totalUnits(): number { return this.lines.reduce((sum, line) => sum + (Number(line.quantity) > 0 ? Number(line.quantity) : 0), 0); }
+  get hasUnsavedChanges(): boolean { return !this.loading && !!this.lastSavedSnapshot && this.formSnapshot() !== this.lastSavedSnapshot; }
   get validLines(): boolean {
     return this.lines.length > 0 && this.lines.every(line => {
       const product = this.productFor(line);
@@ -85,8 +95,9 @@ export class ReceiveStock implements OnInit {
   }
   cancel(): void { void this.router.navigate(['/inventory']); }
 
-  submitReceipt(): void {
-    if (!this.validLines || this.saving || this.loading) return;
+  submitReceipt(exitAfterSave = false): void {
+    if (this.saving || this.loading) return;
+    if (!this.validLines) { this.errorMessage = 'Vui lòng chọn sản phẩm, phân loại và số lượng hợp lệ cho phiếu nhập.'; return; }
     this.saving = true;
     this.errorMessage = '';
     this.inventoryService.receiveStock(
@@ -100,7 +111,13 @@ export class ReceiveStock implements OnInit {
     ).subscribe({
       next: () => {
         this.saving = false;
-        void this.router.navigate(['/inventory']);
+        this.lastSavedSnapshot = this.formSnapshot();
+        if (exitAfterSave) {
+          this.finishLogoutIfNeeded();
+          this.resolveExitNavigation(true);
+        } else {
+          void this.router.navigate(['/inventory']);
+        }
       },
       error: error => {
         this.saving = false;
@@ -110,17 +127,44 @@ export class ReceiveStock implements OnInit {
     });
   }
 
+  confirmCanDeactivate(): boolean | Promise<boolean> {
+    if (!this.hasUnsavedChanges) { this.finishLogoutIfNeeded(); return true; }
+    this.errorMessage = '';
+    this.exitPromptVisible = true;
+    this.changeDetector.markForCheck();
+    return new Promise(resolve => { this.resolveCanDeactivate = resolve; });
+  }
+  stayOnEditor(): void { this.pendingLogout = false; this.resolveExitNavigation(false); }
+  discardChangesAndExit(): void { this.finishLogoutIfNeeded(); this.resolveExitNavigation(true); }
+  saveChangesAndExit(): void { this.submitReceipt(true); }
+  private formSnapshot(): string { return JSON.stringify({ lines: this.lines, reason: this.reason }); }
+  private resolveExitNavigation(allowNavigation: boolean): void {
+    this.exitPromptVisible = false;
+    const resolve = this.resolveCanDeactivate;
+    this.resolveCanDeactivate = undefined;
+    this.changeDetector.markForCheck();
+    resolve?.(allowNavigation);
+  }
+  private finishLogoutIfNeeded(): void {
+    if (!this.pendingLogout) return;
+    localStorage.removeItem('adminUser'); localStorage.removeItem('adminToken');
+    sessionStorage.removeItem('adminUser'); sessionStorage.removeItem('adminToken');
+    this.pendingLogout = false;
+  }
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.exitPromptVisible && !this.saving) this.stayOnEditor();
+    else if (this.logoutConfirmationVisible) this.cancelLogoutConfirmation();
+  }
+
   requestLogoutConfirmation(): void { this.logoutConfirmationVisible = true; }
   cancelLogoutConfirmation(): void { this.logoutConfirmationVisible = false; }
   confirmLogout(): void { this.logoutConfirmationVisible = false; this.logout(); }
-  logout(): void {
-    localStorage.removeItem('adminUser'); localStorage.removeItem('adminToken');
-    sessionStorage.removeItem('adminUser'); sessionStorage.removeItem('adminToken');
-    void this.router.navigate(['/admin-login']);
-  }
+  logout(): void { this.pendingLogout = true; void this.router.navigate(['/admin-login']); }
   private readAdminName(): void {
     const stored = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser');
     try { this.adminName = stored ? (JSON.parse(stored) as { fullName?: string }).fullName || 'Admin' : 'Admin'; }
     catch { this.adminName = 'Admin'; }
   }
 }
+

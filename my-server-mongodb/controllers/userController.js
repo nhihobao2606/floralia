@@ -4,13 +4,17 @@ const { toPublicUser } = require('./authController');
 
 const NAME_RE = /^[\p{L}\p{M}]+(?:[ '\-][\p{L}\p{M}]+)*$/u;
 
+function normalizePhoneNumber(phone) {
+    return String(phone || '').trim().replace(/\s+/g, '').replace(/^\+84/, '0');
+}
+
 function toAdminUser(user) {
     const isBlocked = Boolean(user.isBlocked || user.status === 'blocked');
     return {
         id: user._id ? user._id.toString() : user.id,
         fullName: user.fullName || 'Người dùng',
         email: user.email || '',
-        phone: user.phone || '',
+        phone: normalizePhoneNumber(user.phone),
         avatar: user.avatar || '',
         role: user.role || 'customer',
         status: isBlocked ? 'blocked' : 'active',
@@ -21,41 +25,51 @@ function toAdminUser(user) {
         orderCount: Number(user.orderCount || 0)
     };
 }
-const PHONE_RE = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
+const PHONE_RE = /^0(3|5|7|8|9)\d{8}$/;
 const PASS_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function avatarWithinLimit(avatar) {
+    if (!String(avatar || '').startsWith('data:image/')) return true;
+    const match = String(avatar).match(/^data:image\/(?:jpeg|png|webp);base64,([A-Za-z0-9+/]+={0,2})$/i);
+    return Boolean(match && Buffer.from(match[1], 'base64').length <= 10 * 1024 * 1024);
+}
 
 async function createUserForAdmin(req, res) {
     try {
         const fullName = String(req.body.fullName || '').trim().replace(/\s+/g, ' ');
         const email = String(req.body.email || '').trim().toLowerCase();
-        // The admin form formats phones with spaces (for example 0912 345 678).
-        // Normalize whitespace before applying the stored E.164/local number rule.
-        const phone = String(req.body.phone || '').replace(/\s+/g, '');
+        const phone = normalizePhoneNumber(req.body.phone);
         const password = String(req.body.password || '');
         const role = req.body.role === 'admin' ? 'admin' : 'user';
         const avatar = String(req.body.avatar || '').trim();
 
+        if (!avatarWithinLimit(avatar)) {
+            return res.status(400).json({ success: false, field: 'avatar', message: 'Ảnh đại diện phải là JPG, PNG hoặc WebP và tối đa 10 MB.' });
+        }
+
         if (!NAME_RE.test(fullName) || fullName.length < 2) {
             return res.status(400).json({ success: false, message: 'Họ và tên không hợp lệ.' });
         }
-        if (!EMAIL_RE.test(email)) {
+        if (email && !EMAIL_RE.test(email)) {
             return res.status(400).json({ success: false, message: 'Email không hợp lệ.' });
         }
         if (!PHONE_RE.test(phone)) {
             return res.status(400).json({ success: false, message: 'Số điện thoại không hợp lệ.' });
         }
+        if (await User.existsByPhone(phone)) {
+            return res.status(409).json({ success: false, field: 'phone', message: 'Số điện thoại này đã được dùng cho tài khoản khác.' });
+        }
         if (!PASS_RE.test(password)) {
             return res.status(400).json({ success: false, message: 'Mật khẩu tối thiểu 8 ký tự, gồm chữ và số.' });
         }
-        if (await User.exists(email)) {
+        if (email && await User.existsByEmail(email)) {
             return res.status(409).json({ success: false, field: 'email', message: 'Email này đã được đăng ký.' });
         }
 
         const now = new Date();
         const isBlocked = req.body.status === 'blocked';
         const newUser = {
-            fullName, email, phone, avatar,
+            fullName, ...(email ? { email } : {}), phone, avatar,
             password: await bcrypt.hash(password, 10),
             role,
             isBlocked,
@@ -71,7 +85,8 @@ async function createUserForAdmin(req, res) {
         });
     } catch (err) {
         if (err.code === 11000) {
-            return res.status(409).json({ success: false, field: 'email', message: 'Email này đã được đăng ký.' });
+            const field = err.keyPattern?.email ? 'email' : 'phone';
+            return res.status(409).json({ success: false, field, message: field === 'email' ? 'Email n\u00e0y \u0111\u00e3 \u0111\u01b0\u1ee3c \u0111\u0103ng k\u00fd.' : 'S\u1ed1 \u0111i\u1ec7n tho\u1ea1i n\u00e0y \u0111\u00e3 \u0111\u01b0\u1ee3c d\u00f9ng cho t\u00e0i kho\u1ea3n kh\u00e1c.' });
         }
         console.error('Lỗi tạo tài khoản người dùng:', err);
         res.status(500).json({ success: false, message: 'Không thể tạo tài khoản người dùng.' });
@@ -108,13 +123,24 @@ async function updateProfile(req, res) {
         const fullName = String(req.body.fullName || '')
             .trim()
             .replace(/\s+/g, ' ');
-        const phone = String(req.body.phone || '').trim();
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const phone = normalizePhoneNumber(req.body.phone);
+        const gender = String(req.body.gender || '').trim();
+        const birthDate = String(req.body.birthDate || '').trim();
 
         if (fullName && (!NAME_RE.test(fullName) || fullName.length < 2)) {
             return res.status(400).json({
                 success: false,
                 message: 'Họ và tên không hợp lệ.'
             });
+        }
+
+        if (email && (email.length > 254 || !EMAIL_RE.test(email))) {
+            return res.status(400).json({ success: false, field: 'email', message: 'Địa chỉ email không hợp lệ.' });
+        }
+
+        if (email && await User.existsByEmail(email, req.userId)) {
+            return res.status(409).json({ success: false, field: 'email', message: 'Email này đã được đăng ký.' });
         }
 
         if (phone && !PHONE_RE.test(phone)) {
@@ -124,16 +150,50 @@ async function updateProfile(req, res) {
             });
         }
 
-        const updateData = {};
-        if (fullName) updateData.fullName = fullName;
-        if (phone) updateData.phone = phone;
-        if ('avatar' in req.body) {
-            updateData.avatar = req.body.avatar ? String(req.body.avatar) : '';
+        if (gender && !['female', 'male', 'other'].includes(gender)) {
+            return res.status(400).json({ success: false, message: 'Giới tính không hợp lệ.' });
         }
 
-        await User.update(req.userId, updateData);
+        if (birthDate) {
+            const parsedBirthDate = new Date(`${birthDate}T00:00:00.000Z`);
+            const today = new Date();
+            today.setUTCHours(23, 59, 59, 999);
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || Number.isNaN(parsedBirthDate.getTime()) ||
+                parsedBirthDate.toISOString().slice(0, 10) !== birthDate || parsedBirthDate > today) {
+                return res.status(400).json({ success: false, message: 'Ngày sinh không hợp lệ.' });
+            }
+        }
+
+        if (phone && await User.existsByPhone(phone, req.userId)) {
+            return res.status(409).json({ success: false, field: 'phone', message: 'Số điện thoại này đã được dùng cho tài khoản khác.' });
+        }
+
+        const updateData = {};
+        if (fullName) updateData.fullName = fullName;
+        if ('email' in req.body) updateData.email = email;
+        if (phone) {
+            updateData.phone = phone;
+        }
+        if ('gender' in req.body) updateData.gender = gender;
+        if ('birthDate' in req.body) updateData.birthDate = birthDate;
+        if ('avatar' in req.body) {
+            updateData.avatar = req.body.avatar ? String(req.body.avatar) : '';
+            if (!avatarWithinLimit(updateData.avatar)) {
+                return res.status(400).json({ success: false, field: 'avatar', message: 'Ảnh đại diện phải là JPG, PNG hoặc WebP và tối đa 10 MB.' });
+            }
+        }
+
+        const updateResult = await User.updateProfile(req.userId, updateData);
+        if (updateResult?.matchedCount !== 1) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản để cập nhật.' });
+        }
 
         const updatedUser = await User.getById(req.userId);
+        if (!updatedUser ||
+            ('email' in req.body && String(updatedUser.email || '') !== email) ||
+            ('birthDate' in req.body && updatedUser.birthDate !== birthDate)) {
+            return res.status(500).json({ success: false, message: 'Không thể xác nhận thông tin đã được lưu. Vui lòng thử lại.' });
+        }
 
         res.json({
             success: true,
@@ -142,6 +202,9 @@ async function updateProfile(req, res) {
         });
     } catch (err) {
         console.error('Lỗi cập nhật người dùng:', err);
+        if (err.code === 11000 && err.keyPattern?.email) {
+            return res.status(409).json({ success: false, field: 'email', message: 'Email này đã được đăng ký.' });
+        }
         res.status(500).json({
             success: false,
             message: 'Không thể cập nhật. Vui lòng thử lại.'
@@ -239,10 +302,13 @@ async function updateUserForAdmin(req, res) {
         }
 
         const nextFullName = String(req.body.fullName || '').trim().replace(/\s+/g, ' ');
-        const nextPhone = String(req.body.phone || '').trim();
+        const nextPhone = normalizePhoneNumber(req.body.phone);
         const requestedRole = req.body.role ? String(req.body.role) : undefined;
         const nextRole = requestedRole === 'customer' ? 'user' : requestedRole;
         const nextAvatar = req.body.avatar !== undefined ? String(req.body.avatar || '').trim() : undefined;
+        if (nextAvatar !== undefined && !avatarWithinLimit(nextAvatar)) {
+            return res.status(400).json({ success: false, field: 'avatar', message: 'Ảnh đại diện phải là JPG, PNG hoặc WebP và tối đa 10 MB.' });
+        }
 
         if (nextFullName && (!NAME_RE.test(nextFullName) || nextFullName.length < 2)) {
             return res.status(400).json({
@@ -258,6 +324,10 @@ async function updateUserForAdmin(req, res) {
             });
         }
 
+        if (nextPhone && await User.existsByPhone(nextPhone, id)) {
+            return res.status(409).json({ success: false, field: 'phone', message: 'Số điện thoại này đã được dùng cho tài khoản khác.' });
+        }
+
         if (nextRole && !['user', 'admin'].includes(nextRole)) {
             return res.status(400).json({
                 success: false,
@@ -267,7 +337,9 @@ async function updateUserForAdmin(req, res) {
 
         const updateData = {};
         if (nextFullName) updateData.fullName = nextFullName;
-        if (nextPhone) updateData.phone = nextPhone;
+        if (nextPhone) {
+            updateData.phone = nextPhone;
+        }
         if (nextAvatar !== undefined) updateData.avatar = nextAvatar;
         if (nextRole) updateData.role = nextRole;
 

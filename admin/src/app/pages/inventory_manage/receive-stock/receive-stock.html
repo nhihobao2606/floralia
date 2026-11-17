@@ -1,13 +1,37 @@
 <div class="receive-layout">
   <app-admin-sidebar [orderBadge]="unreadNotificationsCount" (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
   <main class="receive-main">
-    <header class="receive-topbar"><h1>Nhập hàng tồn kho</h1><div class="receive-account"><span class="receive-avatar">{{ adminName.charAt(0).toUpperCase() }}</span><span><strong>{{ adminName }}</strong><small>Quản trị viên</small></span><button type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button></div></header>
+    <header class="topbar">
+      <div class="breadcrumbs">
+        <a routerLink="/inventory">Quản lý tồn kho</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <strong>Nhập hàng tồn kho</strong>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge" *ngIf="unreadNotificationsCount">{{ unreadNotificationsCount }}</span>
+        </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar" aria-hidden="true">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button type="button" class="topbar-logout" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+          </button>
+        </div>
+      </div>
+    </header>
     <section class="receive-content">
       <a class="receive-back-link" routerLink="/inventory"><i class="bi bi-arrow-left" aria-hidden="true"></i> Quay lại Quản lý tồn kho</a>
       <div class="receive-welcome"><div><h2>Tạo phiếu nhập hàng</h2><p>Chọn một hoặc nhiều sản phẩm và nhập số lượng cần bổ sung vào kho.</p></div></div>
 
       <section class="receipt-card">
-        <header class="receipt-card-heading"><div><h3>Sản phẩm nhập kho</h3><p>Phiếu nhập gồm {{ lines.length }} mặt hàng · {{ totalUnits }} sản phẩm</p></div><button class="receive-button outline" type="button" (click)="addLine()" [disabled]="loading || products.length === 0"><i class="bi bi-plus-lg"></i> Thêm mặt hàng</button></header>
+        <header class="receipt-card-heading"><div><h3>Sản phẩm nhập kho</h3><p>Phiếu nhập gồm {{ lines.length }} mặt hàng · {{ totalUnits }} sản phẩm</p></div></header>
         <div *ngIf="loading" class="receipt-message">Đang tải danh sách sản phẩm…</div>
         <div *ngIf="loadError" class="receipt-error" role="alert">{{ loadError }}</div>
         <div *ngIf="!loading && !loadError && products.length === 0" class="receipt-message">Chưa có sản phẩm để nhập kho.</div>
@@ -15,7 +39,7 @@
         <div class="receipt-table-wrap" *ngIf="products.length">
           <table class="receipt-table"><thead><tr><th>Sản phẩm</th><th>Phân loại</th><th>Tồn hiện tại</th><th>Số lượng nhập</th><th>Tồn sau nhập</th><th></th></tr></thead>
             <tbody><tr *ngFor="let line of lines; let index = index">
-              <td><div class="receipt-product"><img *ngIf="productFor(line) as product" [src]="imageUrl(product.imageUrl)" [alt]="product.name"><div class="receipt-product-placeholder" *ngIf="!productFor(line)"><i class="bi bi-box"></i></div><select [attr.aria-label]="'Chọn sản phẩm dòng ' + (index + 1)" [ngModel]="line.productSku" (ngModelChange)="selectProduct(line, $event)"><option value="">Chọn sản phẩm</option><option *ngFor="let product of products" [value]="product.sku">{{ product.name }}</option></select></div></td>
+              <td><div class="receipt-product"><img *ngIf="productFor(line) as product" [src]="imageUrl(product.imageUrl)" [alt]="product.name"><div class="receipt-product-placeholder" *ngIf="!productFor(line)"><i class="bi bi-box"></i></div><app-custom-select class="receive-product-select" [options]="productOptions" placeholder="Chọn sản phẩm" [ariaLabel]="'Chọn sản phẩm dòng ' + (index + 1)" [maxMenuHeight]="452" [minMenuWidth]="280" [fixedMenu]="true" [ngModel]="line.productSku" (ngModelChange)="selectProduct(line, $event)"></app-custom-select></div></td>
               <td><select *ngIf="productFor(line)?.variants?.length" class="variant-select" [attr.aria-label]="'Chọn phân loại dòng ' + (index + 1)" [ngModel]="line.variantSku" (ngModelChange)="selectVariant(line, $event)"><option value="">Chọn phân loại</option><option *ngFor="let variant of productFor(line)?.variants" [value]="variant.sku">{{ variant.label }}</option></select><span *ngIf="productFor(line) && !productFor(line)?.variants?.length">Không có phân loại</span><span *ngIf="!productFor(line)">—</span></td>
               <td>{{ productFor(line) ? (currentStock(line) ?? '—') : '—' }}</td>
               <td><input class="quantity-input" type="number" min="1" step="1" [attr.aria-label]="'Số lượng nhập dòng ' + (index + 1)" [(ngModel)]="line.quantity"></td>
@@ -34,4 +58,16 @@
   </main>
 </div>
 
-<div class="receive-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()"><section class="receive-logout-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><h2>Đăng xuất</h2><p>Bạn có chắc muốn đăng xuất khỏi trang quản trị?</p><footer><button class="receive-button outline" type="button" (click)="cancelLogoutConfirmation()">Ở lại</button><button class="receive-button primary" type="button" (click)="confirmLogout()">Đăng xuất</button></footer></section></div>
+<app-admin-logout-dialog
+  [visible]="logoutConfirmationVisible"
+  (cancelled)="cancelLogoutConfirmation()"
+  (confirmed)="confirmLogout()"
+></app-admin-logout-dialog>
+<app-unsaved-changes-dialog
+  [visible]="exitPromptVisible"
+  [saving]="saving"
+  [error]="errorMessage"
+  (stay)="stayOnEditor()"
+  (discard)="discardChangesAndExit()"
+  (saveAndLeave)="saveChangesAndExit()"
+></app-unsaved-changes-dialog>

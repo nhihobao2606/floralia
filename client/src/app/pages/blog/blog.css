@@ -20,18 +20,6 @@
   overflow-x: hidden;
 }
 
-/* Breadcrumb */
-.blog-breadcrumb {
-  background: #f3f6f1;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(29, 83, 56, 0.06);
-  font-size: 14px;
-}
-.blog-breadcrumb .breadcrumb { margin: 0; background: transparent; }
-.blog-breadcrumb a { color: var(--muted); text-decoration: none; transition: .25s; }
-.blog-breadcrumb a:hover, .blog-breadcrumb .active { color: var(--matcha); font-weight: 500; }
-.blog-breadcrumb .breadcrumb-item + .breadcrumb-item::before { color: var(--muted); content: "/"; padding: 0 8px; }
-
 /* Floating Leaves */
 .floating-decor { position: absolute; pointer-events: none; opacity: .35; z-index: 0; }
 .leaf-1 { top: 80px; left: 3%; animation: floatSlow 8s ease-in-out infinite; font-size: 26px; }

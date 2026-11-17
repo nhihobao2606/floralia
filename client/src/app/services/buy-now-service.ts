@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CartProduct, CartService, CartVariant } from './cart-service';
+import { CartProduct, CartVariant } from './cart-service';
 
 export interface BuyNowRequest {
   product: CartProduct;
@@ -16,7 +16,6 @@ export class BuyNowService {
   readonly isSubmitting = signal(false);
 
   constructor(
-    private readonly cartService: CartService,
     private readonly router: Router,
   ) {}
 
@@ -88,12 +87,6 @@ export class BuyNowService {
     const quantity = Math.min(this.quantity(), this.stock);
     this.isSubmitting.set(true);
     this.error.set('');
-
-    if (!this.cartService.addProduct(request.product, variant, quantity, request.image)) {
-      this.error.set(this.cartService.cartMessage() || 'Không thể mua sản phẩm này. Vui lòng thử lại.');
-      this.isSubmitting.set(false);
-      return;
-    }
 
     const product = request.product;
     const productId = product._id || product.id || product.sku || product.slug || '';

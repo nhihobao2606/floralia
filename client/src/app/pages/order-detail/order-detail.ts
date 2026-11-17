@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CancelReason, Order, OrderItem, OrderService } from '../../services/order-service';
 import { ProductService } from '../../services/product-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 @Component({
   selector: 'app-order-detail',
@@ -54,6 +55,7 @@ export class OrderDetail implements OnInit {
   selectedReturnReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
   returnNote = '';
   returnImages: string[] = [];
+  isReturnSubmitting = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -229,11 +231,11 @@ export class OrderDetail implements OnInit {
   confirmCancelOrder(): void {
     if (!this.order || this.isCancelSubmitting) return;
     if (!this.selectedCancelReason) {
-      this.actionError = 'Vui lòng chọn lý do hủy đơn.';
+      alert('Vui lòng chọn lý do hủy đơn.');
       return;
     }
     if (this.selectedCancelReason === 'Khác' && !this.otherCancelReason.trim()) {
-      this.actionError = 'Vui lòng nhập lý do khác.';
+      alert('Vui lòng nhập lý do khác.');
       return;
     }
     const pm = (this.order.paymentMethod || '').toLowerCase();
@@ -261,14 +263,15 @@ export class OrderDetail implements OnInit {
       },
       error: (error) => {
         this.isCancelSubmitting = false;
-        this.actionError = error?.error?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.';
-        this.cdr.markForCheck();
+        alert(error?.error?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
       }
     });
   }
 
   // --- Return & Refund ---
   openReturnModal(): void {
+    if (this.isReturnSubmitting) return;
+    this.actionError = '';
     this.selectedReturnReason = 'Hàng bị vỡ/hỏng khi vận chuyển';
     this.returnNote = '';
     this.returnImages = [];
@@ -276,41 +279,58 @@ export class OrderDetail implements OnInit {
   }
 
   closeReturnModal(): void {
+    if (this.isReturnSubmitting) return;
     this.showReturnModal = false;
   }
 
   onReturnImagesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files) return;
-    Array.from(input.files).forEach(file => {
+    if (!input.files || this.isReturnSubmitting) return;
+    this.actionError = '';
+    const files = Array.from(input.files);
+    if (this.returnImages.length + files.length > 5) {
+      this.actionError = 'Bạn chỉ có thể gửi tối đa 5 ảnh minh chứng.';
+      input.value = '';
+      return;
+    }
+    files.forEach(file => {
+      if (!file.type.startsWith('image/')) {
+        this.actionError = 'Vui lòng chỉ chọn tệp hình ảnh.';
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        this.actionError = 'Mỗi ảnh minh chứng phải có dung lượng tối đa 10 MB.';
+        return;
+      }
       const reader = new FileReader();
-      reader.onload = (e: any) => this.returnImages.push(e.target.result);
+      reader.onload = () => {
+        if (typeof reader.result === 'string' && reader.result.length <= 14_000_000) {
+          this.returnImages.push(reader.result);
+        } else {
+          this.actionError = 'Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn.';
+        }
+        this.cdr.markForCheck();
+      };
+      reader.onerror = () => {
+        this.actionError = 'Không thể đọc ảnh đã chọn. Vui lòng thử lại.';
+        this.cdr.markForCheck();
+      };
       reader.readAsDataURL(file);
     });
+    input.value = '';
+    this.cdr.markForCheck();
   }
 
   confirmReturn(): void {
-    if (!this.order) return;
+    if (!this.order || this.isReturnSubmitting) return;
     this.actionError = '';
-    this.orderService.updateOrderStatus(
-      this.order.id,
-      'refund_pending',
-      'CHỜ DUYỆT HOÀN TIỀN',
-      {
-        refundReason: this.selectedReturnReason,
-        refundNote: this.returnNote,
-        refundImages: this.returnImages
-      }
-    ).subscribe({
-      next: ({ order }) => {
-        this.order = order;
-        this.closeReturnModal();
-        alert('Yêu cầu hoàn tiền đã được gửi. Sẽ sớm được duyệt.');
-      },
-      error: (error) => {
-        this.actionError = error?.error?.message || 'Không thể gửi yêu cầu hoàn tiền. Vui lòng thử lại.';
-      }
-    });
+    if (!this.selectedReturnReason.trim()) {
+      this.actionError = 'Vui lòng chọn lý do trả hàng/hoàn tiền.';
+      return;
+    }
+    this.showReturnModal = false;
+    alert('Chức năng đang phát triển.');
+    this.cdr.markForCheck();
   }
 
   // --- Confirm Received ---
@@ -338,10 +358,16 @@ export class OrderDetail implements OnInit {
   }
 
   formatPrice(num?: number): string {
-    return (num || 0).toLocaleString('vi-VN') + ' đ';
+    return formatVietnameseDong(num);
   }
 
   goBack(): void {
-    this.router.navigate(['/orders']);
+    const queryParams = this.route.snapshot.queryParamMap;
+    this.router.navigate(['/orders'], {
+      queryParams: {
+        tab: queryParams.get('tab') || 'all',
+        q: queryParams.get('q') || null
+      }
+    });
   }
 }

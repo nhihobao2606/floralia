@@ -43,7 +43,7 @@ async function getBlogs(req, res) {
             filter.$and = conditions;
         }
 
-        let query = Blog.find(filter).sort({ publishedAt: 1, _id: 1 });
+        let query = Blog.find(filter).sort({ publishedAt: -1, _id: -1 });
         const total = await Blog.countDocuments(filter);
 
         if (page && limit) {

@@ -56,7 +56,7 @@ export class Addresses implements OnInit {
   msg: { type: 'ok' | 'err'; text: string } = { type: 'ok', text: '' };
   formError = '';
 
-  readonly phonePattern = '^(0|\\+84)(3|5|7|8|9)\\d{8}$';
+  readonly phonePattern = '^0(3|5|7|8|9)\\d{8}$';
 
   constructor(
     private http: HttpClient,

@@ -136,9 +136,12 @@ function makeDocument(body, existing = {}) {
     const author = String(body.author || '').trim();
     const content = String(body.content || '').trim();
     const status = String(body.status || existing.status || 'draft');
-    const image = String(body.image || existing.image || '/assets/images/bl1.jpg').trim();
+    const image = body.image !== undefined
+        ? String(body.image || '').trim()
+        : String(existing.image || '').trim();
     const imageData = typeof body.imageData === 'string' ? body.imageData : '';
     const imageMimeType = String(body.imageMimeType || '');
+    const imageFileName = String(body.imageFileName || (imageData ? '' : (image === existing.image && !body.clearImageData ? existing.imageFileName : ''))).trim();
 
     if (!title || title.length > 180) {
         return { error: 'Tiêu đề bài viết bắt buộc và không vượt quá 180 ký tự.' };
@@ -152,17 +155,17 @@ function makeDocument(body, existing = {}) {
     if (!author || author.length > 100) {
         return { error: 'Vui lòng nhập tên tác giả hợp lệ.' };
     }
-    if (!content || content.length > 3_500_000) {
-        return { error: 'Nội dung bài viết bắt buộc và tối đa 3.500.000 ký tự.' };
+    if (!content || content.length > 14_000_000) {
+        return { error: 'Nội dung bài viết bắt buộc và tối đa 14.000.000 ký tự.' };
     }
     if (!VALID_STATUSES.has(status)) {
         return { error: 'Trạng thái bài viết không hợp lệ.' };
     }
-    if (!image || image.length > 2048) {
+    if (image.length > 2048) {
         return { error: 'Đường dẫn hình ảnh không hợp lệ.' };
     }
     if (imageData && (
-        imageData.length > 5_000_000
+        imageData.length > 13_981_016
         || !/^image\/(jpeg|png|webp|gif)$/.test(imageMimeType)
         || !/^[A-Za-z0-9+/]+={0,2}$/.test(imageData)
     )) {
@@ -186,33 +189,31 @@ function makeDocument(body, existing = {}) {
         excerpt,
         content,
         author,
-        authorRole: String(body.authorRole || existing.authorRole || 'Biên tập viên Floralia').trim(),
-        category,
-        categorySlug: slugify(String(body.categorySlug || category)),
-        image,
-        imageAlt: String(body.imageAlt ?? existing.imageAlt ?? '').trim().slice(0, 200),
-        featured: body.featured === true || body.featured === 'true',
-        status,
-        publishedAt,
+        authorRole: String(body.authorRole || existing.authorRole || 'Bi\u00ean t\u1eadp vi\u00ean Floralia').trim(),
         date: publishedAt
             ? new Intl.DateTimeFormat('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' }).format(publishedAt)
             : '',
+        publishedAt,
+        category,
+        categorySlug: slugify(String(body.categorySlug || category)),
+        ...(image ? { image } : {}),
+        ...(!body.clearImageData && imageFileName ? { imageFileName: imageFileName.slice(0, 200) } : {}),
+        featured: body.featured === true || body.featured === 'true',
+        views: Number(existing.views) || 0,
         readTime,
         tags: Array.isArray(body.tags)
             ? body.tags.map(tag => String(tag).trim()).filter(Boolean).slice(0, 20)
             : Array.isArray(existing.tags) ? existing.tags : [],
-        metaTitle: String(body.metaTitle || title).trim().slice(0, 180),
-        metaDescription: String(body.metaDescription || excerpt).trim().slice(0, 500),
-        views: existing.views || 0,
+        ...(imageData ? { imageData, imageMimeType } : {}),
         createdAt: existing.createdAt || now,
-        updatedAt: now
+        updatedAt: now,
+        imageAlt: String(body.imageAlt ?? existing.imageAlt ?? '').trim().slice(0, 200),
+        status,
+        metaTitle: String(body.metaTitle || title).trim().slice(0, 180),
+        metaDescription: String(body.metaDescription || excerpt).trim().slice(0, 500)
     };
 
-    if (imageData) {
-        fields.imageData = imageData;
-        fields.imageMimeType = imageMimeType;
-        fields.imageFileName = String(body.imageFileName || '').slice(0, 200);
-    } else if (existing.imageData && image === existing.image && body.clearImageData !== true) {
+    if (!imageData && existing.imageData && image === String(existing.image || '').trim() && body.clearImageData !== true) {
         fields.imageData = existing.imageData;
         fields.imageMimeType = existing.imageMimeType || null;
         fields.imageFileName = existing.imageFileName || null;
@@ -329,16 +330,17 @@ async function updateBlog(req, res) {
         }
 
         const update = { $set: result.fields };
-        if (existing.imageData && (result.fields.image !== existing.image || req.body.clearImageData === true)) {
-            update.$unset = { imageData: '', imageMimeType: '', imageFileName: '' };
+        const unset = {};
+        if (!result.fields.image) unset.image = '';
+        if (existing.imageData && (req.body.clearImageData === true || (!req.body.imageData && result.fields.image !== existing.image))) {
+            unset.imageData = '';
+            unset.imageMimeType = '';
+            unset.imageFileName = '';
         }
+        if (Object.keys(unset).length) update.$unset = unset;
         await Blog.updateOne(filter, update);
         const response = { ...existing, ...result.fields, _id: existing._id };
-        if (update.$unset) {
-            delete response.imageData;
-            delete response.imageMimeType;
-            delete response.imageFileName;
-        }
+        for (const field of Object.keys(unset)) delete response[field];
         res.json(response);
     } catch (error) {
         console.error('Lỗi cập nhật bài viết:', error);

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import { AdminVoucher, AdminVoucherService, VoucherOrder } from '../../../services/admin-voucher-service';
 import { finalize, timeout } from 'rxjs';
@@ -9,7 +10,7 @@ import { finalize, timeout } from 'rxjs';
 @Component({
   selector: 'app-voucher-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar],
+  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar, AdminLogoutDialog],
   templateUrl: './voucher-detail.html',
   styleUrl: './voucher-detail.css',
 })
@@ -23,6 +24,7 @@ export class AdminVoucherDetail implements OnInit {
   query = '';
   period: 14 | 30 | 0 = 14;
   adminName = 'Admin';
+  logoutConfirmationVisible = false;
   currentPage = 1;
   readonly pageSize = 5;
 
@@ -107,6 +109,20 @@ export class AdminVoucherDetail implements OnInit {
     const status = this.voucher?.status;
     return status === 'active' ? 'Đang chạy' : status === 'upcoming' ? 'Sắp diễn ra' : status === 'paused' ? 'Tạm dừng' : status === 'expired' ? 'Hết hạn' : 'Bản nháp';
   }
+  orderStatusLabel(status?: string | null): string {
+    const labels: Record<string, string> = {
+      pending: 'Chờ xác nhận',
+      processing: 'Chờ lấy hàng',
+      waiting: 'Chờ lấy hàng',
+      shipping: 'Đang vận chuyển',
+      delivered: 'Đã giao hàng',
+      completed: 'Đã giao hàng',
+      cancelled: 'Đã hủy',
+      refunded: 'Đã hoàn tiền',
+      returned: 'Đã hoàn trả',
+    };
+    return status ? labels[status.toLowerCase()] || status : 'Đã áp dụng';
+  }
   setPage(page: number): void { if (page >= 1 && page <= this.totalPages) this.currentPage = page; }
 
   toggleStatus(): void {
@@ -132,5 +148,8 @@ export class AdminVoucherDetail implements OnInit {
     if (this.voucher) void navigator.clipboard?.writeText(this.voucher.code).then(() => this.success = 'Đã sao chép mã voucher.');
   }
 
+  requestLogoutConfirmation(): void { this.logoutConfirmationVisible = true; }
+  cancelLogoutConfirmation(): void { this.logoutConfirmationVisible = false; }
+  confirmLogout(): void { this.logoutConfirmationVisible = false; this.logout(); }
   logout(): void { this.service.clearSession(); void this.router.navigate(['/admin-login']); }
 }

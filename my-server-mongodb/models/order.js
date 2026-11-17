@@ -56,14 +56,14 @@ function getBySlug(slug) {
     });
 }
 
-function create(order) {
+function create(order, options = {}) {
     if (!ordersCollection) {
         throw new Error('Orders collection has not been initialized.');
     }
     return ordersCollection.insertOne({
         ...order,
         createdAt: order.createdAt || new Date()
-    });
+    }, options);
 }
 
 function count(filter = {}) {

@@ -7,6 +7,7 @@ import { App } from './app';
 import { Header } from './components/header/header';
 import { Header2 } from './components/header2/header2';
 import { Footer } from './components/footer/footer';
+import { Breadcrumb } from './components/breadcrumb/breadcrumb';
 import { Homepage } from './pages/homepage/homepage';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -33,8 +34,10 @@ import { LogoutConfirmation } from './components/logout-confirmation/logout-conf
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
 import { PasswordRecovery } from './pages/password-recovery/password-recovery';
 import { GuestOrderTracking } from './pages/guest-order-tracking/guest-order-tracking';
+import { GuestOrderDetail } from './pages/guest-order-detail/guest-order-detail';
 import { OrderReorderDialog } from './components/order-reorder-dialog/order-reorder-dialog';
 import { AuthSessionInterceptor } from './services/auth-session.interceptor';
+import { VietnameseDongPipe } from './shared/vnd-format';
 
 registerLocaleData(localeVi);
 
@@ -44,6 +47,7 @@ registerLocaleData(localeVi);
     Header,
     Header2,
     Footer,
+    Breadcrumb,
     Homepage,
     Login,
     Signup,
@@ -60,6 +64,7 @@ registerLocaleData(localeVi);
     OrderDetail,
     OrderSuccess,
     GuestOrderTracking,
+    GuestOrderDetail,
     About,
     SupportPage,
     ContactPage,
@@ -68,6 +73,7 @@ registerLocaleData(localeVi);
     LogoutConfirmation,
     OrderReorderDialog,
     Pagenotfound,
+    VietnameseDongPipe,
   ],
   imports: [
     BrowserModule,

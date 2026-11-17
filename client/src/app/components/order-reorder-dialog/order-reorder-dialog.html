@@ -36,7 +36,7 @@
               (error)="$any($event.target).src = '/assets/images/no-image.svg'">
             <div>
               <h3 class="reorder-product-name">{{ selection.item.name }}</h3>
-              <strong class="reorder-product-price">{{ priceFor(selection) | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
+              <strong class="reorder-product-price">{{ priceFor(selection) | vnd }}</strong>
             </div>
           </div>
           <ng-container *ngIf="selection.product?.variants?.length; else noVariants">

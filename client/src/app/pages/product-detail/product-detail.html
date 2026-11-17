@@ -1,11 +1,5 @@
 <main class="product-detail-page">
-  <nav class="detail-breadcrumb" aria-label="Điều hướng">
-    <a routerLink="/home">Trang chủ</a>
-    <i class="bi bi-chevron-right" aria-hidden="true"></i>
-    <a routerLink="/products">Sản phẩm</a>
-    <i class="bi bi-chevron-right" aria-hidden="true"></i>
-    <span>{{ product?.name || 'Chi tiết sản phẩm' }}</span>
-  </nav>
+  <app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Sản phẩm', route: '/products' }, { label: product?.name || 'Chi tiết sản phẩm' }]"></app-breadcrumb>
 
   <div class="detail-container">
     <section *ngIf="!loading && errorMessage" class="page-state error-state">
@@ -19,6 +13,7 @@
         <div class="gallery">
           <div class="main-image">
             <img [src]="activeImage" [alt]="item.name || 'Ảnh sản phẩm'" (error)="onImageError($event)">
+            <span class="out-of-stock-overlay" *ngIf="currentStock < 1">HẾT HÀNG</span>
             <button
               *ngIf="galleryImages.length > 1"
               type="button"
@@ -319,6 +314,7 @@
                 [href]="productNavigation.detailUrl(related)"
                 (click)="navigateToRelatedProduct($event, related)">
                 <img [src]="productImage(related)" [alt]="related.name || 'Sản phẩm'" (error)="onImageError($event)">
+                <span class="out-of-stock-overlay" *ngIf="!hasRelatedStock(related)">H&#7870;T H&#192;NG</span>
                 <span *ngIf="related.discount" class="related-discount">-{{ related.discount }}%</span>
               </a>
             </div>

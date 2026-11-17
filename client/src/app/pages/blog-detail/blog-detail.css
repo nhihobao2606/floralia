@@ -17,18 +17,6 @@
   overflow-x: hidden;
 }
 
-/* Breadcrumb */
-.blog-breadcrumb {
-  background: #f3f6f1;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(29, 83, 56, 0.06);
-  font-size: 14px;
-}
-.blog-breadcrumb .breadcrumb { margin: 0; background: transparent; }
-.blog-breadcrumb a { color: var(--muted); text-decoration: none; transition: .25s; }
-.blog-breadcrumb a:hover, .blog-breadcrumb .active { color: var(--matcha); font-weight: 500; }
-.blog-breadcrumb .breadcrumb-item + .breadcrumb-item::before { color: var(--muted); content: "/"; padding: 0 8px; }
-
 /* Floating Leaves */
 .floating-decor { position: absolute; pointer-events: none; opacity: .35; z-index: 0; }
 .leaf-1 { top: 60px; left: 2%; animation: floatSlow 8s ease-in-out infinite; font-size: 26px; }
@@ -107,6 +95,10 @@
 
 /* Article Body Typography */
 :host ::ng-deep .article-body { font-size: 16px; line-height: 1.85; color: #354a3e; }
+:host ::ng-deep .article-body img { display: block; width: auto !important; max-width: 100% !important; max-height: 520px; height: auto !important; margin: 20px auto; border-radius: 8px; object-fit: contain; }
+:host ::ng-deep .article-body figure { max-width: 100%; margin: 20px auto; }
+:host ::ng-deep .article-body figure img { margin: 0 auto; }
+:host ::ng-deep .article-body iframe, :host ::ng-deep .article-body video { display: block; max-width: 100%; margin: 20px auto; }
 :host ::ng-deep .article-body h3 {
   font-family: 'Lora', serif;
   color: var(--matcha);
@@ -116,6 +108,8 @@
   padding-bottom: 5px;
   border-bottom: 2px solid var(--mint);
 }
+:host ::ng-deep .article-body h2 { margin: 28px 0 12px; color: var(--matcha); font-family: 'Lora', serif; font-size: 24px; line-height: 1.4; }
+:host ::ng-deep .article-body h4 { margin: 24px 0 10px; color: var(--matcha); font-size: 18px; font-weight: 600; }
 :host ::ng-deep .article-body p.lead { font-size: 17.5px; font-weight: 500; color: var(--matcha-2); }
 :host ::ng-deep .article-body ul, :host ::ng-deep .article-body ol { padding-left: 22px; margin-bottom: 18px; }
 :host ::ng-deep .article-body li { margin-bottom: 6px; }

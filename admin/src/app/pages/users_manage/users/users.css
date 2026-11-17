@@ -43,21 +43,7 @@
   cursor: pointer;
 }
 .topbar-logout:hover { border-color: #e1b4b1; background: #fff8f7; }
-.page-content { width: min(1280px, 100%); margin: 0 auto; padding: 18px 30px 34px; }
-.welcome-card {
-  display: flex;
-  min-height: 116px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  overflow: hidden;
-  padding: 20px 28px;
-  border-radius: 12px;
-  background: linear-gradient(110deg, #dce8dc, #b8cdbb);
-}
-.welcome-kicker { margin: 0 0 6px; color: #4b7458; font-size: 9px; font-weight: 700; letter-spacing: 1.15px; }
-.welcome-card h2 { margin: 0 0 5px; color: #1d5038; font-size: 20px; font-weight: 700; }
-.welcome-card p:last-child { margin: 0; color: #536c59; font-size: 11px; }
+.page-content { width: min(1280px, 100%); margin: 0 auto; padding: 16px 22px 36px; }
 .primary-button {
   display: inline-flex;
   min-height: 38px;
@@ -567,8 +553,6 @@ th:first-child, td:first-child { padding-left: 18px; }
   .topbar { height: 54px; }
   .topbar-logout { display: none; }
   .page-content { padding: 14px 14px 26px; }
-  .welcome-card { align-items: flex-start; flex-direction: column; padding: 18px; }
-  .welcome-card h2 { font-size: 18px; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .table-footer { align-items: flex-start; flex-direction: column; padding: 10px 12px; }
   .pagination { align-self: flex-end; }
@@ -577,7 +561,6 @@ th:first-child, td:first-child { padding-left: 18px; }
 }
 @media (max-width: 480px) {
   .account-copy { display: none; }
-  .welcome-card p:last-child { line-height: 1.5; }
   .stats-grid { gap: 7px; }
   .stat-card { gap: 8px; padding: 9px; }
   .stat-icon { width: 30px; height: 30px; flex-basis: 30px; font-size: 14px; }
@@ -588,9 +571,6 @@ th:first-child, td:first-child { padding-left: 18px; }
 .topbar h1 { font-size: 17px; }
 .account-copy strong { font-size: 12px; }
 .account-copy small { font-size: 10px; }
-.welcome-kicker { font-size: 10px; }
-.welcome-card h2 { font-size: 22px; }
-.welcome-card p:last-child { font-size: 13px; }
 .primary-button { font-size: 13px; }
 .stat-label { font-size: 10px; }
 .filter-tabs button { font-size: 12px; }
@@ -603,10 +583,13 @@ td { font-size: 12px; }
 .icon-action { font-size: 11px; }
 .table-footer { font-size: 11px; }
 .pagination button { font-size: 11px; }
+
+.topbar.admin-standard-topbar h1 { font-size: 18.5px; }
+.topbar.admin-standard-topbar .topbar-logout { padding: 6px 12px; font-size: 12px; }
 .notice { font-size: 12px; }
 
 /* Match the type scale used on the articles management page. */
-.welcome-kicker,.stat-label { font-size: 11px; }
+.stat-label { font-size: 11px; }
 .filter-tabs button,.search-box input { font-size: 13px; }
 .tab-count { font-size: 11px; }
 th { font-size: 11px; }
@@ -645,4 +628,3 @@ td { font-size: 13px; }
 .confirm-modal .secondary-modal-button { background: #f2f4f1; color: #243b33; }
 .confirm-modal .danger-modal-button { background: #c82333; color: #fff; }
 .confirm-modal .modal-caption { margin-top: 16px; color: #89968f; font-size: 11px; text-align: center; }
-

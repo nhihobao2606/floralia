@@ -11,7 +11,10 @@
   min-height: 70vh;
   color: var(--ink);
   font-family: 'Roboto', sans-serif;
-  background: radial-gradient(circle at 5% 4%, rgba(207, 227, 200, .45), transparent 28%), #fbfdf8;
+  background:
+    radial-gradient(circle at 6% 6%, rgba(207, 227, 200, .5), transparent 30%),
+    radial-gradient(circle at 96% 70%, rgba(251, 230, 234, .55), transparent 30%),
+    #fbfdf8;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -102,18 +105,18 @@ a.product-name:hover { color: #62874f; }
 .pagination button.page-arrow:disabled { opacity: .4; cursor: not-allowed; }
 .cart-summary { position: sticky; top: 105px; }
 .summary-card { padding: 24px; }
-.summary-eyebrow { margin-bottom: 8px; font-size: 10px; letter-spacing: 2px; }
-.summary-card h2 { margin: 0 0 22px; padding-bottom: 14px; border-bottom: 1px solid #edf3ea; color: var(--matcha); font: 600 21px 'Lora', Georgia, serif; }
-.summary-row { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 16px; color: var(--muted); font-size: 13px; }
-.summary-row strong { color: var(--ink); font-size: 13px; text-align: right; }
+.summary-eyebrow { margin-bottom: 8px; font-size: 11px; letter-spacing: 2px; }
+.summary-card h2 { margin: 0 0 22px; padding-bottom: 14px; border-bottom: 1px solid #edf3ea; color: var(--matcha); font: 600 22px 'Lora', Georgia, serif; }
+.summary-row { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+.summary-row strong { color: var(--ink); font-size: 14px; text-align: right; }
 .summary-row.discount-row, .summary-row.discount-row strong { color: #b65d6d; }
 .summary-divider { height: 1px; margin: 20px 0; background: #edf3ea; }
-.summary-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 21px; color: var(--matcha); font-size: 15px; font-weight: 700; }
-.summary-total strong { font-size: 21px; }
-.checkout-button { display: inline-flex; width: 100%; min-height: 50px; align-items: center; justify-content: center; gap: 9px; padding: 0 18px; border: 1px solid var(--matcha); border-radius: 26px; background: var(--matcha); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; transition: background .2s, transform .2s, box-shadow .2s; }
+.summary-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 21px; color: var(--matcha); font-size: 16px; font-weight: 700; }
+.summary-total strong { font-size: 22px; }
+.checkout-button { display: inline-flex; width: 100%; min-height: 50px; align-items: center; justify-content: center; gap: 9px; padding: 0 18px; border: 1px solid var(--matcha); border-radius: 26px; background: var(--matcha); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s, transform .2s, box-shadow .2s; }
 .checkout-button:hover:not(:disabled) { transform: translateY(-1px); background: var(--matcha-dark); box-shadow: 0 8px 18px rgba(29, 83, 56, .18); }
 .checkout-button:disabled { border-color: #b9c7b6; background: #b9c7b6; cursor: not-allowed; }
-.shipping-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 15px 0 0; color: var(--muted); font-size: 11px; }
+.shipping-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 15px 0 0; color: var(--muted); font-size: 12px; }
 .empty-cart { display: flex; min-height: 350px; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
 .empty-cart-icon { display: grid; width: 68px; height: 68px; margin-bottom: 15px; place-items: center; border-radius: 50%; background: var(--mint); color: var(--matcha); font-size: 27px; }
 .empty-cart h2 { margin: 0 0 8px; color: var(--matcha); font: 600 24px 'Lora', Georgia, serif; }

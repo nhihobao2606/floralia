@@ -10,3 +10,10 @@ export const authGuard: CanActivateFn = (_route, state) => {
     queryParams: { returnUrl: state.url },
   });
 };
+
+export const guestOnlyGuard: CanActivateFn = () => {
+  const currentUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (currentUser && token) return inject(Router).createUrlTree(['/orders']);
+  return true;
+};

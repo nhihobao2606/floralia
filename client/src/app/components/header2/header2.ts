@@ -5,6 +5,8 @@ import { ProductService } from '../../services/product-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { CartItem, CartVariant, CartService } from '../../services/cart-service';
 import { Products } from '../../classes/Products';
+import { getCurrentPageReturnUrl } from '../../classes/auth-return-url';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 @Component({
   selector: 'app-header2',
@@ -13,6 +15,9 @@ import { Products } from '../../classes/Products';
   styleUrl: './header2.css',
 })
 export class Header2 implements OnInit, OnDestroy {
+  get authReturnUrl(): string {
+    return getCurrentPageReturnUrl(this.router);
+  }
   @ViewChild('searchBox') searchBox?: ElementRef<HTMLInputElement>;
 
   // Tìm kiếm
@@ -241,6 +246,24 @@ export class Header2 implements OnInit, OnDestroy {
   /* ================= GIỎ HÀNG KHÁCH VÃNG LAI ================= */
   private loadCart(): void {
     this.cart = this.cartService.getCart();
+    const syncImages = (products: Products[]) => {
+      let changed = false;
+      const refreshed = this.cart.map((item) => {
+        const product = this.findCartProduct(item, products);
+        const image = product?.thumbnail ? this.getImage(product) : '';
+        const normalizedImage = image === '/assets/images/no-image.svg' ? '' : image;
+        if (item.image === normalizedImage && item.thumbnail === normalizedImage) return item;
+        changed = true;
+        return { ...item, image: normalizedImage, thumbnail: normalizedImage };
+      });
+      if (changed) {
+        this.cartService.saveCart(refreshed);
+        this.cart = refreshed;
+      }
+    };
+    const cachedProducts = this.productService.getCachedProducts();
+    if (cachedProducts) syncImages(cachedProducts);
+    else this.productService.getProducts().subscribe({ next: syncImages, error: () => undefined });
   }
 
   get cartCount(): number {
@@ -249,6 +272,12 @@ export class Header2 implements OnInit, OnDestroy {
 
   get cartTotal(): number {
     return this.cart.reduce((s, i) => s + Number(i.price || 0) * Number(i.quantity || 0), 0);
+  }
+
+  checkoutCart(): void {
+    sessionStorage.setItem('checkout_items', JSON.stringify(this.cart));
+    sessionStorage.removeItem('checkout_shipping_fee');
+    this.closeCart();
   }
 
   openCart(e: Event): void {
@@ -419,13 +448,20 @@ export class Header2 implements OnInit, OnDestroy {
   private resolveImage(src: any): string {
     if (typeof src !== 'string' || !src) return '/assets/images/no-image.svg';
     if (/^(https?:|data:image\/)/.test(src)) return src;
+    if (src.startsWith('/products/')) return `http://localhost:3002${src}`;
+    if (src.startsWith('products/')) return `http://localhost:3002/${src}`;
+    const legacyAssetId = /^\/?assets\/images\/([^/?]+)$/i.exec(src);
+    if (legacyAssetId && !/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(legacyAssetId[1])) {
+      return `http://localhost:3002/products/image/${encodeURIComponent(legacyAssetId[1])}`;
+    }
     if (src.startsWith('/assets/')) return src;
     if (src.startsWith('assets/')) return `/${src}`;
-    return `/assets/images/${src}`;
+    if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(src)) return `/assets/images/${src}`;
+    return `http://localhost:3002/products/image/${encodeURIComponent(src)}`;
   }
 
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('vi-VN').format(price) + '₫';
+    return formatVietnameseDong(price);
   }
 
   onImgError(event: Event): void {

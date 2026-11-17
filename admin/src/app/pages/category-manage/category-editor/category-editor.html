@@ -1,16 +1,30 @@
 <div class="admin-layout">
   <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
   <main class="admin-main">
-    <header class="editor-topbar">
+    <header class="topbar">
       <nav class="breadcrumbs" aria-label="Điều hướng">
         <a routerLink="/categories">Quản lý danh mục</a>
         <i class="bi bi-chevron-right" aria-hidden="true"></i>
         <strong>{{ isEdit ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}</strong>
       </nav>
-      <div class="admin-account">
-        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
-        <span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span>
-        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
+        </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar" aria-hidden="true">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            Đăng xuất
+          </button>
+        </div>
       </div>
     </header>
 
@@ -112,15 +126,9 @@
   </main>
 </div>
 
-<div class="confirm-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()">
-  <section class="logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="editor-logout-title" (click)="$event.stopPropagation()">
-    <span class="logout-icon"><i class="bi bi-box-arrow-right"></i></span>
-    <h2 id="editor-logout-title">Xác nhận đăng xuất</h2>
-    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
-    <div class="dialog-actions">
-      <button type="button" class="cancel-top" (click)="cancelLogoutConfirmation()">Ở lại</button>
-      <button type="button" class="save-top" (click)="confirmLogout()">Đăng xuất</button>
-    </div>
-  </section>
-</div>
+<app-admin-logout-dialog
+  [visible]="logoutConfirmationVisible"
+  (cancelled)="cancelLogoutConfirmation()"
+  (confirmed)="confirmLogout()"
+></app-admin-logout-dialog>
 

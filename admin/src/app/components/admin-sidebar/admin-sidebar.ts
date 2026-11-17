@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
+  Injectable,
   Input,
   OnChanges,
   OnInit,
@@ -9,7 +10,7 @@ import {
   SimpleChanges,
   inject,
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 export interface AdminMenuItem {
   label: string;
@@ -17,6 +18,11 @@ export interface AdminMenuItem {
   route?: string;
   badge?: number | string;
   disabled: boolean;
+}
+
+@Injectable({ providedIn: 'root' })
+class AdminSidebarState {
+  isCollapsed = false;
 }
 
 @Component({
@@ -27,21 +33,20 @@ export interface AdminMenuItem {
   styleUrl: './admin-sidebar.css',
 })
 export class AdminSidebar implements OnInit, OnChanges {
-  private readonly router = inject(Router);
+  private readonly sidebarState = inject(AdminSidebarState);
 
   @Input() orderBadge?: number | string | null;
   @Output() readonly logoutRequested = new EventEmitter<void>();
 
-  isProductManagementRoute(): boolean {
-    const path = this.router.url.split(/[?#]/, 1)[0];
-    return path.startsWith('/products') || path.startsWith('/categories');
+  get isCollapsed(): boolean {
+    return this.sidebarState.isCollapsed;
   }
 
   readonly menu: AdminMenuItem[] = [
-    { label: 'Tổng quan', icon: 'bi-grid-1x2', disabled: true },
+    { label: 'Tổng quan', icon: 'bi-grid-1x2', route: '/overview', disabled: false },
     { label: 'Quản lý đơn hàng', icon: 'bi-receipt', route: '/orders', badge: 10, disabled: false },
-    { label: 'Quản lý sản phẩm', icon: 'bi-box-seam', disabled: true },
-    { label: 'Quản lý danh mục', icon: 'bi-tags', disabled: true },
+    { label: 'Quản lý sản phẩm', icon: 'bi-box-seam', route: '/products', disabled: false },
+    { label: 'Quản lý danh mục', icon: 'bi-tags', route: '/categories', disabled: false },
     { label: 'Quản lý tồn kho', icon: 'bi-layers', route: '/inventory', disabled: false },
     { label: 'Quản lý người dùng', icon: 'bi-person', route: '/users', disabled: false },
     { label: 'Quản lý bài viết Blog', icon: 'bi-journal-text', route: '/articles', disabled: false },
@@ -56,6 +61,10 @@ export class AdminSidebar implements OnInit, OnChanges {
     if (changes['orderBadge']) {
       this.updateOrderBadge();
     }
+  }
+
+  toggleSidebar(): void {
+    this.sidebarState.isCollapsed = !this.sidebarState.isCollapsed;
   }
 
   private updateOrderBadge(): void {

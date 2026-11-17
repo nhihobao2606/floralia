@@ -32,16 +32,23 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
   background: rgba(255, 255, 255, .92); backdrop-filter: blur(10px);
   border-bottom: 1px solid #edf3ea; transition: box-shadow .35s, height .35s;
 }
+.navbar > .container { gap: clamp(14px, 1.5vw, 26px); }
+.navbar-brand { flex: 0 0 auto; margin-right: 0; }
+.navbar-collapse { min-width: 0; flex: 1 1 auto; }
+.navbar-nav { flex: 1 1 auto; justify-content: center; gap: clamp(0px, .35vw, 6px); }
 .navbar.scrolled { height: 70px; box-shadow: 0 8px 26px rgba(29, 83, 56, .1); }
 .logo { width: 120px; transition: .35s; }
 .navbar.scrolled .logo { width: 104px; }
 
-.navbar-nav .nav-item { margin: 0 4px; }
+.navbar-nav .nav-item { flex: 0 0 auto; margin: 0 4px; }
 .nav-link {
-  position: relative; padding: 10px 14px !important;
-  color: var(--matcha); font-size: 14px; font-weight: 500; letter-spacing: .8px; text-transform: uppercase;
+  position: relative; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: 10px 12px !important;
+  color: var(--matcha); font-size: 14px; font-weight: 500; letter-spacing: .45px; line-height: 1.25; text-transform: uppercase;
   transition: color .3s;
 }
+.nav-link.dropdown-toggle::after { content: none; }
+.nav-caret { flex: 0 0 auto; margin-left: 1px; font-size: 9px; line-height: 1; transition: transform .2s ease; }
+.nav-item.dropdown:hover > .nav-link .nav-caret { transform: translateY(1px) rotate(180deg); }
 .nav-link::after {
   content: ''; position: absolute; left: 50%; bottom: 3px; width: 0; height: 2px; border-radius: 2px;
   background: var(--leaf); transform: translateX(-50%); transition: width .35s;
@@ -73,7 +80,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 .guest-icon-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex: 0 0 auto;
+  gap: 8px;
 }
 
 .icon-btn {
@@ -98,50 +106,53 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border-radius: 15px;
-  font-size: 14px;
-  font-weight: 400;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .1px;
   text-decoration: none;
   white-space: nowrap;
-  transition: all .25s ease-in-out;
+  transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease;
   cursor: pointer;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .auth-btn i {
-  font-size: 14.5px;
+  font-size: 14px;
 }
 
 /* Nút Đăng nhập: Nền mint nhẹ tinh tế */
 .btn-login {
   color: var(--matcha);
-  background: var(--mint);
-  border: 1.5px solid rgba(29, 83, 56, .12);
+  background: #fff;
+  border: 1px solid #cbdacb;
+  box-shadow: 0 2px 7px rgba(29, 83, 56, .04);
 }
 
 .btn-login:hover {
-  background: var(--matcha);
-  color: #fff;
-  border-color: var(--matcha);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(29, 83, 56, .2);
+  background: #f4f8f1;
+  color: #143d29;
+  border-color: #92ad91;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 13px rgba(29, 83, 56, .09);
 }
 
 /* Nút Đăng ký: Gradient nổi bật */
 .btn-signup {
   color: #fff;
-  background: linear-gradient(135deg, var(--matcha), var(--matcha-2));
-  border: 1.5px solid transparent;
-  box-shadow: 0 4px 14px rgba(29, 83, 56, .2);
+  background: var(--matcha);
+  border: 1px solid var(--matcha);
+  box-shadow: 0 4px 11px rgba(29, 83, 56, .16);
 }
 
 .btn-signup:hover {
-  background: linear-gradient(135deg, var(--matcha-2), var(--leaf));
+  background: #16452e;
   color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(47, 123, 67, .3);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(29, 83, 56, .22);
 }
 
 /* ================= TÌM KIẾM ================= */
@@ -195,11 +206,11 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 /* ================= NÚT CỐ ĐỊNH ================= */
 .contact-buttons {
   position: fixed; right: 26px; bottom: 40px; z-index: 1040;
-  display: flex; flex-direction: column; align-items: flex-end; gap: 14px; pointer-events: none;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 11px; pointer-events: none;
 }
 .fab {
   position: relative; display: flex; align-items: center; justify-content: center;
-  width: 54px; height: 54px; border: 0; border-radius: 50%; color: #fff; font-size: 24px; cursor: pointer;
+  width: 48px; height: 48px; border: 0; border-radius: 50%; color: #fff; font-size: 21px; cursor: pointer;
   box-shadow: 0 10px 22px rgba(0, 0, 0, .2), inset 0 2px 0 rgba(255, 255, 255, .35);
   opacity: 0; transform: translateX(40px) scale(.6); pointer-events: none;
   transition: transform .5s cubic-bezier(.34, 1.56, .64, 1), opacity .4s, box-shadow .3s;
@@ -231,10 +242,10 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 .fab:hover::after { background-position: -50% 0; }
 
 .fab-phone { background: linear-gradient(145deg, #ff8a8f, #f2455a); }
-.fab-zalo { background: linear-gradient(145deg, #4aa0ff, #0068ff); font-size: 14px; letter-spacing: -.3px; }
+.fab-zalo { background: linear-gradient(145deg, #4aa0ff, #0068ff); font-size: 12px; letter-spacing: -.3px; }
 .fab-messenger { background: linear-gradient(145deg, #5ec8f5, #3b8de8 55%, #a45be0); }
-.fab-top { width: 44px; height: 44px; font-size: 26px; background: #fff; color: var(--matcha); }
-.fab-mix { width: 60px; height: 60px; background: linear-gradient(145deg, #8cbc4f, #2f7b43 70%); font-size: 27px; animation: shake 3.5s ease-in-out infinite; }
+.fab-top { width: 40px; height: 40px; font-size: 23px; background: #fff; color: var(--matcha); }
+.fab-mix { width: 54px; height: 54px; background: linear-gradient(145deg, #8cbc4f, #2f7b43 70%); font-size: 24px; animation: shake 3.5s ease-in-out infinite; }
 .fab-mix:hover { animation-play-state: paused; }
 
 .sparkle { position: absolute; font-size: 12px; color: #fff3b8; animation: twinkle 2s ease-in-out infinite; }
@@ -372,6 +383,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 /* ================= RESPONSIVE ================= */
 @media (max-width: 992px) {
   .navbar { height: auto; padding: 10px 0; }
+  .navbar > .container { gap: 0; }
+  .navbar-nav { gap: 0; }
   .navbar.scrolled { height: auto; }
   .navbar-toggler { border: 0; box-shadow: none !important; }
   .navbar-collapse { margin-top: 12px; padding: 14px; border-radius: 20px; background: #fff; box-shadow: 0 10px 26px rgba(29, 83, 56, .08); }
@@ -388,11 +401,11 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 
 @media (max-width: 576px) {
   .guest-order-tracker { bottom: 18px; left: 14px; min-height: 44px; padding: 0 14px; font-size: 12px; }
-  .auth-btn { padding: 7px 12px; font-size: 12.5px; }
-  .contact-buttons { right: 14px; bottom: 22px; gap: 11px; }
-  .fab { width: 48px; height: 48px; font-size: 21px; }
-  .fab-mix { width: 54px; height: 54px; }
-  .fab-top { width: 40px; height: 40px; }
+  .auth-btn { min-height: 38px; padding: 0 12px; font-size: 12.5px; }
+  .contact-buttons { right: 14px; bottom: 22px; gap: 9px; }
+  .fab { width: 44px; height: 44px; font-size: 19px; }
+  .fab-mix { width: 50px; height: 50px; font-size: 22px; }
+  .fab-top { width: 36px; height: 36px; font-size: 21px; }
   .cart-sidebar { border-radius: 0; }
   .variant-picker-dialog { padding: 28px 20px 20px; border-radius: 24px; }
   .variant-picker-dialog .cart-add-close { top: 12px; right: 12px; }

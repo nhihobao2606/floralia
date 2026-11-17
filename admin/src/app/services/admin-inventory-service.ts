@@ -56,12 +56,18 @@ export class AdminInventoryService {
     }));
   }
 
-  setStock(sku: string, stock: number, reason = '', productSku?: string, variantLabel?: string): Observable<{ success: boolean; product: InventoryProduct }> {
-    const body = { stock, reason, ...(productSku ? { productSku } : {}), ...(variantLabel ? { variantLabel } : {}) };
+  setStock(sku: string, stock: number, reason = '', productSku?: string, variantLabel?: string, recordAdjustment = false): Observable<{ success: boolean; product: InventoryProduct }> {
+    const body = { stock, reason, recordAdjustment, ...(productSku ? { productSku } : {}), ...(variantLabel ? { variantLabel } : {}) };
     return this.http.patch<{ success: boolean; product: InventoryProduct }>(
       `${this.apiUrl}/${encodeURIComponent(sku)}`,
       body,
       { headers: this.authHeaders() }
+    );
+  }
+
+  bulkAdjust(items: Array<{ sku: string; stock: number; reason: string; productSku: string; variantLabel: string }>): Observable<{ success: boolean; batchCode: string; products: InventoryProduct[] }> {
+    return this.http.patch<{ success: boolean; batchCode: string; products: InventoryProduct[] }>(
+      `${this.apiUrl}/adjust-bulk`, { items }, { headers: this.authHeaders() }
     );
   }
 

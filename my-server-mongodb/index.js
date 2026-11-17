@@ -1,6 +1,4 @@
 const path = require('path');
-const dns = require('dns');
-try { dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']); } catch (e) {}
 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
@@ -14,12 +12,14 @@ const Product = require('./models/product');
 const Blog = require('./models/blog');
 const Order = require('./models/order');
 const Voucher = require('./models/voucher');
+const Cart = require('./models/cart');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const clientProductRoutes = require('./routes/clientProductRoutes');
 const addressRoutes = require('./routes/addressRoutes');
+const adminProfileRoutes = require('./routes/adminProfileRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const adminBlogRoutes = require('./routes/adminBlogRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -27,6 +27,7 @@ const adminProductRoutes = require('./routes/adminProductRoutes');
 const AdminProduct = require('./models/adminProduct');
 const voucherRoutes = require('./routes/voucherRoutes');
 const adminOrderRoutes = require('./routes/adminOrderRoutes');
+const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -46,12 +47,14 @@ app.use('/api/users', userRoutes);
 app.use('/products', clientProductRoutes);
 app.use('/products', productRoutes);
 app.use('/api/addresses', addressRoutes);
+app.use('/api/admin/profile', adminProfileRoutes);
 app.use('/blogs', blogRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
 app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/admin/dashboard', adminDashboardRoutes);
 
 async function startServer() {
     if (!process.env.MONGODB_URI) {
@@ -71,15 +74,47 @@ async function startServer() {
         Product.setCollections(
             db.collection('Product'),
             db.collection('ProductAssets'),
-            db.collection('Reviews')
+            db.collection('Reviews'),
+            client
         );
         AdminProduct.setCollections(db.collection('Product'), db.collection('ProductAssets'));
         Blog.setCollection(db.collection('Blogs'));
 
-        Order.setCollection(db.collection('Orders'));
+        const ordersCollection = db.collection('Orders');
+        Order.setCollection(ordersCollection);
         Voucher.setCollection(db.collection('Vouchers'));
+        const cartsCollection = db.collection('Cart');
+        Cart.setCollection(cartsCollection);
+        await cartsCollection.createIndex({ userId: 1 }, { unique: true });
 
-        await db.collection('Users').createIndex({ email: 1 }, { unique: true });
+        const usersCollection = db.collection('Users');
+        const userIndexes = await usersCollection.listIndexes().toArray();
+        for (const index of userIndexes) {
+            if (
+                (index.key?.email === 1 && Object.keys(index.key).length === 1 && !index.sparse) ||
+                Object.prototype.hasOwnProperty.call(index.key || {}, 'normalizedPhone')
+            ) {
+                await usersCollection.dropIndex(index.name);
+            }
+        }
+        await usersCollection.updateMany(
+            { email: { $type: 'string', $regex: /^\s*$/ } },
+            { $unset: { email: '' } },
+        );
+        await usersCollection.updateMany(
+            { normalizedPhone: { $exists: true } },
+            { $unset: { normalizedPhone: '' } },
+        );
+        await usersCollection.createIndex({ email: 1 }, { unique: true, sparse: true });
+        await usersCollection.createIndex(
+            { email: 1 },
+            {
+                name: 'email_case_insensitive_lookup',
+                collation: { locale: 'en', strength: 2 },
+                sparse: true
+            }
+        );
+        await usersCollection.createIndex({ phone: 1 });
         await db.collection('Orders').createIndex({ id: 1 });
         await db.collection('Orders').createIndex({ code: 1 });
         await db.collection('Orders').createIndex({ orderCode: 1 });

@@ -12,12 +12,6 @@
   background: var(--mix-paper);
 }
 
-.mix-breadcrumb { padding: 10px 0; background: #f4f6ef; font-size: 12px; }
-.mix-breadcrumb .container { display: flex; gap: 9px; align-items: center; }
-.mix-breadcrumb a { color: #526b5d; text-decoration: none; }
-.mix-breadcrumb span { color: #8cbc4f; }
-.mix-breadcrumb [aria-current] { color: var(--mix-forest); }
-
 .mix-intro { position: relative; overflow: hidden; background: radial-gradient(ellipse at 82% 48%, rgba(207, 227, 200, .74), transparent 32%), linear-gradient(112deg, #fbfdf8, #f1f6ec 58%, #fbf7f0); }
 .mix-intro-inner { position: relative; display: flex; align-items: center; min-height: 430px; padding-top: 56px; padding-bottom: 56px; }
 .mix-intro-copy { position: relative; z-index: 2; max-width: 600px; }
@@ -317,3 +311,53 @@
 .recipe-copy { display: flex; min-height: 40px; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(29,83,56,.2); border-radius: 24px; color: var(--mix-forest); background: rgba(255,255,255,.72); font-size: 11px; font-weight: 600; cursor: pointer; transition: background .2s, border-color .2s; }
 .recipe-copy:hover:not(:disabled) { border-color: var(--mix-green); background: #e8f2e3; }
 .recipe-copy:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Improve readability to match the client storefront scale. */
+.mix-eyebrow { font-size: 11px; }
+.mix-start { font-size: 14px; }
+.mix-side-note { font-size: 9px; }
+.builder-heading h2 { font-size: clamp(30px, 3.7vw, 42px); }
+.builder-heading p { font-size: 15px; }
+.mix-presets button span { font-size: 16px; }
+.mix-presets button small { font-size: 12px; }
+.choice-heading { font-size: 11px; }
+.tea-choice-name { font-size: 14px; }
+.tea-choice-note { font-size: 12px; }
+.selection-limit { font-size: 13px; }
+.ratio-control label,
+.sugar-amount-control label { font-size: 14px; }
+.ratio-control label strong,
+.sugar-amount-control label strong { font-size: 13px; }
+.ratio-caption { font-size: 12px; }
+.sugar-choice strong { font-size: 12px; }
+.sugar-choice small { font-size: 11px; }
+.recipe-card-top { font-size: 11px; }
+.recipe-card h3 { font-size: 22px; }
+.recipe-description { font-size: 14px; }
+.recipe-empty { font-size: 12px; }
+.recipe-list strong { font-size: 14px; }
+.recipe-list small { font-size: 12px; }
+.recipe-submit { font-size: 14px; }
+.recipe-clear { font-size: 12px; }
+.recipe-footnote,
+.recipe-copy { font-size: 12px; }
+.recipe-message,
+.catalog-message { font-size: 13px; }
+.stock-note { font-size: 12px; }
+.blend-orbit-item small { font-size: 9px; }
+.summary-empty { font-size: 12px; }
+
+.flavor-profile { margin: 14px 0 17px; padding: 14px 15px; border: 1px solid rgba(47,123,67,.16); border-radius: 10px 18px 10px 18px; background: rgba(255,255,255,.78); }
+.flavor-profile-heading { display: flex; align-items: center; gap: 8px; color: var(--mix-forest); font-size: 14px; }
+.flavor-profile-heading i { color: #b58d36; font-size: 16px; }
+.flavor-profile p { margin: 8px 0 0; color: #596e5e; font-size: 13px; line-height: 1.6; }
+.flavor-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.flavor-tags span { padding: 5px 9px; border-radius: 16px; color: #315b3d; background: #eaf3e6; font-size: 11px; line-height: 1.2; }
+
+@media (max-width: 650px) {
+  .builder-heading p { font-size: 14px; }
+  .tea-choice-name { font-size: 13px; }
+  .tea-choice-note { font-size: 11px; }
+  .recipe-card h3 { font-size: 21px; }
+  .flavor-profile p { font-size: 12px; }
+}

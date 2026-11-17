@@ -112,6 +112,7 @@ export interface ProductCatalogVariant {
   label: string;
   sku?: string;
   price: number;
+  stock?: number;
   image?: string;
 }
 
@@ -247,9 +248,10 @@ export class AdminOrderService {
                 label: v.label || 'Tiêu chuẩn',
                 sku: v.sku || p.sku || '',
                 price: Number(v.price || p.price || 0),
+                stock: v.stock == null && p.stock == null ? undefined : Number(v.stock ?? p.stock),
                 image: imgUrl
               }))
-            : [{ label: 'Tiêu chuẩn', sku: p.sku || '', price: Number(p.price || 0), image: imgUrl }];
+            : [{ label: 'Tiêu chuẩn', sku: p.sku || '', price: Number(p.price || 0), stock: p.stock == null ? undefined : Number(p.stock), image: imgUrl }];
 
           return {
             name: p.name || p.title || 'Sản phẩm Floralia',

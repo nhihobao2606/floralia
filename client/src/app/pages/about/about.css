@@ -77,46 +77,6 @@
 }
 
 /* ==========================================================================
-   SECTION 1: BREADCRUMB
-   ========================================================================== */
-.editorial-breadcrumb {
-  padding: 24px 0 12px;
-  background-color: var(--warm-ivory);
-  border-bottom: 1px solid var(--border-delicate);
-}
-
-.breadcrumb-nav {
-  display: flex;
-  align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 12.5px;
-  font-weight: 500;
-  letter-spacing: 1px;
-}
-
-.breadcrumb-nav a {
-  color: var(--charcoal-muted);
-  text-decoration: none;
-  transition: color 0.3s var(--ease);
-}
-
-.breadcrumb-nav a:hover {
-  color: var(--deep-forest);
-}
-
-.breadcrumb-nav .sep {
-  margin: 0 12px;
-  color: var(--sage-green);
-}
-
-.breadcrumb-nav .active {
-  color: var(--deep-forest);
-  font-weight: 600;
-}
-
-/* ==========================================================================
    SECTION 2: HERO – CÂU CHUYỆN FLORALIA
    ========================================================================== */
 .editorial-hero {

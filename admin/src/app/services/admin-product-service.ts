@@ -179,6 +179,10 @@ export class AdminProductService {
     return this.http.delete<{ success: boolean }>(`${this.apiUrl}/${encodeURIComponent(id)}`, { headers: this.authHeaders() });
   }
 
+  deleteMany(ids: string[]): Observable<{ success: boolean; deletedCount: number }> {
+    return this.http.delete<{ success: boolean; deletedCount: number }>(`${this.apiUrl}/bulk`, { headers: this.authHeaders(), body: { ids } });
+  }
+
   private authHeaders(): HttpHeaders {
     const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });

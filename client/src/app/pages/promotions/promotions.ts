@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
 import { CartService } from '../../services/cart-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { Products } from '../../classes/Products';
-import { CouponItem, DEFAULT_COUPONS } from '../../classes/Coupon';
+import { PublicPromoVoucher } from '../../services/product-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { BuyNowService } from '../../services/buy-now-service';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 @Component({
   selector: 'app-promotions',
@@ -28,7 +30,15 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   // Coupons
   savedCoupons = signal<Set<string>>(new Set());
   copiedCode = signal<string | null>(null);
-  coupons: CouponItem[] = DEFAULT_COUPONS;
+  featuredVouchers = signal<PublicPromoVoucher[]>([]);
+  coupons = signal<PublicPromoVoucher[]>([]);
+  vouchersLoading = signal(true);
+  vouchersError = signal('');
+
+  private readonly promotionVoucherCodes = [
+    'FREESHIPTEA', 'NEWBIE50K', 'NEWBIE20',
+    'FLORALIA10', 'WELCOMEHERBAL', 'TRATHAOMOC', 'NEWBIE15',
+  ];
 
   stars = [1, 2, 3, 4, 5];
 
@@ -41,6 +51,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   });
 
   private timerInterval: any;
+  private productChangesSubscription?: Subscription;
   private targetTime = Date.now() + (5 * 24 * 3600 + 13 * 3600 + 51 * 60 + 5) * 1000;
 
   constructor(
@@ -53,10 +64,83 @@ export class PromotionsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.productChangesSubscription = this.productService.productsChanges$.subscribe(() => this.loadProducts());
+    this.loadVouchers();
     this.startCountdown();
   }
 
+  loadVouchers(): void {
+    this.vouchersLoading.set(true);
+    this.vouchersError.set('');
+    this.productService.getPublicPromoVouchers().subscribe({
+      next: response => {
+        const byCode = new Map((response?.vouchers || []).map(voucher => [voucher.code.toUpperCase(), voucher]));
+        const selected = this.promotionVoucherCodes
+          .map(code => byCode.get(code))
+          .filter((voucher): voucher is PublicPromoVoucher => Boolean(voucher));
+        this.featuredVouchers.set(selected.slice(0, 3));
+        this.coupons.set(selected.slice(3, 7));
+        this.vouchersLoading.set(false);
+      },
+      error: error => {
+        console.error('Lỗi tải voucher từ MongoDB:', error);
+        this.vouchersError.set('Chưa thể tải danh sách voucher. Vui lòng thử lại sau.');
+        this.featuredVouchers.set([]);
+        this.coupons.set([]);
+        this.vouchersLoading.set(false);
+      },
+    });
+  }
+
+  getVoucherTag(voucher: PublicPromoVoucher): string {
+    if (voucher.audience === 'new_customer') return 'DÀNH CHO KHÁCH MỚI';
+    if (voucher.scope === 'categories') return 'ƯU ĐÃI THEO DANH MỤC';
+    return 'ƯU ĐÃI ĐẶC BIỆT';
+  }
+
+  getVoucherBadge(voucher: PublicPromoVoucher): string {
+    if (voucher.code.toUpperCase() === 'FREESHIPTEA') return 'MIỄN PHÍ SHIP';
+    return voucher.discountType === 'percent'
+      ? `GIẢM ${voucher.discountValue}%`
+      : `GIẢM ${this.formatPrice(voucher.discountValue)}`;
+  }
+
+  getVoucherMinimum(voucher: PublicPromoVoucher): string {
+    return voucher.minOrderValue > 0
+      ? `Đơn hàng từ ${this.formatPrice(voucher.minOrderValue)}`
+      : 'Không yêu cầu giá trị đơn tối thiểu';
+  }
+
+  getVoucherExtra(voucher: PublicPromoVoucher): string {
+    const details: string[] = [];
+    if (voucher.maxDiscount && voucher.maxDiscount > 0) {
+      details.push(`Giảm tối đa ${this.formatPrice(voucher.maxDiscount)}`);
+    }
+    details.push(voucher.endDate ? `Hạn đến ${this.getVoucherExpiry(voucher)}` : 'Không thời hạn');
+    return details.join(' · ');
+  }
+
+  getVoucherDescription(voucher: PublicPromoVoucher): string {
+    const parts = [voucher.description || voucher.name];
+    if (voucher.maxDiscount && voucher.maxDiscount > 0) {
+      parts.push(`Giảm tối đa ${this.formatPrice(voucher.maxDiscount)}.`);
+    }
+    if (voucher.audience === 'new_customer') parts.push('Dành cho khách hàng mới.');
+    if (voucher.perUserLimit > 0) parts.push('Cần đăng nhập để sử dụng.');
+    return parts.join(' ');
+  }
+
+  getVoucherExpiry(voucher: PublicPromoVoucher): string {
+    if (!voucher.endDate) return 'Không thời hạn';
+    const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(voucher.endDate);
+    const date = dateOnly
+      ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+      : new Date(voucher.endDate);
+    return Number.isNaN(date.getTime()) ? 'Không thời hạn' : date.toLocaleDateString('vi-VN');
+  }
+
   ngOnDestroy(): void {
+    this.productChangesSubscription?.unsubscribe();
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
@@ -125,28 +209,45 @@ export class PromotionsComponent implements OnInit, OnDestroy {
 
   getProductPrice(product: Products): number {
     const p: any = product;
-    const defaultVariant = p.variants?.find((variant: any) => variant.isDefault) ?? p.variants?.[0];
-    return Number(defaultVariant?.price ?? p.price ?? p.minPrice ?? p.productPrice ?? 0);
+    return Number(this.getDisplayVariant(product)?.price ?? p.price ?? p.minPrice ?? p.productPrice ?? 0);
   }
 
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+    return formatVietnameseDong(price);
   }
 
   hasDiscount(product: Products): boolean {
-    const p: any = product;
-    return Number(p.oldPrice || 0) > this.getProductPrice(product);
+    return this.getOldPrice(product) > this.getProductPrice(product);
   }
 
   getOldPrice(product: Products): number {
     const p: any = product;
-    const defaultVariant = p.variants?.find((variant: any) => variant.isDefault) ?? p.variants?.[0];
-    return Number(defaultVariant?.oldPrice ?? p.oldPrice ?? 0);
+    const variant = this.getDisplayVariant(product);
+    const price = Number(variant?.price ?? p.price ?? 0);
+    const oldPrice = Number(variant?.oldPrice ?? p.oldPrice ?? 0);
+    return oldPrice > price ? oldPrice : 0;
+  }
+
+  getDisplayVariant(product: Products): Products['variants'][number] | null {
+    const variants = product.variants ?? [];
+    if (!variants.length) return null;
+    const inStock = variants.filter(variant => Number(variant.stock) > 0);
+    const pool = inStock.length ? inStock : variants;
+    return pool.reduce((lowest, variant) =>
+      Number(variant.price) < Number(lowest.price) ? variant : lowest, pool[0]);
+  }
+
+  getDisplayVariantLabel(product: Products): string {
+    return this.getDisplayVariant(product)?.label || '';
+  }
+
+  shouldShowFromPrefix(product: Products): boolean {
+    return (product.variants?.length ?? 0) > 1;
   }
 
   getDiscount(product: Products): number {
     const p: any = product;
-    if (p.discount) return Number(p.discount);
+    if (!p.variants?.length && p.discount) return Number(p.discount);
 
     const oldPrice = this.getOldPrice(product);
     const price = this.getProductPrice(product);
@@ -222,7 +323,9 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   addToCart(product: Products): void {
     if (!this.hasStock(product)) return;
     this.cartPopupProduct = product;
+    const preferredVariant = this.getDisplayVariant(product);
     this.cartPopupVariant =
+      (preferredVariant && preferredVariant.stock > 0 ? preferredVariant : null) ??
       product.variants?.find((option) => option.isDefault && option.stock > 0) ??
       product.variants?.find((option) => option.stock > 0) ??
       product.variants?.find((option) => option.isDefault) ??
@@ -273,7 +376,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   }
 
   openBuyNowPopup(product: Products): void {
-    this.buyNowService.open(product, this.getProductImage(product));
+    this.buyNowService.open(product, this.getProductImage(product), this.getDisplayVariant(product));
   }
 
   isWished(product: Products): boolean {

@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { catchError, finalize, of, timeout } from 'rxjs';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import { AdminUser, AdminUserService } from '../../../services/admin-user-service';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminSidebar],
+  imports: [CommonModule, FormsModule, AdminSidebar, AdminLogoutDialog, RouterLink],
   templateUrl: './users.html',
   styleUrl: './users.css',
 })
@@ -33,6 +34,7 @@ export class AdminUsers implements OnInit {
   profileDraft = { fullName: '', phone: '', avatar: '' };
   summary = { total: 0, active: 0, blocked: 0 };
   adminName = 'Admin Floralia';
+  logoutConfirmationVisible = false;
 
   constructor(
     private readonly userService: AdminUserService,
@@ -265,6 +267,19 @@ export class AdminUsers implements OnInit {
       active: users.filter((user) => user.status !== 'blocked').length,
       blocked: users.filter((user) => user.status === 'blocked').length,
     };
+  }
+
+  requestLogoutConfirmation(): void {
+    this.logoutConfirmationVisible = true;
+  }
+
+  cancelLogoutConfirmation(): void {
+    this.logoutConfirmationVisible = false;
+  }
+
+  confirmLogout(): void {
+    this.logoutConfirmationVisible = false;
+    this.logout();
   }
 
   logout(): void {

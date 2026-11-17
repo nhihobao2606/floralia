@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Blog } from '../../classes/Blog';
+import { blogImageSource } from '../../classes/blog-image';
 import { blogDetailLink } from '../../classes/blog-url';
 import { BlogService } from '../../services/blog-service';
 
@@ -157,17 +158,7 @@ export class BlogComponent implements OnInit {
   }
 
   getBlogImage(blog: Blog): string {
-    if (blog.imageData) {
-      if (blog.imageData.startsWith('data:image/')) {
-        return blog.imageData;
-      }
-      const mime = blog.imageMimeType || 'image/jpeg';
-      return `data:${mime};base64,${blog.imageData}`;
-    }
-    if (blog.image) {
-      return blog.image;
-    }
-    return '/assets/images/bl1.jpg';
+    return blogImageSource(blog);
   }
 
   blogDetailLink(blog: Blog): string[] {

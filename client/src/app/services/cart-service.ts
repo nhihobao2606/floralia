@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 
 export interface CartProduct {
@@ -41,6 +41,7 @@ export interface CartItem {
   image?: string;
   thumbnail?: string;
   variantLabel?: string;
+  addedAt?: string;
   variantCount?: number;
   selected?: boolean;
   productSku?: string;
@@ -141,6 +142,7 @@ export class CartService {
         oldPrice,
         discount,
         quantity: quantityToAdd,
+        addedAt: new Date().toISOString(),
         stock,
         image,
         thumbnail: image,
@@ -229,7 +231,13 @@ export class CartService {
     const updatedCart = cart.filter(candidate =>
       !items.some(item => this.matches(candidate, item))
     );
-    if (updatedCart.length !== cart.length) this.saveCart(updatedCart);
+    const removedCount = cart.length - updatedCart.length;
+    if (removedCount > 0) {
+      this.saveCart(updatedCart);
+      this.showCartMessage(removedCount === 1
+        ? 'Đã xóa sản phẩm khỏi giỏ hàng.'
+        : `Đã xóa ${removedCount} sản phẩm khỏi giỏ hàng.`);
+    }
   }
 
   private getCurrentUser(): CartUser | null {
@@ -245,7 +253,8 @@ export class CartService {
 
   private isLoggedInUser(): boolean {
     const user = this.getCurrentUser();
-    return Boolean(user && (user.email || user.id || user._id));
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return Boolean(token && user && (user.id || user._id));
   }
 
   private get cartKey(): string {
@@ -256,14 +265,12 @@ export class CartService {
 
   syncFromServer(): void {
     const user = this.getCurrentUser();
-    if (!this.http || !user || (!user.email && !user.id && !user._id)) return;
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!this.http || !token || !user || (!user.id && !user._id)) return;
     const targetKey = this.cartKey;
-    const params = new HttpParams()
-      .set('userId', String(user.id || user._id || ''))
-      .set('email', String(user.email || ''));
 
     this.http
-      .get<{ success: boolean; exists?: boolean; items?: CartItem[] }>(this.apiUrl, { params })
+      .get<{ success: boolean; exists?: boolean; items?: CartItem[] }>(this.apiUrl, { headers: this.authHeaders() })
       .subscribe({
         next: (res) => {
           if (!res?.success || !Array.isArray(res.items)) return;
@@ -288,14 +295,19 @@ export class CartService {
 
   private pushToServer(cart: CartItem[]): void {
     const user = this.getCurrentUser();
-    if (!this.http || !user || (!user.email && !user.id && !user._id)) return;
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!this.http || !token || !user || (!user.id && !user._id)) return;
+    const items = cart.map(item => ({
+      productId: item.productId || item.productSku || item.slug || item.id || '',
+      productSku: item.productSku || (item.variantSku ? '' : item.sku) || '',
+      variantSku: item.variantSku || (item.sku && item.sku !== item.productSku ? item.sku : '') || '',
+      quantity: Math.max(1, Math.floor(Number(item.quantity) || 1)),
+      addedAt: item.addedAt || new Date().toISOString(),
+    }));
     this.http
       .put<{ success: boolean }>(this.apiUrl, {
-        userId: String(user.id || user._id || ''),
-        email: String(user.email || ''),
-        fullName: String(user.fullName || user.name || ''),
-        items: cart,
-      })
+        items,
+      }, { headers: this.authHeaders() })
       .subscribe({
         error: (err) => {
           console.error('Không thể lưu giỏ hàng lên MongoDB:', err);
@@ -309,6 +321,11 @@ export class CartService {
     return Boolean(rightProductId) &&
       leftProductId === rightProductId &&
       (left.variantSku || '') === (right.variantSku || '');
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {});
   }
 
   clearCart(): void {

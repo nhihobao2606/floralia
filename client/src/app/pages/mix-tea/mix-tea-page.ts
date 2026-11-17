@@ -71,7 +71,14 @@ export class MixTeaPage implements OnInit {
   catalogMessage = '';
   recipeMessage = '';
 
-  constructor(@Optional() private readonly productService: ProductService | null) {}
+  constructor(@Optional() private readonly productService: ProductService | null) {
+    for (const choice of this.teas) {
+      choice.image = this.getAssetImage(`${choice.sku}_THUMB`);
+    }
+    for (const choice of this.sugars) {
+      choice.image = this.getAssetImage(`${choice.sku}_THUMB`);
+    }
+  }
 
   ngOnInit(): void {
     if (!this.productService) return;
@@ -89,12 +96,12 @@ export class MixTeaPage implements OnInit {
       const product = bySku.get(choice.sku);
       if (!product) {
         choice.available = false;
-        choice.image = '/assets/images/no-image.svg';
         continue;
       }
       choice.name = product.name || choice.name;
       choice.available = product.isActive !== false && Number(product.stock) > 0;
-      choice.image = this.getProductImage(product);
+      const productImage = this.getProductImage(product);
+      if (productImage !== '/assets/images/no-image.svg') choice.image = productImage;
     }
 
     const unavailable = this.selectedSkus.filter(sku => !this.teas.find(tea => tea.sku === sku)?.available);
@@ -123,6 +130,16 @@ export class MixTeaPage implements OnInit {
       : '/assets/images/no-image.svg';
   }
 
+  private getAssetImage(assetId: string): string {
+    const configured = typeof window !== 'undefined'
+      ? (window as Window & { FLORALIA_API_ORIGIN?: string }).FLORALIA_API_ORIGIN?.trim()
+      : '';
+    const apiOrigin = configured || (typeof window !== 'undefined'
+      ? `${window.location.protocol}//${window.location.hostname}:3002`
+      : 'http://localhost:3002');
+    return `${apiOrigin}/products/image/${encodeURIComponent(assetId)}`;
+  }
+
   onImageError(event: Event): void {
     const image = event.target as HTMLImageElement | null;
     if (image && !image.src.endsWith('/assets/images/no-image.svg')) {
@@ -138,6 +155,29 @@ export class MixTeaPage implements OnInit {
 
   get selectedSugar(): SugarChoice | undefined {
     return this.sugars.find((sugar) => sugar.sku === this.sugarSku);
+  }
+
+  get flavorProfile(): string {
+    const selected = this.selectedTeas;
+    if (!selected.length) return 'Chọn cốt trà để xem gợi ý hương vị cho mẻ trà của bạn.';
+
+    const notes = selected.map(tea => {
+      const parts = tea.tastingNote.split('·');
+      return (parts.length > 1 ? parts.slice(1).join('·') : parts[0]).trim();
+    });
+    let teaProfile = notes[0];
+    if (notes.length === 2) {
+      const dominantIndex = this.teaRatio >= 50 ? 0 : 1;
+      const supportingIndex = dominantIndex === 0 ? 1 : 0;
+      teaProfile = `${notes[dominantIndex]} làm vị chủ đạo, hòa cùng ${notes[supportingIndex]}`;
+    }
+
+    if (!this.selectedSugar || this.sugarGrams <= 0) {
+      return `${teaProfile}. Không thêm đường nên giữ vị trà rõ, hậu vị tự nhiên.`;
+    }
+
+    const sweetness = this.sugarGrams <= 5 ? 'ngọt nhẹ' : this.sugarGrams <= 12 ? 'ngọt dịu' : 'ngọt đậm';
+    return `${teaProfile}. ${this.selectedSugar.detail}; với ${this.sugarGrams}g đường, vị trà sẽ ${sweetness}.`;
   }
 
   get jarFillPercent(): number {

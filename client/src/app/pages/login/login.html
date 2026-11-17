@@ -12,27 +12,27 @@
 
         <!-- Email -->
         <div class="form-field">
-          <label for="loginEmail">Email <span class="req">*</span></label>
-          <div class="input-wrapper"
-               [class.is-invalid]="emailCtrl.invalid && (emailCtrl.touched || loginForm.submitted)"
-               [class.is-valid]="emailCtrl.valid && emailCtrl.touched">
-            <i class="bi bi-envelope"></i>
-            <input type="email" id="loginEmail" name="email"
-                   [(ngModel)]="email" #emailCtrl="ngModel"
-                   [pattern]="emailPattern" required
-                   placeholder="Nhập địa chỉ email" autocomplete="email">
-            <i class="bi bi-check-circle-fill state-icon ok" *ngIf="emailCtrl.valid && emailCtrl.touched"></i>
+          <label for="loginIdentifier">Email hoặc số điện thoại <span class="req">*</span></label>
+          <div class="input-wrapper" [class.is-invalid]="(identifierCtrl.invalid && (identifierCtrl.touched || loginForm.submitted)) || identifierError">
+            <i class="bi bi-person-vcard"></i>
+            <input type="text" id="loginIdentifier" name="identifier"
+                   [(ngModel)]="identifier" #identifierCtrl="ngModel" required
+                   (ngModelChange)="clearIdentifierError()"
+                   placeholder="Nhập email hoặc số điện thoại" autocomplete="username">
           </div>
-          <div class="field-error" *ngIf="emailCtrl.invalid && (emailCtrl.touched || loginForm.submitted)">
+          <div class="field-error" *ngIf="identifierCtrl.invalid && (identifierCtrl.touched || loginForm.submitted)">
             <i class="bi bi-exclamation-circle"></i>
-            <span *ngIf="emailCtrl.errors?.['required']">Vui lòng nhập email.</span>
-            <span *ngIf="!emailCtrl.errors?.['required'] && emailCtrl.errors?.['pattern']">
-              Email chưa đúng định dạng (ví dụ: ten@gmail.com).
-            </span>
+            <span>Vui lòng nhập email hoặc số điện thoại.</span>
           </div>
+          <div class="field-error" *ngIf="identifierError" role="alert">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>{{ identifierError }}</span>
+          </div>
+          <p class="login-hint" *ngIf="showPhoneLoginHint">
+            Nếu bạn đăng ký bằng Số điện thoại, vui lòng đăng nhập bằng Số điện thoại.
+          </p>
         </div>
 
-        <!-- Mật khẩu -->
         <div class="form-field">
           <label for="loginPassword">Mật khẩu <span class="req">*</span></label>
           <div class="input-wrapper"

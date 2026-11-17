@@ -225,6 +225,126 @@
   margin-bottom: 16px;
   animation: fadeIn .2s ease-out;
 }
+.guest-account-option {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid #dbe7d7;
+  border-radius: 10px;
+  background: #f8fbf6;
+}
+.guest-account-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.guest-account-check input {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin: 2px 0 0;
+  accent-color: var(--matcha);
+}
+.guest-account-check input:disabled {
+  cursor: not-allowed;
+}
+.guest-account-hint,
+.guest-account-demo-note {
+  color: #718276;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.guest-account-hint {
+  padding-left: 27px;
+}
+.guest-account-password {
+  display: grid;
+  gap: 7px;
+  padding: 12px 0 0 27px;
+  border-top: 1px solid #e3ebe0;
+}
+.guest-account-password .form-label {
+  margin-bottom: 0;
+}
+.guest-account-password .req {
+  color: #e0352b;
+  font-weight: 700;
+  margin-left: 2px;
+}
+.guest-account-password-field {
+  position: relative;
+  max-width: 420px;
+}
+.guest-account-password-field .form-input {
+  width: 100%;
+  padding-right: 42px;
+}
+.guest-account-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #718276;
+  font-size: 17px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.guest-account-password-toggle:hover {
+  color: var(--matcha);
+}
+.guest-account-password-toggle:focus-visible {
+  outline: 2px solid var(--matcha);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+.guest-account-demo-note {
+  margin: 0;
+}
+.guest-account-validation {
+  color: #b5424a;
+  font-size: 12.5px;
+}
+.guest-account-demo-submit {
+  justify-self: start;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--matcha);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, opacity .2s;
+}
+.guest-account-demo-submit:hover:not(:disabled) {
+  background: var(--matcha-dark);
+}
+.guest-account-demo-submit:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.guest-account-ready {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #277147;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.guest-account-ready i {
+  margin-top: 2px;
+}
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
@@ -605,6 +725,58 @@
   display: grid;
   gap: 12px;
 }
+.demo-voucher-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px dashed #9fbd9d;
+  border-radius: 9px;
+  background: #f8fbf6;
+}
+.demo-voucher-card.applied {
+  border-style: solid;
+  border-color: #80ae78;
+  background: #f1f8ed;
+}
+.demo-voucher-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.demo-voucher-copy strong {
+  color: var(--matcha);
+  font-size: 14px;
+}
+.demo-voucher-copy strong i {
+  margin-right: 4px;
+}
+.demo-voucher-copy span,
+.demo-voucher-note {
+  color: #627469;
+  font-size: 12px;
+}
+.demo-voucher-card button {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid var(--matcha);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--matcha);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.demo-voucher-card button:disabled {
+  background: var(--matcha);
+  color: #fff;
+  cursor: default;
+}
+.demo-voucher-note {
+  margin: 0;
+  line-height: 1.45;
+}
 .checkout-voucher-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -709,16 +881,15 @@
 }
 
 .total-label {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--matcha);
 }
 
 .total-val {
   font-size: 22px;
   font-weight: 700;
   color: var(--matcha);
-  font-family: 'Lora', serif;
 }
 
 /* Payment Methods */
@@ -852,6 +1023,7 @@
 
 .qr-stk-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   font-size: 13.5px;
@@ -890,6 +1062,12 @@
 .qr-amount-row strong {
   color: var(--matcha);
   font-size: 15px;
+}
+.qr-preview-instruction {
+  margin: 2px 0 0;
+  color: #6d7f72;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .btn-open-qr-popup {

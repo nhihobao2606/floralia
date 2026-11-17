@@ -1,7 +1,7 @@
 const { ObjectId } = require('mongodb');
 const Product = require('../models/product');
 const User = require('../models/user');
-const { normalizeClientProduct } = require('./clientProductController');
+const { normalizeClientProduct, normalizeClientProducts } = require('./clientProductController');
 
 // GET /products
 async function getProducts(req, res) {
@@ -9,7 +9,7 @@ async function getProducts(req, res) {
         const products = await Product.getAll();
 
         // Không tải dữ liệu ảnh ở API danh sách
-        const result = products.map(normalizeClientProduct);
+        const result = await normalizeClientProducts(products);
 
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.json(result);
@@ -55,7 +55,7 @@ async function getProductImage(req, res) {
             : Buffer.from(String(asset.data), 'base64');
 
         res.set('Content-Type', mimeType);
-        res.set('Cache-Control', 'public, max-age=86400');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.send(imageBuffer);
     } catch (error) {
         console.error('Lỗi lấy ảnh sản phẩm:', error);
@@ -224,7 +224,11 @@ async function getProductById(req, res) {
 
         // Không trả dữ liệu ảnh Base64 trong response chi tiết
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-        res.json(normalizeClientProduct(product));
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        res.set('Pragma', 'no-cache');
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        res.set('Pragma', 'no-cache');
+        res.json(await normalizeClientProduct(product));
     } catch (error) {
         console.error('Lỗi lấy chi tiết sản phẩm:', error);
 
@@ -241,12 +245,7 @@ async function getProductBySlug(req, res) {
             return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
         }
 
-        res.json({
-            ...product,
-            imageUrl: product.thumbnail
-                ? `/products/image/${encodeURIComponent(String(product.thumbnail))}`
-                : null
-        });
+        res.json(await normalizeClientProduct(product));
     } catch (error) {
         console.error('Lỗi lấy sản phẩm theo slug:', error);
         res.status(500).json({ message: 'Không thể lấy sản phẩm' });
@@ -309,6 +308,7 @@ async function updateInventoryStock(req, res) {
     const stock = req.body?.stock;
     const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim() : '';
     const importPrice = req.body?.importPrice;
+    const recordAdjustment = req.body?.recordAdjustment === true;
     if (!sku || !Number.isSafeInteger(stock) || stock < 0) {
         return res.status(400).json({ message: 'SKU hợp lệ và số tồn kho nguyên không âm là bắt buộc' });
     }
@@ -319,7 +319,9 @@ async function updateInventoryStock(req, res) {
         return res.status(400).json({ message: 'Giá nhập phải là số nguyên không âm' });
     }
     try {
-        const result = await Product.setStockBySku(sku, stock, reason, importPrice, productSku, variantLabel);
+        const result = recordAdjustment
+            ? await Product.adjustStockBySku(sku, stock, reason, productSku, variantLabel)
+            : await Product.setStockBySku(sku, stock, reason, importPrice, productSku, variantLabel);
         if (!result.matchedCount) return res.status(404).json({ message: `Không tìm thấy sản phẩm hoặc phân loại ${variantLabel || sku} trong MongoDB` });
         const products = await Product.getInventoryProducts();
         const product = products.find(item => item.sku === sku || item.sku === productSku || item.variants?.some(variant => variant.sku === sku || (variantLabel && variant.label === variantLabel)));
@@ -333,6 +335,42 @@ async function updateInventoryStock(req, res) {
     } catch (error) {
         console.error('Lỗi cập nhật tồn kho:', error);
         return res.status(500).json({ message: 'Không thể cập nhật tồn kho' });
+    }
+}
+
+async function bulkAdjustInventoryStock(req, res) {
+    const inputItems = req.body?.items;
+    if (!Array.isArray(inputItems) || inputItems.length < 1 || inputItems.length > 100) {
+        return res.status(400).json({ message: 'Vui lòng chọn từ 1 đến 100 phân loại cần điều chỉnh' });
+    }
+    const seen = new Set();
+    const items = [];
+    for (const item of inputItems) {
+        const sku = typeof item?.sku === 'string' ? item.sku.trim() : '';
+        const productSku = typeof item?.productSku === 'string' ? item.productSku.trim() : '';
+        const variantLabel = typeof item?.variantLabel === 'string' ? item.variantLabel.trim() : '';
+        const reason = typeof item?.reason === 'string' ? item.reason.trim() : '';
+        if (!sku || !Number.isSafeInteger(item?.stock) || item.stock < 0 || seen.has(sku)) {
+            return res.status(400).json({ message: 'Mỗi phân loại cần có SKU riêng và số tồn nguyên không âm' });
+        }
+        if (reason.length > 160) return res.status(400).json({ message: 'Lý do điều chỉnh không được vượt quá 160 ký tự' });
+        seen.add(sku);
+        items.push({ sku, productSku, variantLabel, reason, stock: item.stock });
+    }
+    const dateCode = new Date().toISOString().slice(0, 10).replaceAll('-', '');
+    const batchCode = `ADJ-${dateCode}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    try {
+        await Product.bulkAdjustStock(items, batchCode);
+        const products = await Product.getInventoryProducts();
+        return res.json({ success: true, batchCode, products: [...new Set(items.map(item => item.productSku || item.sku))]
+            .map(sku => products.find(product => product.sku === sku || product.variants?.some(variant => items.some(item => item.sku === variant.sku && item.productSku === product.sku))))
+            .filter(Boolean).map(product => ({ ...product, imageUrl: product.thumbnail ? `/products/image/${encodeURIComponent(String(product.thumbnail))}` : null })) });
+    } catch (error) {
+        console.error('Lỗi điều chỉnh hàng loạt tồn kho:', error);
+        if (/transaction numbers are only allowed|replica set|mongos/i.test(error.message || '')) {
+            return res.status(503).json({ message: 'MongoDB hiện chưa bật replica set nên không thể thực hiện cập nhật nguyên tử. Không có tồn kho nào được thay đổi.' });
+        }
+        return res.status(400).json({ message: error.message || 'Không thể cập nhật hàng loạt tồn kho' });
     }
 }
 
@@ -399,5 +437,6 @@ module.exports = {
     createProductReview,
     getInventory,
     updateInventoryStock,
+    bulkAdjustInventoryStock,
     receiveInventoryStock
 };

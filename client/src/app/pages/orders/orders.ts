@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CancelReason, getOrderSlug, Order, OrderItem, OrderService } from '../../services/order-service';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 @Component({
   selector: 'app-orders',
@@ -95,6 +96,7 @@ export class Orders implements OnInit, OnDestroy {
     if (requestedTab && this.tabs.some(tab => tab.id === requestedTab)) {
       this.activeTab = requestedTab;
     }
+    this.searchQuery = this.route.snapshot.queryParamMap.get('q') || '';
     this.loadOrders();
   }
 
@@ -203,14 +205,18 @@ export class Orders implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
     }
-    this.router.navigate(['/orders', getOrderSlug(order)]);
+    this.router.navigate(['/orders', getOrderSlug(order)], {
+      queryParams: { tab: this.activeTab, q: this.searchQuery || null }
+    });
   }
 
   trackOrder(order: Order, event?: Event): void {
     if (event) {
       event.stopPropagation();
     }
-    this.router.navigate(['/orders', getOrderSlug(order)]);
+    this.router.navigate(['/orders', getOrderSlug(order)], {
+      queryParams: { tab: this.activeTab, q: this.searchQuery || null }
+    });
   }
 
   contactFloralia(order: Order, event?: Event): void {
@@ -377,34 +383,24 @@ export class Orders implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
     Array.from(input.files).forEach(file => {
+      if (!file.type.startsWith('image/') || file.size > 10 * 1024 * 1024) return;
       const reader = new FileReader();
-      reader.onload = (e: any) => this.returnImages.push(e.target.result);
+      reader.onload = (e: any) => {
+        if (typeof e.target?.result === 'string' && e.target.result.length <= 14_000_000) this.returnImages.push(e.target.result);
+      };
       reader.readAsDataURL(file);
     });
+    input.value = '';
   }
 
   confirmReturn(): void {
     if (!this.returningOrder) return;
-    const targetOrder = this.returningOrder;
-    this.orderService.updateOrderStatus(targetOrder.id, 'refund_pending', 'CHỜ DUYỆT HOÀN TIỀN', {
-      refundReason: this.selectedReturnReason,
-      refundNote: this.returnNote2,
-      refundImages: this.returnImages
-    }).subscribe({
-      next: ({ order }) => {
-        Object.assign(targetOrder, order);
-        this.applyFilter();
-        this.closeReturnModal();
-        alert('Yêu cầu hoàn tiền đã được gửi. Sẽ sớm được duyệt.');
-      },
-      error: (error) => {
-        alert(error?.error?.message || 'Không thể gửi yêu cầu hoàn tiền. Vui lòng thử lại.');
-      }
-    });
+    this.closeReturnModal();
+    alert('Chức năng đang phát triển.');
   }
 
   formatPrice(num: number): string {
-    return (num || 0).toLocaleString('vi-VN') + 'đ';
+    return formatVietnameseDong(num);
   }
 
   requestLogout(event: Event): void {

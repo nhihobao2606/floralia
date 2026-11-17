@@ -1,0 +1,308 @@
+<div class="profile-layout">
+  <app-admin-sidebar [orderBadge]="unreadNotificationsCount" (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+
+  <main class="profile-main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="breadcrumbs">
+        <a routerLink="/overview">Tổng quan hệ thống</a>
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        <strong>Hồ sơ quản trị viên</strong>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
+        </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <img *ngIf="adminAvatar" [src]="adminAvatar" alt="Avatar" class="account-avatar-img">
+            <span *ngIf="!adminAvatar" class="account-avatar" aria-hidden="true">{{ initial }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Đăng xuất
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <!-- Profile Header Card -->
+      <div class="profile-hero">
+        <div class="hero-avatar-wrap">
+          <div class="hero-avatar">
+            <img *ngIf="adminAvatar" [src]="adminAvatar" alt="Ảnh đại diện" class="hero-avatar-img">
+            <span *ngIf="!adminAvatar" class="hero-avatar-initial">{{ initial }}</span>
+          </div>
+          <label class="avatar-upload-btn" title="Thay ảnh đại diện">
+            <i class="bi bi-camera-fill"></i>
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" hidden>
+          </label>
+        </div>
+        <div class="hero-info">
+          <h2>{{ adminName }}</h2>
+          <p class="hero-email"><i class="bi bi-envelope"></i> {{ adminEmail }}</p>
+          <span class="role-badge"><i class="bi bi-shield-check"></i> Quản trị viên hệ thống</span>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-remove-avatar" type="button" *ngIf="adminAvatar" (click)="removeAvatar()">
+            <i class="bi bi-trash"></i> Xóa ảnh
+          </button>
+        </div>
+      </div>
+      <p *ngIf="avatarError" class="avatar-err">{{ avatarError }}</p>
+
+      <!-- Tabs -->
+      <div class="profile-tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'info'" (click)="activeTab = 'info'">
+          <i class="bi bi-person"></i> Thông tin tài khoản
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'password'" (click)="activeTab = 'password'">
+          <i class="bi bi-key"></i> Đổi mật khẩu
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'security'" (click)="activeTab = 'security'">
+          <i class="bi bi-shield-lock"></i> Bảo mật
+        </button>
+      </div>
+
+      <!-- TAB: Thông tin tài khoản -->
+      <div class="tab-panel" *ngIf="activeTab === 'info'">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3><i class="bi bi-person-lines-fill"></i> Thông tin cá nhân</h3>
+            <p>Cập nhật thông tin cơ bản của tài khoản quản trị viên.</p>
+          </div>
+
+          <div *ngIf="profileMsg().text" class="flash-msg" [class.flash-ok]="profileMsg().type === 'ok'" [class.flash-err]="profileMsg().type === 'err'">
+            <i class="bi" [ngClass]="profileMsg().type === 'ok' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"></i>
+            {{ profileMsg().text }}
+          </div>
+
+          <form #profileForm="ngForm" (ngSubmit)="updateProfile(profileForm)" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="fullName">Họ và tên <span class="req">*</span></label>
+                <input
+                  id="fullName"
+                  class="form-control"
+                  [(ngModel)]="adminName"
+                  name="fullName"
+                  required
+                  minlength="2"
+                  #namCtrl="ngModel"
+                  placeholder="Nhập họ và tên">
+                <div class="field-err" *ngIf="namCtrl.invalid && (namCtrl.touched || profileForm.submitted)">
+                  Vui lòng nhập họ và tên (ít nhất 2 ký tự).
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input id="email" class="form-control readonly-input" [value]="adminEmail" readonly placeholder="Email không thể thay đổi">
+                <small class="field-hint"><i class="bi bi-info-circle"></i> Email tài khoản không thể thay đổi.</small>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Vai trò</label>
+                <div class="readonly-field">
+                  <i class="bi bi-shield-check text-green"></i> Quản trị viên hệ thống
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-save" type="submit">
+                <i class="bi bi-check-lg"></i> Lưu thay đổi
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB: Đổi mật khẩu -->
+      <div class="tab-panel" *ngIf="activeTab === 'password'">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3><i class="bi bi-key-fill"></i> Đổi mật khẩu</h3>
+            <p>Mật khẩu phải có ít nhất 8 ký tự, gồm cả chữ và số. Nên dùng mật khẩu mạnh, duy nhất.</p>
+          </div>
+
+          <div *ngIf="passMsg().text" class="flash-msg" [class.flash-ok]="passMsg().type === 'ok'" [class.flash-err]="passMsg().type === 'err'">
+            <i class="bi" [ngClass]="passMsg().type === 'ok' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"></i>
+            {{ passMsg().text }}
+          </div>
+
+          <form class="password-form" #passForm="ngForm" (ngSubmit)="changePassword(passForm)" novalidate>
+            <!-- Mật khẩu hiện tại -->
+            <div class="form-group">
+              <label class="form-label" for="curPass">Mật khẩu hiện tại <span class="req">*</span></label>
+              <div class="input-eye">
+                <input
+                  [type]="show.cur ? 'text' : 'password'"
+                  id="curPass"
+                  class="form-control"
+                  [(ngModel)]="currentPassword"
+                  name="currentPassword"
+                  required
+                  #curCtrl="ngModel"
+                  [class.is-err]="wrongCurrent || (curCtrl.invalid && (curCtrl.touched || passForm.submitted))"
+                  placeholder="Mật khẩu đang dùng">
+                <button type="button" class="eye-btn" (click)="show.cur = !show.cur">
+                  <i class="bi" [ngClass]="show.cur ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
+              <div class="field-err" *ngIf="wrongCurrent">Mật khẩu hiện tại không chính xác.</div>
+              <div class="field-err" *ngIf="!wrongCurrent && curCtrl.invalid && (curCtrl.touched || passForm.submitted)">Vui lòng nhập mật khẩu hiện tại.</div>
+            </div>
+
+            <!-- Mật khẩu mới -->
+            <div class="form-group">
+              <label class="form-label" for="newPass">Mật khẩu mới <span class="req">*</span></label>
+              <div class="input-eye">
+                <input
+                  [type]="show.new_ ? 'text' : 'password'"
+                  id="newPass"
+                  class="form-control"
+                  [(ngModel)]="newPassword"
+                  name="newPassword"
+                  required
+                  [pattern]="passwordPattern"
+                  #newCtrl="ngModel"
+                  [class.is-err]="(samePassword && newCtrl.touched) || (newCtrl.invalid && (newCtrl.touched || passForm.submitted))"
+                  placeholder="Mật khẩu mới (tối thiểu 8 ký tự)">
+                <button type="button" class="eye-btn" (click)="show.new_ = !show.new_">
+                  <i class="bi" [ngClass]="show.new_ ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
+              <div class="field-err" *ngIf="samePassword && newCtrl.touched">Mật khẩu mới phải khác mật khẩu hiện tại.</div>
+              <div class="field-err" *ngIf="!samePassword && newCtrl.invalid && (newCtrl.touched || passForm.submitted)">Mật khẩu tối thiểu 8 ký tự, gồm cả chữ và số.</div>
+            </div>
+
+            <!-- Xác nhận mật khẩu -->
+            <div class="form-group">
+              <label class="form-label" for="cfPass">Xác nhận mật khẩu mới <span class="req">*</span></label>
+              <div class="input-eye">
+                <input
+                  [type]="show.cf ? 'text' : 'password'"
+                  id="cfPass"
+                  class="form-control"
+                  [(ngModel)]="confirmPassword"
+                  name="confirmPassword"
+                  required
+                  #cfCtrl="ngModel"
+                  [class.is-err]="confirmInvalid(cfCtrl, passForm)"
+                  placeholder="Nhập lại mật khẩu mới">
+                <button type="button" class="eye-btn" (click)="show.cf = !show.cf">
+                  <i class="bi" [ngClass]="show.cf ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+              </div>
+              <div class="field-err" *ngIf="confirmInvalid(cfCtrl, passForm)">Mật khẩu xác nhận không khớp.</div>
+            </div>
+
+            <!-- Password strength tips -->
+            <div class="pass-tips">
+              <span class="tip-item" [class.tip-ok]="newPassword.length >= 8"><i class="bi" [ngClass]="newPassword.length >= 8 ? 'bi-check-circle-fill' : 'bi-circle'"></i> Ít nhất 8 ký tự</span>
+              <span class="tip-item" [class.tip-ok]="/[A-Za-z]/.test(newPassword)"><i class="bi" [ngClass]="/[A-Za-z]/.test(newPassword) ? 'bi-check-circle-fill' : 'bi-circle'"></i> Có chữ cái</span>
+              <span class="tip-item" [class.tip-ok]="/\d/.test(newPassword)"><i class="bi" [ngClass]="/\d/.test(newPassword) ? 'bi-check-circle-fill' : 'bi-circle'"></i> Có chữ số</span>
+              <span class="tip-item" [class.tip-ok]="/[^A-Za-z0-9]/.test(newPassword)"><i class="bi" [ngClass]="/[^A-Za-z0-9]/.test(newPassword) ? 'bi-check-circle-fill' : 'bi-circle'"></i> Có ký tự đặc biệt</span>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-save" type="submit">
+                <i class="bi bi-check-lg"></i> Cập nhật mật khẩu
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB: Bảo mật -->
+      <div class="tab-panel" *ngIf="activeTab === 'security'">
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3><i class="bi bi-shield-lock-fill"></i> Cài đặt bảo mật</h3>
+            <p>Tăng cường bảo mật cho tài khoản quản trị viên của bạn.</p>
+          </div>
+
+          <div *ngIf="securityMsg().text" class="flash-msg" [class.flash-ok]="securityMsg().type === 'ok'" [class.flash-err]="securityMsg().type === 'err'">
+            <i class="bi" [ngClass]="securityMsg().type === 'ok' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"></i>
+            {{ securityMsg().text }}
+          </div>
+
+          <!-- 2FA Toggle -->
+          <div class="security-item">
+            <div class="security-item-info">
+              <div class="security-item-title">
+                <i class="bi bi-phone"></i>
+                Xác thực hai yếu tố (2FA)
+                <span class="sec-badge sec-badge-soon">Sắp ra mắt</span>
+              </div>
+              <p>Yêu cầu mã xác thực bổ sung khi đăng nhập để bảo vệ tài khoản tốt hơn.</p>
+            </div>
+            <label class="toggle-switch disabled">
+              <input type="checkbox" [(ngModel)]="twoFactorEnabled" [disabled]="true">
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+
+          <!-- Login Notification -->
+          <div class="security-item">
+            <div class="security-item-info">
+              <div class="security-item-title">
+                <i class="bi bi-bell"></i>
+                Thông báo khi đăng nhập
+              </div>
+              <p>Nhận thông báo mỗi khi có phiên đăng nhập mới vào tài khoản quản trị.</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="loginNotification">
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+
+          <!-- Session Timeout -->
+          <div class="security-item">
+            <div class="security-item-info">
+              <div class="security-item-title">
+                <i class="bi bi-clock-history"></i>
+                Thời gian hết phiên
+              </div>
+              <p>Tự động đăng xuất sau khoảng thời gian không hoạt động được chọn.</p>
+            </div>
+            <select class="sec-select" [(ngModel)]="sessionTimeout">
+              <option [value]="60">1 giờ</option>
+              <option [value]="240">4 giờ</option>
+              <option [value]="480">8 giờ</option>
+              <option [value]="1440">24 giờ</option>
+              <option [value]="10080">7 ngày</option>
+            </select>
+          </div>
+
+          <!-- Active sessions info -->
+          <div class="security-info-box">
+            <i class="bi bi-info-circle-fill"></i>
+            <div>
+              <strong>Phiên đăng nhập hiện tại</strong>
+              <p>Nếu bạn nghi ngờ tài khoản bị xâm phạm, hãy đổi mật khẩu ngay và liên hệ bộ phận kỹ thuật.</p>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-save" type="button" (click)="updateSecurity()">
+              <i class="bi bi-shield-check"></i> Lưu cài đặt bảo mật
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <app-admin-logout-dialog
+    [visible]="logoutConfirmVisible"
+    (cancelled)="cancelLogout()"
+    (confirmed)="confirmLogout()"
+  ></app-admin-logout-dialog>
+</div>

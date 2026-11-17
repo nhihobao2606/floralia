@@ -17,7 +17,7 @@
           </div>
           <div class="side-user-info">
             <strong>{{ user?.fullName || 'Khách hàng' }}</strong>
-            <small>{{ user?.email }}</small>
+            <small>{{ user?.email || 'Chưa thêm email' }}</small>
           </div>
         </div>
 
@@ -36,7 +36,7 @@
       <div class="profile-content">
 
         <!-- Thông tin tài khoản -->
-        <section class="card-box">
+        <section class="card-box profile-info-card">
           <div class="card-head"><h2><i class="bi bi-person-heart"></i> Thông tin tài khoản</h2></div>
 
           <form class="card-body-box" (ngSubmit)="updateProfile(profileForm)" #profileForm="ngForm" novalidate>
@@ -60,11 +60,16 @@
                 </div>
 
                 <div class="form-field">
-                  <label for="pfEmail">Email</label>
-                  <div class="input-wrapper readonly">
+                  <label for="pfEmail">Email <span class="optional">(không bắt buộc)</span></label>
+                  <div class="input-wrapper"
+                       [class.is-invalid]="emailCtrl.invalid && (emailCtrl.touched || profileForm.submitted)">
                     <i class="bi bi-envelope"></i>
-                    <input id="pfEmail" type="email" [value]="email" readonly tabindex="-1">
-                    <i class="bi bi-lock-fill lock" title="Email dùng để đăng nhập nên không thể thay đổi"></i>
+                    <input id="pfEmail" name="email" type="email" [(ngModel)]="email" #emailCtrl="ngModel"
+                           maxlength="254" placeholder="Nhập email nếu có">
+                  </div>
+                  <div class="field-error" *ngIf="emailCtrl.invalid && (emailCtrl.touched || profileForm.submitted)">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span>Địa chỉ email chưa đúng định dạng.</span>
                   </div>
                 </div>
 
@@ -74,12 +79,69 @@
                        [class.is-invalid]="phoneCtrl.invalid && (phoneCtrl.touched || profileForm.submitted)">
                     <i class="bi bi-telephone"></i>
                     <input id="pfPhone" name="phone" type="tel" [(ngModel)]="phone" #phoneCtrl="ngModel"
-                           required [pattern]="phonePattern" maxlength="12" placeholder="Nhập số điện thoại">
+                           required [pattern]="phonePattern" maxlength="10" placeholder="0912345678">
                   </div>
                   <div class="field-error" *ngIf="phoneCtrl.invalid && (phoneCtrl.touched || profileForm.submitted)">
                     <i class="bi bi-exclamation-circle"></i>
                     <span *ngIf="phoneCtrl.errors?.['required']">Vui lòng nhập số điện thoại.</span>
                     <span *ngIf="!phoneCtrl.errors?.['required'] && phoneCtrl.errors?.['pattern']">Số điện thoại chưa hợp lệ (ví dụ: 0912345678).</span>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="pfGender">Giới tính</label>
+                  <div class="gender-options" role="radiogroup" aria-label="Giới tính">
+                    <label class="gender-option">
+                      <input type="radio" name="gender" value="male" [(ngModel)]="gender">
+                      <span>Nam</span>
+                    </label>
+                    <label class="gender-option">
+                      <input type="radio" name="gender" value="female" [(ngModel)]="gender">
+                      <span>Nữ</span>
+                    </label>
+                    <label class="gender-option">
+                      <input type="radio" name="gender" value="other" [(ngModel)]="gender">
+                      <span>Khác</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="pfBirthDate">Ngày sinh</label>
+                  <input type="hidden" name="birthDate" [(ngModel)]="birthDate">
+                  <div class="birthdate-selects">
+                    <div class="birthdate-select" (click)="$event.stopPropagation()">
+                      <button id="pfBirthDay" class="birthdate-select-trigger" type="button" aria-label="Ngày sinh - ngày"
+                              [attr.aria-expanded]="openBirthPart === 'day'" (click)="toggleBirthPart('day', $event)">
+                        <span>{{ birthDay || 'Ngày' }}</span><i class="bi bi-chevron-down" aria-hidden="true"></i>
+                      </button>
+                      <div class="birthdate-options" *ngIf="openBirthPart === 'day'" role="listbox" aria-label="Chọn ngày" (click)="$event.stopPropagation()">
+                        <button *ngFor="let day of birthDays" type="button" role="option" [attr.aria-selected]="birthDay === day"
+                                [class.selected]="birthDay === day" (click)="selectBirthPart('day', day)">{{ day }}</button>
+                      </div>
+                    </div>
+                    <div class="birthdate-select" (click)="$event.stopPropagation()">
+                      <button id="pfBirthMonth" class="birthdate-select-trigger" type="button" aria-label="Ngày sinh - tháng"
+                              [attr.aria-expanded]="openBirthPart === 'month'" (click)="toggleBirthPart('month', $event)">
+                        <span>{{ birthMonth ? birthMonths[birthMonth - 1].label : 'Tháng' }}</span><i class="bi bi-chevron-down" aria-hidden="true"></i>
+                      </button>
+                      <div class="birthdate-options" *ngIf="openBirthPart === 'month'" role="listbox" aria-label="Chọn tháng" (click)="$event.stopPropagation()">
+                        <button *ngFor="let month of birthMonths" type="button" role="option"
+                                [disabled]="birthYear === currentBirthYear && month.value > currentBirthMonth"
+                                [attr.aria-selected]="birthMonth === month.value" [class.selected]="birthMonth === month.value"
+                                (click)="selectBirthPart('month', month.value)">{{ month.label }}</button>
+                      </div>
+                    </div>
+                    <div class="birthdate-select" (click)="$event.stopPropagation()">
+                      <button id="pfBirthYear" class="birthdate-select-trigger" type="button" aria-label="Ngày sinh - năm"
+                              [attr.aria-expanded]="openBirthPart === 'year'" (click)="toggleBirthPart('year', $event)">
+                        <span>{{ birthYear || 'Năm' }}</span><i class="bi bi-chevron-down" aria-hidden="true"></i>
+                      </button>
+                      <div class="birthdate-options" *ngIf="openBirthPart === 'year'" role="listbox" aria-label="Chọn năm" (click)="$event.stopPropagation()">
+                        <button *ngFor="let year of birthYears" type="button" role="option" [attr.aria-selected]="birthYear === year"
+                                [class.selected]="birthYear === year" (click)="selectBirthPart('year', year)">{{ year }}</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -97,7 +159,7 @@
                   <i class="bi bi-camera"></i> Chọn hình ảnh
                 </button>
                 <button type="button" class="link-remove" *ngIf="avatar" (click)="removeAvatar()">Xóa ảnh</button>
-                <small class="avatar-note">JPG, PNG hoặc WEBP, tối đa 5MB</small>
+                <small class="avatar-note">JPG, PNG hoặc WEBP, tối đa 10 MB</small>
                 <div class="field-error center" *ngIf="avatarError"><i class="bi bi-exclamation-circle"></i> {{ avatarError }}</div>
               </div>
             </div>

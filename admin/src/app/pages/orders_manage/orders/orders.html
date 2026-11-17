@@ -20,11 +20,11 @@
         </div>
 
         <div class="admin-account">
-          <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
-          <span class="account-copy">
+          <a class="account-avatar-link" routerLink="/profile" aria-label="Open admin profile"><span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span></a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
             <strong>{{ adminName }}</strong>
             <small>Quản trị viên</small>
-          </span>
+          </a>
           <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
             <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
             Đăng xuất
@@ -33,23 +33,24 @@
       </div>
     </header>
 
-    <section class="page-content">
+    <section class="page-content admin-standard-page-content">
       <!-- Welcome Banner -->
-      <section class="welcome-card">
+      <section class="welcome-card admin-standard-hero">
         <div class="welcome-info">
-          <h2>Chào mừng trở lại, {{ adminName }}</h2>
-          <p>Quản lý đơn hàng: Theo dõi chi tiết thông tin các đơn hàng và tình trạng xử lý đơn hàng trên hệ thống.</p>
+          <p class="welcome-kicker admin-standard-hero-kicker">KHÔNG GIAN ĐƠN HÀNG FLORALIA</p>
+          <h2 class="admin-standard-hero-title">Chào mừng trở lại, {{ adminName }}</h2>
+          <p class="admin-standard-hero-description">Theo dõi đơn hàng và tiến độ xử lý trên hệ thống Floralia Tea.</p>
         </div>
-        <div class="welcome-actions">
-          <button class="export-button" type="button" (click)="exportList()">
+        <div class="welcome-actions admin-standard-hero-actions">
+          <button class="export-button admin-standard-hero-action admin-standard-hero-action-secondary" type="button" (click)="exportList()">
             <i class="bi bi-file-earmark-spreadsheet" aria-hidden="true"></i>
             Xuất danh sách
           </button>
-          <button class="primary-button create-button" type="button" (click)="openCreateModal()">
+          <button class="primary-button create-button admin-standard-hero-action" type="button" (click)="openCreateModal()">
             <i class="bi bi-plus-lg" aria-hidden="true"></i>
             Tạo đơn hàng
           </button>
-          <button class="cancel-order-button" type="button" (click)="cancelSelectedOrder()" [disabled]="!canCancelSelectedOrder || cancellingSelectedOrder" [attr.aria-label]="'Hủy đơn hàng'">
+          <button class="cancel-order-button admin-standard-hero-action admin-standard-hero-action-danger" type="button" (click)="cancelSelectedOrder()" [disabled]="!canCancelSelectedOrder || cancellingSelectedOrder" [attr.aria-label]="'Hủy đơn hàng'">
             <i class="bi bi-x-circle" aria-hidden="true"></i>
             Hủy đơn hàng
           </button>
@@ -354,72 +355,58 @@
           <span>Họ và tên người nhận <b>*</b></span>
           <input type="text" [(ngModel)]="createForm.customerName" placeholder="Ví dụ: Nguyễn Văn A">
         </label>
-
         <label class="form-field">
           <span>Số điện thoại <b>*</b></span>
-          <input type="tel" [(ngModel)]="createForm.customerPhone" placeholder="Ví dụ: 0912 345 678">
+          <input type="tel" [(ngModel)]="createForm.customerPhone" maxlength="11" placeholder="Ví dụ: 0912345678">
+          
         </label>
-
         <label class="form-field">
           <span>Email khách hàng</span>
           <input type="email" [(ngModel)]="createForm.customerEmail" placeholder="khachhang@email.com">
         </label>
-
         <label class="form-field full-field">
           <span>Địa chỉ giao hàng <b>*</b></span>
           <input type="text" [(ngModel)]="createForm.customerAddress" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, TP">
         </label>
-
-        <label class="form-field full-field">
-          <span>Sản phẩm <b>*</b></span>
-          <select [ngModel]="createForm.productName" (ngModelChange)="onProductSelected($event)">
-            <option *ngFor="let prod of productCatalog" [value]="prod.name">
-              {{ prod.name }}
-            </option>
-          </select>
-        </label>
-
-        <label class="form-field">
-          <span>Phân loại / Quy cách <b>*</b></span>
-          <select [ngModel]="createForm.productVariant" (ngModelChange)="onVariantSelected($event)">
-            <option *ngFor="let v of availableVariants" [value]="v.label">
-              {{ v.label }} ({{ formatPrice(v.price) }})
-            </option>
-          </select>
-        </label>
-
-        <label class="form-field">
-          <span>Đơn giá (VND)</span>
-          <input type="number" [(ngModel)]="createForm.productPrice" min="0" step="5000">
-        </label>
-
-        <label class="form-field">
-          <span>Số lượng</span>
-          <input type="number" [(ngModel)]="createForm.productQuantity" min="1">
-        </label>
-
-        <label class="form-field">
-          <span>Phương thức thanh toán</span>
-          <select [(ngModel)]="createForm.paymentMethod">
-            <option value="COD">COD (Thanh toán khi nhận hàng)</option>
-            <option value="Chuyển khoản">Chuyển khoản ngân hàng</option>
-            <option value="VNPay">Cổng thanh toán VNPay</option>
-          </select>
-        </label>
-
-        <label class="form-field full-field">
-          <span>Trạng thái thanh toán</span>
-          <select [(ngModel)]="createForm.paymentStatus">
-            <option value="unpaid">Chưa thanh toán</option>
-            <option value="paid">Đã thanh toán</option>
-          </select>
-        </label>
       </div>
 
-      <div class="order-total-preview">
-        <span>Tổng thanh toán:</span>
-        <strong>{{ formatPrice(createForm.productPrice * createForm.productQuantity) }}</strong>
+      <section class="create-order-items">
+        <div class="create-order-section-heading"><div><h3>Sản phẩm trong đơn</h3><span>Chọn sản phẩm, phân loại và số lượng cần giao</span></div></div>
+        <div class="order-line-head"><span>Sản phẩm</span><span>Phân loại / Quy cách</span><span>Đơn giá</span><span>Số lượng</span><span></span></div>
+        <div class="create-order-line" *ngFor="let line of orderLines; let i = index">
+          <label class="form-field"><span class="mobile-line-label">Sản phẩm</span>
+            <select [ngModel]="line.productName" (ngModelChange)="onProductSelected(line, $event)">
+              <option value="">Chọn sản phẩm</option><option *ngFor="let prod of productCatalog" [value]="prod.name">{{ prod.name }}</option>
+            </select>
+          </label>
+          <label class="form-field"><span class="mobile-line-label">Phân loại</span>
+            <select [ngModel]="line.productVariant" (ngModelChange)="onVariantSelected(line, $event)" [disabled]="!line.productName">
+              <option value="">Chọn phân loại</option>
+              <option *ngFor="let v of variantsForLine(line)" [value]="v.label">{{ v.label }} ({{ formatPrice(v.price) }}) - Còn {{ v.stock ?? '—' }}</option>
+            </select>
+            <small class="line-stock-note" *ngIf="line.productVariant">Tồn kho: {{ lineStock(line) ?? 'Chưa cập nhật' }}</small>
+          </label>
+          <label class="form-field"><span class="mobile-line-label">Đơn giá</span><input class="readonly-price" type="text" [value]="formatPrice(line.productPrice)" readonly></label>
+          <label class="form-field"><span class="mobile-line-label">Số lượng</span><input type="number" [(ngModel)]="line.productQuantity" min="1" step="1"></label>
+          <button class="remove-order-line" type="button" (click)="removeOrderLine(i)" [disabled]="orderLines.length <= 1" aria-label="Xóa sản phẩm"><i class="bi bi-trash"></i></button>
+        </div>
+        <button class="add-order-line" type="button" (click)="addOrderLine()"><i class="bi bi-plus-circle"></i> Thêm sản phẩm</button>
+      </section>
+
+      <div class="form-grid order-extra-fields">
+        <label class="form-field"><span>Nguồn đơn</span><select [(ngModel)]="orderSource"><option value="">Chọn nguồn đơn</option><option>Facebook</option><option>Zalo</option><option>Instagram</option><option>Mua tại quầy</option><option>Khác</option></select></label>
+        <label class="form-field"><span>Phương thức thanh toán</span><select [(ngModel)]="createForm.paymentMethod"><option value="COD">COD (Thanh toán khi nhận hàng)</option><option value="momo">Ví MoMo</option><option value="vnpay">Cổng thanh toán VNPay</option></select></label>
+        <label class="form-field full-field"><span>Ghi chú đơn hàng</span><textarea [(ngModel)]="customerNote" rows="2" placeholder="Ví dụ: Giao giờ hành chính, gói quà kèm thiệp"></textarea></label>
+        <label class="form-field full-field"><span>Trạng thái thanh toán</span><select [(ngModel)]="createForm.paymentStatus"><option value="unpaid">Chưa thanh toán</option><option value="paid">Đã thanh toán</option></select></label>
       </div>
+
+      <section class="payment-summary">
+        <h3>Tóm tắt thanh toán</h3>
+        <div class="payment-summary-row"><span>Tạm tính</span><strong>{{ formatPrice(createSubtotal) }}</strong></div>
+        <div class="shipping-controls"><label class="form-field"><span>Phí vận chuyển</span><input type="number" [(ngModel)]="shippingFee" min="0" step="1000" [disabled]="freeShipping"></label></div>
+        <label class="form-field discount-field"><span>Giảm giá / Voucher</span><input type="number" [(ngModel)]="manualDiscount" min="0" [max]="createSubtotal" step="1000" placeholder="0"></label>
+        <div class="payment-summary-row total-row"><span>Tổng thanh toán</span><strong>{{ formatPrice(createTotal) }}</strong></div>
+      </section>
     </div>
 
     <footer class="modal-footer">
@@ -562,15 +549,8 @@
   </section>
 </div>
 
-<!-- Modal: Đăng xuất -->
-<div *ngIf="logoutConfirmationVisible" class="modal-backdrop" (click)="cancelLogoutConfirmation()">
-  <section class="logout-modal-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-    <div class="logout-icon"><i class="bi bi-box-arrow-right"></i></div>
-    <h2>Xác nhận đăng xuất</h2>
-    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị Floralia?</p>
-    <div class="modal-footer justify-center">
-      <button class="secondary-button" type="button" (click)="cancelLogoutConfirmation()">Hủy</button>
-      <button class="primary-button" type="button" (click)="confirmLogout()">Đăng xuất</button>
-    </div>
-  </section>
-</div>
+<app-admin-logout-dialog
+  [visible]="logoutConfirmationVisible"
+  (cancelled)="cancelLogoutConfirmation()"
+  (confirmed)="confirmLogout()"
+></app-admin-logout-dialog>

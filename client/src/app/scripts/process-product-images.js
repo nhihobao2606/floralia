@@ -51,7 +51,6 @@ async function main() {
       continue;
     }
 
-    // Thumbnail hiện tại là tên ảnh bạn đã ghép bằng tay
     const thumbnailName = path.basename(
       String(product.thumbnail)
     );

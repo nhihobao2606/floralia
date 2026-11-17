@@ -1,16 +1,4 @@
-<!-- ================= BREADCRUMB ================= -->
-<div class="blog-breadcrumb">
-  <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item">
-          <a routerLink="/home"><i class="bi bi-house-door-fill me-1"></i>Trang chủ</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">Tin tức</li>
-      </ol>
-    </nav>
-  </div>
-</div>
+<app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Tin tức' }]"></app-breadcrumb>
 
 <!-- ================= MAIN BLOG SECTION ================= -->
 <section class="blog-page-section">

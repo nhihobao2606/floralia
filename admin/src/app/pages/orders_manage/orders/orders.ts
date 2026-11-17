@@ -4,6 +4,7 @@ import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import { AdminNotificationService, SimulatedOrderNotification } from '../../../services/admin-notification-service';
 import {
@@ -26,10 +27,17 @@ const EMPTY_STATS: AdminOrderStats = {
   cancelled: 0,
 };
 
+interface ManualOrderLine {
+  productName: string;
+  productVariant: string;
+  productPrice: number;
+  productQuantity: number;
+}
+
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AdminSidebar],
+  imports: [CommonModule, FormsModule, RouterModule, AdminSidebar, AdminLogoutDialog],
   templateUrl: './orders.html',
   styleUrl: './orders.css',
 })
@@ -67,7 +75,12 @@ export class Orders implements OnInit, OnDestroy {
 
   // Products catalog for Create Order modal
   productCatalog: ProductCatalogItem[] = [];
-  availableVariants: ProductCatalogVariant[] = [];
+  orderLines: ManualOrderLine[] = [];
+  shippingFee = 30000;
+  freeShipping = false;
+  manualDiscount = 0;
+  customerNote = '';
+  orderSource = '';
 
   // Create Order Modal
   createModalVisible = false;
@@ -77,10 +90,6 @@ export class Orders implements OnInit, OnDestroy {
     customerPhone: '',
     customerAddress: '',
     customerEmail: '',
-    productName: '',
-    productVariant: '',
-    productPrice: 0,
-    productQuantity: 1,
     paymentMethod: 'COD',
     paymentStatus: 'unpaid' as PaymentStatus,
     status: 'pending' as OrderStatus,
@@ -109,9 +118,7 @@ export class Orders implements OnInit, OnDestroy {
 
     this.orderService.getProductsCatalog().subscribe(catalog => {
       this.productCatalog = catalog || [];
-      if (this.productCatalog.length > 0 && !this.createForm.productName) {
-        this.onProductSelected(this.productCatalog[0].name);
-      }
+      if (this.productCatalog.length > 0 && this.orderLines.length === 0) this.orderLines = [this.createLine(this.productCatalog[0])];
     });
 
     this.loadOrders();
@@ -340,108 +347,75 @@ export class Orders implements OnInit, OnDestroy {
   }
 
   // Create Order handling
-  onProductSelected(name: string): void {
-    this.createForm.productName = name;
-    const prod = this.productCatalog.find(p => p.name === name);
-    if (prod && Array.isArray(prod.variants) && prod.variants.length > 0) {
-      this.availableVariants = prod.variants;
-      this.onVariantSelected(prod.variants[0].label);
-    } else {
-      this.availableVariants = [{ label: 'Tiêu chuẩn', price: 150000 }];
-      this.createForm.productVariant = 'Tiêu chuẩn';
-      this.createForm.productPrice = 150000;
-    }
+  createLine(product?: ProductCatalogItem): ManualOrderLine {
+    const item = product || this.productCatalog[0];
+    const variant = item?.variants?.[0];
+    return { productName: item?.name || '', productVariant: variant?.label || '', productPrice: variant?.price || 0, productQuantity: 1 };
   }
 
-  onVariantSelected(variantLabel: string): void {
-    this.createForm.productVariant = variantLabel;
-    const v = this.availableVariants.find(item => item.label === variantLabel);
-    if (v) {
-      this.createForm.productPrice = v.price;
-    }
+  variantsForLine(line: ManualOrderLine): ProductCatalogVariant[] {
+    return this.productCatalog.find(item => item.name === line.productName)?.variants || [];
   }
+
+  onProductSelected(line: ManualOrderLine, name: string): void {
+    const product = this.productCatalog.find(item => item.name === name);
+    Object.assign(line, this.createLine(product));
+  }
+
+  onVariantSelected(line: ManualOrderLine, label: string): void {
+    line.productVariant = label;
+    line.productPrice = this.variantsForLine(line).find(item => item.label === label)?.price || 0;
+  }
+
+  addOrderLine(): void { this.orderLines = [...this.orderLines, this.createLine()]; }
+  removeOrderLine(index: number): void { if (this.orderLines.length > 1) this.orderLines.splice(index, 1); }
+  selectedVariant(line: ManualOrderLine): ProductCatalogVariant | undefined { return this.variantsForLine(line).find(v => v.label === line.productVariant); }
+  lineSku(line: ManualOrderLine): string { const product = this.productCatalog.find(p => p.name === line.productName); return this.selectedVariant(line)?.sku || product?.sku || ''; }
+  lineStock(line: ManualOrderLine): number | undefined { return this.selectedVariant(line)?.stock; }
+  get createSubtotal(): number { return this.orderLines.reduce((sum, line) => sum + line.productPrice * Math.max(0, Number(line.productQuantity) || 0), 0); }
+  get effectiveShippingFee(): number { return this.freeShipping ? 0 : Math.max(0, Number(this.shippingFee) || 0); }
+  get createTotal(): number { return Math.max(0, this.createSubtotal - Math.max(0, Number(this.manualDiscount) || 0)) + this.effectiveShippingFee; }
 
   openCreateModal(): void {
-    const firstProd = this.productCatalog.length > 0 ? this.productCatalog[0] : null;
-    const firstVar = firstProd?.variants?.[0];
-    this.createForm = {
-      customerName: '',
-      customerPhone: '',
-      customerAddress: '',
-      customerEmail: '',
-      productName: firstProd?.name || 'Hồng Diệp Trà – Trà Atiso Đỏ Nguyên Nụ',
-      productVariant: firstVar?.label || 'Hộp 200g',
-      productPrice: firstVar?.price || 180000,
-      productQuantity: 1,
-      paymentMethod: 'COD',
-      paymentStatus: 'unpaid',
-      status: 'pending',
-    };
-    if (firstProd && Array.isArray(firstProd.variants)) {
-      this.availableVariants = firstProd.variants;
-    }
+    this.createForm = { customerName: '', customerPhone: '', customerAddress: '', customerEmail: '', paymentMethod: 'COD', paymentStatus: 'unpaid', status: 'pending' };
+    this.orderLines = [this.createLine()];
+    this.shippingFee = 30000;
+    this.freeShipping = false;
+    this.manualDiscount = 0;
+    this.customerNote = '';
+    this.orderSource = '';
     this.createModalVisible = true;
   }
 
-  closeCreateModal(): void {
-    this.createModalVisible = false;
-  }
+  closeCreateModal(): void { this.createModalVisible = false; }
 
   submitCreateOrder(): void {
-    if (!this.createForm.customerName.trim() || !this.createForm.customerPhone.trim()) {
-      alert('Vui lòng điền họ tên và số điện thoại khách hàng.');
-      return;
+    if (!this.createForm.customerName.trim() || !this.createForm.customerPhone.trim() || !this.createForm.customerAddress.trim()) {
+      alert('Vui lòng nhập tên, số điện thoại và địa chỉ giao hàng.'); return;
     }
-
+    if (!this.orderLines.length || this.orderLines.some(line => !line.productName || !line.productVariant || !Number.isInteger(Number(line.productQuantity)) || Number(line.productQuantity) < 1)) {
+      alert('Vui lòng chọn sản phẩm, phân loại và số lượng hợp lệ cho từng dòng.'); return;
+    }
+    const overStock = this.orderLines.find(line => this.lineStock(line) !== undefined && Number(line.productQuantity) > Number(this.lineStock(line)));
+    if (overStock) { alert(`Tồn kho phân loại ${overStock.productVariant} không đủ (còn ${this.lineStock(overStock)}).`); return; }
+    if (Number(this.manualDiscount) > this.createSubtotal) { alert('Giảm giá không thể lớn hơn tạm tính.'); return; }
     this.creatingOrder = true;
-    const subtotal = this.createForm.productPrice * this.createForm.productQuantity;
-    const total = subtotal;
-
-    const matchedProd = this.productCatalog.find(p => p.name === this.createForm.productName);
-    const matchedVariant = this.availableVariants.find(v => v.label === this.createForm.productVariant);
-    const itemImage = matchedVariant?.image || matchedProd?.imageUrl || '/assets/images/products/74.png';
-    const itemSku = matchedVariant?.sku || matchedProd?.sku || '';
-
-    const newOrderPayload: Partial<AdminOrder> = {
-      receiver: {
-        name: this.createForm.customerName.trim(),
-        phone: this.createForm.customerPhone.trim(),
-        address: this.createForm.customerAddress.trim() || 'Hồ Chí Minh',
-        email: this.createForm.customerEmail.trim(),
-      },
-      items: [
-        {
-          sku: itemSku,
-          name: this.createForm.productName,
-          variant: this.createForm.productVariant,
-          price: this.createForm.productPrice,
-          quantity: this.createForm.productQuantity,
-          total: subtotal,
-          image: itemImage,
-        },
-      ],
-      subtotal,
-      discount: 0,
-      shippingFee: 0,
-      total,
-      paymentMethod: this.createForm.paymentMethod,
-      paymentStatus: this.createForm.paymentStatus,
+    const items: AdminOrderItem[] = this.orderLines.map(line => {
+      const product = this.productCatalog.find(p => p.name === line.productName);
+      const variant = this.selectedVariant(line);
+      return { sku: variant?.sku || product?.sku || '', name: line.productName, variant: line.productVariant, price: line.productPrice, quantity: Number(line.productQuantity), total: line.productPrice * Number(line.productQuantity), image: variant?.image || product?.imageUrl || '/assets/images/products/74.png' };
+    });
+    const payload: Partial<AdminOrder> & { customerNote?: string; source?: string } = {
+      receiver: { name: this.createForm.customerName.trim(), phone: this.createForm.customerPhone.trim(), address: this.createForm.customerAddress.trim(), email: this.createForm.customerEmail.trim() },
+      items, subtotal: this.createSubtotal, discount: Number(this.manualDiscount) || 0, shippingFee: this.effectiveShippingFee, total: this.createTotal,
+      customerNote: this.customerNote.trim(), source: this.orderSource,
+      paymentMethod: this.createForm.paymentMethod, paymentStatus: this.createForm.paymentStatus,
       paymentStatusLabel: this.createForm.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán',
-      status: this.createForm.status,
-      statusLabel: this.createForm.status === 'pending' ? 'Chờ xác nhận' : 'Chờ lấy hàng',
+      status: this.createForm.status, statusLabel: this.createForm.status === 'pending' ? 'Chờ xác nhận' : 'Chờ lấy hàng',
     };
-
-    this.orderService.createOrder(newOrderPayload).subscribe({
-      next: (res) => {
-        this.creatingOrder = false;
-        this.createModalVisible = false;
-        this.flashActionMessage(`Tạo đơn hàng ${res.order.code} thành công.`);
-        this.loadOrders();
-      },
-      error: (error) => {
-        this.creatingOrder = false;
-        alert(error?.error?.message || 'Không thể lưu đơn hàng vào MongoDB. Vui lòng kiểm tra kết nối máy chủ.');
-      },
+    this.orderService.createOrder(payload).subscribe({
+      next: res => { this.creatingOrder = false; this.createModalVisible = false; this.flashActionMessage(`Tạo đơn hàng ${res.order.code} thành công.`); this.loadOrders(); },
+      error: error => { this.creatingOrder = false; alert(error?.error?.message || 'Không thể lưu đơn hàng. Vui lòng thử lại.'); },
     });
   }
 

@@ -10,7 +10,7 @@ export interface Blog {
   publishedAt?: string | Date;
   category: string;
   categorySlug: string;
-  image: string;
+  image?: string;
   imageData?: string | null;
   imageMimeType?: string | null;
   featured: boolean;

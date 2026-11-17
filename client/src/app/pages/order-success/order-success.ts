@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { getOrderSlug, Order, OrderService } from '../../services/order-service';
 import { ProductService } from '../../services/product-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 @Component({
   selector: 'app-order-success',
@@ -79,7 +80,7 @@ export class OrderSuccess implements OnInit {
   }
 
   formatPrice(num?: number): string {
-    return (num || 0).toLocaleString('vi-VN') + 'đ';
+    return formatVietnameseDong(num);
   }
 
   get currentProgressStep(): number {

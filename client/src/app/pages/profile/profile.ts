@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { NgControl, NgForm } from '@angular/forms';
@@ -27,6 +27,20 @@ export class Profile implements OnInit {
   fullName = '';
   email = '';
   phone = '';
+  gender = '';
+  birthDate = '';
+  birthDay: number | null = null;
+  birthMonth: number | null = null;
+  birthYear: number | null = null;
+  openBirthPart: 'day' | 'month' | 'year' | null = null;
+  readonly currentBirthYear = new Date().getFullYear();
+  readonly currentBirthMonth = new Date().getMonth() + 1;
+  readonly currentBirthDay = new Date().getDate();
+  readonly birthMonths = Array.from({ length: 12 }, (_, index) => ({
+    value: index + 1,
+    label: `Tháng ${String(index + 1).padStart(2, '0')}`
+  }));
+  readonly birthYears = Array.from({ length: this.currentBirthYear - 1899 }, (_, index) => this.currentBirthYear - index);
   avatar = '';
   avatarError = '';
   profileMsg: { type: 'ok' | 'err'; text: string } = { type: 'ok', text: '' };
@@ -40,8 +54,64 @@ export class Profile implements OnInit {
   passMsg: { type: 'ok' | 'err'; text: string } = { type: 'ok', text: '' };
 
   readonly namePattern = '^(?=.*\\S)[^\\d!@#$%^&*()_+=\\[\\]{};:"\\\\|<>?/~]+$';
-  readonly phonePattern = '^(0|\\+84)(3|5|7|8|9)\\d{8}$';
+  readonly phonePattern = '^0(3|5|7|8|9)\\d{8}$';
   readonly passwordPattern = '^(?=.*[A-Za-z])(?=.*\\d).{8,}$';
+
+  get maxBirthDate(): string {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }
+
+  get birthDays(): number[] {
+    const monthLength = this.birthMonth && this.birthYear
+      ? new Date(this.birthYear, this.birthMonth, 0).getDate()
+      : 31;
+    const limit = this.birthYear === this.currentBirthYear && this.birthMonth === this.currentBirthMonth
+      ? this.currentBirthDay
+      : monthLength;
+    return Array.from({ length: limit }, (_, index) => index + 1);
+  }
+
+  updateBirthDateParts(): void {
+    if (this.birthYear === this.currentBirthYear && this.birthMonth && this.birthMonth > this.currentBirthMonth) {
+      this.birthMonth = null;
+    }
+    if (!this.birthDay || !this.birthMonth || !this.birthYear) {
+      this.birthDate = '';
+      return;
+    }
+
+    const monthLength = new Date(this.birthYear, this.birthMonth, 0).getDate();
+    const maxDay = this.birthYear === this.currentBirthYear && this.birthMonth === this.currentBirthMonth
+      ? Math.min(monthLength, this.currentBirthDay)
+      : monthLength;
+    this.birthDay = Math.min(this.birthDay, maxDay);
+    const value = `${this.birthYear}-${String(this.birthMonth).padStart(2, '0')}-${String(this.birthDay).padStart(2, '0')}`;
+    this.birthDate = value <= this.maxBirthDate ? value : '';
+  }
+
+  toggleBirthPart(part: 'day' | 'month' | 'year', event: Event): void {
+    event.stopPropagation();
+    this.openBirthPart = this.openBirthPart === part ? null : part;
+  }
+
+  selectBirthPart(part: 'day' | 'month' | 'year', value: number): void {
+    if (part === 'day') this.birthDay = value;
+    if (part === 'month') this.birthMonth = value;
+    if (part === 'year') this.birthYear = value;
+    this.updateBirthDateParts();
+    this.openBirthPart = null;
+  }
+
+  @HostListener('document:click')
+  closeBirthPartDropdown(): void {
+    this.openBirthPart = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  closeBirthPartDropdownOnEscape(): void {
+    this.openBirthPart = null;
+  }
 
   constructor(
     private http: HttpClient,
@@ -80,6 +150,16 @@ export class Profile implements OnInit {
     this.fullName = u.fullName || '';
     this.email = u.email || '';
     this.phone = u.phone || '';
+    this.gender = u.gender || '';
+    this.birthDate = u.birthDate || '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(this.birthDate)) {
+      const [year, month, day] = this.birthDate.split('-').map(Number);
+      this.birthYear = year;
+      this.birthMonth = month;
+      this.birthDay = day;
+    } else {
+      this.birthYear = this.birthMonth = this.birthDay = null;
+    }
     this.avatar = u.avatar || '';
     this.cdr.detectChanges();
   }
@@ -113,8 +193,8 @@ export class Profile implements OnInit {
       input.value = '';
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      this.avatarError = 'Ảnh quá lớn (tối đa 5MB).';
+    if (file.size > 10 * 1024 * 1024) {
+      this.avatarError = 'Ảnh quá lớn (tối đa 10 MB).';
       input.value = '';
       return;
     }
@@ -199,23 +279,28 @@ export class Profile implements OnInit {
     const updated = {
       ...this.user,
       fullName: this.fullName.trim().replace(/\s+/g, ' '),
+      email: this.email.trim().toLowerCase(),
       phone: this.phone.trim(),
+      gender: this.gender,
+      birthDate: this.birthDate,
       avatar: this.avatar,
     };
-    this.fill(updated);
-    this.syncStorage(updated);
-    this.flash('profileMsg', 'ok', 'Cập nhật thông tin thành công!');
-
-    // Gửi cập nhật lên server
+    // Chỉ báo thành công sau khi server đã ghi và trả lại dữ liệu từ MongoDB.
     this.http.put<any>(`${this.API}/me`, {
       fullName: this.fullName.trim().replace(/\s+/g, ' '),
+      email: this.email.trim().toLowerCase(),
       phone: this.phone.trim(),
+      gender: this.gender,
+      birthDate: this.birthDate,
       avatar: this.avatar,
     }, { headers: this.headers }).subscribe({
       next: (res) => {
         if (res.success) {
           this.fill(res.user);
           this.syncStorage(res.user);
+          this.flash('profileMsg', 'ok', 'Cập nhật thông tin thành công!');
+        } else {
+          this.flash('profileMsg', 'err', res.message || 'Không thể lưu thông tin. Vui lòng thử lại.');
         }
       },
       error: (err) => {

@@ -1,25 +1,38 @@
 <div class="admin-layout">
   <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
   <main class="admin-main">
-    <header class="topbar">
+    <header class="topbar admin-standard-topbar">
       <h1>Quản lý sản phẩm</h1>
-      <div class="admin-account">
-        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
-        <span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span>
-        <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
+        </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar" aria-hidden="true">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+          </button>
+        </div>
       </div>
     </header>
 
-    <section class="page-content">
-      <section class="welcome-card">
+    <section class="page-content admin-standard-page-content">
+      <section class="welcome-card admin-standard-hero">
         <div>
-          <p class="welcome-kicker">KHÔNG GIAN SẢN PHẨM FLORALIA</p>
-          <h2>Quản lý sản phẩm</h2>
-          <p>Quản lý danh sách trà thảo mộc, giá bán, tồn kho và trạng thái kinh doanh.</p>
+          <p class="welcome-kicker admin-standard-hero-kicker">KHÔNG GIAN SẢN PHẨM FLORALIA</p>
+          <h2 class="admin-standard-hero-title">Chào mừng trở lại, Admin Floralia</h2>
+          <p class="admin-standard-hero-description">Quản lý trà thảo mộc, giá bán, tồn kho và trạng thái kinh doanh.</p>
         </div>
-        <div class="welcome-actions">
-          <button class="secondary-button" type="button" (click)="exportList()"><i class="bi bi-download"></i> Xuất danh sách</button>
-          <button class="primary-button" type="button" (click)="createProduct()"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</button>
+        <div class="welcome-actions admin-standard-hero-actions">
+          <button class="secondary-button admin-standard-hero-action admin-standard-hero-action-secondary" type="button" (click)="exportList()"><i class="bi bi-download"></i> Xuất danh sách</button>
+          <button class="primary-button admin-standard-hero-action" type="button" (click)="createProduct()"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</button>
         </div>
       </section>
 
@@ -31,20 +44,29 @@
 
       <section class="products-card">
         <div class="list-toolbar">
-          <label class="search-box"><i class="bi bi-search"></i><input #searchInput type="search" [value]="searchText" (input)="onSearch(searchInput.value)" placeholder="Tìm tên hoặc SKU..."></label>
-          <app-custom-select ariaLabel="Lọc danh mục" placeholder="Tất cả danh mục" [options]="categoryOptions" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"></app-custom-select>
-          <app-custom-select ariaLabel="Lọc trạng thái" placeholder="Tất cả trạng thái" [options]="statusOptions" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()"></app-custom-select>
-          <button class="reset-button" type="button" (click)="resetFilters()">Đặt lại</button>
+          <div class="toolbar-left">
+            <button class="danger-action-btn" type="button" [disabled]="selectedCount === 0" (click)="requestDeleteSelected()"><i class="bi bi-trash3" aria-hidden="true"></i> Xóa ({{ selectedCount }})</button>
+            <button class="reset-button" type="button" (click)="resetFilters()">
+              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+              Đặt lại
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <app-custom-select [compact]="true" ariaLabel="Lọc danh mục" placeholder="Tất cả danh mục" [options]="categoryOptions" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()"></app-custom-select>
+            <app-custom-select [compact]="true" ariaLabel="Lọc trạng thái" placeholder="Tất cả trạng thái" [options]="statusOptions" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()"></app-custom-select>
+            <label class="search-box"><i class="bi bi-search" aria-hidden="true"></i><input #searchInput type="search" [value]="searchText" (input)="onSearch(searchInput.value)" placeholder="Tìm tên hoặc SKU..."></label>
+          </div>
         </div>
 
         <p class="action-error" *ngIf="actionError">{{ actionError }}</p>
         <div class="table-scroll">
           <table>
-            <thead><tr><th>SKU</th><th>Ảnh</th><th>Tên sản phẩm</th><th>Danh mục</th><th>Giá gốc</th><th>Giá bán</th><th>Giảm giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <thead><tr><th class="selection-cell"><input type="checkbox" aria-label="Chọn tất cả sản phẩm trên trang" [checked]="allVisibleSelected" (change)="toggleSelectAllVisible($event)"></th><th>SKU</th><th>Ảnh</th><th>Tên sản phẩm</th><th>Danh mục</th><th>Giá gốc</th><th>Giá bán</th><th>Giảm giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
             <tbody>
-              <tr *ngIf="listError && products.length === 0"><td colspan="10" class="table-state error-state">{{ listError }} <button class="retry-button" type="button" (click)="retryLoading()">Thử tải lại</button></td></tr>
-              <tr *ngIf="!listError && products.length === 0"><td colspan="10" class="table-state">Không tìm thấy sản phẩm phù hợp.</td></tr>
+              <tr *ngIf="listError && products.length === 0"><td colspan="11" class="table-state error-state">{{ listError }} <button class="retry-button" type="button" (click)="retryLoading()">Thử tải lại</button></td></tr>
+              <tr *ngIf="!listError && products.length === 0"><td colspan="11" class="table-state">Không tìm thấy sản phẩm phù hợp.</td></tr>
               <tr *ngFor="let product of products">
+                <td class="selection-cell"><input type="checkbox" [attr.aria-label]="'Chọn ' + product.name" [checked]="isProductSelected(product)" (change)="toggleProductSelection(product)"></td>
                 <td class="sku-cell">{{ product.sku }}</td>
                 <td><img class="product-thumb" [src]="imageSource(product)" [alt]="product.name" (error)="$any($event.target).src='/assets/no-image.svg'"></td>
                 <td class="name-cell"><strong>{{ product.name }}</strong><small>{{ product.brand || 'Floralia Tea' }}</small></td>
@@ -64,7 +86,7 @@
           <span>Hiển thị {{ pageStart }}–{{ pageEnd }} / {{ total }} sản phẩm</span>
           <nav class="pagination" aria-label="Phân trang">
             <button type="button" aria-label="Trang trước" [disabled]="currentPage <= 1" (click)="goToPage(currentPage - 1)"><i class="bi bi-chevron-left"></i></button>
-            <button *ngFor="let page of pageNumbers" type="button" [class.current]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+            <button *ngFor="let page of pageNumbers" type="button" [class.current]="page === currentPage" [attr.aria-current]="page === currentPage ? 'page' : null" (click)="goToPage(page)">{{ page }}</button>
             <button type="button" aria-label="Trang sau" [disabled]="currentPage >= totalPages" (click)="goToPage(currentPage + 1)"><i class="bi bi-chevron-right"></i></button>
           </nav>
         </footer>
@@ -73,14 +95,11 @@
   </main>
 </div>
 
-<div class="confirm-backdrop" *ngIf="logoutConfirmationVisible" (click)="cancelLogoutConfirmation()">
-  <section class="delete-dialog logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="logout-title" (click)="$event.stopPropagation()">
-    <span class="logout-icon"><i class="bi bi-box-arrow-right"></i></span>
-    <h2 id="logout-title">Xác nhận đăng xuất</h2>
-    <p>Bạn có chắc chắn muốn đăng xuất khỏi trang quản trị không?</p>
-    <div class="dialog-actions"><button type="button" class="cancel-button" (click)="cancelLogoutConfirmation()">Ở lại</button><button type="button" class="confirm-delete-button" (click)="confirmLogout()">Đăng xuất</button></div>
-  </section>
-</div>
+<app-admin-logout-dialog
+  [visible]="logoutConfirmationVisible"
+  (cancelled)="cancelLogoutConfirmation()"
+  (confirmed)="confirmLogout()"
+></app-admin-logout-dialog>
 
 <div class="confirm-backdrop" *ngIf="pendingDelete as productToDelete" (click)="cancelDelete()">
   <section class="delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title" (click)="$event.stopPropagation()">
@@ -90,5 +109,15 @@
     <p>Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
     <p class="action-error" *ngIf="actionError">{{ actionError }}</p>
     <div class="dialog-actions"><button type="button" class="cancel-button" [disabled]="deleting" (click)="cancelDelete()">Hủy</button><button type="button" class="confirm-delete-button" [disabled]="deleting" (click)="confirmDelete()">{{ deleting ? 'Đang xóa...' : 'Xác nhận xóa' }}</button></div>
+  </section>
+</div>
+
+<div class="confirm-backdrop" *ngIf="pendingDeleteProducts.length" (click)="cancelDeleteSelected()">
+  <section class="delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-selected-title" (click)="$event.stopPropagation()">
+    <button class="dialog-close" type="button" aria-label="Đóng" [disabled]="deletingSelected" (click)="cancelDeleteSelected()"><i class="bi bi-x-lg"></i></button>
+    <h2 id="delete-selected-title">Xóa sản phẩm đã chọn</h2>
+    <p>Bạn có chắc chắn muốn xóa {{ pendingDeleteProducts.length }} sản phẩm đã chọn không?</p>
+    <p class="action-error" *ngIf="actionError" role="alert">{{ actionError }}</p>
+    <div class="dialog-actions"><button type="button" class="cancel-button" [disabled]="deletingSelected" (click)="cancelDeleteSelected()">Hủy</button><button type="button" class="confirm-delete-button" [disabled]="deletingSelected" (click)="confirmDeleteSelected()">{{ deletingSelected ? 'Đang xóa...' : 'Xác nhận xóa' }}</button></div>
   </section>
 </div>

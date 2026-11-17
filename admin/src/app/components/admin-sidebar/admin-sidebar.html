@@ -1,6 +1,7 @@
-<aside class="admin-sidebar" [class.product-route]="isProductManagementRoute()">
-  <a class="sidebar-brand" routerLink="/articles" aria-label="Floralia Tea - quản trị">
-    <img src="/assets/logo.png" alt="Floralia Tea">
+<aside class="admin-sidebar" [class.collapsed]="isCollapsed">
+  <a class="sidebar-brand" routerLink="/overview" aria-label="Floralia Tea - quản trị">
+    <img src="/assets/logo1.png" alt="Floralia Tea">
+    <i class="sidebar-brand-mark bi bi-flower1" aria-hidden="true"></i>
   </a>
 
   <nav class="sidebar-nav" aria-label="Menu quản trị">
@@ -10,20 +11,23 @@
       [class.disabled]="item.disabled"
       [routerLink]="item.disabled ? null : item.route"
       routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
+      [routerLinkActiveOptions]="{ exact: false }"
       [attr.aria-label]="item.label"
-      [attr.aria-disabled]="item.disabled"
-      [attr.title]="item.disabled ? 'Mục này sẽ được triển khai sau' : null">
+      [attr.title]="isCollapsed ? item.label : null"
+      [attr.aria-disabled]="item.disabled">
       <i [ngClass]="['bi', item.icon]" aria-hidden="true"></i>
       <span>{{ item.label }}</span>
     </a>
-    <a class="sidebar-link product-manage-shortcut" routerLink="/products" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" aria-label="Quản lý sản phẩm">
-      <i class="bi bi-box-seam" aria-hidden="true"></i>
-      <span>Quản lý sản phẩm</span>
-    </a>
-    <a class="sidebar-link category-manage-shortcut" routerLink="/categories" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" aria-label="Quản lý danh mục">
-      <i class="bi bi-folder2" aria-hidden="true"></i>
-      <span>Quản lý danh mục</span>
-    </a>
   </nav>
+
+  <button
+    class="sidebar-toggle"
+    type="button"
+    [attr.aria-label]="isCollapsed ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên'"
+    [attr.title]="isCollapsed ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên'"
+    [attr.aria-expanded]="!isCollapsed"
+    (click)="toggleSidebar()">
+    <i class="bi" [ngClass]="isCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'" aria-hidden="true"></i>
+    <span>{{ isCollapsed ? 'Mở rộng' : 'Thu gọn' }}</span>
+  </button>
 </aside>

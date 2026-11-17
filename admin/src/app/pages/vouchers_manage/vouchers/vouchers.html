@@ -1,12 +1,45 @@
 <div class="admin-layout">
-  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <app-admin-logout-dialog
+    [visible]="logoutConfirmationVisible"
+    (cancelled)="cancelLogoutConfirmation()"
+    (confirmed)="confirmLogout()"
+  ></app-admin-logout-dialog>
   <main class="admin-main">
-    <header class="topbar">
+    <header class="topbar admin-standard-topbar">
       <h1>Quản lý khuyến mãi</h1>
-      <div class="admin-account"><span class="account-avatar">{{ adminName.charAt(0).toUpperCase() }}</span><span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span><button type="button" class="logout" (click)="logout()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button></div>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
+        </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button type="button" class="topbar-logout" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+          </button>
+        </div>
+      </div>
     </header>
-    <div class="vouchers-page">
-      <section class="promo-hero"><div><span class="hero-kicker"><i class="bi bi-tag-fill"></i> CHIẾN DỊCH KHUYẾN MÃI</span><h1>Tạo ưu đãi để thu hút khách hàng</h1><p>Thiết lập và quản lý các chương trình mã giảm giá, voucher kích cầu tiêu dùng trà thảo mộc tự nhiên của Floralia Tea.</p></div><a routerLink="/vouchers/new" class="hero-button"><i class="bi bi-plus-lg"></i> Tạo voucher</a></section>
+    <section class="page-content vouchers-page admin-standard-page-content">
+      <section class="welcome-card admin-standard-hero">
+        <div class="welcome-info">
+          <p class="welcome-kicker admin-standard-hero-kicker">KHÔNG GIAN KHUYẾN MÃI FLORALIA</p>
+          <h2 class="admin-standard-hero-title">Chào mừng trở lại, {{ adminName }}</h2>
+          <p class="admin-standard-hero-description">Tạo và theo dõi mã giảm giá, thời hạn áp dụng và lượt sử dụng trên cửa hàng.</p>
+        </div>
+        <div class="welcome-actions admin-standard-hero-actions">
+          <a routerLink="/vouchers/new" class="primary-button admin-standard-hero-action">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Tạo voucher
+          </a>
+        </div>
+      </section>
       <section class="stats-grid" aria-label="Thống kê voucher">
         <article class="stat-card"><span class="stat-icon mint"><i class="bi bi-ticket-perforated"></i></span><small>TỔNG VOUCHER</small><strong>{{ summary.total }}</strong><span class="stat-note">Toàn bộ chiến dịch đã khởi tạo</span></article>
         <article class="stat-card"><span class="stat-icon green"><i class="bi bi-fire"></i></span><small>ĐANG CHẠY</small><strong>{{ summary.active }} <small>đang áp dụng</small></strong><span class="stat-note">Voucher có thể dùng trên cửa hàng</span></article>
@@ -41,6 +74,6 @@
         </table></div>
         <footer class="table-footer"><span>Hiển thị {{ filtered.length ? (currentPage - 1) * pageSize + 1 : 0 }}–{{ (currentPage - 1) * pageSize + visible.length }} trên {{ filtered.length }} voucher</span><nav class="pagination"><button (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1" aria-label="Trang trước"><i class="bi bi-chevron-left"></i></button><button *ngFor="let page of pages" [class.current]="currentPage === page" (click)="setPage(page)">{{ page }}</button><button (click)="setPage(currentPage + 1)" [disabled]="currentPage === pageCount" aria-label="Trang sau"><i class="bi bi-chevron-right"></i></button></nav></footer>
       </section>
-    </div>
+    </section>
   </main>
 </div>

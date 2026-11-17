@@ -43,18 +43,6 @@ async function syncProductAssetsSku(product) {
         );
     }
 
-    const exists = await productAssetsCollection.findOne({ productSku: baseSku }, { projection: { _id: 1 } });
-    if (!exists) {
-        await productAssetsCollection.insertOne({
-            productSku: baseSku,
-            assetId: `${baseSku}_META`,
-            originalFileName: `${baseSku}_META`,
-            mimeType: 'image/svg+xml',
-            data: '',
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-    }
 }
 
 async function backfillAllProductsAssetSkus() {
@@ -64,9 +52,34 @@ async function backfillAllProductsAssetSkus() {
         for (const product of products) {
             await syncProductAssetsSku(product);
         }
+        await productAssetsCollection.deleteMany({
+            assetId: { $regex: /_META$/ },
+            type: { $exists: false },
+            mimeType: 'image/svg+xml',
+            data: ''
+        });
+        await cleanupOrphanProductAssets();
     } catch (err) {
         console.error('Không thể đồng bộ productSku cho ProductAssets:', err);
     }
+}
+
+async function cleanupOrphanProductAssets() {
+    if (!productsCollection || !productAssetsCollection) return;
+    const products = await productsCollection.find({}).project({ sku: 1 }).toArray();
+    // An empty catalog can be a first-run/import state; do not sweep its assets.
+    if (!products.length) return;
+    const activeSkus = products.map(product => String(product.sku || '').split('-')[0].trim()).filter(Boolean);
+    const assets = await productAssetsCollection.find({ assetId: { $exists: true } }).project({ _id: 1, assetId: 1, productSku: 1 }).toArray();
+    const orphanIds = assets.filter(asset => {
+        const assetId = String(asset.assetId || '');
+        const belongsToActiveSku = activeSkus.some(sku =>
+            assetId.startsWith(`${sku}_THUMB`) || assetId.startsWith(`${sku}_IMG_`)
+        );
+        const storedSku = String(asset.productSku || '').split('-')[0].trim();
+        return !belongsToActiveSku && (!storedSku || !activeSkus.includes(storedSku));
+    }).map(asset => asset._id);
+    if (orphanIds.length) await productAssetsCollection.deleteMany({ _id: { $in: orphanIds } });
 }
 
 function setCollections(products, assets) {
@@ -84,8 +97,16 @@ async function getAll() {
 }
 
 async function getById(id) {
-    if (!ObjectId.isValid(id)) return null;
-    return productsCollection.findOne({ _id: new ObjectId(id) });
+    if (typeof id === 'string' && ObjectId.isValid(id) && id.length === 24) {
+        const found = await productsCollection.findOne({ _id: new ObjectId(id) });
+        if (found) return found;
+    }
+    return productsCollection.findOne({ sku: id });
+}
+
+async function getByIds(ids) {
+    if (!Array.isArray(ids) || !ids.length) return [];
+    return productsCollection.find({ _id: { $in: ids.map(id => new ObjectId(id)) } }).toArray();
 }
 
 async function getBySku(sku, exceptId) {
@@ -118,25 +139,125 @@ async function remove(id) {
     return productsCollection.deleteOne({ _id: new ObjectId(id) });
 }
 
+async function removeMany(ids) {
+    return productsCollection.deleteMany({ _id: { $in: ids.map(id => new ObjectId(id)) } });
+}
+
 async function updateMany(filter, updateDoc) {
     if (!productsCollection) return;
     return productsCollection.updateMany(filter, updateDoc);
 }
 
-async function insertImages(images, productSku = '') {
+async function insertImages(images, productSku = '', options = {}) {
+    if (!Array.isArray(images) || images.length === 0) return [];
+    if (!productAssetsCollection) throw new Error('ProductAssets collection has not been initialized.');
+
     const baseSku = productSku ? String(productSku).split('-')[0].trim() : '';
-    const assets = images.map(image => ({
-        data: image.data,
-        mimeType: image.mimeType,
-        originalFileName: image.fileName,
-        assetId: `product-${new ObjectId().toString()}`,
-        ...(baseSku ? { productSku: baseSku } : {}),
-        createdAt: new Date(),
-        updatedAt: new Date()
-    }));
-    if (!assets.length) return [];
-    const result = await productAssetsCollection.insertMany(assets);
-    return assets.map((asset, index) => String(result.insertedIds[index]));
+    const createThumbnail = Boolean(options.createThumbnail);
+    let imageIndex = Math.max(0, Number(options.imageStartIndex) || 0);
+    const reservedAssetIds = new Set();
+    const assets = [];
+    for (let index = 0; index < images.length; index++) {
+        const image = images[index];
+        const isThumbnail = createThumbnail && index === 0;
+        if (isThumbnail) {
+            assets.push({
+                _id: new ObjectId(),
+                assetId: `${baseSku}_THUMB`,
+                productSku: baseSku,
+                originalFileName: image.fileName,
+                type: 'thumbnail',
+                mimeType: 'image/webp',
+                data: image.data
+            });
+            // Keep IMG_1 as the canonical image copy of the representative photo.
+            imageIndex = 1;
+            const imageId = `${baseSku}_IMG_${imageIndex}`;
+            assets.push({
+                _id: new ObjectId(),
+                assetId: imageId,
+                productSku: baseSku,
+                originalFileName: image.fileName,
+                type: 'image',
+                mimeType: 'image/webp',
+                data: image.data
+            });
+            reservedAssetIds.add(imageId);
+            continue;
+        }
+        imageIndex += 1;
+        const assetId = `${baseSku}_IMG_${imageIndex}`;
+        if (reservedAssetIds.has(assetId)) throw new Error(`Duplicate product image index: ${assetId}`);
+        reservedAssetIds.add(assetId);
+        assets.push({
+            _id: new ObjectId(),
+            assetId,
+            productSku: baseSku,
+            originalFileName: image.fileName,
+            type: 'image',
+            mimeType: 'image/webp',
+            data: image.data
+        });
+    }
+    const assetIds = assets.map(asset => asset.assetId);
+    await productAssetsCollection.deleteMany({ assetId: { $in: assetIds } });
+    await productAssetsCollection.insertMany(assets);
+    return assets.map(asset => asset.assetId);
 }
 
-module.exports = { setCollections, getAll, getById, getBySku, create, update, updateMany, remove, insertImages, productEvents, notifyProductChanged, getVersion };
+async function pruneProductAssets(productSku, references = []) {
+    if (!productAssetsCollection || !productSku) return;
+    const baseSku = String(productSku).split('-')[0].trim();
+    const retainedIds = [...new Set((references || []).filter(Boolean).map(String))];
+    const filter = { productSku: baseSku };
+    if (retainedIds.length) filter.assetId = { $nin: retainedIds };
+    await productAssetsCollection.deleteMany(filter);
+}
+
+async function removeProductAssetsBySkus(productSkus = []) {
+    if (!productAssetsCollection) return { deletedCount: 0 };
+    const baseSkus = [...new Set(productSkus.map(sku => String(sku || '').split('-')[0].trim()).filter(Boolean))];
+    if (!baseSkus.length) return { deletedCount: 0 };
+    const assetIdPatterns = baseSkus.map(sku => ({
+        assetId: { $regex: `^${sku.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}_(?:THUMB|IMG_\\d+)(?:_\\d+)?$` }
+    }));
+    return productAssetsCollection.deleteMany({
+        $or: [
+            { productSku: { $in: baseSkus } },
+            ...assetIdPatterns
+        ]
+    });
+}
+
+async function getAssetsByReferences(references) {
+    if (!productAssetsCollection) return [];
+    const ids = [...new Set((references || []).filter(Boolean).map(String))];
+    if (!ids.length) return [];
+    const conditions = [
+        { assetId: { $in: ids } },
+        { originalFileName: { $in: ids } }
+    ];
+    for (const id of ids) {
+        if (ObjectId.isValid(id) && id.length === 24) {
+            conditions.push({ _id: new ObjectId(id) });
+        }
+    }
+    return productAssetsCollection.find({ $or: conditions }).project({
+        assetId: 1,
+        originalFileName: 1
+    }).toArray();
+}
+
+async function getProductAssetsBySku(productSku) {
+    if (!productAssetsCollection || !productSku) return [];
+    const baseSku = String(productSku).split('-')[0].trim();
+    return productAssetsCollection.find({ productSku: baseSku }).project({
+        assetId: 1,
+        productSku: 1,
+        originalFileName: 1,
+        type: 1,
+        mimeType: 1
+    }).toArray();
+}
+
+module.exports = { setCollections, getAll, getById, getByIds, getBySku, create, update, updateMany, remove, removeMany, insertImages, pruneProductAssets, removeProductAssetsBySkus, getAssetsByReferences, getProductAssetsBySku, productEvents, notifyProductChanged, getVersion };

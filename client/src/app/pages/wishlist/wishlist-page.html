@@ -56,10 +56,11 @@
           <div class="wishlist-grid" *ngIf="!loading() && !errorMessage() && products().length">
             <article class="product-card" *ngFor="let product of products()">
               <div class="product-img">
-                <span class="sale-badge" *ngIf="product.discount > 0">-{{ product.discount }}%</span>
+                <span class="sale-badge" *ngIf="displayDiscount(product) > 0">-{{ displayDiscount(product) }}%</span>
                 <a [attr.href]="productNavigation.detailUrl(product)" (click)="openProduct($event, product)">
                   <img [src]="getProductImage(product)" [alt]="product.name" loading="lazy" (error)="onImageError($event)">
                 </a>
+                <span class="out-of-stock-overlay" *ngIf="!hasStock(product)">H&#7870;T H&#192;NG</span>
                 <button type="button" class="sale-heart on" (click)="remove(product)" [attr.aria-label]="'Bỏ ' + product.name + ' khỏi yêu thích'" aria-pressed="true">
                   <i class="bi bi-heart-fill" aria-hidden="true"></i>
                 </button>
@@ -70,10 +71,13 @@
                   <i *ngFor="let star of [1, 2, 3, 4, 5]" class="bi" [class.bi-star-fill]="star <= rating(product)" [class.bi-star]="star > rating(product)"></i>
                   <small>{{ ratingText(product) }}</small>
                 </div>
-                <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ product.sold || 0 }}</div>
+                <div class="sale-meta-row">
+                  <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ product.sold || 0 }}</div>
+                  <span class="sale-variant-pill" *ngIf="displayVariantLabel(product)">{{ displayVariantLabel(product) }}</span>
+                </div>
                 <div class="sale-price">
-                  <span class="sale-current">{{ formatPrice(product.price) }}</span>
-                  <del class="sale-old" *ngIf="product.oldPrice">{{ formatPrice(product.oldPrice) }}</del>
+                  <span class="sale-current"><small class="price-from-prefix" *ngIf="shouldShowFromPrefix(product)">Từ </small>{{ formatPrice(displayPrice(product)) }}</span>
+                  <del class="sale-old" *ngIf="displayOldPrice(product) > 0">{{ formatPrice(displayOldPrice(product)) }}</del>
                 </div>
                 <div class="product-actions">
                   <button type="button" class="sale-cart-icon" [disabled]="!hasStock(product)" (click)="addToCart(product)" [attr.aria-label]="'Thêm ' + product.name + ' vào giỏ hàng'" title="Thêm vào giỏ hàng">
@@ -92,3 +96,71 @@
   </div>
 </main>
 <app-logout-confirmation [open]="showLogoutConfirm" (cancelled)="showLogoutConfirm = false" (confirmed)="confirmLogout()"></app-logout-confirmation>
+
+<div
+  *ngIf="cartService.cartMessage()"
+  class="cart-notification"
+  role="status"
+  aria-live="polite">
+  <i class="bi bi-bag-check" aria-hidden="true"></i>
+  <span>{{ cartService.cartMessage() }}</span>
+</div>
+
+<div
+  *ngIf="cartPopupProduct as product"
+  class="cart-add-backdrop"
+  (click)="closeCartPopup()">
+  <section
+    class="cart-add-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="wishlist-cart-add-title"
+    (click)="$event.stopPropagation()">
+    <button type="button" class="cart-add-close" aria-label="Đóng" (click)="closeCartPopup()">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+
+    <div class="cart-add-product">
+      <img [src]="getProductImage(product)" [alt]="product.name">
+      <div>
+        <p class="cart-add-eyebrow">THÊM VÀO GIỎ HÀNG</p>
+        <h2 id="wishlist-cart-add-title">{{ product.name }}</h2>
+        <div class="cart-add-price">
+          <strong>{{ formatPrice(cartPopupPrice) }}</strong>
+          <del *ngIf="cartPopupOldPrice > cartPopupPrice">{{ formatPrice(cartPopupOldPrice) }}</del>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-add-variants" *ngIf="product.variants?.length">
+      <h3>Phân loại</h3>
+      <div class="cart-add-variant-options">
+        <button
+          *ngFor="let variant of product.variants"
+          type="button"
+          class="cart-add-variant"
+          [class.selected]="cartPopupVariant?.sku === variant.sku"
+          [disabled]="variant.stock < 1"
+          [attr.aria-pressed]="cartPopupVariant?.sku === variant.sku"
+          (click)="selectCartPopupVariant(variant)">
+          {{ variant.label }}
+          <small *ngIf="variant.stock < 1">Hết hàng</small>
+        </button>
+      </div>
+    </div>
+
+    <p class="cart-add-stock">Kho: {{ cartPopupStock }}</p>
+
+    <div class="cart-add-footer">
+      <div class="cart-add-quantity" aria-label="Số lượng">
+        <button type="button" aria-label="Giảm số lượng" [disabled]="cartPopupQuantity <= 1" (click)="changeCartPopupQuantity(-1)">−</button>
+        <span aria-live="polite">{{ cartPopupQuantity }}</span>
+        <button type="button" aria-label="Tăng số lượng" [disabled]="cartPopupQuantity >= cartPopupStock" (click)="changeCartPopupQuantity(1)">+</button>
+      </div>
+      <button type="button" class="cart-add-confirm" [disabled]="cartPopupStock < 1" (click)="confirmAddToCart()">
+        <i class="bi bi-bag-plus" aria-hidden="true"></i>
+        Thêm vào giỏ hàng
+      </button>
+    </div>
+  </section>
+</div>

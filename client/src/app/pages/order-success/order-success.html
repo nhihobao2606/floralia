@@ -6,7 +6,7 @@
   <div class="container success-container">
 
     <header class="hero-header">
-      <p class="success-eyebrow">FLORALIA HERBAL TEA</p>
+      <p class="success-eyebrow">FLORALIA TEA</p>
       <h1 class="hero-title">
         <span class="success-icon-badge"><i class="bi bi-check2-circle" aria-hidden="true"></i></span>
         Đặt hàng thành công
@@ -46,8 +46,9 @@
       <p>Mã vận đơn: <strong>{{ order.trackingCode || 'Chưa được lưu' }}</strong></p>
     </section>
 
-    <!-- PRODUCTS TABLE (CART/ORDER-DETAIL STYLE) -->
-    <div class="products-cart-card">
+    <div class="success-order-layout">
+      <!-- PRODUCTS TABLE (CART/ORDER-DETAIL STYLE) -->
+      <div class="products-cart-card">
       <div class="cart-panel-header">
         <h2 class="cart-panel-title">
           <i class="bi bi-bag-check"></i> Sản phẩm trong đơn hàng
@@ -84,23 +85,23 @@
                 </div>
               </td>
               <td class="td-price">
-                <span class="unit-old-price" *ngIf="it.oldPrice && it.oldPrice > (it.salePrice ?? it.price)">{{ it.oldPrice.toLocaleString('vi-VN') }}đ</span>
-                <span class="unit-price">{{ (it.salePrice ?? it.price ?? it.oldPrice ?? 0).toLocaleString('vi-VN') }}đ</span>
+                <span class="unit-old-price" *ngIf="it.oldPrice && it.oldPrice > (it.salePrice ?? it.price)">{{ formatPrice(it.oldPrice) }}</span>
+                <span class="unit-price">{{ formatPrice(it.salePrice ?? it.price ?? it.oldPrice ?? 0) }}</span>
               </td>
               <td class="td-qty">
                 <span class="qty-pill">x{{ it.quantity }}</span>
               </td>
               <td class="td-total">
-                <strong class="line-total">{{ (((it.salePrice ?? it.price ?? it.oldPrice ?? 0) * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
+                <strong class="line-total">{{ formatPrice(((it.salePrice ?? it.price ?? it.oldPrice ?? 0) * it.quantity) || 0) }}</strong>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
 
-    <div class="success-order-footer">
-      <section class="success-summary-card" aria-label="Tổng kết thanh toán">
+      <div class="success-order-footer">
+        <section class="success-summary-card" aria-label="Tổng kết thanh toán">
         <div class="success-summary-row">
           <span>Tạm tính</span>
           <span>{{ formatPrice(order.subtotal) }}</span>
@@ -121,20 +122,21 @@
           <strong>Tổng thanh toán</strong>
           <strong>{{ formatPrice(order.total) }}</strong>
         </div>
-      </section>
-      <p class="success-customer-note" *ngIf="order.customerNote">
-        <strong>Ghi chú đơn hàng:</strong> {{ order.customerNote }}
-      </p>
-
-      <div class="detail-bottom-actions">
-        <button type="button" class="btn-track-action" (click)="trackOrder()">
-          <i class="bi bi-box-seam"></i> Theo dõi đơn hàng
-        </button>
-
-        <button type="button" class="btn-shop-action" (click)="continueShopping()">
-          <i class="bi bi-shop"></i> Tiếp tục mua sắm
-        </button>
+        </section>
+        <p class="success-customer-note" *ngIf="order.customerNote">
+          <strong>Ghi chú đơn hàng:</strong> {{ order.customerNote }}
+        </p>
       </div>
+    </div>
+
+    <div class="detail-bottom-actions">
+      <button type="button" class="btn-track-action" (click)="trackOrder()">
+        <i class="bi bi-box-seam"></i> Theo dõi đơn hàng
+      </button>
+
+      <button type="button" class="btn-shop-action" (click)="continueShopping()">
+        <i class="bi bi-shop"></i> Tiếp tục mua sắm
+      </button>
     </div>
 
   </div>

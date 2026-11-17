@@ -12,12 +12,6 @@
 }
 
 .contact-page { background: var(--contact-paper); }
-.contact-breadcrumb { padding: 9px 0; background: #f2eff0; font-size: 12px; }
-.contact-breadcrumb .container { display: flex; align-items: center; gap: 9px; }
-.contact-breadcrumb a { color: #526b5d; text-decoration: none; }
-.contact-breadcrumb span { color: #8cbc4f; }
-.contact-breadcrumb [aria-current] { color: var(--contact-green); }
-
 .contact-main { padding: 54px 0 58px; background: #fff; }
 .contact-grid { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: clamp(48px, 7vw, 100px); align-items: start; }
 .contact-eyebrow { color: var(--contact-green-light); font-size: 10px; font-weight: 700; letter-spacing: 2.3px; }
@@ -70,7 +64,6 @@
 }
 
 @media (max-width: 480px) {
-  .contact-breadcrumb { padding: 8px 0; }
   .contact-main { padding: 30px 0 38px; }
   .contact-grid { gap: 28px; }
   .contact-info-row { grid-template-columns: 1fr; gap: 5px; padding: 12px 0; }

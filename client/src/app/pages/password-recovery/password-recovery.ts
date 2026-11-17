@@ -62,25 +62,8 @@ export class PasswordRecovery implements OnInit {
       return;
     }
 
-    this.isSubmitting = true;
-    this.http.post<RecoveryResponse>(`${this.apiUrl}/forgot-password`, {
-      email: this.email.trim().toLowerCase(),
-    }).pipe(
-      timeout({ first: 20_000 }),
-      finalize(() => this.isSubmitting = false),
-    ).subscribe({
-      next: (result) => {
-        this.requestSent = true;
-        this.successMessage = result.message;
-      },
-      error: (error: { name?: string; status?: number; error?: { message?: string } }) => {
-        this.errorMessage = error instanceof TimeoutError
-          ? 'Gửi email mất quá nhiều thời gian. Vui lòng kiểm tra cấu hình SMTP rồi thử lại.'
-          : error.status === 0
-            ? 'Không thể kết nối đến máy chủ. Vui lòng thử lại.'
-            : error.error?.message || 'Chưa thể gửi email đặt lại mật khẩu. Vui lòng thử lại sau.';
-      },
-    });
+    this.requestSent = true;
+    this.successMessage = 'Chức năng gửi liên kết đặt lại mật khẩu sẽ sớm được hoàn thiện.';
   }
 
   resetPassword(form: NgForm): void {

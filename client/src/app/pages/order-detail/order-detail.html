@@ -10,7 +10,7 @@
   <div class="detail-container">
     <header class="order-overview-header">
       <div>
-        <p class="order-eyebrow">FLORALIA HERBAL TEA</p>
+        <p class="order-eyebrow">FLORALIA TEA</p>
         <h1 class="page-title">Chi tiết đơn hàng</h1>
       </div>
       <div class="order-date-meta" aria-label="Thời gian và số sản phẩm">
@@ -79,13 +79,13 @@
           </div>
           <div class="sum-row">
             <span class="sum-label">Giảm giá sản phẩm</span>
-            <span class="sum-price sum-discount">-{{ (order.productDiscount ?? order.discount ?? 0).toLocaleString('vi-VN') }}đ</span>
+            <span class="sum-price sum-discount">-{{ formatPrice(order.productDiscount ?? order.discount ?? 0) }}</span>
           </div>
           <div class="sum-row" *ngIf="(order.voucherDiscount ?? 0) > 0">
             <span class="sum-label">
               Giảm giá voucher <small class="voucher-code-label" *ngIf="order.voucherCode">{{ order.voucherCode }}</small>
             </span>
-            <span class="sum-price sum-discount">-{{ (order.voucherDiscount ?? 0).toLocaleString('vi-VN') }}đ</span>
+            <span class="sum-price sum-discount">-{{ formatPrice(order.voucherDiscount ?? 0) }}</span>
           </div>
           <div class="sum-row" *ngIf="order.shippingFee > 0">
             <span class="sum-label">Phí vận chuyển</span>
@@ -121,6 +121,13 @@
         </ng-container>
       </div>
     </div>
+
+    <section class="tracking-card" aria-label="Thông tin vận chuyển"
+      *ngIf="!(order.isDemo && (order.status === 'cancelled' || order.status === 'pending'))">
+      <h2><i class="bi bi-truck"></i> Theo dõi vận chuyển</h2>
+      <p>Đơn vị vận chuyển: <strong>{{ order.shippingUnit || 'Chưa được lưu' }}</strong></p>
+      <p>Mã vận đơn: <strong>{{ order.trackingCode || 'Chưa được lưu' }}</strong></p>
+    </section>
 
     <!-- CANCELLED/REFUND STATUS NOTICE -->
     <div class="status-notice-box" *ngIf="order.status === 'cancelled'">
@@ -185,14 +192,14 @@
                 </div>
               </td>
               <td class="td-price">
-                <span class="unit-old-price" *ngIf="it.oldPrice && it.oldPrice > (it.salePrice ?? it.price)">{{ it.oldPrice.toLocaleString('vi-VN') }}đ</span>
-                <span class="unit-price">{{ (it.salePrice ?? it.price ?? it.oldPrice ?? 0).toLocaleString('vi-VN') }}đ</span>
+                <span class="unit-old-price" *ngIf="it.oldPrice && it.oldPrice > (it.salePrice ?? it.price)">{{ formatPrice(it.oldPrice) }}</span>
+                <span class="unit-price">{{ formatPrice(it.salePrice ?? it.price ?? it.oldPrice ?? 0) }}</span>
               </td>
               <td class="td-qty">
                 <span class="qty-pill">x{{ it.quantity }}</span>
               </td>
               <td class="td-total">
-                <strong class="line-total">{{ (((it.salePrice ?? it.price ?? it.oldPrice ?? 0) * it.quantity) || 0).toLocaleString('vi-VN') }}đ</strong>
+                <strong class="line-total">{{ formatPrice(((it.salePrice ?? it.price ?? it.oldPrice ?? 0) * it.quantity) || 0) }}</strong>
               </td>
             </tr>
           </tbody>
@@ -304,43 +311,46 @@
 </div>
 
 <!-- ====== RETURN & REFUND MODAL ====== -->
-<div class="modal-backdrop" *ngIf="showReturnModal" (click)="closeReturnModal()">
-  <div class="modal-dialog-card return-modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3 class="modal-title"><i class="bi bi-arrow-return-left"></i> Trả hàng – Hoàn tiền</h3>
-      <button type="button" class="btn-close-modal" (click)="closeReturnModal()">
+<div class="modal-backdrop return-refund-backdrop" *ngIf="showReturnModal" (click)="closeReturnModal()">
+  <div class="modal-card return-refund-modal" (click)="$event.stopPropagation()">
+    <div class="return-refund-header">
+      <h3 class="return-refund-title">Trả hàng/Hoàn tiền {{ order?.code }}</h3>
+      <button type="button" class="return-refund-close" (click)="closeReturnModal()" [disabled]="isReturnSubmitting" aria-label="Đóng">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
-    <div class="modal-body">
-      <p class="modal-desc">Vui lòng chọn lý do trả hàng:</p>
-      <div class="reason-list">
-        <label class="reason-item" *ngFor="let r of returnReasons">
-          <input type="radio" name="returnReason" [value]="r" [(ngModel)]="selectedReturnReason">
-          <span class="reason-text">{{ r }}</span>
+    <div class="return-refund-body">
+      <p class="return-refund-prompt">Vui lòng chọn lý do trả hàng:</p>
+      <div class="return-refund-reasons">
+        <label class="return-refund-reason" *ngFor="let r of returnReasons" [class.selected]="selectedReturnReason === r">
+          <input type="radio" name="returnReason" [value]="r" [(ngModel)]="selectedReturnReason" [disabled]="isReturnSubmitting">
+          <span class="return-refund-radio"></span>
+          <span>{{ r }}</span>
         </label>
       </div>
 
-      <div class="return-note-box">
-        <label class="note-label">Ghi chú thêm (tùy chọn):</label>
-        <textarea class="return-note-input" rows="3" [(ngModel)]="returnNote" placeholder="Mô tả thêm về vấn đề..."></textarea>
+      <div class="return-refund-note">
+        <label for="detailReturnNote">Ghi chú thêm:</label>
+        <textarea id="detailReturnNote" rows="2" [(ngModel)]="returnNote" [disabled]="isReturnSubmitting" placeholder="Mô tả thêm..."></textarea>
       </div>
 
-      <div class="return-images-box">
-        <label class="note-label">Ảnh minh chứng:</label>
-        <input type="file" accept="image/*" multiple (change)="onReturnImagesSelected($event)" class="file-input-hidden" #fileInput>
-        <button type="button" class="btn-upload-img" (click)="fileInput.click()">
+      <div class="return-refund-images">
+        <label>Ảnh minh chứng:</label>
+        <input type="file" accept="image/*" multiple (change)="onReturnImagesSelected($event)" [disabled]="isReturnSubmitting" #fileInput>
+        <button type="button" class="return-refund-upload" (click)="fileInput.click()" [disabled]="isReturnSubmitting">
           <i class="bi bi-image"></i> Chọn ảnh
         </button>
-        <div class="return-images-preview" *ngIf="returnImages.length > 0">
-          <img *ngFor="let img of returnImages" [src]="img" class="preview-thumb" alt="Ảnh minh chứng">
+        <div class="return-refund-preview" *ngIf="returnImages.length > 0">
+          <img *ngFor="let img of returnImages" [src]="img" alt="Ảnh minh chứng">
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-modal-secondary" (click)="closeReturnModal()">Hủy bỏ</button>
-      <button type="button" class="btn-modal-primary" (click)="confirmReturn()">
-        <i class="bi bi-send"></i> Gửi yêu cầu hoàn tiền
+    <p class="return-refund-error" *ngIf="actionError" role="alert">{{ actionError }}</p>
+    <div class="return-refund-actions">
+      <button type="button" class="return-refund-cancel" (click)="closeReturnModal()" [disabled]="isReturnSubmitting">Hủy bỏ</button>
+      <button type="button" class="return-refund-submit" (click)="confirmReturn()" [disabled]="isReturnSubmitting">
+        <i class="bi" [ngClass]="isReturnSubmitting ? 'bi-hourglass-split' : 'bi-send'"></i>
+        {{ isReturnSubmitting ? 'Đang gửi yêu cầu...' : 'Gửi yêu cầu hoàn tiền' }}
       </button>
     </div>
   </div>

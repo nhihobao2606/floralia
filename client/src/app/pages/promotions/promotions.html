@@ -8,68 +8,35 @@
     </div>
 
     <!-- 3 Big Voucher Cards (25% ở giữa là Hot Deal) -->
-    <div class="voucher-cards-row">
-      <!-- Voucher 1: Free Ship (Trái) -->
-      <div class="voucher-card" (click)="saveCoupon('FREESHIP199')">
+    <div class="voucher-cards-row" *ngIf="!vouchersLoading() && featuredVouchers().length > 0">
+      <article class="voucher-card" *ngFor="let voucher of featuredVouchers(); let i = index"
+        [class.highlight]="i === 1" [class.hot-center]="i === 1" (click)="saveCoupon(voucher.code)">
         <div class="voucher-notch top-notch"></div>
+        <span class="ribbon-hot" *ngIf="i === 1">HOT DEAL</span>
         <div class="voucher-card-top">
-          <span class="v-tag"><i class="bi bi-truck me-1"></i>MIỄN PHÍ SHIP</span>
-          <h4>FREE SHIP</h4>
+          <span class="v-tag" [class.hot-tag]="i === 1">
+            <i class="bi" [ngClass]="voucher.audience === 'new_customer' ? 'bi-person-heart' : (voucher.scope === 'categories' ? 'bi-tag-fill' : 'bi-stars')"></i>
+            {{ getVoucherTag(voucher) }}
+          </span>
+          <h4>{{ getVoucherBadge(voucher) }}</h4>
+          <span class="voucher-name">{{ voucher.name }}</span>
         </div>
         <div class="voucher-card-bottom">
-          <p>Đơn hàng từ 199.000đ</p>
+          <p>{{ getVoucherMinimum(voucher) }}</p>
+          <small class="voucher-extra">{{ getVoucherExtra(voucher) }}</small>
           <div class="voucher-code-pill">
-            <code>FREESHIP199</code>
-            <span class="btn-copy-code" [class.copied]="isCouponSaved('FREESHIP199')">
-              <i class="bi" [ngClass]="isCouponSaved('FREESHIP199') ? 'bi-check2' : 'bi-copy'"></i>
-              {{ isCouponSaved('FREESHIP199') ? 'Đã lưu' : 'Lưu mã' }}
+            <code>{{ voucher.code }}</code>
+            <span class="btn-copy-code" [class.btn-hot]="i === 1" [class.copied]="isCouponSaved(voucher.code)">
+              <i class="bi" [ngClass]="isCouponSaved(voucher.code) ? 'bi-check2' : 'bi-copy'"></i>
+              {{ isCouponSaved(voucher.code) ? 'Đã lưu' : 'Lưu mã' }}
             </span>
           </div>
         </div>
         <div class="voucher-notch bottom-notch"></div>
-      </div>
-
-      <!-- Voucher 2: Giảm 25% (Ở GIỮA - HOT DEAL) -->
-      <div class="voucher-card highlight hot-center" (click)="saveCoupon('SALE25')">
-        <div class="voucher-notch top-notch"></div>
-        <span class="ribbon-hot">HOT DEAL</span>
-        <div class="voucher-card-top">
-          <span class="v-tag hot-tag"><i class="bi bi-fire me-1"></i>SIÊU ƯU ĐÃI</span>
-          <h4>GIẢM 25%</h4>
-        </div>
-        <div class="voucher-card-bottom">
-          <p>Đơn hàng từ 299.000đ</p>
-          <div class="voucher-code-pill">
-            <code>SALE25</code>
-            <span class="btn-copy-code btn-hot" [class.copied]="isCouponSaved('SALE25')">
-              <i class="bi" [ngClass]="isCouponSaved('SALE25') ? 'bi-check2' : 'bi-copy'"></i>
-              {{ isCouponSaved('SALE25') ? 'Đã lưu' : 'Lưu mã' }}
-            </span>
-          </div>
-        </div>
-        <div class="voucher-notch bottom-notch"></div>
-      </div>
-
-      <!-- Voucher 3: Giảm 15% (Phải) -->
-      <div class="voucher-card" (click)="saveCoupon('SALE15')">
-        <div class="voucher-notch top-notch"></div>
-        <div class="voucher-card-top">
-          <span class="v-tag"><i class="bi bi-tag-fill me-1"></i>GIẢM TRỰC TIẾP</span>
-          <h4>GIẢM 15%</h4>
-        </div>
-        <div class="voucher-card-bottom">
-          <p>Đơn hàng từ 249.000đ</p>
-          <div class="voucher-code-pill">
-            <code>SALE15</code>
-            <span class="btn-copy-code" [class.copied]="isCouponSaved('SALE15')">
-              <i class="bi" [ngClass]="isCouponSaved('SALE15') ? 'bi-check2' : 'bi-copy'"></i>
-              {{ isCouponSaved('SALE15') ? 'Đã lưu' : 'Lưu mã' }}
-            </span>
-          </div>
-        </div>
-        <div class="voucher-notch bottom-notch"></div>
-      </div>
+      </article>
     </div>
+    <p class="voucher-loading-message" *ngIf="vouchersLoading()">Đang tải voucher...</p>
+    <p class="voucher-loading-message" *ngIf="!vouchersLoading() && vouchersError()">{{ vouchersError() }}</p>
   </div>
 </section>
 
@@ -118,24 +85,25 @@
 <!-- ================= SECTION 2: COUPON RIÊNG DÀNH CHO BẠN MỚI ================= -->
 <section class="coupons-section">
   <div class="container">
-    <h2 class="section-heading text-center">COUPON RIÊNG DÀNH CHO BẠN MỚI</h2>
+    <h2 class="section-heading text-center">VOUCHER ĐANG ÁP DỤNG</h2>
 
     <!-- Coupons Grid (2 columns) -->
     <div class="coupon-grid">
-      <div class="coupon-ticket" *ngFor="let cp of coupons">
+      <div class="coupon-ticket" *ngFor="let cp of coupons()">
         <!-- Left Red Badge -->
         <div class="ticket-left">
           <div class="notch top-notch"></div>
-          <div class="ticket-badge-text">{{ cp.discountBadge }}</div>
-          <div class="ticket-sub">Đơn từ {{ cp.minOrder }}</div>
+          <div class="ticket-badge-text">{{ getVoucherBadge(cp) }}</div>
+          <div class="ticket-sub">{{ getVoucherMinimum(cp) }}</div>
           <div class="notch bottom-notch"></div>
         </div>
 
         <!-- Right Ticket Body -->
         <div class="ticket-right">
           <div class="ticket-info">
-            <span class="expiry-text">Hạn sử dụng: <strong>{{ cp.expiryDate }}</strong></span>
-            <p class="ticket-desc">{{ cp.desc }}</p>
+            <span class="expiry-text">Hạn sử dụng: <strong>{{ getVoucherExpiry(cp) }}</strong></span>
+            <span class="coupon-code">Mã: {{ cp.code }}</span>
+            <p class="ticket-desc">{{ getVoucherDescription(cp) }}</p>
           </div>
 
           <div class="ticket-action">
@@ -178,7 +146,7 @@
     <!-- Center View More Button -->
     <div class="view-more-wrap text-center">
       <a routerLink="/products" class="btn-view-more">
-        XEM THÊM
+        Xem Thêm
       </a>
     </div>
   </div>
@@ -192,9 +160,10 @@
       <span class="sale-badge" *ngIf="getDiscount(p) > 0">-{{ getDiscount(p) }}%</span>
       <a
         [routerLink]="productNavigation.detailRoute(p)"
-        [state]="{ product: p, products: products() }">
+        [state]="{ product: p, products: products(), selectedVariantSku: getDisplayVariant(p)?.sku }">
         <img [src]="getProductImage(p)" [alt]="getProductName(p)" (error)="onImageError($event)" />
       </a>
+      <span class="out-of-stock-overlay" *ngIf="!hasStock(p)">H&#7870;T H&#192;NG</span>
       <button class="sale-heart" type="button" aria-label="Yêu thích"
               [class.on]="isWished(p)" (click)="toggleWish(p)">
         <i class="bi" [ngClass]="isWished(p) ? 'bi-heart-fill' : 'bi-heart'"></i>
@@ -204,7 +173,7 @@
     <div class="product-info">
       <a
         [routerLink]="productNavigation.detailRoute(p)"
-        [state]="{ product: p, products: products() }"
+        [state]="{ product: p, products: products(), selectedVariantSku: getDisplayVariant(p)?.sku }"
         class="sale-name">{{ getProductName(p) }}</a>
 
       <div class="sale-rating">
@@ -212,10 +181,13 @@
            [ngClass]="s <= getRating(p) ? 'bi-star-fill' : 'bi-star'"></i>
         <small>{{ formatRatingAverage(p) }} ({{ getRatingCount(p) }})</small>
       </div>
-      <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ p.sold || 0 }}</div>
+      <div class="sale-meta-row">
+        <div class="sale-sold"><i class="bi bi-bag-check" aria-hidden="true"></i> Đã bán {{ p.sold || 0 }}</div>
+        <span class="sale-variant-pill" *ngIf="getDisplayVariantLabel(p)">{{ getDisplayVariantLabel(p) }}</span>
+      </div>
 
       <div class="sale-price">
-        <span class="sale-current">{{ formatPrice(getProductPrice(p)) }}</span>
+        <span class="sale-current"><small class="price-from-prefix" *ngIf="shouldShowFromPrefix(p)">Từ </small>{{ formatPrice(getProductPrice(p)) }}</span>
         <span class="sale-old" *ngIf="hasDiscount(p)">{{ formatPrice(getOldPrice(p)) }}</span>
       </div>
 

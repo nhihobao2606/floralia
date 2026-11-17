@@ -1,0 +1,114 @@
+<main class="guest-detail-page">
+  <div class="guest-detail-container" *ngIf="order; else unavailable">
+    <button type="button" class="guest-detail-back" (click)="goBack()">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i> Tra cứu đơn khác
+    </button>
+
+    <header class="guest-detail-header">
+      <p class="guest-detail-eyebrow">FLORALIA TEA</p>
+      <h1>Chi tiết đơn hàng</h1>
+      <p class="guest-detail-code">Mã đơn hàng <strong>{{ order.code }}</strong></p>
+      <span class="guest-detail-status">{{ order.statusLabel }}</span>
+      <p class="guest-detail-date" *ngIf="formatDate(order)">Đặt lúc {{ formatDate(order) }}</p>
+      <p class="guest-detail-notice" *ngIf="order.notice">{{ order.notice }}</p>
+    </header>
+
+    <section class="guest-detail-grid">
+      <article class="guest-detail-card">
+        <h2><i class="bi bi-geo-alt"></i> Địa chỉ nhận hàng</h2>
+        <strong>{{ order.receiver.name || 'Khách hàng' }}</strong> | <span>{{ order.receiver.phone }}</span>
+        <p>{{ order.receiver.address || 'Chưa cập nhật địa chỉ' }}</p>
+        <p *ngIf="order.receiver.email">{{ order.receiver.email }}</p>
+      </article>
+      <article class="guest-detail-card">
+        <h2><i class="bi bi-truck"></i> Vận chuyển</h2>
+        <p>Đơn vị vận chuyển <strong>{{ order.shippingUnit || 'Chưa cập nhật' }}</strong></p>
+        <p>Mã vận đơn <strong>{{ order.trackingCode || 'Chưa có' }}</strong></p>
+        <p>Thanh toán <strong>{{ order.paymentMethod || 'Chưa cập nhật' }}</strong></p>
+      </article>
+    </section>
+
+    <section class="guest-detail-card guest-detail-products">
+      <h2><i class="bi bi-bag-check"></i> Sản phẩm trong đơn hàng</h2>
+      <div class="guest-detail-item" *ngFor="let item of order.items">
+        <img [src]="item.image || '/assets/images/no-image.svg'" [alt]="item.name">
+        <div class="guest-detail-item-info">
+          <strong>{{ item.name }}</strong>
+          <small *ngIf="item.variant">{{ item.variant }}</small>
+          <span>Số lượng: {{ item.quantity }}</span>
+        </div>
+        <strong class="guest-detail-item-total">{{ formatPrice(item.total || item.price * item.quantity) }}</strong>
+      </div>
+    </section>
+
+    <section class="guest-detail-bottom">
+      <article class="guest-detail-card guest-detail-summary">
+        <div><span>Tạm tính</span><strong>{{ formatPrice(order.subtotal) }}</strong></div>
+        <div *ngIf="order.productDiscount > 0"><span>Giảm giá sản phẩm</span><strong>-{{ formatPrice(order.productDiscount) }}</strong></div>
+        <div *ngIf="order.voucherDiscount > 0"><span>Giảm giá voucher {{ order.voucherCode }}</span><strong>-{{ formatPrice(order.voucherDiscount) }}</strong></div>
+        <div><span>Phí vận chuyển</span><strong>{{ formatPrice(order.shippingFee) }}</strong></div>
+        <div class="guest-detail-grand-total"><span>Tổng thanh toán</span><strong>{{ formatPrice(order.total) }}</strong></div>
+      </article>
+
+      <article class="guest-detail-card guest-detail-timeline" *ngIf="order.trackingTimeline.length">
+        <h2>Tiến trình đơn hàng</h2>
+        <ol>
+          <li *ngFor="let step of order.trackingTimeline" [class.completed]="step.completed">
+            <span class="guest-timeline-dot"></span>
+            <span>{{ step.title }}</span>
+            <time>{{ step.time }}</time>
+          </li>
+        </ol>
+      </article>
+    </section>
+
+    <div class="guest-detail-action-row" *ngIf="actionMessage || canCancel">
+      <p class="guest-detail-action-message" role="status" *ngIf="actionMessage">{{ actionMessage }}</p>
+      <button type="button" class="guest-cancel-order-button" *ngIf="canCancel" (click)="openCancelModal()">
+        <i class="bi bi-x-circle" aria-hidden="true"></i> Hủy đơn hàng
+      </button>
+    </div>
+  </div>
+
+  <ng-template #unavailable>
+    <section class="guest-detail-unavailable" role="status">
+      <i class="bi bi-shield-lock"></i>
+      <h1>Không thể mở chi tiết đơn</h1>
+      <p>{{ error }}</p>
+      <button type="button" (click)="goBack()">Quay lại tra cứu</button>
+    </section>
+  </ng-template>
+
+  <div class="guest-cancel-backdrop" *ngIf="showCancelModal" (click)="closeCancelModal()">
+    <section class="guest-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="guestCancelTitle" (click)="$event.stopPropagation()">
+      <header class="guest-cancel-modal-header">
+        <h2 id="guestCancelTitle">Lý do hủy đơn {{ order?.code }}</h2>
+        <button type="button" class="guest-cancel-close" (click)="closeCancelModal()" [disabled]="isCancelSubmitting" aria-label="Đóng">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+      <div class="guest-cancel-warning">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span>Vui lòng chọn lý do hủy. Thao tác này sẽ hủy toàn bộ sản phẩm trong đơn hàng và không thể hoàn tác.</span>
+      </div>
+      <div class="guest-cancel-reasons">
+        <label *ngFor="let reason of cancelReasons" [class.selected]="selectedCancelReason === reason">
+          <input type="radio" name="guestCancelReason" [value]="reason" [(ngModel)]="selectedCancelReason" (change)="toggleCancelReason(reason)" [disabled]="isCancelSubmitting">
+          <span class="guest-cancel-radio" aria-hidden="true"></span>
+          <span>{{ reason }}</span>
+        </label>
+      </div>
+      <div class="guest-cancel-other" *ngIf="selectedCancelReason === 'Khác'">
+        <label for="guestOtherCancelReason">Lý do khác <span>*</span></label>
+        <textarea id="guestOtherCancelReason" rows="3" maxlength="500" [(ngModel)]="otherCancelReason" [disabled]="isCancelSubmitting" placeholder="Nhập lý do bạn muốn hủy đơn hàng..."></textarea>
+      </div>
+      <p class="guest-cancel-error" role="alert" *ngIf="actionError">{{ actionError }}</p>
+      <footer class="guest-cancel-actions">
+        <button type="button" class="guest-cancel-back-button" (click)="closeCancelModal()" [disabled]="isCancelSubmitting">Không phải bây giờ</button>
+        <button type="button" class="guest-cancel-submit-button" (click)="confirmCancelOrder()" [disabled]="isCancelSubmitting">
+          {{ isCancelSubmitting ? 'Đang xử lý...' : 'Hủy đơn hàng' }}
+        </button>
+      </footer>
+    </section>
+  </div>
+</main>

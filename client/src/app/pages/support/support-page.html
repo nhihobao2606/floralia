@@ -1,9 +1,5 @@
 <main class="support-page">
-  <nav class="support-breadcrumb" aria-label="Điều hướng">
-    <div class="container">
-      <a routerLink="/home">Trang chủ</a><span>/</span><span aria-current="page">Hỗ trợ</span><span>/</span><strong>{{ page.label }}</strong>
-    </div>
-  </nav>
+  <app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Hỗ trợ', route: '/return-policy' }, { label: page.label }]"></app-breadcrumb>
 
   <section class="support-hero">
     <div class="container support-hero-inner">

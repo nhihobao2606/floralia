@@ -11,7 +11,8 @@ const {
   approveRefund,
   updateAdminOrderStatus,
   requestGuestTrackingOtp,
-  verifyGuestTrackingOtp
+  verifyGuestTrackingOtp,
+  cancelGuestOrder
 } = require('../controllers/orderController');
 
 router.use(optionalAuth);
@@ -20,6 +21,7 @@ router.get('/admin', requireAuth, requireAdmin, getAdminOrders);
 router.get('/admin/user/:userId', requireAuth, requireAdmin, getAdminOrdersForUser);
 router.post('/guest-tracking/request-otp', requestGuestTrackingOtp);
 router.post('/guest-tracking/verify-otp', verifyGuestTrackingOtp);
+router.patch('/guest-tracking/:id/cancel', cancelGuestOrder);
 router.patch('/:id/approve-refund', requireAuth, requireAdmin, approveRefund);
 router.patch('/:id/admin-status', requireAuth, requireAdmin, updateAdminOrderStatus);
 router.get('/', getOrders);

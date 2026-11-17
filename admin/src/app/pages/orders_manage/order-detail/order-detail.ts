@@ -4,6 +4,7 @@ import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import {
   AdminOrder,
@@ -16,7 +17,7 @@ import {
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, AdminSidebar],
+  imports: [CommonModule, FormsModule, RouterModule, AdminSidebar, AdminLogoutDialog],
   templateUrl: './order-detail.html',
   styleUrl: './order-detail.css',
 })

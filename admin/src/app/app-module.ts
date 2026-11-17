@@ -10,21 +10,22 @@ import { ArticleEditor } from './pages/articles_manage/article-editor/article-ed
 import { Orders } from './pages/orders_manage/orders/orders';
 import { OrderDetail } from './pages/orders_manage/order-detail/order-detail';
 import { Pagenotfound } from './pages/pagenotfound/pagenotfound';
-import { ProductManage } from './pages/product-manage/product-manage';
 import { Products } from './pages/product-manage/products/products';
 import { ProductEditor } from './pages/product-manage/product-editor/product-editor';
 import { Categories } from './pages/category-manage/categories/categories';
 import { CategoryEditor } from './pages/category-manage/category-editor/category-editor';
 import { FormsModule } from '@angular/forms';
 import { AdminSidebar } from './components/admin-sidebar/admin-sidebar';
+import { AdminLogoutDialog } from './components/admin-logout-dialog/admin-logout-dialog';
 import { CustomSelect } from './components/custom-select/custom-select';
 import { AdminUsers } from './pages/users_manage/users/users';
 import { AdminUserDetail } from './pages/users_manage/user-detail/user-detail';
 import { AdminUserForm } from './pages/users_manage/user-form/user-form';
+import { Overview } from './pages/overview/overview';
 import { ApiOriginInterceptor } from './services/api-origin.interceptor';
 
 @NgModule({
-  declarations: [App, Pagenotfound, ProductManage, Products, ProductEditor, Categories, CategoryEditor],
+  declarations: [App, Pagenotfound, Products, ProductEditor, Categories, CategoryEditor],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -35,12 +36,14 @@ import { ApiOriginInterceptor } from './services/api-origin.interceptor';
     ArticleEditor,
     FormsModule,
     AdminSidebar,
+    AdminLogoutDialog,
     CustomSelect,
     AdminUsers,
     AdminUserDetail,
     AdminUserForm,
     Orders,
     OrderDetail,
+    Overview,
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

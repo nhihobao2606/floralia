@@ -40,7 +40,7 @@
       <div>
         <p class="buy-now-eyebrow">MUA NGAY</p>
         <h2 id="buy-now-title">{{ request.product.name || request.product.title }}</h2>
-        <strong>{{ buyNowService.price | currency:'VND':'symbol':'1.0-0':'vi' }}</strong>
+        <strong>{{ buyNowService.price | vnd }}</strong>
       </div>
     </div>
 

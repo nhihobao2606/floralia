@@ -1,5 +1,4 @@
 const { ObjectId } = require('mongodb');
-const Cart = require('./cart');
 const Category = require('./category');
 const path = require('path');
 const fs = require('fs');
@@ -7,6 +6,8 @@ const fs = require('fs');
 let productsCollection;
 let productAssetsCollection;
 let reviewsCollection;
+let inventoryAdjustmentsCollection;
+let mongoClient;
 
 let localCatalog = null;
 function getLocalCatalog() {
@@ -26,13 +27,69 @@ function getLocalCatalog() {
     return localCatalog;
 }
 
-function setCollections(products, productAssets, reviews) {
+function setCollections(products, productAssets, reviews, client) {
     productsCollection = products;
     productAssetsCollection = productAssets;
     reviewsCollection = reviews;
+    mongoClient = client || products?.s?.db?.client || null;
     if (products?.s?.db) {
-        Cart.setCollection(products.s.db.collection('Cart'));
         Category.setCollection(products.s.db.collection('Categories'));
+      inventoryAdjustmentsCollection = products.s.db.collection('InventoryAdjustments');
+    }
+}
+
+async function bulkAdjustStock(items, batchCode) {
+    if (!productsCollection || !mongoClient || !inventoryAdjustmentsCollection) throw new Error('MongoDB inventory transaction is not available');
+    const session = mongoClient.startSession();
+    const updatedAt = new Date();
+    try {
+        await session.withTransaction(async () => {
+            const products = await productsCollection.find({ isActive: { $ne: false }, $or: [
+                { sku: { $in: items.map(item => item.productSku || item.sku) } },
+                { 'variants.sku': { $in: items.map(item => item.sku) } }
+            ] }, { session }).toArray();
+            const changesByProduct = new Map();
+            const records = [];
+            for (const item of items) {
+                const product = products.find(candidate => candidate.sku === (item.productSku || item.sku) || candidate.variants?.some(variant => variant.sku === item.sku));
+                if (!product) throw new Error(`Không tìm thấy SKU ${item.sku}`);
+                const variant = product.variants?.find(candidate => candidate.sku === item.sku || (item.variantLabel && candidate.label === item.variantLabel));
+                if (product.variants?.length && !variant) throw new Error(`Không tìm thấy phân loại ${item.sku}`);
+                const current = Number(variant?.stock ?? product.stock) || 0;
+                if (!changesByProduct.has(product._id.toString())) changesByProduct.set(product._id.toString(), { product, variants: (product.variants || []).map(value => ({ ...value })), stock: Number(product.stock) || 0 });
+                const change = changesByProduct.get(product._id.toString());
+                if (variant) {
+                    const updatedVariant = change.variants.find(value => value.sku === variant.sku);
+                    updatedVariant.stock = item.stock;
+                    updatedVariant.stockAdjustmentReason = item.reason;
+                    updatedVariant.updatedAt = updatedAt;
+                    change.stock += item.stock - current;
+                } else {
+                    change.stock = item.stock;
+                }
+                records.push({ batchCode, sku: item.sku, productSku: product.sku, variantLabel: variant?.label || 'Tiêu chuẩn', previousStock: current, newStock: item.stock, reason: item.reason, createdAt: updatedAt });
+            }
+            for (const change of changesByProduct.values()) {
+                const stock = change.variants.length ? change.variants.reduce((sum, variant) => sum + (Number(variant.stock) || 0), 0) : change.stock;
+                await productsCollection.updateOne({ _id: change.product._id }, { $set: { variants: change.variants, stock, updatedAt, stockAdjustmentReason: records.find(record => record.productSku === change.product.sku)?.reason || '' } }, { session });
+            }
+            await inventoryAdjustmentsCollection.insertMany(records, { session });
+        }, { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } });
+    } finally {
+        await session.endSession();
+    }
+}
+
+async function withTransaction(work) {
+    if (!mongoClient) throw new Error('MongoDB transaction client is not available');
+    const session = mongoClient.startSession();
+    try {
+        return await session.withTransaction(() => work(session), {
+            readConcern: { level: 'snapshot' },
+            writeConcern: { w: 'majority' }
+        });
+    } finally {
+        await session.endSession();
     }
 }
 
@@ -83,7 +140,7 @@ async function getAll() {
 
     return products.map(product => {
         const summary = ratingsBySku.get(product.sku);
-        const thumbnail = product.thumbnail || (assetSkuSet.has(product.sku) ? `${product.sku}_THUMB` : '');
+        const thumbnail = product.thumbnail || '';
         return {
             ...product,
             thumbnail,
@@ -146,11 +203,26 @@ function getBySlug(slug) {
     return productsCollection.findOne({ slug });
 }
 
-function incrementSoldBySku(sku, quantity) {
+function incrementSoldBySku(sku, quantity, session) {
     if (!productsCollection) return Promise.resolve({ matchedCount: 0 });
     return productsCollection.updateOne(
         { $or: [{ sku }, { 'variants.sku': sku }] },
-        { $inc: { sold: quantity } }
+        { $inc: { sold: quantity } },
+        session ? { session } : {}
+    );
+}
+
+function decrementSoldBySku(sku, quantity, session) {
+    if (!productsCollection) return Promise.resolve({ matchedCount: 0 });
+    return productsCollection.updateOne(
+        {
+            $and: [
+                { $or: [{ sku }, { 'variants.sku': sku }] },
+                { sold: { $gte: quantity } }
+            ]
+        },
+        { $inc: { sold: -quantity } },
+        session ? { session } : {}
     );
 }
 
@@ -197,6 +269,70 @@ async function setStockBySku(sku, stock, reason = '', importPrice, productSku, v
     );
 }
 
+async function adjustStockBySku(sku, stock, reason = '', productSku = '', variantLabel = '') {
+    if (!productsCollection || !mongoClient || !inventoryAdjustmentsCollection) {
+        throw new Error('MongoDB inventory transaction is not available');
+    }
+    const session = mongoClient.startSession();
+    const updatedAt = new Date();
+    const dateCode = updatedAt.toISOString().slice(0, 10).replaceAll('-', '');
+    const batchCode = `ADJ-${dateCode}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    let updateResult = { matchedCount: 0 };
+    try {
+        await session.withTransaction(async () => {
+            let product = await productsCollection.findOne(
+                { 'variants.sku': sku, isActive: { $ne: false } },
+                { session }
+            );
+            if (!product) {
+                product = await productsCollection.findOne(
+                    { sku: productSku || sku, isActive: { $ne: false } },
+                    { session }
+                );
+            }
+            if (!product) return;
+
+            const variants = Array.isArray(product.variants) ? product.variants.map(variant => ({ ...variant })) : [];
+            const variant = variants.find(item => item.sku === sku || (variantLabel && item.label === variantLabel));
+            if (variants.length && !variant) throw new Error('Variant not found: ' + (variantLabel || sku));
+
+            const previousStock = Number(variant?.stock ?? product.stock) || 0;
+            if (variant) {
+                variant.stock = stock;
+                variant.stockAdjustmentReason = reason;
+                variant.updatedAt = updatedAt;
+            }
+            const totalStock = variants.length
+                ? variants.reduce((sum, item) => sum + (Number(item.stock) || 0), 0)
+                : stock;
+            updateResult = await productsCollection.updateOne(
+                { _id: product._id },
+                { $set: {
+                    ...(variants.length ? { variants } : {}),
+                    stock: totalStock,
+                    updatedAt,
+                    stockAdjustmentReason: reason,
+                } },
+                { session }
+            );
+            if (updateResult.matchedCount !== 1) throw new Error('Could not update SKU ' + sku);
+            await inventoryAdjustmentsCollection.insertOne({
+                batchCode,
+                sku,
+                productSku: product.sku,
+                variantLabel: variant?.label || variantLabel || 'Tiêu chuẩn',
+                previousStock,
+                newStock: stock,
+                reason,
+                createdAt: updatedAt,
+            }, { session });
+        }, { readConcern: { level: 'snapshot' }, writeConcern: { w: 'majority' } });
+        return updateResult;
+    } finally {
+        await session.endSession();
+    }
+}
+
 async function addStockBulk(items, reason = '') {
     if (!productsCollection) throw new Error('MongoDB Product collection is not available');
     if (!items.length) return;
@@ -231,9 +367,151 @@ async function addStockBulk(items, reason = '') {
     }
 }
 
+async function deductStockBulk(items, session) {
+    if (!productsCollection) throw new Error('MongoDB Product collection is not available');
+    if (!session) throw new Error('MongoDB stock deduction requires a transaction session');
+
+    const updatedAt = new Date();
+    for (const item of items) {
+        const sku = String(item.sku || '').trim();
+        const quantity = Number(item.quantity);
+        if (!sku || !Number.isSafeInteger(quantity) || quantity < 1) {
+            throw new Error('Invalid SKU or quantity for stock deduction');
+        }
+
+        const variantProduct = await productsCollection.findOne(
+            { 'variants.sku': sku, isActive: { $ne: false } },
+            { session, projection: { _id: 1 } }
+        );
+        const result = variantProduct
+            ? await productsCollection.updateOne(
+                {
+                    _id: variantProduct._id,
+                    variants: { $elemMatch: { sku, stock: { $gte: quantity } } }
+                },
+                {
+                    $inc: { 'variants.$.stock': -quantity, stock: -quantity },
+                    $set: { updatedAt }
+                },
+                { session }
+            )
+            : await productsCollection.updateOne(
+                { sku, isActive: { $ne: false }, stock: { $gte: quantity } },
+                { $inc: { stock: -quantity }, $set: { updatedAt } },
+                { session }
+            );
+
+        if (result.matchedCount !== 1) {
+            const error = new Error(`Insufficient stock for SKU ${sku}`);
+            error.code = 'INSUFFICIENT_STOCK';
+            error.sku = sku;
+            throw error;
+        }
+
+        const updatedProduct = await productsCollection.findOne(
+            variantProduct ? { _id: variantProduct._id } : { sku, isActive: { $ne: false } },
+            { session, projection: { _id: 1, stock: 1, variants: 1 } }
+        );
+        const totalStock = Array.isArray(updatedProduct?.variants) && updatedProduct.variants.length
+            ? updatedProduct.variants.reduce((sum, variant) => sum + Math.max(0, Number(variant.stock) || 0), 0)
+            : Math.max(0, Number(updatedProduct?.stock) || 0);
+        await productsCollection.updateOne(
+            { _id: updatedProduct._id },
+            {
+                $set: {
+                    stock: totalStock,
+                    status: totalStock > 0 ? 'C\u00f2n h\u00e0ng' : '\u0048\u1ebft h\u00e0ng',
+                    updatedAt
+                }
+            },
+            { session }
+        );
+    }
+}
+
+async function restoreStockBulk(items, session) {
+    if (!productsCollection) throw new Error('MongoDB Product collection is not available');
+    if (!session) throw new Error('MongoDB stock restoration requires a transaction session');
+
+    const updatedAt = new Date();
+    for (const item of items) {
+        const sku = String(item.sku || '').trim();
+        const quantity = Number(item.quantity);
+        if (!sku || !Number.isSafeInteger(quantity) || quantity < 1) {
+            throw new Error('Invalid SKU or quantity for stock restoration');
+        }
+
+        const variantProduct = await productsCollection.findOne(
+            { 'variants.sku': sku },
+            { session, projection: { _id: 1 } }
+        );
+        const result = variantProduct
+            ? await productsCollection.updateOne(
+                { _id: variantProduct._id, 'variants.sku': sku },
+                { $inc: { 'variants.$.stock': quantity } },
+                { session }
+            )
+            : await productsCollection.updateOne(
+                { sku },
+                { $inc: { stock: quantity } },
+                { session }
+            );
+
+        if (result.matchedCount !== 1) {
+            throw new Error(`Cannot restore stock for missing SKU ${sku}`);
+        }
+
+        const updatedProduct = await productsCollection.findOne(
+            variantProduct ? { _id: variantProduct._id } : { sku },
+            { session, projection: { _id: 1, stock: 1, variants: 1 } }
+        );
+        const totalStock = Array.isArray(updatedProduct?.variants) && updatedProduct.variants.length
+            ? updatedProduct.variants.reduce((sum, variant) => sum + Math.max(0, Number(variant.stock) || 0), 0)
+            : Math.max(0, Number(updatedProduct?.stock) || 0);
+        await productsCollection.updateOne(
+            { _id: updatedProduct._id },
+            {
+                $set: {
+                    stock: totalStock,
+                    status: totalStock > 0 ? 'C\u00f2n h\u00e0ng' : '\u0048\u1ebft h\u00e0ng',
+                    updatedAt
+                }
+            },
+            { session }
+        );
+    }
+}
+
 // ProductAssets
 function getAllAssets() {
     return productAssetsCollection.find({}).toArray();
+}
+
+function getProductAssetsBySku(sku) {
+    const baseSku = String(sku || '').split('-')[0].trim();
+    if (!baseSku || !productAssetsCollection) return Promise.resolve([]);
+    const escapedSku = baseSku.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return productAssetsCollection.find({
+        $or: [
+            { productSku: baseSku },
+            { assetId: { $regex: `^${escapedSku}_(?:THUMB|IMG_\\d+)$` } }
+        ]
+    }, {
+        projection: { assetId: 1, productSku: 1, type: 1, originalFileName: 1, mimeType: 1 }
+    }).toArray();
+}
+
+function getProductAssetsBySkus(skus) {
+    const baseSkus = [...new Set((skus || []).map(sku => String(sku || '').split('-')[0].trim()).filter(Boolean))];
+    if (!baseSkus.length || !productAssetsCollection) return Promise.resolve([]);
+    const canonicalAssetQueries = baseSkus.map(sku => ({
+        assetId: { $regex: `^${sku.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}_(?:THUMB|IMG_\\d+)$` }
+    }));
+    return productAssetsCollection.find({
+        $or: [{ productSku: { $in: baseSkus } }, ...canonicalAssetQueries]
+    }, {
+        projection: { assetId: 1, productSku: 1, type: 1, originalFileName: 1, mimeType: 1 }
+    }).toArray();
 }
 
 function getAssetsByThumbnails(thumbnails) {
@@ -280,8 +558,14 @@ function getByAssetId(assetId) {
     return productAssetsCollection.findOne({ assetId });
 }
 
-function getByFileName(originalFileName) {
-    return productAssetsCollection.findOne({ originalFileName });
+async function getByFileName(originalFileName) {
+    const matches = await productAssetsCollection
+        .find({ originalFileName })
+        .limit(2)
+        .toArray();
+    // Old records sometimes store the original filename instead of an assetId.
+    // Do not resolve duplicate filenames to an arbitrary product's image.
+    return matches.length === 1 ? matches[0] : null;
 }
 
 function getApprovedReviewsBySku(sku) {
@@ -318,10 +602,18 @@ module.exports = {
     getBySku,
     getBySlug,
     incrementSoldBySku,
+    decrementSoldBySku,
     getInventoryProducts,
     setStockBySku,
+    adjustStockBySku,
     addStockBulk,
+    deductStockBulk,
+    restoreStockBulk,
+    bulkAdjustStock,
+    withTransaction,
     getAllAssets,
+    getProductAssetsBySku,
+    getProductAssetsBySkus,
     getAssetsByThumbnails,
     getAssetImageById,
     getAssetById,

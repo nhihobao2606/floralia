@@ -1,10 +1,5 @@
 <main class="contact-page">
-  <nav class="contact-breadcrumb" aria-label="Điều hướng">
-    <div class="container">
-      <a routerLink="/home">Trang chủ</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Liên hệ</span>
-    </div>
-  </nav>
+  <app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Liên hệ' }]"></app-breadcrumb>
 
   <section class="contact-main">
     <div class="container contact-grid">

@@ -7,7 +7,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const NAME_RE = /^[\p{L}\p{M}]+(?:[ '\-][\p{L}\p{M}]+)*$/u;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const PHONE_RE = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
+const PHONE_RE = /^0(3|5|7|8|9)\d{8}$/;
+
+function normalizePhoneNumber(phone) {
+    return String(phone || '').trim().replace(/\s+/g, '').replace(/^\+84/, '0');
+}
 const PASS_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
 function toPublicUser(user) {
@@ -15,10 +19,46 @@ function toPublicUser(user) {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
-        phone: user.phone,
+        phone: normalizePhoneNumber(user.phone),
         avatar: user.avatar || '',
-        role: user.role || 'user'
+        role: user.role || 'user',
+        gender: user.gender || '',
+        birthDate: user.birthDate || ''
     };
+}
+
+// POST /api/auth/check-availability
+async function checkSignupAvailability(req, res) {
+    try {
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const rawPhone = String(req.body.phone || '').trim();
+        const phone = rawPhone ? normalizePhoneNumber(rawPhone) : '';
+
+        if (email && !EMAIL_RE.test(email)) {
+            return res.status(400).json({ success: false, field: 'email', message: 'Email không hợp lệ.' });
+        }
+        if (phone && !PHONE_RE.test(phone)) {
+            return res.status(400).json({ success: false, field: 'phone', message: 'Số điện thoại không hợp lệ.' });
+        }
+        if (!email && !phone) {
+            return res.status(400).json({ success: false, message: 'Vui lòng nhập email hoặc số điện thoại cần kiểm tra.' });
+        }
+
+        const [existingEmail, existingPhone] = await Promise.all([
+            email ? User.existsByEmail(email) : null,
+            phone ? User.existsByPhone(phone) : null
+        ]);
+        if (existingEmail) {
+            return res.status(409).json({ success: false, field: 'email', message: 'Email này đã được sử dụng cho tài khoản khác.' });
+        }
+        if (existingPhone) {
+            return res.status(409).json({ success: false, field: 'phone', message: 'Số điện thoại này đã được đăng ký.' });
+        }
+        return res.json({ success: true });
+    } catch (error) {
+        console.error('Không thể kiểm tra thông tin đăng ký:', error);
+        return res.status(500).json({ success: false, message: 'Không thể kiểm tra thông tin đăng ký lúc này.' });
+    }
 }
 
 // POST /api/auth/signup
@@ -32,7 +72,7 @@ async function signup(req, res) {
             .trim()
             .toLowerCase();
 
-        const phone = String(req.body.phone || '').trim();
+        const phone = normalizePhoneNumber(req.body.phone);
         const password = String(req.body.password || '');
 
         if (!NAME_RE.test(fullName) || fullName.length < 2) {
@@ -42,7 +82,7 @@ async function signup(req, res) {
             });
         }
 
-        if (!EMAIL_RE.test(email)) {
+        if (email && !EMAIL_RE.test(email)) {
             return res.status(400).json({
                 success: false,
                 message: 'Email không hợp lệ.'
@@ -56,6 +96,10 @@ async function signup(req, res) {
             });
         }
 
+        if (req.body.termsAccepted !== true) {
+            return res.status(400).json({ success: false, message: 'Vui l\u00f2ng ch\u1ea5p nh\u1eadn c\u00e1c ch\u00ednh s\u00e1ch.' });
+        }
+
         if (!PASS_RE.test(password)) {
             return res.status(400).json({
                 success: false,
@@ -63,25 +107,30 @@ async function signup(req, res) {
             });
         }
 
-        if (await User.exists(email)) {
+        if (email && await User.existsByEmail(email)) {
             return res.status(409).json({
                 success: false,
                 field: 'email',
-                message: 'Email này đã được đăng ký.'
+                message: 'Email này đã được sử dụng cho tài khoản khác.'
             });
+        }
+
+        if (await User.existsByPhone(phone)) {
+            return res.status(409).json({ success: false, field: 'phone', message: 'Số điện thoại này đã được đăng ký.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = {
             fullName,
-            email,
+            ...(email ? { email } : {}),
             phone,
             password: hashedPassword,
             avatar: '',
             role: 'user',
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            termsAcceptedAt: new Date()
         };
 
         const result = await User.create(newUser);
@@ -96,10 +145,13 @@ async function signup(req, res) {
         });
     } catch (err) {
         if (err.code === 11000) {
+            const field = err.keyPattern?.email ? 'email' : 'phone';
             return res.status(409).json({
                 success: false,
-                field: 'email',
-                message: 'Email này đã được đăng ký.'
+                field,
+                message: field === 'email'
+                    ? 'Email này đã được sử dụng cho tài khoản khác.'
+                    : 'Số điện thoại này đã được đăng ký.'
             });
         }
 
@@ -115,18 +167,32 @@ async function signup(req, res) {
 // POST /api/auth/login
 async function login(req, res) {
     try {
-        const email = String(req.body.email || '')
-            .trim()
-            .toLowerCase();
+        const identifier = String(req.body.identifier || req.body.email || req.body.phone || '').trim();
 
         const password = String(req.body.password || '');
 
-        const user = await User.findByEmail(email);
+        let user = null;
+        if (identifier.includes('@')) {
+            user = await User.findByEmail(identifier.toLowerCase());
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    code: 'EMAIL_NOT_REGISTERED',
+                    message: 'Email chưa được đăng ký.'
+                });
+            }
+        } else {
+            const matches = await User.findByPhone(identifier);
+            if (matches.length > 1) {
+                return res.status(409).json({ success: false, message: 'S\u1ed1 \u0111i\u1ec7n tho\u1ea1i n\u00e0y li\u00ean k\u1ebft v\u1edbi nhi\u1ec1u t\u00e0i kho\u1ea3n. Vui l\u00f2ng \u0111\u0103ng nh\u1eadp b\u1eb1ng email.' });
+            }
+            user = matches[0] || null;
+        }
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(401).json({
                 success: false,
-                message: 'Email hoặc mật khẩu không chính xác.'
+                message: 'Th\u00f4ng tin \u0111\u0103ng nh\u1eadp kh\u00f4ng ch\u00ednh x\u00e1c.'
             });
         }
 
@@ -298,6 +364,7 @@ async function requireAdmin(req, res, next) {
 }
 
 module.exports = {
+    checkSignupAvailability,
     signup,
     login,
     forgotPassword,

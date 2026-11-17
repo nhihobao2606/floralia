@@ -8,7 +8,7 @@
     <form *ngIf="!challengeId" (ngSubmit)="requestOtp()" class="guest-tracking-form">
       <label for="orderLookup">Số điện thoại hoặc mã đơn</label>
       <input id="orderLookup" name="query" [(ngModel)]="query" maxlength="80"
-        placeholder="Ví dụ: 0912 345 678 hoặc #A1B2C3D4" autocomplete="off" required>
+        placeholder="Ví dụ: 0912345678 hoặc #A1B2C3D4" autocomplete="off" required>
       <button type="submit" [disabled]="loading || !query.trim()">
         <i class="bi" [ngClass]="loading ? 'bi-hourglass-split' : 'bi-chat-dots'"></i>
         {{ loading ? 'Đang gửi mã…' : 'Gửi mã OTP' }}
@@ -43,12 +43,9 @@
       <div class="guest-order-items" *ngIf="order.items.length">
         <div *ngFor="let item of order.items"><span>{{ item.name }}</span><strong>×{{ item.quantity }}</strong></div>
       </div>
-      <p class="guest-tracking-code" *ngIf="order.trackingCode">Mã vận đơn: <strong>{{ order.trackingCode }}</strong></p>
-      <ol class="guest-order-timeline" *ngIf="order.trackingTimeline.length">
-        <li *ngFor="let step of order.trackingTimeline" [class.completed]="step.completed">
-          <span class="timeline-dot"></span><span>{{ step.title }}</span><time>{{ step.time }}</time>
-        </li>
-      </ol>
+      <button type="button" class="guest-order-open" (click)="openOrder(order)">
+        Xem chi tiết đơn hàng <i class="bi bi-arrow-right" aria-hidden="true"></i>
+      </button>
     </article>
   </section>
 </main>

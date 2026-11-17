@@ -1,24 +1,38 @@
 <div class="admin-layout">
-  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <app-admin-logout-dialog
+    [visible]="logoutConfirmationVisible"
+    (cancelled)="cancelLogoutConfirmation()"
+    (confirmed)="confirmLogout()"
+  ></app-admin-logout-dialog>
 
   <main class="admin-main">
     <header class="topbar">
       <div class="breadcrumbs" aria-label="Điều hướng">
-        <button type="button" (click)="goBack()">Quản lý người dùng</button>
+        <a routerLink="/users">Quản lý người dùng</a>
         <i class="bi bi-chevron-right" aria-hidden="true"></i>
         <strong>Chi tiết người dùng</strong>
       </div>
 
-      <div class="admin-account">
-        <span class="account-avatar" aria-hidden="true">{{ adminName.charAt(0).toUpperCase() }}</span>
-        <span class="account-copy">
-          <strong>{{ adminName }}</strong>
-          <small>Quản trị viên</small>
-        </span>
-        <button class="topbar-logout" type="button" (click)="logout()">
-          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-          Đăng xuất
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
         </button>
+
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar" aria-hidden="true">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button class="topbar-logout" type="button" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            Đăng xuất
+          </button>
+        </div>
       </div>
     </header>
 

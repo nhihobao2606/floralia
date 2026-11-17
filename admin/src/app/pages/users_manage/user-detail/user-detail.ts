@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import { catchError, finalize, of, timeout } from 'rxjs';
 import { AdminUser, AdminUserService } from '../../../services/admin-user-service';
@@ -30,7 +31,7 @@ interface UsedVoucherRow {
 @Component({
   selector: 'app-user-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminSidebar],
+  imports: [CommonModule, FormsModule, AdminSidebar, AdminLogoutDialog, RouterLink],
   templateUrl: './user-detail.html',
   styleUrl: './user-detail.css',
 })
@@ -41,6 +42,7 @@ export class AdminUserDetail implements OnInit {
   ordersError = '';
   error = '';
   adminName = 'Admin Floralia';
+  logoutConfirmationVisible = false;
   activeTab: HistoryTab = 'orders';
   searchTerm = '';
   currentPage = 1;
@@ -247,6 +249,19 @@ export class AdminUserDetail implements OnInit {
   editUser(): void {
     if (!this.user) return;
     void this.router.navigate(['/users', this.user.id, 'edit']);
+  }
+
+  requestLogoutConfirmation(): void {
+    this.logoutConfirmationVisible = true;
+  }
+
+  cancelLogoutConfirmation(): void {
+    this.logoutConfirmationVisible = false;
+  }
+
+  confirmLogout(): void {
+    this.logoutConfirmationVisible = false;
+    this.logout();
   }
 
   logout(): void {

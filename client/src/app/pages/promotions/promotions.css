@@ -169,6 +169,21 @@
   margin: 4px 0 0;
   letter-spacing: 0.5px;
 }
+.voucher-name {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.voucher-loading-message {
+  margin: 20px 0 0;
+  color: var(--muted);
+  text-align: center;
+}
 
 .voucher-card.hot-center h4 {
   color: #b71c1c;
@@ -184,6 +199,12 @@
   font-size: 13.5px;
   color: var(--muted);
   font-weight: 500;
+}
+.voucher-extra {
+  display: block;
+  margin: -6px 0 10px;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .voucher-code-pill {
@@ -409,8 +430,16 @@
   margin-bottom: 10px;
   font-size: 15px;
 }
-.sale-sold { display: flex; align-items: center; gap: 5px; margin: -4px 0 12px; color: #78877c; font-size: 12px; }
+.sale-meta-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin: -4px 0 12px; }
+.sale-sold { display: flex; align-items: center; gap: 5px; margin: 0; color: #78877c; font-size: 12px; }
 .sale-sold i { color: #789879; font-size: 13px; }
+.sale-variant-pill {
+  display: inline-flex; align-items: center; max-width: 100%; overflow: hidden;
+  padding: 2px 8px; border: 1px solid #dce8dc; border-radius: 12px;
+  background: #f4f9f3; color: #285d40; font-size: 11px; font-weight: 500;
+  line-height: 1.35; white-space: nowrap; text-overflow: ellipsis;
+}
+.price-from-prefix { margin-right: 2px; color: #55705e; font-size: 14px; font-weight: 500; }
 .sale-rating small {
   color: var(--muted);
   margin-left: 4px;
@@ -763,6 +792,13 @@
   display: block;
   margin-bottom: 6px;
 }
+.coupon-code {
+  display: inline-block;
+  margin-bottom: 5px;
+  color: var(--matcha);
+  font: 700 13px/1.4 'Roboto', sans-serif;
+  letter-spacing: .3px;
+}
 .ticket-desc {
   margin: 0;
   font-size: 12.5px;
@@ -874,6 +910,10 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
   }
+  .product-card { padding: 8px 8px 14px; }
+  .sale-name { min-height: 44px; font-size: 15px; }
+  .sale-current { font-size: 17px; }
+  .sale-old { font-size: 13px; }
   .voucher-card {
     width: 100%;
     max-width: 320px;

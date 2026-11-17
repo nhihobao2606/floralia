@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
+import { getAuthReturnUrl } from '../../classes/auth-return-url';
 
 @Component({
   selector: 'app-login',
@@ -10,16 +11,16 @@ import { NgForm } from '@angular/forms';
   styleUrl: './login.css'
 })
 export class Login implements OnInit {
-  email = '';
+  identifier = '';
   password = '';
 
   showPassword = false;
   rememberMe = false;
   errorMessage = '';
   notice = '';
+  identifierError = '';
+  showPhoneLoginHint = false;
 
-  // Email hợp lệ: có phần tên, ký tự @, tên miền và đuôi tối thiểu 2 ký tự.
-  readonly emailPattern = '^\\s*[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}\\s*$';
 
   constructor(
     private http: HttpClient,
@@ -38,6 +39,8 @@ export class Login implements OnInit {
 
   login(form: NgForm): void {
     this.errorMessage = '';
+    this.identifierError = '';
+    this.showPhoneLoginHint = false;
     this.notice = '';
 
     // Chỉ đăng nhập khi cả hai ô đều hợp lệ.
@@ -46,8 +49,11 @@ export class Login implements OnInit {
       return;
     }
 
+    const identifier = this.identifier.trim();
     this.http.post<any>('http://localhost:3002/api/auth/login', {
-      email: this.email.trim(),
+      identifier,
+      // Keep compatibility with API instances that still expect email instead of identifier.
+      email: identifier.includes('@') ? identifier : undefined,
       password: this.password
     }).subscribe({
       next: (result) => {
@@ -71,36 +77,35 @@ export class Login implements OnInit {
           // Báo hiệu cập nhật người dùng và giỏ hàng ngay lập tức trên giao diện
           window.dispatchEvent(new Event('auth-changed'));
           window.dispatchEvent(new Event('cart-updated'));
-
           alert('Đăng nhập thành công!');
           this.navigateAfterLogin();
         } else {
-          this.errorMessage = result.message || 'Email hoặc mật khẩu không chính xác.';
+          this.errorMessage = result.message || 'Th\u00f4ng tin \u0111\u0103ng nh\u1eadp kh\u00f4ng ch\u00ednh x\u00e1c.';
         }
       },
       error: (error) => {
         if (error.status === 0) {
           this.errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng thử lại.';
+        } else if (error.status === 404 && error.error?.code === 'EMAIL_NOT_REGISTERED') {
+          this.identifierError = 'Email chưa được đăng ký.';
+          this.showPhoneLoginHint = true;
         } else {
           this.errorMessage = error.error?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
         }
-        alert(this.errorMessage);
+        if (this.errorMessage) alert(this.errorMessage);
         console.error('Lỗi đăng nhập:', error);
       }
     });
   }
 
+  clearIdentifierError(): void {
+    this.identifierError = '';
+    this.showPhoneLoginHint = false;
+  }
+
   private navigateAfterLogin(): void {
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    if (returnUrl?.startsWith('/') && !returnUrl.startsWith('//')) {
-      try {
-        void this.router.navigateByUrl(this.router.parseUrl(returnUrl));
-        return;
-      } catch {
-        // Invalid return URLs fall back to the homepage.
-      }
-    }
-    void this.router.navigate(['/']);
+    const returnUrl = getAuthReturnUrl(this.route, this.router);
+    void this.router.navigateByUrl(returnUrl || '/');
   }
 
   // Đăng nhập bằng mạng xã hội (chưa nối API).
@@ -110,7 +115,10 @@ export class Login implements OnInit {
   }
 
   goToSignup(): void {
-    this.router.navigate(['/signup']);
+    const returnUrl = getAuthReturnUrl(this.route, this.router);
+    void this.router.navigate(['/signup'], {
+      queryParams: returnUrl ? { returnUrl } : undefined,
+    });
   }
 
   forgotPassword(): void {

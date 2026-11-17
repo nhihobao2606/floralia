@@ -9,6 +9,7 @@ import {
   BlogFormValue,
   BlogStatus,
 } from '../../../services/admin-blog-service';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 
 function emptyArticle(): BlogFormValue {
@@ -19,7 +20,7 @@ function emptyArticle(): BlogFormValue {
     author: '',
     category: '',
     categorySlug: '',
-    image: '/assets/images/bl1.jpg',
+    image: '',
     imageAlt: '',
     status: 'draft',
     featured: false,
@@ -41,7 +42,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-article-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar],
+  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar, AdminLogoutDialog],
   templateUrl: './article-editor.html',
   styleUrl: './article-editor.css',
 })
@@ -62,6 +63,8 @@ export class ArticleEditor implements OnInit, OnDestroy {
   statusDropdownOpen = false;
   authorDropdownOpen = false;
   blockFormatDropdownOpen = false;
+  alignmentDropdownOpen = false;
+  activeTextAlignment = 'justifyLeft';
   activeBlockFormat = 'H2';
   datePickerOpen = false;
   previewVisible = false;
@@ -78,10 +81,10 @@ export class ArticleEditor implements OnInit, OnDestroy {
   successMessage = '';
   loadError = '';
   private autoSaveInterval?: ReturnType<typeof setInterval>;
+  private editorSelection: Range | null = null;
   private successMessageTimeout?: ReturnType<typeof setTimeout>;
   private lastSavedSnapshot = '';
   private lastAutoSavedSnapshot = '';
-  private editorSelection: Range | null = null;
   private resolveCanDeactivate?: (allowNavigation: boolean) => void;
   private pendingLogout = false;
   readonly statusOptions: { value: BlogStatus; label: string }[] = [
@@ -92,8 +95,14 @@ export class ArticleEditor implements OnInit, OnDestroy {
   readonly blockFormatOptions = [
     { value: 'H2', label: 'Tiêu đề' },
     { value: 'P', label: 'Nội dung' },
-    { value: 'H3', label: 'Tiêu đề nhỏ' },
-    { value: 'BLOCKQUOTE', label: 'Trích dẫn' },
+    { value: 'H3', label: 'Tiêu đề 1' },
+    { value: 'H4', label: 'Tiêu đề 2' },
+  ];
+  readonly alignmentOptions = [
+    { value: 'justifyLeft', label: 'Căn trái', icon: 'bi-text-left' },
+    { value: 'justifyCenter', label: 'Căn giữa', icon: 'bi-text-center' },
+    { value: 'justifyRight', label: 'Căn phải', icon: 'bi-text-right' },
+    { value: 'justifyFull', label: 'Căn đều', icon: 'bi-justify' },
   ];
   readonly weekdays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
@@ -235,6 +244,9 @@ export class ArticleEditor implements OnInit, OnDestroy {
     if (event.target instanceof Element && !event.target.closest('.toolbar-format-select')) {
       this.blockFormatDropdownOpen = false;
     }
+    if (event.target instanceof Element && !event.target.closest('.toolbar-align-select')) {
+      this.alignmentDropdownOpen = false;
+    }
     if (event.target instanceof Element && !event.target.closest('.date-picker')) {
       this.datePickerOpen = false;
     }
@@ -245,9 +257,7 @@ export class ArticleEditor implements OnInit, OnDestroy {
       return false;
     }
     const editor = document.querySelector<HTMLElement>('.rich-editor');
-    if (editor) {
-      this.article.content = editor.innerHTML;
-    }
+    if (editor) this.article.content = editor.innerHTML;
     return JSON.stringify(this.article) !== this.lastSavedSnapshot;
   }
 
@@ -345,22 +355,28 @@ export class ArticleEditor implements OnInit, OnDestroy {
     this.blockFormatDropdownOpen = !this.blockFormatDropdownOpen;
     this.statusDropdownOpen = false;
     this.authorDropdownOpen = false;
+    this.alignmentDropdownOpen = false;
+  }
+
+  toggleAlignmentDropdown(): void {
+    this.captureEditorSelection();
+    this.alignmentDropdownOpen = !this.alignmentDropdownOpen;
+    this.blockFormatDropdownOpen = false;
+  }
+
+  applyTextAlignment(command: string): void {
+    this.activeTextAlignment = command;
+    this.alignmentDropdownOpen = false;
+    this.formatText(command);
   }
 
   applyBlockFormat(format: string): void {
     this.activeBlockFormat = format;
     this.blockFormatDropdownOpen = false;
     const editor = document.querySelector<HTMLElement>('.rich-editor');
-    if (!editor) {
-      return;
-    }
-
+    if (!editor) return;
     editor.focus();
-    if (this.editorSelection && editor.contains(this.editorSelection.commonAncestorContainer)) {
-      const selection = window.getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(this.editorSelection);
-    }
+    this.restoreEditorSelection(editor);
     document.execCommand('formatBlock', false, format);
     this.article.content = editor.innerHTML;
     this.editorSelection = null;
@@ -448,7 +464,7 @@ export class ArticleEditor implements OnInit, OnDestroy {
           author: article.author,
           category: article.category,
           categorySlug: article.categorySlug,
-          image: article.image,
+          image: article.image || '',
           imageAlt: article.imageAlt || '',
           imageData: article.imageData || undefined,
           imageMimeType: article.imageMimeType || undefined,
@@ -476,9 +492,7 @@ export class ArticleEditor implements OnInit, OnDestroy {
         this.changeDetector.markForCheck();
         setTimeout(() => {
           const editor = document.querySelector<HTMLElement>('.rich-editor');
-          if (editor) {
-            editor.innerHTML = this.article.content;
-          }
+          if (editor) editor.innerHTML = this.article.content;
         });
       },
       error: error => {
@@ -516,18 +530,19 @@ export class ArticleEditor implements OnInit, OnDestroy {
   }
 
   onContentInput(event: Event): void {
-    const element = event.currentTarget;
-    if (element instanceof HTMLElement) {
-      this.article.content = element.innerHTML;
+    const editor = event.currentTarget;
+    if (editor instanceof HTMLElement) {
+      this.article.content = editor.innerHTML;
       this.syncInlineImagesFromContent();
+      this.captureEditorSelection();
     }
   }
 
   removeInlineImage(index: number): void {
     const editor = document.querySelector<HTMLElement>('.rich-editor');
-    const images = editor?.querySelectorAll('img');
-    if (editor && images?.[index]) {
-      images[index].remove();
+    const image = editor?.querySelectorAll('img')[index];
+    if (editor && image) {
+      image.remove();
       this.article.content = editor.innerHTML;
     } else {
       const content = new DOMParser().parseFromString(this.article.content, 'text/html');
@@ -538,12 +553,14 @@ export class ArticleEditor implements OnInit, OnDestroy {
   }
 
   formatText(command: string, value?: string): void {
-    document.execCommand(command, false, value);
     const editor = document.querySelector<HTMLElement>('.rich-editor');
-    if (editor) {
-      this.article.content = editor.innerHTML;
-      editor.focus();
-    }
+    if (!editor) return;
+    editor.focus();
+    this.restoreEditorSelection(editor);
+    document.execCommand(command, false, value);
+    this.article.content = editor.innerHTML;
+    this.syncInlineImagesFromContent();
+    this.editorSelection = null;
   }
 
   async onCoverSelected(event: Event): Promise<void> {
@@ -582,8 +599,8 @@ export class ArticleEditor implements OnInit, OnDestroy {
   }
 
   private async loadCoverFile(file: File): Promise<void> {
-    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 2_000_000) {
-      this.errorMessage = 'Ảnh bìa phải là JPG hoặc PNG và dưới 2 MB.';
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      this.errorMessage = 'Ảnh bìa phải là JPG, PNG hoặc WebP và tối đa 10 MB.';
       this.changeDetector.markForCheck();
       return;
     }
@@ -594,6 +611,7 @@ export class ArticleEditor implements OnInit, OnDestroy {
       this.article.imageData = dataUrl.slice(separator + 1);
       this.article.imageMimeType = file.type;
       this.article.imageFileName = file.name;
+      this.article.image = '';
       this.article.clearImageData = false;
       this.imagePreview = dataUrl;
       this.errorMessage = '';
@@ -608,7 +626,7 @@ export class ArticleEditor implements OnInit, OnDestroy {
     this.article.imageData = undefined;
     this.article.imageMimeType = undefined;
     this.article.imageFileName = undefined;
-    this.article.image = '/assets/images/bl1.jpg';
+    this.article.image = '';
     this.article.imageAlt = '';
     this.imagePreview = '';
     this.article.clearImageData = true;
@@ -703,10 +721,8 @@ export class ArticleEditor implements OnInit, OnDestroy {
 
   previewArticle(): void {
     const editor = document.querySelector<HTMLElement>('.rich-editor');
-    if (editor) {
-      this.article.content = editor.innerHTML;
-      this.syncInlineImagesFromContent();
-    }
+    if (editor) this.article.content = editor.innerHTML;
+    this.syncInlineImagesFromContent();
     this.previewVisible = true;
   }
 
@@ -815,9 +831,7 @@ export class ArticleEditor implements OnInit, OnDestroy {
     }
 
     const editor = document.querySelector<HTMLElement>('.rich-editor');
-    if (editor) {
-      this.article.content = editor.innerHTML;
-    }
+    if (editor) this.article.content = editor.innerHTML;
 
     const snapshot = JSON.stringify(this.article);
     if (snapshot === this.lastAutoSavedSnapshot) {
@@ -845,40 +859,53 @@ export class ArticleEditor implements OnInit, OnDestroy {
   captureEditorSelection(): void {
     const editor = document.querySelector<HTMLElement>('.rich-editor');
     const selection = window.getSelection();
-    if (editor && selection?.rangeCount && editor.contains(selection.anchorNode)) {
+    if (editor && selection?.rangeCount && selection.anchorNode && (selection.anchorNode === editor || editor.contains(selection.anchorNode))) {
       this.editorSelection = selection.getRangeAt(0).cloneRange();
     }
+  }
+
+  private restoreEditorSelection(editor: HTMLElement): void {
+    if (!this.editorSelection || !(this.editorSelection.commonAncestorContainer === editor || editor.contains(this.editorSelection.commonAncestorContainer))) return;
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(this.editorSelection);
   }
 
   async onInlineImageSelected(event: Event): Promise<void> {
     const input = event.currentTarget;
     const file = input instanceof HTMLInputElement ? input.files?.[0] : undefined;
-    if (!file) {
-      return;
-    }
-    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 2_000_000) {
-      this.errorMessage = 'Ảnh chèn phải là JPG hoặc PNG và dưới 2 MB.';
+    if (!file) return;
+    if (input instanceof HTMLInputElement) input.value = '';
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      this.errorMessage = 'Ảnh chèn phải là JPG, PNG hoặc WebP và tối đa 10 MB.';
       this.changeDetector.markForCheck();
       return;
     }
-
     try {
       const dataUrl = await this.readFileAsDataUrl(file);
       const editor = document.querySelector<HTMLElement>('.rich-editor');
-      if (!editor) {
-        throw new Error('Article editor is unavailable');
+      if (!editor) throw new Error('Article editor is unavailable');
+      const hasSavedRange = !!this.editorSelection
+        && (this.editorSelection.commonAncestorContainer === editor || editor.contains(this.editorSelection.commonAncestorContainer));
+      const range = hasSavedRange && this.editorSelection ? this.editorSelection.cloneRange() : document.createRange();
+      if (!hasSavedRange) {
+        range.selectNodeContents(editor);
+        range.collapse(false);
       }
-
+      const image = document.createElement('img');
+      image.src = dataUrl;
+      image.alt = file.name.replace(/\.[^.]+$/, '');
+      range.deleteContents();
+      range.insertNode(image);
+      range.setStartAfter(image);
+      range.collapse(true);
       editor.focus();
-      if (this.editorSelection && editor.contains(this.editorSelection.commonAncestorContainer)) {
-        const selection = window.getSelection();
-        selection?.removeAllRanges();
-        selection?.addRange(this.editorSelection);
-      }
-      document.execCommand('insertImage', false, dataUrl);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
       this.article.content = editor.innerHTML;
       this.syncInlineImagesFromContent();
-      this.editorSelection = null;
+      this.editorSelection = range.cloneRange();
       this.errorMessage = '';
       this.changeDetector.markForCheck();
     } catch {

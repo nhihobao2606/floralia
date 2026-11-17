@@ -1,23 +1,35 @@
-const Product = require('./product');
+﻿const Product = require('./product');
 
-async function incrementSoldCounts(items) {
-  const quantitiesBySku = new Map();
+function quantitiesBySku(items) {
+  const quantities = new Map();
   for (const item of items) {
-    const sku = item.sku.trim();
-    quantitiesBySku.set(sku, (quantitiesBySku.get(sku) || 0) + item.quantity);
+    const sku = String(item.sku || '').trim();
+    if (sku) quantities.set(sku, (quantities.get(sku) || 0) + Number(item.quantity || 0));
   }
-
-  const entries = [...quantitiesBySku];
-  const updates = await Promise.all(
-    entries.map(([sku, quantity]) => Product.incrementSoldBySku(sku, quantity))
-  );
-
-  return updates.reduce((missingSkus, result, index) => {
-    if (result.matchedCount === 0) {
-      missingSkus.push(entries[index][0]);
-    }
-    return missingSkus;
-  }, []);
+  return [...quantities];
 }
 
-module.exports = { incrementSoldCounts };
+async function incrementSoldCounts(items, session) {
+  const entries = quantitiesBySku(items);
+  const missingSkus = [];
+  for (const [sku, quantity] of entries) {
+    const result = await Product.incrementSoldBySku(sku, quantity, session);
+    if (result.matchedCount === 0) missingSkus.push(sku);
+  }
+  if (session && missingSkus.length) {
+    throw new Error(`Cannot increment sold count for SKU(s): ${missingSkus.join(', ')}`);
+  }
+  return missingSkus;
+}
+
+async function decrementSoldCounts(items, session) {
+  const entries = quantitiesBySku(items);
+  for (const [sku, quantity] of entries) {
+    const result = await Product.decrementSoldBySku(sku, quantity, session);
+    if (result.matchedCount !== 1) {
+      throw new Error(`Cannot restore sold count for SKU ${sku}`);
+    }
+  }
+}
+
+module.exports = { incrementSoldCounts, decrementSoldCounts };

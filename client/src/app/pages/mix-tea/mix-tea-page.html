@@ -1,10 +1,5 @@
 <main class="mix-page">
-  <nav class="mix-breadcrumb" aria-label="Điều hướng">
-    <div class="container">
-      <a routerLink="/home">Trang chủ</a><span aria-hidden="true">/</span>
-      <span aria-current="page">Tự phối trà</span>
-    </div>
-  </nav>
+  <app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Tự phối trà' }]"></app-breadcrumb>
 
   <section class="mix-intro">
     <div class="container mix-intro-inner">
@@ -44,10 +39,9 @@
           <div class="choice-heading"><span>01 / CHỌN CỐT TRÀ</span><span>{{ selectedSkus.length }} / {{ maxChoices }} cốt</span></div>
           <div class="tea-choice-grid">
             <button type="button" class="tea-choice" *ngFor="let tea of teas" [class.selected]="isSelected(tea.sku)" [class.unavailable]="!tea.available" [attr.aria-pressed]="isSelected(tea.sku)" [disabled]="!tea.available" (click)="toggleTea(tea.sku)">
-              <span class="tea-choice-image"><img [src]="tea.image" [alt]="tea.name" (error)="onImageError($event)" loading="lazy"><span class="choice-check"><i class="bi bi-check2" aria-hidden="true"></i></span></span>
+              <span class="tea-choice-image"><img [src]="tea.image" [alt]="tea.name" (error)="onImageError($event)" loading="eager" decoding="async"><span class="out-of-stock-overlay" *ngIf="!tea.available">H&#7870;T H&#192;NG</span><span class="choice-check"><i class="bi bi-check2" aria-hidden="true"></i></span></span>
               <span class="tea-choice-name">{{ tea.name }}</span>
               <span class="tea-choice-note">{{ tea.tastingNote }}</span>
-              <span class="stock-note" *ngIf="!tea.available">Tạm hết hàng</span>
             </button>
           </div>
           <p class="catalog-message" role="status" *ngIf="catalogMessage">{{ catalogMessage }}</p>
@@ -67,7 +61,7 @@
                 <span><strong>Không thêm đường</strong><small>Giữ vị trà nguyên bản</small></span>
               </button>
               <button type="button" class="sugar-choice" *ngFor="let sugar of sugars" [class.selected]="sugarSku === sugar.sku" [class.unavailable]="!sugar.available" [attr.aria-pressed]="sugarSku === sugar.sku" [disabled]="!sugar.available" (click)="chooseSugar(sugar.sku)">
-                <span class="sugar-choice-image"><img [src]="sugar.image" [alt]="sugar.name" (error)="onImageError($event)" loading="lazy"></span>
+                <span class="sugar-choice-image"><img [src]="sugar.image" [alt]="sugar.name" (error)="onImageError($event)" loading="eager" decoding="async"></span>
                 <span><strong>{{ sugar.name }}</strong><small>{{ sugar.available ? sugar.detail : 'Tạm hết hàng' }}</small></span>
                 <i class="bi bi-check-circle-fill sugar-check" aria-hidden="true"></i>
               </button>
@@ -89,7 +83,7 @@
             <span class="jar-spark spark-a" aria-hidden="true"></span><span class="jar-spark spark-b" aria-hidden="true"></span>
             <div class="blend-orbit" *ngIf="selectedTeas.length" aria-hidden="true">
               <span class="blend-orbit-item" *ngFor="let tea of selectedTeas; let i = index" [class.orbit-second]="i === 1">
-                <img [src]="tea.image" alt="" (error)="onImageError($event)" loading="lazy">
+                <img [src]="tea.image" alt="" (error)="onImageError($event)" loading="eager" decoding="async">
                 <small>{{ tea.name }}</small>
               </span>
             </div>
@@ -118,6 +112,15 @@
             </div>
             <div class="summary-total"><span>Tổng mẻ phối</span><strong>{{ batchGrams }}g</strong></div>
           </div>
+
+          <section class="flavor-profile" aria-live="polite" aria-label="Gợi ý hương vị">
+            <div class="flavor-profile-heading"><i class="bi bi-stars" aria-hidden="true"></i><strong>Hương vị dự kiến</strong></div>
+            <p>{{ flavorProfile }}</p>
+            <div class="flavor-tags" *ngIf="selectedTeas.length">
+              <span *ngFor="let tea of selectedTeas">{{ tea.tastingNote.split('·').pop()?.trim() }}</span>
+              <span>{{ selectedSugar ? (sugarGrams <= 5 ? 'Ngọt nhẹ' : sugarGrams <= 12 ? 'Ngọt dịu' : 'Ngọt đậm') : 'Không thêm đường' }}</span>
+            </div>
+          </section>
 
           <div class="recipe-actions">
             <button class="recipe-submit" type="button" [disabled]="!selectedTeas.length" (click)="sendRecipe()">Gửi công thức tư vấn <i class="bi bi-arrow-right" aria-hidden="true"></i></button>

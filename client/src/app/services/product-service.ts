@@ -1,6 +1,6 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, Subject, catchError, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
+import { Observable, Subject, catchError, finalize, map, shareReplay, tap, throwError } from 'rxjs';
 import { Products } from '../classes/Products';
 
 export interface PublicCategoryItem {
@@ -46,6 +46,22 @@ export interface AvailableVoucher extends ValidatedVoucher {
   maxDiscount: number | null;
   minOrderValue: number;
   endDate: string | null;
+}
+
+export interface PublicPromoVoucher {
+  code: string;
+  name: string;
+  description: string;
+  discountType: 'fixed' | 'percent';
+  discountValue: number;
+  maxDiscount: number | null;
+  minOrderValue: number;
+  startDate: string | null;
+  endDate: string | null;
+  audience: string;
+  scope: string;
+  categories: string[];
+  perUserLimit: number;
 }
 
 @Injectable({
@@ -129,10 +145,6 @@ export class ProductService implements OnDestroy {
 
   // Lấy danh sách sản phẩm
   getProducts(): Observable<Products[]> {
-    if (this.productsCache && Date.now() < this.productsCacheExpiresAt) {
-      return of(this.productsCache);
-    }
-
     if (this.productsRequest) {
       return this.productsRequest;
     }
@@ -143,7 +155,9 @@ export class ProductService implements OnDestroy {
       tap((products) => {
         if (requestVersion === this.cacheVersion) {
           this.productsCache = products;
-          this.productsCacheExpiresAt = Date.now() + 1_000;
+          // Keep the last response available to components that need a snapshot,
+          // but never serve it as the next product request.
+          this.productsCacheExpiresAt = 0;
         }
       }),
       catchError((error: unknown) => {
@@ -178,6 +192,12 @@ export class ProductService implements OnDestroy {
       'http://localhost:3002/api/vouchers/available',
       { subtotal, items },
       { headers: new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {}) }
+    );
+  }
+
+  getPublicPromoVouchers(): Observable<{ success: boolean; vouchers: PublicPromoVoucher[] }> {
+    return this.http.get<{ success: boolean; vouchers: PublicPromoVoucher[] }>(
+      'http://localhost:3002/api/vouchers/public'
     );
   }
 

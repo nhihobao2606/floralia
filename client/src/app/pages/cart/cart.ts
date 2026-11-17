@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartItem, CartService, CartVariant } from '../../services/cart-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 export interface CartDisplayItem extends CartItem {
   selected: boolean;
@@ -84,6 +85,21 @@ export class CartComponent implements OnInit {
 
   get allSelected(): boolean {
     return this.items.length > 0 && this.items.every(item => item.selected);
+  }
+
+  imageSource(item: CartItem): string {
+    const source = item.image || item.thumbnail;
+    if (!source) return '/assets/images/no-image.svg';
+    if (/^(https?:|data:image\/)/i.test(source)) return source;
+    if (source.startsWith('/products/')) return `http://localhost:3002${source}`;
+    const legacyAssetId = /^\/?assets\/images\/([^/?]+)$/i.exec(source);
+    if (legacyAssetId && !/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(legacyAssetId[1])) {
+      return `http://localhost:3002/products/image/${encodeURIComponent(legacyAssetId[1])}`;
+    }
+    if (source.startsWith('/assets/')) return source;
+    if (source.startsWith('assets/')) return `/${source}`;
+    if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(source)) return `/assets/images/${source}`;
+    return `http://localhost:3002/products/image/${encodeURIComponent(source)}`;
   }
 
   toggleSelect(item: CartDisplayItem): void {
@@ -206,7 +222,7 @@ export class CartComponent implements OnInit {
   }
 
   formatPrice(num: number): string {
-    return new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(num || 0) + ' ₫';
+    return formatVietnameseDong(num);
   }
 
   proceedToCheckout(): void {

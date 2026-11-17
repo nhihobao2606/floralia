@@ -12,12 +12,6 @@
 }
 
 .support-page { min-height: 70vh; background: var(--support-paper); }
-.support-breadcrumb { padding: 18px 0; border-bottom: 1px solid rgba(29, 83, 56, .1); font-size: 13px; }
-.support-breadcrumb .container { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.support-breadcrumb a { color: #6b7f72; text-decoration: none; }
-.support-breadcrumb span { color: #9aab9d; }
-.support-breadcrumb strong { color: var(--support-forest); font-weight: 500; }
-
 .support-hero {
   position: relative;
   overflow: hidden;

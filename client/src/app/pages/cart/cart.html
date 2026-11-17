@@ -1,7 +1,7 @@
 <main class="cart-page">
   <div class="container cart-container">
     <header class="page-heading">
-      <p class="eyebrow">FLORALIA HERBAL TEA</p>
+      <p class="eyebrow">FLORALIA TEA</p>
       <h1>Giỏ hàng</h1>
     </header>
 
@@ -40,10 +40,10 @@
                 <td class="product-column">
                   <div class="cart-product">
                     <a *ngIf="it.slug; else imageWithoutLink" [routerLink]="productNavigation.detailRoute(it.slug)" class="cart-product-image">
-                      <img [src]="it.image || it.thumbnail || '/assets/images/no-image.svg'" [alt]="it.name || it.title" loading="lazy">
+                      <img [src]="imageSource(it)" [alt]="it.name || it.title" loading="lazy">
                     </a>
                     <ng-template #imageWithoutLink>
-                      <span class="cart-product-image"><img [src]="it.image || it.thumbnail || '/assets/images/no-image.svg'" [alt]="it.name || it.title" loading="lazy"></span>
+                      <span class="cart-product-image"><img [src]="imageSource(it)" [alt]="it.name || it.title" loading="lazy"></span>
                     </ng-template>
                     <div class="cart-product-info">
                       <a *ngIf="it.slug; else nameWithoutLink" class="product-name" [routerLink]="productNavigation.detailRoute(it.slug)">{{ it.name || it.title }}</a>

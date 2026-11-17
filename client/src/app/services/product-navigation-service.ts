@@ -20,8 +20,8 @@ export class ProductNavigationService {
 
     const categorySlug = item.categorySlug?.trim();
     return categorySlug
-      ? ['/', categorySlug, item.slug]
-      : ['/product', item.slug];
+      ? ['/', 'products', categorySlug, item.slug]
+      : ['/products', item.slug];
   }
 
   detailUrl(product: ProductNavigationItem | string | null | undefined): string | null {
@@ -32,6 +32,7 @@ export class ProductNavigationService {
   navigateToProduct(
     product: ProductNavigationItem,
     products?: ProductNavigationItem[],
+    selectedVariantSku?: string,
   ): Promise<boolean> {
     const route = this.detailRoute(product);
     if (!route) return Promise.resolve(false);
@@ -40,6 +41,7 @@ export class ProductNavigationService {
       state: {
         product,
         ...(products ? { products } : {}),
+        ...(selectedVariantSku ? { selectedVariantSku } : {}),
       },
     });
   }

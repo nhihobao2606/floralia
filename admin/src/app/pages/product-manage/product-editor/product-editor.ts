@@ -155,17 +155,16 @@ export class ProductEditor implements OnInit {
   }
 
   private applyProduct(product: AdminProduct): void {
-    const initialImages = product.images?.length
-      ? [...product.images]
-      : product.thumbnail
-        ? [product.thumbnail]
-        : [];
+    const storedImages = [...new Set((product.images || []).filter(Boolean))];
+    const thumbnail = String(product.thumbnail || storedImages[0] || '').trim();
+    const galleryImages = storedImages.filter(image => image !== thumbnail);
+    const initialImages = galleryImages.length ? galleryImages : (thumbnail ? [thumbnail] : []);
     this.form = {
       ...this.emptyForm(),
       ...product,
       status: product.status === 'inactive' || product.status === 'out-of-stock' ? 'out-of-stock' : 'active',
-      images: initialImages,
-      thumbnail: initialImages[0] || '',
+      images: galleryImages,
+      thumbnail,
       benefits: [...(product.benefits || [])],
       tags: [...(product.tags || [])],
       usage: [...(product.usage || [])],
@@ -254,53 +253,97 @@ export class ProductEditor implements OnInit {
   private imageUrl(value: string): string {
     if (!value) return '';
     if (/^(https?:|data:image\/)/i.test(value) || value.startsWith('/assets/')) return value;
-    return `http://localhost:3002/products/image/${encodeURIComponent(value)}`;
+    return `http://localhost:3002/products/image/${encodeURIComponent(value)}?v=${Date.now()}`;
   }
 
-  onImagesSelected(event: Event): void {
+  async onImagesSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files || []);
     if (!files.length) return;
-    const invalid = files.find(file => !file.type.startsWith('image/'));
-    if (invalid) {
-      this.error = `${invalid.name}: định dạng tệp không phải hình ảnh hợp lệ.`;
-      input.value = '';
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+    const unsupported = files.find(file => !supportedTypes.includes(file.type));
+    const oversized = files.find(file => file.size > 10 * 1024 * 1024);
+    input.value = '';
+    if (unsupported) {
+      this.error = unsupported.name + ': Vui lòng chọn ảnh JPG, PNG, WebP, GIF hoặc AVIF.';
+      this.changeDetector.markForCheck();
       return;
     }
-    this.error = '';
-    this.successMessage = '';
-    const readers = files.map(file => new Promise<ProductImageUpload>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve({ dataUrl: String(reader.result), name: file.name, type: file.type });
-      reader.onerror = () => reject(new Error(`Không thể đọc ảnh ${file.name}.`));
-      reader.readAsDataURL(file);
-    }));
-    Promise.all(readers).then(images => {
+    if (oversized) {
+      this.error = oversized.name + ': Kích thước ảnh không được vượt quá 10 MB.';
+      this.changeDetector.markForCheck();
+      return;
+    }
+
+    try {
+      const images = await Promise.all(files.map(file => this.convertImageToWebp(file)));
+      this.error = '';
+      this.successMessage = '';
+      // When replacing the current photo set, previews and the save payload must
+      // contain only the newly selected files, never stale persisted references.
+      if (this.form.thumbnail || this.form.images.length) {
+        this.form.thumbnail = '';
+        this.form.images = [];
+        this.replaceImages = true;
+      }
       this.imageUploads = [...this.imageUploads, ...images];
       this.form.imageUploads = this.imageUploads;
       this.form.replaceImages = this.replaceImages;
-      this.imagePreviews = [...this.imagePreviews, ...images.map(image => image.dataUrl)];
-      this.changeDetector.markForCheck();
-    }).catch(error => {
-      this.error = error.message || 'Không thể đọc ảnh.';
-      this.changeDetector.markForCheck();
-    });
-    input.value = '';
+      this.imagePreviews = [...this.imageUploads.map(image => image.dataUrl)];
+    } catch (error) {
+      this.error = error instanceof Error ? error.message : 'Không thể chuyển ảnh sang WebP.';
+    }
+    this.changeDetector.markForCheck();
   }
 
+  private async convertImageToWebp(file: File): Promise<ProductImageUpload> {
+    const bitmap = await createImageBitmap(file);
+    try {
+      const maxEdge = 1200;
+      const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Trình duyệt không thể xử lý ảnh.');
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(result => result ? resolve(result) : reject(new Error('Không thể chuyển ảnh sang WebP.')), 'image/webp', 0.85);
+      });
+      if (blob.type !== 'image/webp') throw new Error('Trình duyệt này không hỗ trợ xuất ảnh WebP.');
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error('Không thể đọc ảnh ' + file.name + '.'));
+        reader.readAsDataURL(blob);
+      });
+      return { dataUrl, name: file.name, type: 'image/webp' };
+    } finally {
+      bitmap.close();
+    }
+  }
   removeImage(index: number): void {
     if (index < 0 || index >= this.imagePreviews.length) return;
-    const existingCount = this.form.images.length;
-    if (index < existingCount) {
-      this.form.images = this.form.images.filter((_, current) => current !== index);
+    const galleryCount = this.form.images.length;
+    const thumbnailPreviewCount = galleryCount === 0 && this.form.thumbnail ? 1 : 0;
+    const persistedCount = galleryCount || thumbnailPreviewCount;
+    if (index < persistedCount) {
+      if (galleryCount) this.form.images = this.form.images.filter((_, current) => current !== index);
+      else this.form.thumbnail = '';
+      this.replaceImages = true;
     } else {
-      const uploadIndex = index - existingCount;
+      const uploadIndex = index - persistedCount;
       this.imageUploads = this.imageUploads.filter((_, current) => current !== uploadIndex);
-      this.form.imageUploads = this.imageUploads;
     }
-    this.imagePreviews = this.imagePreviews.filter((_, current) => current !== index);
-    this.form.thumbnail = this.form.images[0] || '';
-    if (!this.form.images.length && !this.imageUploads.length) {
+    this.form.imageUploads = this.imageUploads;
+    this.form.replaceImages = this.replaceImages;
+    this.imagePreviews = [
+      ...(this.form.images.length
+        ? this.form.images.map(image => this.imageUrl(image))
+        : (this.form.thumbnail ? [this.imageUrl(this.form.thumbnail)] : [])),
+      ...this.imageUploads.map(image => image.dataUrl),
+    ];
+    if (!this.form.thumbnail && !this.form.images.length && !this.imageUploads.length) {
       this.replaceImages = true;
       this.form.replaceImages = true;
     }

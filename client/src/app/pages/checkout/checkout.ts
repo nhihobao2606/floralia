@@ -5,6 +5,7 @@ import { getOrderSlug, OrderService, Order } from '../../services/order-service'
 import { CartService } from '../../services/cart-service';
 import { AvailableVoucher, CheckoutProduct, ProductService, ValidatedVoucher } from '../../services/product-service';
 import { forkJoin } from 'rxjs';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 interface CheckoutItem {
   sku: string;
@@ -26,6 +27,7 @@ interface CheckoutItem {
   styleUrl: './checkout.css'
 })
 export class CheckoutComponent implements OnInit {
+  private readonly invalidAddressSubmitError = 'Vui lòng kiểm tra và bổ sung các thông tin nhận hàng được đánh dấu.';
   isSubmitting = false;
   submitError = '';
   addressValidationAttempted = false;
@@ -45,6 +47,13 @@ export class CheckoutComponent implements OnInit {
   checkoutLoadingProvinces = false;
   checkoutLoadingWards = false;
   note = '';
+  demoCreateAccount = false;
+  demoAccountPassword = '';
+  demoAccountConfirmPassword = '';
+  showDemoAccountPassword = false;
+  showDemoAccountConfirmPassword = false;
+  demoAccountReady = false;
+  demoVoucherApplied = false;
 
   hasAddress = false; // Whether user has any saved address or has filled address manually
   isEditingAddress = false;
@@ -195,6 +204,7 @@ export class CheckoutComponent implements OnInit {
     this.checkoutProvinceDropdownOpen = false;
     this.checkoutWardDropdownOpen = false;
     this.checkoutLoadingWards = true;
+    this.onAddressDetailsChanged();
     this.http.get<any[]>(`https://provinces.open-api.vn/api/v2/w/?province=${province.code}`).subscribe({
       next: wards => this.ngZone.run(() => {
         this.checkoutWards = (wards || []).map(({ code, name }) => ({ code, name }));
@@ -219,13 +229,20 @@ export class CheckoutComponent implements OnInit {
     this.checkoutWard = ward;
     this.ward = ward.name;
     this.checkoutWardDropdownOpen = false;
+    this.onAddressDetailsChanged();
+  }
+
+  onAddressDetailsChanged(): void {
+    if (this.submitError === this.invalidAddressSubmitError && this.checkoutAddressIsValid()) {
+      this.submitError = '';
+    }
   }
 
   showAddressFieldError(field: 'fullName' | 'phone' | 'street' | 'province' | 'ward' | 'email'): boolean {
     if (!this.addressValidationAttempted) return false;
     switch (field) {
       case 'fullName': return !this.fullName.trim() || this.fullName.trim().length > 60;
-      case 'phone': return !/^(0|\+84)(3|5|7|8|9)\d{8}$/.test(this.phone.trim());
+      case 'phone': return !/^0(3|5|7|8|9)\d{8}$/.test(this.phone.trim());
       case 'street': return !this.street.trim() || this.street.trim().length > 180;
       case 'province': return !(this.hasAddress && !this.isEditingAddress ? this.city.trim() : this.checkoutProvince?.name);
       case 'ward': return !(this.hasAddress && !this.isEditingAddress ? this.ward.trim() : this.checkoutWard?.name);
@@ -242,6 +259,37 @@ export class CheckoutComponent implements OnInit {
       !this.showAddressFieldError('email');
   }
 
+  get canDemoCreateAccount(): boolean {
+    const province = this.hasAddress && !this.isEditingAddress ? this.city : this.checkoutProvince?.name;
+    const ward = this.hasAddress && !this.isEditingAddress ? this.ward : this.checkoutWard?.name;
+    return !this.isLoggedIn &&
+      !!this.fullName.trim() &&
+      this.fullName.trim().length <= 60 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.email.trim()) &&
+      /^0(3|5|7|8|9)\d{8}$/.test(this.phone.trim()) &&
+      !!this.street.trim() &&
+      this.street.trim().length <= 180 &&
+      !!province?.trim() &&
+      !!ward?.trim();
+  }
+
+  get canCompleteDemoAccount(): boolean {
+    return this.canDemoCreateAccount &&
+      !!this.demoAccountPassword &&
+      !!this.demoAccountConfirmPassword &&
+      this.demoAccountPassword === this.demoAccountConfirmPassword;
+  }
+
+  completeDemoAccount(): void {
+    if (!this.canCompleteDemoAccount) return;
+    this.demoAccountReady = true;
+  }
+
+  applyDemoVoucher(): void {
+    if (!this.demoAccountReady) return;
+    this.demoVoucherApplied = true;
+  }
+
   applyAddress(addr: any): void {
     if (!addr) return;
     this.selectedAddressId = addr._id || null;
@@ -252,6 +300,7 @@ export class CheckoutComponent implements OnInit {
     if (addr.ward) this.ward = addr.ward;
     this.hasAddress = true;
     this.isEditingAddress = false;
+    this.onAddressDetailsChanged();
   }
 
   openAddressModal(): void {
@@ -427,7 +476,7 @@ export class CheckoutComponent implements OnInit {
       this.addAddressError = 'Vui lòng điền đầy đủ các trường bắt buộc.';
       return;
     }
-    if (!/^(0|\+84)(3|5|7|8|9)\d{8}$/.test(this.addAddressPhone.trim())) {
+    if (!/^0(3|5|7|8|9)\d{8}$/.test(this.addAddressPhone.trim())) {
       this.addAddressError = 'Số điện thoại không hợp lệ.';
       return;
     }
@@ -510,11 +559,11 @@ export class CheckoutComponent implements OnInit {
   }
 
   openQRModal(): void {
-    this.showQRModal = this.paymentMethod === 'paypal' || this.paymentMethod === 'vnpay';
+    this.showQRModal = this.paymentMethod === 'momo' || this.paymentMethod === 'vnpay';
   }
 
   onPaymentMethodChange(): void {
-    this.showQRModal = this.paymentMethod === 'paypal' || this.paymentMethod === 'vnpay';
+    this.showQRModal = this.paymentMethod === 'momo' || this.paymentMethod === 'vnpay';
   }
 
   closeQRModal(): void {
@@ -522,7 +571,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   copyAccountNumber(): void {
-    navigator.clipboard.writeText('PSP2605813700000226');
+    navigator.clipboard.writeText(this.paymentIdentifierValue);
     this.copiedText = true;
     setTimeout(() => {
       this.copiedText = false;
@@ -752,18 +801,54 @@ export class CheckoutComponent implements OnInit {
     return computed > 0 ? computed : 0;
   }
 
+  get isMomoPayment(): boolean {
+    return this.paymentMethod === 'momo';
+  }
+
+  get selectedPaymentName(): string {
+    return this.isMomoPayment ? 'MoMo' : 'VNPay';
+  }
+
+  get paymentQrImage(): string {
+    return this.isMomoPayment
+      ? '/assets/images/momo-qr-code.png'
+      : '/assets/images/vnpay-qr.png';
+  }
+
+  get paymentBeneficiary(): string {
+    return this.isMomoPayment ? 'Floralia' : 'Floralia';
+  }
+
+  get paymentProviderLabel(): string {
+    return this.isMomoPayment ? 'MoMo' : 'VNPay QR';
+  }
+
+  get paymentIdentifierLabel(): string {
+    return this.isMomoPayment ? 'Số tài khoản' : 'MID / TID';
+  }
+
+  get paymentIdentifierValue(): string {
+    return this.isMomoPayment ? 'PSP2605813700000226' : '0108388733 / UKG00006';
+  }
+
+  get paymentInstruction(): string {
+    return this.isMomoPayment
+      ? 'Mở MoMo hoặc ứng dụng ngân hàng để quét mã. Kiểm tra đúng người nhận và số tiền trước khi xác nhận.'
+      : 'Mở ứng dụng hỗ trợ VNPay QR để quét mã. Kiểm tra mã cửa hàng và đúng số tiền trước khi xác nhận.';
+  }
+
   formatPrice(num: number): string {
-    return (num || 0).toLocaleString('vi-VN') + 'đ';
+    return formatVietnameseDong(num);
   }
 
   getPaymentMethodLabel(): string {
     switch (this.paymentMethod) {
-      case 'paypal':
-        return 'Paypal';
+      case 'momo':
+        return 'MoMo';
       case 'cod':
         return 'Thanh toán khi nhận hàng (COD)';
       case 'vnpay':
-        return 'VnPay';
+        return 'VNPay';
       default:
         return 'Thanh toán khi nhận hàng (COD)';
     }
@@ -782,7 +867,7 @@ export class CheckoutComponent implements OnInit {
 
     this.addressValidationAttempted = true;
     if (!this.checkoutAddressIsValid()) {
-      this.submitError = 'Vui lòng kiểm tra và bổ sung các thông tin nhận hàng được đánh dấu.';
+      this.submitError = this.invalidAddressSubmitError;
       if (!this.hasAddress) this.isEditingAddress = true;
       return;
     }
@@ -862,14 +947,14 @@ export class CheckoutComponent implements OnInit {
         this.ngZone.run(() => {
           if (!response.order?.id) {
             this.isSubmitting = false;
-            this.submitError = 'Máy chủ chưa trả về mã đơn hàng đã lưu. Vui lòng kiểm tra đơn hàng trước khi thử lại.';
+            this.submitError = 'Máy chủ chưa trả về thông tin đơn hàng. Vui lòng kiểm tra lại đơn hàng.';
             this.cdr.markForCheck();
             return;
           }
           if (response.persisted) this.productService.invalidateCache();
           sessionStorage.removeItem('checkout_items');
           sessionStorage.removeItem('checkout_shipping_fee');
-          this.cartService.clearCart();
+          sessionStorage.removeItem('checkout_source');
           this.router.navigate(['/order-success', getOrderSlug(response.order)]);
           this.cdr.markForCheck();
         });
@@ -878,7 +963,7 @@ export class CheckoutComponent implements OnInit {
         this.ngZone.run(() => {
           this.isSubmitting = false;
           this.submitError = error?.name === 'TimeoutError'
-            ? 'Máy chủ chưa xác nhận đơn hàng sau 20 giây. Hãy kiểm tra mục Đơn hàng của tôi trước khi thử lại để tránh tạo trùng.'
+            ? 'Máy chủ phản hồi chậm. Vui lòng kiểm tra mục Đơn hàng của tôi trước khi đặt lại.'
             : error?.error?.message || error?.message || 'Không thể tạo đơn hàng. Vui lòng thử lại sau.';
           this.cdr.markForCheck();
         });

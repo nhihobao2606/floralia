@@ -28,12 +28,19 @@ function keepSingleDefault(addresses, preferredId = null) {
   }));
 }
 
+function normalizePhone(phone) {
+  return String(phone || '').trim().replace(/\s+/g, '').replace(/^\+84/, '0');
+}
+
 // GET /api/addresses - Lấy danh sách địa chỉ
 async function getAddresses(req, res) {
   try {
     const user = await User.getById(req.userId);
     if (!user) return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
-    let addresses = user.addresses || [];
+    let addresses = (user.addresses || []).map(address => ({
+      ...address,
+      phone: normalizePhone(address.phone),
+    }));
     const defaultCount = addresses.filter(address => address.isDefault).length;
     if (addresses.length && defaultCount !== 1) {
       addresses = keepSingleDefault(addresses);
@@ -53,7 +60,8 @@ async function addAddress(req, res) {
     if (!fullName || !phone || !address || !province || !ward) {
       return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ thông tin địa chỉ.' });
     }
-    if (!/^(0|\+84)(3|5|7|8|9)\d{8}$/.test(String(phone).trim())) {
+    const normalizedPhone = normalizePhone(phone);
+    if (!/^0(3|5|7|8|9)\d{8}$/.test(normalizedPhone)) {
       return res.status(400).json({ success: false, message: 'Số điện thoại không hợp lệ.' });
     }
 
@@ -78,7 +86,7 @@ async function addAddress(req, res) {
     const newAddress = {
       _id: new ObjectId(),
       fullName: fullName.trim(),
-      phone: phone.trim(),
+      phone: normalizedPhone,
       address: address.trim(),
       province: province.trim(),
       provinceCode: provinceCode || null,
@@ -111,7 +119,8 @@ async function updateAddress(req, res) {
     if (!fullName || !phone || !address || !province || !ward) {
       return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ thông tin địa chỉ.' });
     }
-    if (!/^(0|\+84)(3|5|7|8|9)\d{8}$/.test(String(phone).trim())) {
+    const normalizedPhone = normalizePhone(phone);
+    if (!/^0(3|5|7|8|9)\d{8}$/.test(normalizedPhone)) {
       return res.status(400).json({ success: false, message: 'Số điện thoại không hợp lệ.' });
     }
 
@@ -139,7 +148,7 @@ async function updateAddress(req, res) {
         return {
           ...a,
           fullName: fullName.trim(),
-          phone: phone.trim(),
+          phone: normalizedPhone,
           address: address.trim(),
           province: province.trim(),
           provinceCode: provinceCode || null,

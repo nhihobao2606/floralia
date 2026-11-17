@@ -1,13 +1,58 @@
 <div class="admin-layout">
-  <app-admin-sidebar (logoutRequested)="logout()"></app-admin-sidebar>
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <app-admin-logout-dialog
+    [visible]="logoutConfirmationVisible"
+    (cancelled)="cancelLogoutConfirmation()"
+    (confirmed)="confirmLogout()"
+  ></app-admin-logout-dialog>
+  <app-unsaved-changes-dialog
+    [visible]="exitPromptVisible"
+    [saving]="saving"
+    [error]="error"
+    (stay)="stayOnEditor()"
+    (discard)="discardChangesAndExit()"
+    (saveAndLeave)="saveChangesAndExit()"
+  ></app-unsaved-changes-dialog>
   <main class="admin-main">
-    <header class="topbar"><div class="breadcrumb"><a routerLink="/vouchers">Quản lý khuyến mãi</a><i class="bi bi-chevron-right"></i><strong>{{ editing ? 'Chỉnh sửa voucher' : 'Tạo voucher mới' }}</strong></div><div class="admin-account"><span class="account-avatar">{{ adminName.charAt(0).toUpperCase() }}</span><span class="account-copy"><strong>{{ adminName }}</strong><small>Quản trị viên</small></span><button type="button" class="logout" (click)="logout()">Đăng xuất</button></div></header>
+    <header class="topbar">
+      <div class="breadcrumbs">
+        <a routerLink="/vouchers">Quản lý khuyến mãi</a>
+        <i class="bi bi-chevron-right"></i>
+        <strong>{{ editing ? 'Chỉnh sửa voucher' : 'Tạo voucher mới' }}</strong>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i>
+          <span class="bell-badge">3</span>
+        </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar" aria-hidden="true">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Open admin profile">
+            <strong>{{ adminName || 'Admin Floralia' }}</strong>
+            <small>Quản trị viên</small>
+          </a>
+          <button type="button" class="topbar-logout" (click)="requestLogoutConfirmation()">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+          </button>
+        </div>
+      </div>
+    </header>
     <div class="form-page">
       <a routerLink="/vouchers" class="back-link"><i class="bi bi-arrow-left"></i> Quay lại danh sách khuyến mãi</a>
-      <h1>{{ editing ? 'Chỉnh sửa voucher' : 'Tạo voucher khuyến mãi mới' }}</h1><p class="intro">Điền thông tin và quy định điều kiện áp dụng cho chương trình mã ưu đãi.</p>
+      <div class="page-heading">
+        <h1>{{ editing ? 'Chỉnh sửa voucher' : 'Tạo voucher khuyến mãi mới' }}</h1>
+        <div class="action-row">
+          <a routerLink="/vouchers" class="cancel">Hủy</a>
+          <button type="button" class="draft" *ngIf="!editing" [disabled]="saving || loading" (click)="save('draft')">Lưu nháp</button>
+          <button class="submit" type="submit" form="voucherForm" [disabled]="saving || loading"><i class="bi bi-send"></i>{{ saving ? 'Đang lưu...' : (editing ? 'Cập nhật voucher' : 'Phát hành voucher') }}</button>
+        </div>
+      </div>
+      <p class="intro">Điền thông tin và quy định điều kiện áp dụng cho chương trình mã ưu đãi.</p>
       <div *ngIf="error" class="alert" role="alert"><i class="bi bi-exclamation-circle"></i>{{ error }}</div>
       <div *ngIf="loading" class="loading"><span class="spinner"></span> Đang tải voucher...</div>
-      <form *ngIf="!loading" class="editor-grid" (ngSubmit)="save()">
+      <form *ngIf="!loading" id="voucherForm" class="editor-grid" (ngSubmit)="save()">
         <div class="editor-main">
           <section class="form-card">
             <header class="section-heading"><span><i class="bi bi-tag"></i></span><div><h2>Thông tin cơ bản</h2><p>Tên chương trình và định danh nhận diện voucher</p></div></header>
@@ -30,7 +75,6 @@
           <section class="aside-card status-card"><div><strong>Trạng thái voucher</strong><small>{{ form.status === 'active' ? 'Kích hoạt voucher sau khi lưu' : form.status === 'draft' ? 'Lưu thành bản nháp' : 'Voucher sẽ tạm dừng' }}</small></div><label class="switch"><input type="checkbox" [checked]="form.status === 'active'" (change)="form.status = $any($event.target).checked ? 'active' : 'paused'"><span></span></label></section>
           <section class="aside-card"><h3><i class="bi bi-list-check"></i> Điều kiện tóm tắt</h3><p><i class="bi bi-check-circle"></i> Chiết khấu {{ form.discountType === 'percent' ? (form.discountValue || 0) + '%' : money(form.discountValue || 0) + '₫' }}<ng-container *ngIf="form.maxDiscount">, tối đa {{ money(form.maxDiscount) }}₫</ng-container>.</p><p><i class="bi bi-check-circle"></i> Đơn hàng từ {{ money(form.minOrderValue || 0) }}₫ trở lên.</p><p><i class="bi bi-check-circle"></i> Giới hạn {{ form.perUserLimit || 'không giới hạn' }} lượt mỗi tài khoản.</p><p><i class="bi bi-check-circle"></i> Tổng lượng phát hành {{ form.usageLimit || 'không giới hạn' }} voucher.</p></section>
           <div *ngIf="error" class="save-error" role="alert">{{ error }}</div>
-          <div class="action-row"><a routerLink="/vouchers" class="cancel">Hủy</a><button type="button" class="draft" *ngIf="!editing" [disabled]="saving" (click)="save('draft')">Lưu nháp</button><button class="submit" type="submit" [disabled]="saving"><i class="bi bi-send"></i>{{ saving ? 'Đang lưu...' : (editing ? 'Cập nhật voucher' : 'Phát hành voucher') }}</button></div>
         </aside>
       </form>
       <div class="bottom-note" *ngIf="!loading"><i class="bi bi-shield-check"></i> Hệ thống tự động kiểm tra cú pháp điều kiện áp dụng trước khi lưu.</div>

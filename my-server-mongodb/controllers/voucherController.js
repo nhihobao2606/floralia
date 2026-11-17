@@ -29,6 +29,55 @@ function serializeVoucher(voucher) {
     };
 }
 
+function parseVoucherBoundary(value, endOfDay = false) {
+    if (!value) return null;
+    const text = String(value);
+    const normalized = /^\d{4}-\d{2}-\d{2}$/.test(text)
+        ? `${text}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}+07:00`
+        : text;
+    const date = new Date(normalized);
+    return Number.isFinite(date.getTime()) ? date : null;
+}
+
+async function getPublicVouchers(req, res) {
+    try {
+        const now = new Date();
+        const vouchers = (await Voucher.getAll()).filter(voucher => {
+            const status = voucher.status || ((voucher.isActive === false || voucher.active === false) ? 'paused' : 'active');
+            if (status !== 'active' || voucher.isActive === false || voucher.active === false) return false;
+
+            const startDate = parseVoucherBoundary(voucher.startDate ?? voucher.startsAt);
+            const endDate = parseVoucherBoundary(voucher.endDate ?? voucher.expiresAt, true);
+            if ((startDate && startDate > now) || (endDate && endDate < now)) return false;
+
+            const usageLimit = Number(voucher.usageLimit || 0);
+            return !(usageLimit > 0 && Number(voucher.usedCount || 0) >= usageLimit);
+        }).map(voucher => {
+            const details = serializeVoucher(voucher);
+            return {
+                code: details.code,
+                name: details.name,
+                description: details.description || '',
+                discountType: details.discountType,
+                discountValue: details.discountValue,
+                maxDiscount: details.maxDiscount,
+                minOrderValue: details.minOrderValue,
+                startDate: details.startDate,
+                endDate: details.endDate,
+                audience: details.audience || 'all',
+                scope: details.scope || 'all',
+                categories: details.categories,
+                perUserLimit: details.perUserLimit,
+            };
+        });
+
+        res.json({ success: true, vouchers });
+    } catch (error) {
+        console.error('Lỗi lấy danh sách voucher công khai:', error);
+        res.status(500).json({ success: false, message: 'Không thể tải danh sách voucher.' });
+    }
+}
+
 function validateVoucherInput(body) {
     const code = String(body.code || '').trim().toUpperCase();
     const name = String(body.name || '').trim();
@@ -286,6 +335,7 @@ async function validateVoucher(req, res) {
 }
 
 module.exports = {
+    getPublicVouchers,
     getAvailableVouchers,
     validateVoucher,
     getAdminVouchers,

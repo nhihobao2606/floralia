@@ -75,6 +75,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
   overflow: hidden; background: #fff; border: 1px solid #e8f0e4; border-radius: 26px;
   box-shadow: 0 10px 30px rgba(29, 83, 56, .06); transition: box-shadow .35s;
 }
+.card-box.profile-info-card { overflow: visible; }
+.profile-info-card .card-head { border-radius: 25px 25px 0 0; }
 .card-box:hover { box-shadow: 0 16px 38px rgba(29, 83, 56, .1); }
 .card-head { padding: 20px 28px; border-bottom: 1px solid #edf3ea; background: linear-gradient(90deg, #f6faf3, #fff); }
 .card-head h2 { display: flex; align-items: center; gap: 10px; margin: 0; font: 600 20px 'Lora', serif; color: var(--matcha); }
@@ -96,6 +98,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 /* ================= FORM ================= */
 .form-field { margin-bottom: 18px; }
 .form-field label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; }
+.form-field label .optional { color: var(--muted); font-size: 12px; font-weight: 400; }
 .req { color: #e0352b; font-weight: 700; margin-left: 2px; }
 
 .input-wrapper { position: relative; display: flex; align-items: center; }
@@ -112,6 +115,42 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--leaf); outline-
 .input-wrapper.is-invalid > i:first-child { color: var(--danger); }
 .input-wrapper.readonly input { background: #f3f7f1; color: #6f8475; cursor: not-allowed; border-style: dashed; }
 .input-wrapper .lock { position: absolute; right: 18px; font-size: 14px; color: #9cb0a1; }
+
+.gender-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.gender-option {
+  display: inline-flex !important; align-items: center; gap: 9px; min-height: 44px; margin: 0 !important;
+  padding: 0 16px; border: 1.5px solid #dce6d8; border-radius: 999px; background: #fbfdf9;
+  color: var(--ink); cursor: pointer; transition: .2s;
+}
+.gender-option:hover { border-color: #9aba8b; background: #f4f9f1; }
+.gender-option:has(input:checked) { border-color: var(--matcha-2); background: #edf5e9; color: var(--matcha); }
+.gender-option input { width: 17px; height: 17px; margin: 0; accent-color: var(--matcha-2); cursor: pointer; }
+.gender-option span { font-size: 14px; font-weight: 500; }
+
+.birthdate-selects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.birthdate-select { position: relative; display: block; min-width: 0; margin: 0 !important; }
+.birthdate-select-trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 50px; padding: 0 14px;
+  border: 1.5px solid #dce6d8; border-radius: 16px; outline: 0; background: #fbfdf9;
+  color: var(--ink); font: 400 14px 'Roboto', sans-serif; text-align: left; cursor: pointer; transition: .2s;
+}
+.birthdate-select-trigger:hover { border-color: #9aba8b; background: #fff; }
+.birthdate-select-trigger[aria-expanded="true"] { border-color: var(--matcha-2); background: #fff; box-shadow: 0 0 0 4px rgba(140, 188, 79, .15); }
+.birthdate-select-trigger i { flex: 0 0 auto; color: #829887; font-size: 12px; transition: transform .18s; }
+.birthdate-select-trigger[aria-expanded="true"] i { color: var(--matcha-2); transform: rotate(180deg); }
+.birthdate-select-trigger:focus-visible, .birthdate-options button:focus-visible { outline: 3px solid rgba(140, 188, 79, .45); outline-offset: 2px; }
+.birthdate-options {
+  position: absolute; z-index: 50; top: calc(100% + 7px); left: 0; width: 100%; max-height: 192px; overflow-y: auto;
+  padding: 5px; border: 1px solid #dce8d7; border-radius: 15px; background: #fff;
+  box-shadow: 0 12px 28px rgba(29, 83, 56, .16); overscroll-behavior: contain;
+}
+.birthdate-options button {
+  display: block; width: 100%; min-height: 36px; padding: 7px 10px; border: 0; border-radius: 9px;
+  background: transparent; color: var(--ink); font: 400 14px 'Roboto', sans-serif; text-align: left; cursor: pointer; transition: .15s;
+}
+.birthdate-options button:hover:not(:disabled) { background: #edf5e9; color: var(--matcha); }
+.birthdate-options button.selected { background: #e8f2e3; color: var(--matcha); font-weight: 600; }
+.birthdate-options button:disabled { color: #bdc8be; cursor: not-allowed; }
 
 .toggle-password { position: absolute; right: 12px; width: 32px; height: 34px; border: 0; background: none; color: #829887; font-size: 18px; cursor: pointer; }
 .toggle-password:hover { color: var(--matcha); }

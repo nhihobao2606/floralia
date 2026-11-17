@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize, timeout } from 'rxjs';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import { AdminVoucher, AdminVoucherService, VoucherStatus, VoucherSummary } from '../../../services/admin-voucher-service';
 
@@ -11,7 +12,7 @@ type VoucherFilter = 'all' | 'active' | 'upcoming' | 'paused' | 'expired';
 @Component({
   selector: 'app-admin-vouchers',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar],
+  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar, AdminLogoutDialog],
   templateUrl: './vouchers.html',
   styleUrl: './vouchers.css',
 })
@@ -27,6 +28,7 @@ export class AdminVouchers implements OnInit {
   success = '';
   busyId = '';
   adminName = 'Admin';
+  logoutConfirmationVisible = false;
 
   constructor(
     private readonly service: AdminVoucherService,
@@ -111,5 +113,8 @@ export class AdminVouchers implements OnInit {
     });
   }
 
+  requestLogoutConfirmation(): void { this.logoutConfirmationVisible = true; }
+  cancelLogoutConfirmation(): void { this.logoutConfirmationVisible = false; }
+  confirmLogout(): void { this.logoutConfirmationVisible = false; this.logout(); }
   logout(): void { this.service.clearSession(); void this.router.navigate(['/admin-login']); }
 }

@@ -22,7 +22,7 @@
           <li class="nav-item"><a class="nav-link" routerLink="/home" routerLinkActive="active">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" routerLink="/about" routerLinkActive="active">Giới thiệu</a></li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" routerLink="/products" routerLinkActive="active">Sản phẩm</a>
+            <a class="nav-link dropdown-toggle" routerLink="/products" routerLinkActive="active">Sản phẩm <i class="bi bi-chevron-down nav-caret" aria-hidden="true"></i></a>
             <ul class="dropdown-menu">
               <li *ngFor="let cat of headerCategories"><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: cat.slug }">{{ cat.name }}</a></li>
 
@@ -34,7 +34,7 @@
           <li class="nav-item"><a class="nav-link" routerLink="/blog" routerLinkActive="active">Blog</a></li>
           <li class="nav-item"><a class="nav-link" routerLink="/sales" routerLinkActive="active">Khuyến mãi</a></li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" routerLink="/return-policy">Hỗ trợ</a>
+            <a class="nav-link dropdown-toggle" routerLink="/return-policy">Hỗ trợ <i class="bi bi-chevron-down nav-caret" aria-hidden="true"></i></a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" routerLink="/return-policy">Chính sách đổi trả</a></li>
               <li><a class="dropdown-item" routerLink="/privacy">Chính sách bảo mật</a></li>
@@ -196,7 +196,7 @@
         <span>{{ cartCount }} sản phẩm</span>
         <strong>{{ formatPrice(cartTotal) }}</strong>
       </div>
-      <a class="checkout-btn" routerLink="/checkout" (click)="closeCart()">Thanh toán</a>
+      <a class="checkout-btn" routerLink="/checkout" (click)="checkoutCart()">Thanh toán</a>
       <a class="view-cart-btn" routerLink="/cart" (click)="closeCart()">Xem giỏ hàng</a>
     </div>
   </aside>

@@ -102,6 +102,42 @@
   animation: slideIn .25s ease;
 }
 
+.optional-label { color: var(--muted); font-size: 12px; font-weight: 400; }
+.email-hint { margin: 6px 0 0 18px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.email-hint.email-available { color: #277147; }
+.terms-field { margin: 4px 0 18px; }
+.terms-check { display: flex; align-items: flex-start; gap: 10px; color: var(--ink); font-size: 13px; line-height: 1.5; cursor: pointer; }
+.terms-check input { flex: 0 0 auto; width: 17px; height: 17px; margin: 1px 0 0; accent-color: var(--matcha-2); }
+.terms-documents { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0 27px; color: var(--muted); font-size: 13px; }
+.terms-documents a, .terms-check a { color: var(--matcha-2); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+.demo-otp-notice {
+  display: flex;
+  gap: 11px;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--sage);
+  border-radius: 16px;
+  background: var(--mint);
+  color: var(--matcha);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.demo-otp-notice > i { margin-top: 2px; font-size: 17px; }
+.demo-otp-notice p { margin: 4px 0 0; color: var(--muted); }
+.demo-otp-code { letter-spacing: 2px; font-size: 16px; }
+.otp-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.otp-actions button {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--matcha-2);
+  font: 500 13px 'Roboto', sans-serif;
+  cursor: pointer;
+}
+.otp-actions button:hover:not(:disabled) { text-decoration: underline; }
+.otp-actions button:disabled { opacity: .6; cursor: not-allowed; }
+
 
 .error-message, .notice-message {
   display: flex; align-items: flex-start; gap: 9px; margin-bottom: 16px;

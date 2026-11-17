@@ -1,16 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import { AdminVoucher, AdminVoucherService } from '../../../services/admin-voucher-service';
 import { AdminCategory, AdminCategoryService } from '../../../services/admin-category-service';
 import { finalize, timeout } from 'rxjs';
+import { UnsavedChangesDialog } from '../../../components/unsaved-changes-dialog/unsaved-changes-dialog';
 
 @Component({
   selector: 'app-voucher-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar],
+  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar, AdminLogoutDialog, UnsavedChangesDialog],
   templateUrl: './voucher-form.html',
   styleUrl: './voucher-form.css',
 })
@@ -21,6 +23,13 @@ export class AdminVoucherForm implements OnInit {
   saving = false;
   error = '';
   adminName = 'Admin';
+  logoutConfirmationVisible = false;
+  exitPromptVisible = false;
+  private lastSavedSnapshot = '';
+  private resolveCanDeactivate?: (allowNavigation: boolean) => void;
+  private pendingLogout = false;
+  private categoriesLoaded = false;
+  private voucherLoaded = false;
   categories: AdminCategory[] = [];
   categoryDropdownOpen = false;
   form = {
@@ -41,11 +50,14 @@ export class AdminVoucherForm implements OnInit {
       next: response => {
         this.categories = (response.data || []).filter(category => category.visible !== false);
         this.form.categories = this.form.categories.map(value => this.categoryValue(value));
+        this.categoriesLoaded = true;
+        this.setBaselineWhenReady();
         this.cdr.detectChanges();
       },
-      error: () => { this.error = 'KhÃ´ng thá»ƒ táº£i danh má»¥c sáº£n pháº©m.'; },
+      error: () => { this.categoriesLoaded = true; this.setBaselineWhenReady(); this.error = 'Could not load product categories.'; },
     });
     if (this.editing) this.load();
+    else { this.voucherLoaded = true; this.setBaselineWhenReady(); }
   }
 
   private load(): void {
@@ -67,6 +79,8 @@ export class AdminVoucherForm implements OnInit {
           status: voucher.status === 'paused' ? 'paused' : voucher.status === 'draft' ? 'draft' : 'active',
         };
         this.form.categories = this.form.categories.map(value => this.categoryValue(value));
+        this.voucherLoaded = true;
+        this.setBaselineWhenReady();
         this.cdr.detectChanges();
       },
       error: err => {
@@ -96,7 +110,7 @@ export class AdminVoucherForm implements OnInit {
       : this.form.categories.filter(value => value !== slug);
   }
 
-  save(status?: 'active' | 'draft'): void {
+  save(status?: 'active' | 'draft', exitAfterSave = false): void {
     if (this.saving) return;
     this.error = '';
     this.form.code = this.form.code.trim().toUpperCase().replace(/\s+/g, '_');
@@ -116,7 +130,15 @@ export class AdminVoucherForm implements OnInit {
     };
     const request = this.editing ? this.service.update(this.id, payload) : this.service.create(payload);
     request.pipe(timeout(10000), finalize(() => { this.saving = false; this.cdr.detectChanges(); })).subscribe({
-      next: response => { void this.router.navigate(['/vouchers', response.voucher.id]); },
+      next: response => {
+        this.lastSavedSnapshot = this.formSnapshot();
+        if (exitAfterSave) {
+          this.finishLogoutIfNeeded();
+          this.resolveExitNavigation(true);
+          return;
+        }
+        void this.router.navigate(['/vouchers', response.voucher.id]);
+      },
       error: err => {
         this.error = err?.name === 'TimeoutError'
           ? 'Máy chủ phản hồi quá lâu. Vui lòng kiểm tra kết nối rồi thử lưu lại.'
@@ -126,6 +148,41 @@ export class AdminVoucherForm implements OnInit {
     });
   }
 
+  get hasUnsavedChanges(): boolean {
+    return !this.loading && !!this.lastSavedSnapshot && this.formSnapshot() !== this.lastSavedSnapshot;
+  }
+  confirmCanDeactivate(): boolean | Promise<boolean> {
+    if (!this.hasUnsavedChanges) { this.finishLogoutIfNeeded(); return true; }
+    this.error = '';
+    this.exitPromptVisible = true;
+    this.cdr.detectChanges();
+    return new Promise(resolve => { this.resolveCanDeactivate = resolve; });
+  }
+  stayOnEditor(): void { this.pendingLogout = false; this.resolveExitNavigation(false); }
+  discardChangesAndExit(): void { this.finishLogoutIfNeeded(); this.resolveExitNavigation(true); }
+  saveChangesAndExit(): void { this.save(undefined, true); }
+  private formSnapshot(): string { return JSON.stringify(this.form); }
+  private setBaselineWhenReady(): void {
+    if (this.categoriesLoaded && this.voucherLoaded) this.lastSavedSnapshot = this.formSnapshot();
+  }
+  private resolveExitNavigation(allowNavigation: boolean): void {
+    this.exitPromptVisible = false;
+    const resolve = this.resolveCanDeactivate;
+    this.resolveCanDeactivate = undefined;
+    this.cdr.detectChanges();
+    resolve?.(allowNavigation);
+  }
+  private finishLogoutIfNeeded(): void {
+    if (!this.pendingLogout) return;
+    this.service.clearSession();
+    this.pendingLogout = false;
+  }
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.exitPromptVisible && !this.saving) this.stayOnEditor();
+    else if (this.logoutConfirmationVisible) this.cancelLogoutConfirmation();
+  }
+
   private splitList(value: string): string[] { return [...new Set(value.split(',').map(item => item.trim()).filter(Boolean))]; }
   private categoryValue(value: string): string {
     const normalized = String(value || '').trim().toLocaleLowerCase();
@@ -133,5 +190,9 @@ export class AdminVoucherForm implements OnInit {
       [category.slug, category.name, category.code].some(candidate => String(candidate || '').trim().toLocaleLowerCase() === normalized)
     )?.slug || value;
   }
-  logout(): void { this.service.clearSession(); void this.router.navigate(['/admin-login']); }
+  requestLogoutConfirmation(): void { this.logoutConfirmationVisible = true; }
+  cancelLogoutConfirmation(): void { this.logoutConfirmationVisible = false; }
+  confirmLogout(): void { this.logoutConfirmationVisible = false; this.logout(); }
+  logout(): void { this.pendingLogout = true; void this.router.navigate(['/admin-login']); }
 }
+

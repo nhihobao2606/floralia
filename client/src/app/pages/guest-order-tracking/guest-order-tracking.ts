@@ -1,20 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { finalize, timeout } from 'rxjs';
-
-interface GuestTrackingOrder {
-  id: string;
-  code: string;
-  status: string;
-  statusLabel: string;
-  createdAt?: string;
-  date?: string;
-  time?: string;
-  trackingCode: string;
-  notice: string;
-  trackingTimeline: Array<{ title: string; time: string; completed: boolean }>;
-  items: Array<{ name: string; quantity: number; image: string }>;
-}
+import { GuestOrder } from '../../classes/guest-order';
 
 @Component({
   selector: 'app-guest-order-tracking',
@@ -30,13 +18,14 @@ export class GuestOrderTracking {
   loading = false;
   error = '';
   info = '';
-  orders: GuestTrackingOrder[] = [];
+  orders: GuestOrder[] = [];
 
   private readonly apiUrl = 'http://localhost:3002/api/orders/guest-tracking';
 
   constructor(
     private readonly http: HttpClient,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly router: Router
   ) {}
 
   requestOtp(): void {
@@ -50,6 +39,9 @@ export class GuestOrderTracking {
     this.info = 'Đang tra cứu đơn và gửi mã OTP…';
     this.orders = [];
     this.challengeId = '';
+    sessionStorage.removeItem('floralia_verified_guest_order');
+    sessionStorage.removeItem('floralia_verified_guest_order_at');
+    sessionStorage.removeItem('floralia_guest_order_access_token');
     this.http.post<any>(`${this.apiUrl}/request-otp`, { query }).pipe(
       timeout({ first: 8_000 }),
       finalize(() => {
@@ -110,10 +102,19 @@ export class GuestOrderTracking {
           return;
         }
         this.orders = response.orders || [];
+        if (response.guestAccessToken) {
+          sessionStorage.setItem('floralia_guest_order_access_token', response.guestAccessToken);
+        } else {
+          sessionStorage.removeItem('floralia_guest_order_access_token');
+        }
         this.challengeId = '';
         this.otp = '';
-        this.info = this.orders.length
-          ? ''
+        if (this.orders.length === 1) {
+          this.openOrder(this.orders[0]);
+          return;
+        }
+        this.info = this.orders.length > 1
+          ? 'Đã xác minh thành công. Chọn đơn hàng bạn muốn xem chi tiết.'
           : 'Không có đơn hàng nào đang chờ xử lý hoặc vận chuyển với thông tin này. Đơn đã giao thành công không còn tra cứu được tại đây.';
         this.cdr.markForCheck();
       },
@@ -127,7 +128,13 @@ export class GuestOrderTracking {
     });
   }
 
-  formatDate(order: GuestTrackingOrder): string {
+  openOrder(order: GuestOrder): void {
+    sessionStorage.setItem('floralia_verified_guest_order', JSON.stringify(order));
+    sessionStorage.setItem('floralia_verified_guest_order_at', String(Date.now()));
+    void this.router.navigate(['/guest-order-detail', order.id]);
+  }
+
+  formatDate(order: GuestOrder): string {
     if (order.createdAt) {
       const date = new Date(order.createdAt);
       if (!Number.isNaN(date.getTime())) return date.toLocaleString('vi-VN');

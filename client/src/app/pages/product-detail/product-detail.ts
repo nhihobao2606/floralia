@@ -7,7 +7,7 @@ import { CartService } from '../../services/cart-service';
 import { WishlistService } from '../../services/wishlist-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { Products } from '../../classes/Products';
-import { BuyNowService } from '../../services/buy-now-service';
+import { formatVietnameseDong } from "../../shared/vnd-format";
 
 interface ProductVariant {
   sku: string;
@@ -25,6 +25,7 @@ interface ProductVariant {
 interface ProductDetails extends Omit<Partial<Products>, 'variants'> {
   _id?: string;
   id?: string;
+  title?: string;
   subCategory?: string;
   variantLabel?: string;
   brand?: string;
@@ -102,7 +103,6 @@ export class ProductDetail implements OnInit {
     readonly productNavigation: ProductNavigationService,
     readonly cartService: CartService,
     private readonly wishlistService: WishlistService,
-    private readonly buyNowService: BuyNowService,
   ) {}
 
   ngOnInit(): void {
@@ -192,13 +192,12 @@ export class ProductDetail implements OnInit {
     }
     this.relatedProductsLoading = this.allProducts.length === 0;
 
-    this.loading = !initialProduct;
+    // Avoid rendering possibly stale, unnormalized navigation state before the API response.
+    this.loading = true;
     this.errorMessage = '';
-    if (initialProduct) {
-      this.setProduct(initialProduct, preferredVariantSku);
-    } else {
-      this.product = null;
-    }
+    this.product = null;
+    this.galleryImages = [];
+    this.activeImage = '/assets/images/no-image.svg';
 
     this.productService.getProductBySlug?.(slug)?.subscribe({
       next: (product) => {
@@ -216,7 +215,7 @@ export class ProductDetail implements OnInit {
       error: (error: unknown) => {
         if (requestId !== this.productLoadRequestId) return;
         console.error('Không thể tải thông tin sản phẩm:', error);
-        if (!this.product && !this.allProducts.length) {
+        if (!this.product) {
           this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
           this.loading = false;
           this.changeDetector.markForCheck();
@@ -242,7 +241,7 @@ export class ProductDetail implements OnInit {
         );
 
         if (!product || product.isActive === false || product.status === 'inactive') {
-          if (!this.product && !initialProduct) {
+          if (!this.product) {
             this.errorMessage = 'Không tìm thấy sản phẩm này.';
             this.loading = false;
           }
@@ -258,7 +257,7 @@ export class ProductDetail implements OnInit {
         if (requestId !== this.productLoadRequestId) return;
         console.error('Không thể tải sản phẩm liên quan:', error);
         this.relatedProductsLoading = false;
-        if (!this.product && !initialProduct) {
+        if (!this.product) {
           this.errorMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
           this.loading = false;
         }
@@ -375,14 +374,11 @@ export class ProductDetail implements OnInit {
 
   private getGalleryImages(product: ProductDetails): string[] {
     const thumbnail = product.thumbnail || product.imageUrl;
-    const secondaryImages = Array.isArray(product.images) ? [...product.images] : [];
-
-    // The image-processing script stores the thumbnail source again as IMG_1.
-    if (product.sku && secondaryImages[0] === `${product.sku}_IMG_1`) {
-      secondaryImages.shift();
-    }
-
-    const sources = [thumbnail, ...secondaryImages];
+    const fullSizeImages = Array.isArray(product.images)
+      ? product.images.filter((image): image is string => typeof image === 'string' && image.length > 0)
+      : [];
+    // THUMB is for cards; the detail gallery displays full-size IMG_1, IMG_2...
+    const sources = fullSizeImages.length ? fullSizeImages : [thumbnail];
 
     return [...new Set(
       sources
@@ -401,7 +397,7 @@ export class ProductDetail implements OnInit {
     }
 
     const imagePath = `/products/image/${encodeURIComponent(source)}`;
-    return `http://localhost:3002${imagePath}`;
+    return `http://localhost:3002${imagePath}?v=${Date.now()}`;
   }
 
   get relatedProducts(): ProductDetails[] {
@@ -469,6 +465,15 @@ export class ProductDetail implements OnInit {
     );
   }
 
+  hasRelatedStock(product: ProductDetails): boolean {
+    if (product.status === 'out-of-stock' || product.status === 'inactive' || product.isActive === false) {
+      return false;
+    }
+    return product.variants?.length
+      ? product.variants.some((variant) => variant.stock > 0)
+      : Number(product.stock) > 0;
+  }
+
   private updateDisplayedProductRating(): void {
     const product = this.product;
     const productSku = product?.sku;
@@ -510,7 +515,7 @@ export class ProductDetail implements OnInit {
   }
 
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('vi-VN').format(price) + '₫';
+    return formatVietnameseDong(price);
   }
 
   formatVariantType(type: string): string {
@@ -692,7 +697,7 @@ export class ProductDetail implements OnInit {
 
   goToLoginFromPrompt(): void {
     this.closeLoginPrompt();
-    void this.router.navigate(['/login']);
+    void this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
   }
 
   changeQuantity(delta: number): void {
@@ -713,13 +718,31 @@ export class ProductDetail implements OnInit {
   }
 
   buyNow(): void {
-    if (!this.product) return;
-    this.buyNowService.open(
-      this.product,
-      this.activeImage || this.productImage(this.product),
-      this.selectedVariant,
-      this.quantity,
-    );
+    const product = this.product;
+    if (!product || this.currentStock < 1) return;
+
+    const image = this.activeImage || this.productImage(product);
+    const quantity = Math.min(Math.max(1, Math.floor(this.quantity)), this.currentStock);
+
+    const productId = product._id || product.id || product.sku || product.slug || '';
+    const sku = this.selectedVariant?.sku || product.sku || productId;
+    const price = this.currentPrice;
+    sessionStorage.setItem('checkout_items', JSON.stringify([{
+      id: sku,
+      productId,
+      sku,
+      name: product.name || product.title || 'Trà thảo mộc Floralia',
+      title: product.name || product.title || 'Trà thảo mộc Floralia',
+      image,
+      thumbnail: image,
+      variant: this.selectedVariant?.label || '',
+      variantLabel: this.selectedVariant?.label || '',
+      price,
+      quantity,
+      total: price * quantity,
+    }]));
+
+    void this.router.navigate(['/checkout']);
   }
 
   isProductFavorite(product: ProductDetails): boolean {

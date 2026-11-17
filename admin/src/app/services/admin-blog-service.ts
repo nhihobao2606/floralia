@@ -14,7 +14,7 @@ export interface AdminBlog {
   authorRole?: string;
   category: string;
   categorySlug: string;
-  image: string;
+  image?: string;
   imageData?: string | null;
   imageMimeType?: string | null;
   imageFileName?: string | null;

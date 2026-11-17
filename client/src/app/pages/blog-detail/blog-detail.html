@@ -1,21 +1,4 @@
-<!-- ================= BREADCRUMB ================= -->
-<div class="blog-breadcrumb">
-  <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item">
-          <a routerLink="/home"><i class="bi bi-house-door-fill me-1"></i>Trang chủ</a>
-        </li>
-        <li class="breadcrumb-item">
-          <a routerLink="/blog">Tin tức</a>
-        </li>
-        <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 400px;">
-          {{ blog()?.title || 'Chi tiết bài viết' }}
-        </li>
-      </ol>
-    </nav>
-  </div>
-</div>
+<app-breadcrumb [items]="[{ label: 'Trang chủ', route: '/home' }, { label: 'Tin tức', route: '/blog' }, { label: blog()?.title || 'Chi tiết bài viết' }]"></app-breadcrumb>
 
 <section class="blog-detail-section">
   <!-- Decorative floating leaves -->

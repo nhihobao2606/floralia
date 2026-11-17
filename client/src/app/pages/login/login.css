@@ -102,6 +102,7 @@
   margin: 7px 0 0 18px; color: var(--danger); font-size: 12.5px;
   animation: slideIn .25s ease;
 }
+.login-hint { margin: 6px 0 0 18px; color: var(--muted); font-size: 12.5px; line-height: 1.5; }
 
 .form-options { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 22px; font-size: 13px; }
 .remember-me { display: flex; align-items: center; gap: 8px; color: var(--muted); cursor: pointer; }
