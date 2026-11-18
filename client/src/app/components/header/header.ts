@@ -51,8 +51,11 @@ export class Header implements OnInit, OnDestroy {
   hasUnreadChat = false;
   headerCategories: Array<{ name: string; slug: string }> = [];
   productMenuOpen = false;
+  supportMenuOpen = false;
   private productMenuSuppressedUntilMouseLeave = false;
   private productMenuNavigationPending = false;
+  private supportMenuSuppressedUntilPointerMove = false;
+  private supportMenuNavigationPending = false;
   private lastPointerPosition: { x: number; y: number } | null = null;
 
   private subs = new Subscription();
@@ -78,9 +81,14 @@ export class Header implements OnInit, OnDestroy {
       this.router.events.subscribe((e) => {
         if (e instanceof NavigationEnd) {
           this.productMenuOpen = false;
+          this.supportMenuOpen = false;
           if (this.productMenuNavigationPending) {
             this.productMenuSuppressedUntilMouseLeave = true;
             this.productMenuNavigationPending = false;
+          }
+          if (this.supportMenuNavigationPending) {
+            this.supportMenuSuppressedUntilPointerMove = true;
+            this.supportMenuNavigationPending = false;
           }
           this.searchOpen = false;
           this.userOpen = false;
@@ -142,23 +150,48 @@ export class Header implements OnInit, OnDestroy {
     this.productMenuOpen = false;
   }
 
+  openSupportMenu(): void {
+    if (this.supportMenuSuppressedUntilPointerMove) return;
+    this.supportMenuOpen = true;
+  }
+
+  closeSupportMenu(): void { this.supportMenuOpen = false; }
+
+  closeSupportMenuForNavigation(): void {
+    this.supportMenuOpen = false;
+    this.supportMenuSuppressedUntilPointerMove = true;
+    this.supportMenuNavigationPending = true;
+  }
+
+  onSupportMenuMouseLeave(): void { this.supportMenuOpen = false; }
+
   @HostListener('document:mousemove', ['$event'])
   onDocumentMouseMove(event: MouseEvent): void {
     const moved = !this.lastPointerPosition ||
       event.clientX !== this.lastPointerPosition.x || event.clientY !== this.lastPointerPosition.y;
     this.lastPointerPosition = { x: event.clientX, y: event.clientY };
-    if (!this.productMenuSuppressedUntilMouseLeave || !moved) return;
+    if ((!this.productMenuSuppressedUntilMouseLeave && !this.supportMenuSuppressedUntilPointerMove) || !moved) return;
     const target = event.target;
     const overProductMenu = target instanceof Element && Boolean(target.closest('.product-nav-dropdown'));
-    this.productMenuSuppressedUntilMouseLeave = false;
-    this.productMenuNavigationPending = false;
-    if (overProductMenu) this.productMenuOpen = true;
+    const overSupportMenu = target instanceof Element && Boolean(target.closest('.support-nav-dropdown'));
+    if (this.productMenuSuppressedUntilMouseLeave) {
+      this.productMenuSuppressedUntilMouseLeave = false;
+      this.productMenuNavigationPending = false;
+    }
+    if (this.supportMenuSuppressedUntilPointerMove) {
+      this.supportMenuSuppressedUntilPointerMove = false;
+      this.supportMenuNavigationPending = false;
+    }
+    if (overProductMenu && !this.productMenuSuppressedUntilMouseLeave) this.productMenuOpen = true;
+    if (overSupportMenu && !this.supportMenuSuppressedUntilPointerMove) this.supportMenuOpen = true;
   }
 
   @HostListener('window:blur')
   onWindowBlur(): void {
     this.productMenuOpen = false;
     this.productMenuSuppressedUntilMouseLeave = true;
+    this.supportMenuOpen = false;
+    this.supportMenuSuppressedUntilPointerMove = true;
   }
 
   /* ================= SỰ KIỆN CHUNG ================= */
