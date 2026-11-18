@@ -13,6 +13,7 @@ const Blog = require('./models/blog');
 const Order = require('./models/order');
 const Voucher = require('./models/voucher');
 const Cart = require('./models/cart');
+const ChatMessage = require('./models/chatMessage');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -28,6 +29,8 @@ const AdminProduct = require('./models/adminProduct');
 const voucherRoutes = require('./routes/voucherRoutes');
 const adminOrderRoutes = require('./routes/adminOrderRoutes');
 const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+const chatController = require('./controllers/chatController');
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -55,6 +58,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
+app.use('/api/chat', chatRoutes);
 
 async function startServer() {
     if (!process.env.MONGODB_URI) {
@@ -86,6 +90,10 @@ async function startServer() {
         const cartsCollection = db.collection('Cart');
         Cart.setCollection(cartsCollection);
         await cartsCollection.createIndex({ userId: 1 }, { unique: true });
+
+        chatController.setCollection(db.collection('Product'));
+        ChatMessage.setCollection(db.collection('ChatbotMessages'));
+        await db.collection('ChatbotMessages').createIndex({ sessionId: 1, createdAt: 1 });
 
         const usersCollection = db.collection('Users');
         const userIndexes = await usersCollection.listIndexes().toArray();

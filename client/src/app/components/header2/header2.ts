@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
 import { CartItem, CartVariant, CartService } from '../../services/cart-service';
+import { ChatService } from '../../services/chat.service';
 import { Products } from '../../classes/Products';
 import { getCurrentPageReturnUrl } from '../../classes/auth-return-url';
 import { formatVietnameseDong } from "../../shared/vnd-format";
@@ -44,6 +45,7 @@ export class Header2 implements OnInit, OnDestroy {
   scrolled = false;
   showFloat = false;
   showInvite = false;
+  hasUnreadChat = false;
 
   private subs = new Subscription();
   private timers: any[] = [];
@@ -53,10 +55,12 @@ export class Header2 implements OnInit, OnDestroy {
     private router: Router,
     private cartService: CartService,
     readonly productNavigation: ProductNavigationService,
+    private chatService: ChatService,
   ) {}
 
   ngOnInit(): void {
     this.loadCart();
+    this.subs.add(this.chatService.hasUnread$.subscribe((v) => (this.hasUnreadChat = v)));
     this.onScroll();
 
     this.subs.add(
@@ -114,6 +118,13 @@ export class Header2 implements OnInit, OnDestroy {
 
   scrollTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  toggleChat(e?: Event): void {
+    if (e) {
+      e.stopPropagation();
+    }
+    this.chatService.toggleChat();
   }
 
   /* ================= TÌM KIẾM ================= */

@@ -8,9 +8,11 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon --exec \"node --env-file-if-exists=.env\" index.js",
+    "sync-embeddings": "node scripts/sync-embeddings.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@google/genai": "^3.3.0",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.4.0",
     "cors": "^2.8.6",

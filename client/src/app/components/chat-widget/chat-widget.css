@@ -1,0 +1,823 @@
+/* ============================================================
+   FLORALIA TEA AI CHATBOT WIDGET STYLES
+   ============================================================ */
+
+/* Nút trigger nổi ở góc trái màn hình (Ẩn hiện đồng bộ khi cuộn trang như khối liên hệ bên phải) */
+.floralia-chat-trigger-wrap {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  right: auto;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  font-family: 'Roboto', sans-serif;
+  opacity: 0;
+  transform: translateX(-40px) scale(0.6);
+  pointer-events: none;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s, box-shadow 0.3s;
+}
+
+.floralia-chat-trigger-wrap.show {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.floralia-chat-toggle-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #143d29 0%, #1d5338 60%, #3d7b39 100%);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(20, 61, 41, 0.32), inset 0 2px 0 rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+  animation: chatbotShake 4s ease-in-out infinite;
+}
+
+.floralia-chat-toggle-btn:hover {
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 0 16px 32px rgba(20, 61, 41, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+  animation-play-state: paused;
+}
+
+/* Hiệu ứng sóng tròn ẩn hiện lan tỏa (Ring ripple giống khối nút bên phải) */
+.floralia-chat-toggle-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #8cbc4f;
+  opacity: 0;
+  animation: chatbotRing 2.6s ease-out infinite;
+}
+
+@keyframes chatbotRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
+@keyframes chatbotShake {
+  0%, 82%, 100% {
+    rotate: 0deg;
+  }
+  85% {
+    rotate: 8deg;
+  }
+  88% {
+    rotate: -8deg;
+  }
+  91% {
+    rotate: 5deg;
+  }
+  94% {
+    rotate: -3deg;
+  }
+}
+
+/* Ánh kim quét nhẹ qua nút khi hover */
+.floralia-chat-toggle-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+  background-size: 250% 100%;
+  background-position: 150% 0;
+  transition: background-position 0.8s;
+  pointer-events: none;
+}
+
+.floralia-chat-toggle-btn:hover::after {
+  background-position: -50% 0;
+}
+
+/* Khối Logo Chatbot AI */
+.chatbot-logo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.chatbot-robot-logo {
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+  display: block;
+}
+
+.chatbot-sparkle {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 13px;
+  color: #f7d070;
+  animation: sparkleTwinkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkleTwinkle {
+  0%, 100% {
+    transform: scale(0.5) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2) rotate(25deg);
+    opacity: 1;
+  }
+}
+
+.robot-eye {
+  transform-origin: center;
+  animation: eyeBlink 3.8s infinite;
+}
+
+@keyframes eyeBlink {
+  0%, 94%, 100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+
+.antenna-beacon {
+  animation: beaconPulse 2s ease-in-out infinite;
+  transform-origin: 20px 3px;
+}
+
+@keyframes beaconPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.3);
+  }
+}
+
+/* Tooltip nhãn trượt ra khi rê chuột (giống hệt khối nút bên phải) */
+.chat-fab-label {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  padding: 8px 16px;
+  border-radius: 50px;
+  background: #ffffff;
+  color: #143d29;
+  font: 600 13px 'Roboto', sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(20, 61, 41, 0.18);
+  border: 1px solid rgba(140, 188, 79, 0.3);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-10px, -50%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s, visibility 0.3s;
+}
+
+.floralia-chat-toggle-btn:hover .chat-fab-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -50%);
+}
+
+.unread-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 13px;
+  height: 13px;
+  background-color: #e63946;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(230, 57, 70, 0.5);
+}
+
+/* ============================================================
+   CỬA SỔ CHAT WINDOW
+   ============================================================ */
+.floralia-chat-window {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  left: auto;
+  width: 410px;
+  max-width: calc(100vw - 32px);
+  height: 620px;
+  max-height: calc(100vh - 48px);
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(20, 61, 41, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(29, 83, 56, 0.12);
+  display: flex;
+  flex-direction: column;
+  z-index: 1060;
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
+  animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Header */
+.chat-header {
+  background: linear-gradient(135deg, #143d29 0%, #1d5338 100%);
+  color: #faf7f0;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-avatar-wrap {
+  position: relative;
+}
+
+.chat-avatar-inner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8cbc4f;
+  font-size: 22px;
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  background-color: #2ec4b6;
+  border: 2px solid #143d29;
+  border-radius: 50%;
+}
+
+.chat-title {
+  margin: 0;
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.chat-subtitle {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: rgba(250, 247, 240, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-subtitle i {
+  color: #f7d070;
+}
+
+.chat-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Chat Body */
+.chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: #f9faf8;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Quick prompt chips */
+.quick-prompts-container {
+  background: #ffffff;
+  border: 1px solid #e7ede4;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 6px;
+}
+
+.quick-prompts-label {
+  margin: 0 0 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #6b7a70;
+  letter-spacing: 0.5px;
+}
+
+.quick-prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quick-prompt-chip {
+  text-align: left;
+  background: #f1f6ec;
+  border: 1px solid rgba(140, 188, 79, 0.3);
+  color: #143d29;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, border-color 0.2s;
+}
+
+.quick-prompt-chip:hover:not(:disabled) {
+  background: #e2edd8;
+  border-color: #8cbc4f;
+  transform: translateX(3px);
+}
+
+/* Messages */
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.message-row {
+  display: flex;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.user-row {
+  justify-content: flex-end;
+}
+
+.bot-row {
+  justify-content: flex-start;
+}
+
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #143d29;
+  color: #8cbc4f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(20, 61, 41, 0.15);
+}
+
+.msg-bubble-wrap {
+  display: flex;
+  flex-direction: column;
+  max-width: 84%;
+  gap: 8px;
+}
+
+.user-row .msg-bubble-wrap {
+  max-width: 82%;
+  align-items: flex-end;
+}
+
+.msg-bubble {
+  padding: 12px 15px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  position: relative;
+  word-break: break-word;
+}
+
+.user-row .msg-bubble {
+  background: linear-gradient(135deg, #1d5338, #143d29);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.bot-row .msg-bubble {
+  background: #ffffff;
+  color: #2f3a33;
+  border: 1px solid #e7ede4;
+  border-bottom-left-radius: 4px;
+}
+
+.msg-text {
+  white-space: pre-line;
+}
+
+.msg-time {
+  display: block;
+  font-size: 10px;
+  opacity: 0.65;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* Typing indicator */
+.typing-bubble {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.typing-text {
+  font-size: 12px;
+  color: #6b7a70;
+  font-style: italic;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #3d7b39;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ============================================================
+   THẺ SẢN PHẨM GỢI Ý (MINI PRODUCT CARDS)
+   ============================================================ */
+.suggested-products-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.suggested-heading {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #1d5338;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.product-cards-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mini-product-card {
+  background: #ffffff;
+  border: 1.5px solid #e4ece0;
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 4px 12px rgba(29, 83, 56, 0.06);
+  position: relative;
+}
+
+.mini-product-card:hover {
+  transform: translateY(-2px);
+  border-color: #8cbc4f;
+  box-shadow: 0 8px 20px rgba(29, 83, 56, 0.12);
+}
+
+.mini-card-thumb {
+  width: 74px;
+  height: 74px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #f1f6ec;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mini-card-tag {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: rgba(20, 61, 41, 0.85);
+  color: #ffffff;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 500;
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mini-card-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #143d29;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-card-flavor {
+  margin: 3px 0;
+  font-size: 11.5px;
+  color: #6b7a70;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-card-pricing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.current-price {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1d5338;
+}
+
+.stock-badge {
+  font-size: 10.5px;
+  color: #888;
+}
+
+.stock-badge.in-stock {
+  color: #2d8a4e;
+  font-weight: 500;
+}
+
+.mini-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.btn-view-detail {
+  flex: 1;
+  background: #f1f6ec;
+  border: 1px solid rgba(29, 83, 56, 0.2);
+  color: #143d29;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-view-detail:hover {
+  background: #e2ebd8;
+}
+
+.btn-add-cart {
+  width: 32px;
+  height: 28px;
+  background: #143d29;
+  border: none;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-add-cart:hover:not(:disabled) {
+  background: #1d5338;
+  transform: scale(1.05);
+}
+
+.btn-add-cart:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   FOOTER INPUT
+   ============================================================ */
+.chat-footer {
+  padding: 12px 16px;
+  background: #ffffff;
+  border-top: 1px solid #e7ede4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-input-box {
+  display: flex;
+  align-items: center;
+  background: #f1f6ec;
+  border: 1.5px solid #d5e3cb;
+  border-radius: 22px;
+  padding: 4px 6px 4px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.chat-input-box:focus-within {
+  border-color: #1d5338;
+  box-shadow: 0 0 0 3px rgba(29, 83, 56, 0.1);
+  background: #ffffff;
+}
+
+.chat-textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: #2f3a33;
+  resize: none;
+  font-family: inherit;
+  padding: 8px 4px 8px 0;
+  line-height: 1.35;
+  height: 36px;
+  max-height: 72px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.chat-textarea::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-send-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #143d29;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+  background: #1d5338;
+  transform: scale(1.05);
+}
+
+.chat-send-btn:disabled {
+  background: #c5d4c9;
+  cursor: not-allowed;
+}
+
+.chat-disclaimer {
+  text-align: center;
+  font-size: 10px;
+  color: #8c9b90;
+}
+
+/* ============================================================
+   ANIMATIONS & RESPONSIVE
+   ============================================================ */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes floatBubble {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pulseSparkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .floralia-chat-window {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 0;
+  }
+
+  .chat-fab-label {
+    display: none;
+  }
+
+  .floralia-chat-trigger-wrap {
+    bottom: 18px;
+    left: 18px;
+    right: auto;
+  }
+}

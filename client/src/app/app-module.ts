@@ -36,6 +36,7 @@ import { PasswordRecovery } from './pages/password-recovery/password-recovery';
 import { GuestOrderTracking } from './pages/guest-order-tracking/guest-order-tracking';
 import { GuestOrderDetail } from './pages/guest-order-detail/guest-order-detail';
 import { OrderReorderDialog } from './components/order-reorder-dialog/order-reorder-dialog';
+import { ChatWidget } from './components/chat-widget/chat-widget';
 import { AuthSessionInterceptor } from './services/auth-session.interceptor';
 import { VietnameseDongPipe } from './shared/vnd-format';
 
@@ -72,6 +73,7 @@ registerLocaleData(localeVi);
     WishlistPage,
     LogoutConfirmation,
     OrderReorderDialog,
+    ChatWidget,
     Pagenotfound,
     VietnameseDongPipe,
   ],

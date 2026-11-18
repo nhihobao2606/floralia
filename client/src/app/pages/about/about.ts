@@ -131,7 +131,7 @@ export class About implements AfterViewInit, OnDestroy {
       role: 'Customer Experience Executive',
       img: '/assets/images/nhathuy.jpg',
       facebook: 'https://www.facebook.com/nhuy010806?locale=vi_VN',
-      instagram: 'https://www.instagram.com/__nt.th__?igsh=Y3VyZWh1ZDg3a2x2&utm_source=qr',
+      instagram: 'https://www.instagram.com/nhathuy8676/',
     },
   ];
 

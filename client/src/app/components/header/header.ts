@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
 import { CartItem, CartVariant, CartService } from '../../services/cart-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
+import { ChatService } from '../../services/chat.service';
 import { Products } from '../../classes/Products';
 import { getCurrentPageReturnUrl } from '../../classes/auth-return-url';
 import { formatVietnameseDong } from "../../shared/vnd-format";
@@ -47,6 +48,7 @@ export class Header implements OnInit, OnDestroy {
   scrolled = false;
   showFloat = false;
   showInvite = false;
+  hasUnreadChat = false;
   headerCategories = [
     { name: 'Trà thảo mộc', slug: 'tra-thao-moc' },
     { name: 'Trà thảo mộc mix', slug: 'tra-thao-moc-mix' },
@@ -63,6 +65,7 @@ export class Header implements OnInit, OnDestroy {
     private router: Router,
     private cartService: CartService,
     readonly productNavigation: ProductNavigationService,
+    private chatService: ChatService,
   ) {}
 
   ngOnInit(): void {
@@ -70,6 +73,7 @@ export class Header implements OnInit, OnDestroy {
     this.loadCart();
     this.loadHeaderCategories();
     this.subs.add(this.productService.productsChanges$.subscribe(() => this.loadHeaderCategories()));
+    this.subs.add(this.chatService.hasUnread$.subscribe((v) => (this.hasUnreadChat = v)));
     this.onScroll();
 
     this.subs.add(
@@ -145,6 +149,13 @@ export class Header implements OnInit, OnDestroy {
 
   scrollTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  toggleChat(e?: Event): void {
+    if (e) {
+      e.stopPropagation();
+    }
+    this.chatService.toggleChat();
   }
 
   /* ================= TÌM KIẾM ================= */

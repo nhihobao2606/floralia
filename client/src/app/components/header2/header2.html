@@ -137,10 +137,28 @@
       <i class="bi bi-stars sparkle s2"></i>
     </a>
 
-    <a href="tel:0901234567" class="fab fab-phone" title="Gọi ngay">
-      <span class="fab-label">Gọi ngay</span>
-      <i class="bi bi-telephone-fill"></i>
-    </a>
+    <button type="button" class="fab fab-chat" (click)="toggleChat($event)" aria-label="Floralia AI Chatbot" title="Tư vấn trà AI">
+      <span class="fab-label">Chatbot tư vấn AI</span>
+      <div class="chatbot-logo-wrap">
+        <svg class="chatbot-robot-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="20" y1="3" x2="20" y2="9" stroke="#f7d070" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="20" cy="3" r="3" fill="#f7d070"/>
+          <circle cx="20" cy="3" r="4.5" stroke="#f7d070" stroke-width="1" opacity="0.6" class="antenna-beacon"/>
+          <rect x="6" y="9" width="28" height="22" rx="10" fill="#ffffff"/>
+          <rect x="3.5" y="16" width="3" height="8" rx="1.5" fill="#f7d070"/>
+          <rect x="33.5" y="16" width="3" height="8" rx="1.5" fill="#f7d070"/>
+          <rect x="9" y="12.5" width="22" height="13" rx="6.5" fill="#143d29"/>
+          <ellipse cx="16" cy="18.5" rx="2.5" ry="3" fill="#69f0ae" class="robot-eye"/>
+          <ellipse cx="24" cy="18.5" rx="2.5" ry="3" fill="#69f0ae" class="robot-eye"/>
+          <circle cx="17" cy="17.5" r="1" fill="#ffffff"/>
+          <circle cx="25" cy="17.5" r="1" fill="#ffffff"/>
+          <path d="M12 31L12 35L17 31H12Z" fill="#ffffff"/>
+          <path d="M17 22.5Q20 24.5 23 22.5" stroke="#69f0ae" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <i class="bi bi-stars chatbot-sparkle"></i>
+      </div>
+      <span class="unread-dot" *ngIf="hasUnreadChat"></span>
+    </button>
 
     <a href="https://zalo.me/your_id" target="_blank" rel="noopener" class="fab fab-zalo" title="Chat Zalo">
       <span class="fab-label">Chat Zalo</span>
