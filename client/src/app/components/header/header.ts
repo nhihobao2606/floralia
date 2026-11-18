@@ -49,13 +49,11 @@ export class Header implements OnInit, OnDestroy {
   showFloat = false;
   showInvite = false;
   hasUnreadChat = false;
-  headerCategories = [
-    { name: 'Trà thảo mộc', slug: 'tra-thao-moc' },
-    { name: 'Trà thảo mộc mix', slug: 'tra-thao-moc-mix' },
-    { name: 'Đồ uống kèm trà', slug: 'do-uong-kem-tra' },
-    { name: 'Ấm trà', slug: 'am-tra' },
-    { name: 'Set quà tặng', slug: 'set-qua-tang' },
-  ];
+  headerCategories: Array<{ name: string; slug: string }> = [];
+  productMenuOpen = false;
+  private productMenuSuppressedUntilMouseLeave = false;
+  private productMenuNavigationPending = false;
+  private lastPointerPosition: { x: number; y: number } | null = null;
 
   private subs = new Subscription();
   private timers: any[] = [];
@@ -79,6 +77,11 @@ export class Header implements OnInit, OnDestroy {
     this.subs.add(
       this.router.events.subscribe((e) => {
         if (e instanceof NavigationEnd) {
+          this.productMenuOpen = false;
+          if (this.productMenuNavigationPending) {
+            this.productMenuSuppressedUntilMouseLeave = true;
+            this.productMenuNavigationPending = false;
+          }
           this.searchOpen = false;
           this.userOpen = false;
           this.closeCart();
@@ -110,11 +113,52 @@ export class Header implements OnInit, OnDestroy {
     this.productService.getCategories().subscribe({
       next: (res) => {
         if (Array.isArray(res?.mainCategories)) {
-          this.headerCategories = res.mainCategories.map((cat) => ({ name: cat.name, slug: cat.slug }));
+          const categories = res.mainCategories
+            .map((cat) => ({ name: String(cat.name || '').trim(), slug: String(cat.slug || '').trim() }))
+            .filter((cat) => cat.name && cat.slug);
+          this.headerCategories = categories;
         }
       },
       error: () => {},
     });
+  }
+
+  openProductMenu(): void {
+    if (this.productMenuSuppressedUntilMouseLeave) return;
+    this.productMenuOpen = true;
+  }
+
+  closeProductMenu(): void {
+    this.productMenuOpen = false;
+  }
+
+  closeProductMenuForNavigation(): void {
+    this.productMenuOpen = false;
+    this.productMenuSuppressedUntilMouseLeave = true;
+    this.productMenuNavigationPending = true;
+  }
+
+  onProductMenuMouseLeave(): void {
+    this.productMenuOpen = false;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onDocumentMouseMove(event: MouseEvent): void {
+    const moved = !this.lastPointerPosition ||
+      event.clientX !== this.lastPointerPosition.x || event.clientY !== this.lastPointerPosition.y;
+    this.lastPointerPosition = { x: event.clientX, y: event.clientY };
+    if (!this.productMenuSuppressedUntilMouseLeave || !moved) return;
+    const target = event.target;
+    const overProductMenu = target instanceof Element && Boolean(target.closest('.product-nav-dropdown'));
+    this.productMenuSuppressedUntilMouseLeave = false;
+    this.productMenuNavigationPending = false;
+    if (overProductMenu) this.productMenuOpen = true;
+  }
+
+  @HostListener('window:blur')
+  onWindowBlur(): void {
+    this.productMenuOpen = false;
+    this.productMenuSuppressedUntilMouseLeave = true;
   }
 
   /* ================= SỰ KIỆN CHUNG ================= */

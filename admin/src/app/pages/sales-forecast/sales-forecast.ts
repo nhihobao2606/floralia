@@ -2,19 +2,22 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AdminSidebar } from '../../components/admin-sidebar/admin-sidebar';
+import { AdminLogoutDialog } from '../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminRecommendationService, SalesForecast, SalesForecastRow } from '../../services/admin-recommendation-service';
 import { catchError, map, of, startWith, Subject, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-sales-forecast',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminSidebar],
+  imports: [CommonModule, FormsModule, RouterLink, AdminSidebar, AdminLogoutDialog],
   templateUrl: './sales-forecast.html',
   styleUrl: './sales-forecast.css',
 })
 export class SalesForecastPage {
+  adminName = 'Admin Floralia';
+  logoutConfirmationVisible = false;
   readonly activeMetric = signal<'units' | 'revenue' | 'shortage' | 'highStock' | null>(null);
   readonly loading = signal(true);
   readonly error = signal('');
@@ -30,6 +33,15 @@ export class SalesForecastPage {
     private readonly router: Router,
     destroyRef: DestroyRef,
   ) {
+    const saved = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser');
+    if (saved) {
+      try {
+        const user = JSON.parse(saved);
+        this.adminName = user.fullName || user.name || 'Admin Floralia';
+      } catch {
+        this.adminName = 'Admin Floralia';
+      }
+    }
     this.reloadRequests.pipe(
       startWith(undefined),
       switchMap(() => {
@@ -116,6 +128,10 @@ export class SalesForecastPage {
     const [year, index] = month.split('-').map(Number);
     return `T${index}/${String(year).slice(-2)}`;
   }
+
+  requestLogoutConfirmation(): void { this.logoutConfirmationVisible = true; }
+  cancelLogoutConfirmation(): void { this.logoutConfirmationVisible = false; }
+  confirmLogout(): void { this.logoutConfirmationVisible = false; this.logout(); }
 
   logout(): void {
     for (const storage of [localStorage, sessionStorage]) {

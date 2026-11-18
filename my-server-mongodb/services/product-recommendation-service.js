@@ -14,6 +14,7 @@ const recommendationEvents = new EventEmitter();
 recommendationEvents.setMaxListeners(500);
 let recommendationSnapshot = null;
 let recommendationSnapshotPromise = null;
+let recommendationSnapshotPromiseVersion = -1;
 let recommendationSnapshotVersion = 0;
 let productViewsCollection;
 
@@ -54,14 +55,16 @@ async function recordProductView(user, visitorId, sku) {
 function notifyOrdersChanged() {
     recommendationSnapshotVersion++;
     recommendationSnapshot = null;
+    recommendationSnapshotPromise = null;
+    recommendationSnapshotPromiseVersion = -1;
     recommendationEvents.emit('updated', { version: Date.now() });
 }
 
 async function getRecommendationSnapshot() {
     if (recommendationSnapshot && recommendationSnapshot.expiresAt > Date.now()) return recommendationSnapshot;
-    if (recommendationSnapshotPromise) return recommendationSnapshotPromise;
+    if (recommendationSnapshotPromise && recommendationSnapshotPromiseVersion === recommendationSnapshotVersion) return recommendationSnapshotPromise;
     const requestedVersion = recommendationSnapshotVersion;
-    recommendationSnapshotPromise = Promise.all([
+    const request = Promise.all([
         Order.getRecommendationHistory(),
         Product.getAll()
     ]).then(([orders, products]) => {
@@ -69,8 +72,15 @@ async function getRecommendationSnapshot() {
         const snapshot = { orders, products, model, expiresAt: Date.now() + 15000 };
         if (requestedVersion === recommendationSnapshotVersion) recommendationSnapshot = snapshot;
         return snapshot;
-    }).finally(() => { recommendationSnapshotPromise = null; });
-    return recommendationSnapshotPromise;
+    }).finally(() => {
+        if (recommendationSnapshotPromise === request) {
+            recommendationSnapshotPromise = null;
+            recommendationSnapshotPromiseVersion = -1;
+        }
+    });
+    recommendationSnapshotPromise = request;
+    recommendationSnapshotPromiseVersion = requestedVersion;
+    return request;
 }
 
 function getProductCategories(value) {
@@ -252,8 +262,10 @@ async function getAdminData() {
 async function saveSegment(segmentId, productSkus) {
     if (!SEGMENTS.some(segment => segment.id === segmentId)) throw new Error('Phân khúc không hợp lệ.');
     const products = await Product.getAll();
-    const available = new Set(products.map(product => product.sku));
-    const normalized = [...new Set((Array.isArray(productSkus) ? productSkus : []).map(String).filter(sku => available.has(sku)))].slice(0, 12);
+    const available = new Set(products.map(product => String(product.sku || '').trim()).filter(Boolean));
+    const normalized = [...new Set((Array.isArray(productSkus) ? productSkus : [])
+        .map(sku => String(sku || '').trim())
+        .filter(sku => available.has(sku)))].slice(0, 12);
     await settingsCollection.updateOne(
         { _id: 'product-recommendations' },
         { $set: { [`segments.${segmentId}`]: { productSkus: normalized, updatedAt: new Date() }, updatedAt: new Date() } },
@@ -291,7 +303,7 @@ async function getForCustomer(user, visitorId) {
     // Anonymous storefront visitors are treated as new customers so the manually
     // curated recommendations for that segment are visible before sign-in.
     const segmentId = user ? userSegment(summary, now) : 'new';
-    const productBySku = new Map(products.map(product => [String(product.sku), product]));
+    const productBySku = new Map(products.map(product => [String(product.sku || '').trim(), product]));
     const purchasedSkus = new Set(customerOrders.flatMap(order => (order.items || []).map(item => String(item.sku || '')).filter(Boolean)));
     const profile = new Map();
     const categoryAffinity = new Map();
@@ -333,12 +345,14 @@ async function getForCustomer(user, visitorId) {
         }
     }
     const segmentScores = model.segmentPopularity.get(segmentId) || new Map();
-    const pinnedSkuOrder = segmentId ? (saved?.segments?.[segmentId]?.productSkus || []) : [];
+    const pinnedSkuOrder = segmentId
+        ? (saved?.segments?.[segmentId]?.productSkus || []).map(sku => String(sku || '').trim()).filter(Boolean)
+        : [];
     const pinnedSkus = new Set(pinnedSkuOrder);
     const maxValue = values => Math.max(0, ...values);
     // Build candidates before calculating content similarity for viewed products.
     const eligible = products.filter(product => {
-        const sku = String(product.sku);
+        const sku = String(product.sku || '').trim();
         return !purchasedSkus.has(sku) || pinnedSkus.has(sku) || viewedSkus.has(sku);
     });
     const candidates = eligible.length ? eligible : products;
@@ -396,12 +410,23 @@ async function getForCustomer(user, visitorId) {
     const selected = [];
     const categoryCounts = new Map();
     const remaining = [...ranked];
-    // The most recently viewed product gets the first slot, while the admin's
-    // curated products fill the slots after it in the configured order.
-    const prioritySkus = [focusedViews[0]?.sku, ...pinnedSkuOrder].filter(Boolean);
+    // Admin-curated products lead the storefront list in their configured order;
+    // the latest viewed product can follow when there is room.
+    const prioritySkus = [...pinnedSkuOrder, focusedViews[0]?.sku].filter(Boolean);
     for (const sku of prioritySkus) {
-        const index = remaining.findIndex(item => String(item.product.sku) === sku);
-        if (index < 0 || selected.length >= 8) continue;
+        if (selected.some(product => String(product.sku || '').trim() === String(sku).trim())) continue;
+        const index = remaining.findIndex(item => String(item.product.sku || '').trim() === String(sku).trim());
+        if (selected.length >= 8) break;
+        if (index < 0) {
+            // Keep a saved admin selection visible even if ranking filters or
+            // stale model candidates omit it from the ranked list.
+            const pinnedProduct = pinnedSkuOrder.includes(String(sku).trim()) ? productBySku.get(String(sku).trim()) : null;
+            if (!pinnedProduct) continue;
+            selected.push(pinnedProduct);
+            const category = getProductCategories(pinnedProduct.category)[0] || 'other';
+            categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
+            continue;
+        }
         const [item] = remaining.splice(index, 1);
         selected.push(item.product);
         categoryCounts.set(item.category, (categoryCounts.get(item.category) || 0) + 1);

@@ -25,10 +25,12 @@ export class Homepage implements OnInit {
   products = signal<Products[]>([]);
   featured = signal<Products[]>([]);
   bestSelling = signal<Products[]>([]);
-  recommendationTitle = signal('Gợi ý dành riêng cho bạn');
+  recommendationTitle = signal('');
   recommendationReasons = signal<Record<string, string>>({});
+  recommendationsReady = signal(false);
   recommendationModelStats = signal<{ trainedOrders: number; learnedProducts: number; customerProfileProducts: number; customerViewProducts: number } | null>(null);
   private recommendationRequestId = 0;
+  private recommendationRequestPending = false;
   loading = signal(true);
 
   // Danh sách sản phẩm yêu thích (lưu tạm trong phiên).
@@ -157,31 +159,81 @@ export class Homepage implements OnInit {
     this.buyNowService.open(product, this.getProductImage(product), this.getDisplayVariant(product));
   }
 
+  private sortBySoldCount(products: Products[]): Products[] {
+    return [...products].sort((left, right) => Number(right.sold || 0) - Number(left.sold || 0));
+  }
+
   private loadRecommendations(catalog: Products[]): void {
     const requestId = ++this.recommendationRequestId;
+    this.recommendationRequestPending = true;
     this.productService.getRecommendations().subscribe({
       next: recommendation => {
         if (requestId !== this.recommendationRequestId) return;
+        this.recommendationRequestPending = false;
         const currentProducts = this.products().length ? this.products() : catalog;
-        const bySku = new Map(currentProducts.map(product => [product.sku, product] as const));
+        const bySku = new Map(currentProducts.map(product => [String(product.sku), product] as const));
         const recommended = (recommendation.products || [])
-          .map(product => bySku.get(product.sku))
-          .filter((product): product is Products => Boolean(product));
+          .map(product => bySku.get(String(product.sku)) ?? product);
         this.featured.set(recommended);
-        const soldRanked = [...currentProducts].sort((a, b) => Number(b.sold || 0) - Number(a.sold || 0));
-        this.bestSelling.set(this.productService.personalizeProducts(soldRanked).slice(0, 4));
-        this.recommendationTitle.set(`G\u1ee3i \u00fd cho ${recommendation.segmentName.toLowerCase()}`);
+        this.bestSelling.set(this.sortBySoldCount(currentProducts).slice(0, 4));
+        const title = this.getRecommendationTitle(recommendation.segmentId, recommendation.segmentName);
+        this.recommendationTitle.set(title);
+        this.saveRecommendationSegment(recommendation.segmentId, recommendation.segmentName);
         this.recommendationReasons.set(Object.fromEntries(
           (recommendation.recommendationReasons || []).map(item => [item.sku, item.reason]),
         ));
         this.recommendationModelStats.set(recommendation.modelStats || null);
+        this.recommendationsReady.set(true);
       },
       error: error => {
         if (requestId === this.recommendationRequestId) {
+          this.recommendationRequestPending = false;
           console.warn('Could not refresh product recommendations:', error);
+          const fallbackCatalog = this.products().length ? this.products() : catalog;
+          if (!this.recommendationsReady() && fallbackCatalog.length) {
+            const featuredList = fallbackCatalog.filter(product => product.featured === true);
+            this.featured.set((featuredList.length ? featuredList : fallbackCatalog).slice(0, 8));
+          }
+          if (fallbackCatalog.length) this.recommendationsReady.set(true);
         }
       },
     });
+  }
+
+  private getRecommendationTitle(segmentId: string | null, segmentName: string): string {
+    const hasSignedInAccount = Boolean(localStorage.getItem('token') || sessionStorage.getItem('token'));
+    if (segmentId === 'new' && hasSignedInAccount) return 'G\u1ee3i \u00fd cho kh\u00e1ch h\u00e0ng m\u1edbi';
+    if (!hasSignedInAccount) return 'G\u1ee3i \u00fd d\u00e0nh ri\u00eang cho b\u1ea1n';
+    return `G\u1ee3i \u00fd cho ${segmentName.toLowerCase()}`;
+  }
+
+  private recommendationCacheKey(): string {
+    const rawUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+    if (rawUser) {
+      try {
+        const user = JSON.parse(rawUser);
+        const userId = String(user.id || user._id || '').trim();
+        if (userId) return `floralia_recommendation_segment_${userId}`;
+      } catch { /* Use the guest cache when no readable account ID is available. */ }
+    }
+    return 'floralia_recommendation_segment_guest';
+  }
+
+  private saveRecommendationSegment(segmentId: string | null, segmentName: string): void {
+    try {
+      localStorage.setItem(this.recommendationCacheKey(), JSON.stringify({ segmentId, segmentName }));
+    } catch { /* Recommendations still work when browser storage is unavailable. */ }
+  }
+
+  private loadCachedRecommendationTitle(): void {
+    try {
+      const raw = localStorage.getItem(this.recommendationCacheKey());
+      if (!raw) return;
+      const cached = JSON.parse(raw) as { segmentId?: string | null; segmentName?: string };
+      if (cached.segmentName) {
+        this.recommendationTitle.set(this.getRecommendationTitle(cached.segmentId || null, cached.segmentName));
+      }
+    } catch { /* Use the default title when there is no valid cached segment. */ }
   }
 
   getRecommendationReason(product: Products): string {
@@ -190,6 +242,11 @@ export class Homepage implements OnInit {
   
 
   ngOnInit(): void {
+    const hasSignedInAccount = Boolean(localStorage.getItem('token') || sessionStorage.getItem('token'));
+    this.recommendationTitle.set(hasSignedInAccount ? 'G\u1ee3i \u00fd cho b\u1ea1n' : 'G\u1ee3i \u00fd d\u00e0nh ri\u00eang cho b\u1ea1n');
+    this.loadCachedRecommendationTitle();
+    this.loadRecommendations([]);
+
     this.reviewService.ratingUpdates
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((update) => {
@@ -205,7 +262,12 @@ export class Homepage implements OnInit {
 
     this.productService.recommendationChanges$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.loadRecommendations(this.products()));
+      .subscribe(() => {
+        const hasSignedInAccount = Boolean(localStorage.getItem('token') || sessionStorage.getItem('token'));
+        this.recommendationTitle.set(hasSignedInAccount ? 'G\u1ee3i \u00fd cho b\u1ea1n' : 'G\u1ee3i \u00fd d\u00e0nh ri\u00eang cho b\u1ea1n');
+        this.loadCachedRecommendationTitle();
+        this.loadRecommendations(this.products());
+      });
 
     this.productService.getAll().subscribe({
       next: (res: any) => {
@@ -220,19 +282,14 @@ export class Homepage implements OnInit {
           return defaultVariant ? { ...product, price: defaultVariant.price } : product;
         });
         this.products.set(list);
+        const bySku = new Map(list.map(product => [String(product.sku), product] as const));
+        this.featured.update(recommended => recommended.map(product => bySku.get(String(product.sku)) ?? product));
        
 
-        // Sản phẩm nổi bật (nếu chưa đánh dấu thì lấy các sản phẩm đầu).
-        const featuredList = list.filter((p: any) => p.featured === true);
-        this.featured.set((featuredList.length ? featuredList : list).slice(0, 8));
-
         // Sản phẩm bán chạy: sắp xếp theo số lượng đã bán.
-        const bestList = [...list].sort(
-          (a: any, b: any) => Number(b.sold || 0) - Number(a.sold || 0)
-        );
-        this.bestSelling.set(bestList.slice(0, 4));
+        this.bestSelling.set(this.sortBySoldCount(list).slice(0, 4));
 
-        this.loadRecommendations(list);
+        if (!this.recommendationsReady() && !this.recommendationRequestPending) this.loadRecommendations(list);
 
         this.loading.set(false);
       },
@@ -275,11 +332,7 @@ export class Homepage implements OnInit {
           return variant ? { ...product, price: variant.price } : product;
         });
         this.products.set(list);
-        const featured = list.filter(product => product.featured === true);
-        this.featured.set((featured.length ? featured : list).slice(0, 8));
-        this.bestSelling.set([...list]
-          .sort((a, b) => Number(b.sold || 0) - Number(a.sold || 0))
-          .slice(0, 4));
+        this.bestSelling.set(this.sortBySoldCount(list).slice(0, 4));
         this.loadRecommendations(list);
       },
       error: error => console.error('Không thể làm mới sản phẩm:', error),

@@ -1,9 +1,27 @@
 <div class="layout">
-  <app-admin-sidebar></app-admin-sidebar>
+  <app-admin-sidebar (logoutRequested)="requestLogoutConfirmation()"></app-admin-sidebar>
+  <app-admin-logout-dialog
+    [visible]="logoutConfirmationVisible"
+    (cancelled)="cancelLogoutConfirmation()"
+    (confirmed)="confirmLogout()"
+  ></app-admin-logout-dialog>
   <main>
-    <header class="topbar">
-      <div><small>PHÂN TÍCH KINH DOANH</small><h1>Dự báo nhu cầu và doanh số</h1></div>
-      <button class="logout" type="button" (click)="logout()">Đăng xuất</button>
+    <header class="topbar admin-standard-topbar">
+      <h1>Dự báo nhu cầu và doanh số</h1>
+      <div class="topbar-right">
+        <button class="topbar-bell" type="button" aria-label="Thông báo">
+          <i class="bi bi-bell" aria-hidden="true"></i><span class="bell-badge">3</span>
+        </button>
+        <div class="admin-account">
+          <a class="account-avatar-link" routerLink="/profile" title="Xem hồ sơ quản trị viên" aria-label="Hồ sơ quản trị viên">
+            <span class="account-avatar">{{ (adminName || 'A').charAt(0).toUpperCase() }}</span>
+          </a>
+          <a class="account-copy profile-account-link" routerLink="/profile" aria-label="Hồ sơ quản trị viên">
+            <strong>{{ adminName }}</strong><small>Quản trị viên</small>
+          </a>
+          <button type="button" class="topbar-logout" (click)="requestLogoutConfirmation()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
+        </div>
+      </div>
     </header>
 
     <section class="intro">

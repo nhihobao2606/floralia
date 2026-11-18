@@ -311,45 +311,8 @@ export class ProductService implements OnDestroy {
 
   getCategories(): Observable<PublicCategoriesResponse> {
     return this.http.get<PublicCategoriesResponse>(`${this.apiUrl}/categories`).pipe(
-      catchError(() =>
-        this.getProducts().pipe(
-          map((products) => {
-            const defaultOrder = ['Trà thảo mộc', 'Trà thảo mộc mix', 'Đồ uống kèm trà', 'Ấm trà', 'Set quà tặng'];
-            const seen = new Map<string, PublicCategoryItem>();
-            for (const name of defaultOrder) {
-              const slug = this.slugify(name);
-              seen.set(slug, { _id: slug, code: '', name, slug });
-            }
-            for (const p of products || []) {
-              const name = String(p.category || '').trim();
-              const slug = this.slugify(p.categorySlug || name);
-              if (name && name !== 'Chưa phân loại' && slug && !seen.has(slug)) {
-                seen.set(slug, { _id: slug, code: '', name, slug });
-              }
-            }
-            return {
-              mainCategories: Array.from(seen.values()),
-              benefits: [
-                { label: 'Thanh lọc – Mát gan', slug: 'thanh-loc-mat-gan', values: ['thanh-loc', 'mat-gan'], parentSlugs: ['tra-thao-moc', 'tra-thao-moc-mix'] },
-                { label: 'Dưỡng nhan – Cân bằng nội tiết', slug: 'duong-nhan-can-bang-noi-tiet', values: ['duong-nhan', 'can-bang-noi-tiet'], parentSlugs: ['tra-thao-moc', 'tra-thao-moc-mix'] },
-                { label: 'Thanh tâm – Dưỡng thần', slug: 'thanh-tam-duong-than', values: ['thanh-tam', 'duong-than'], parentSlugs: ['tra-thao-moc', 'tra-thao-moc-mix'] },
-                { label: 'Giảm stress – Ngủ ngon', slug: 'giam-stress-ngu-ngon', values: ['giam-stress', 'ngu-ngon'], parentSlugs: ['tra-thao-moc', 'tra-thao-moc-mix'] },
-                { label: 'Bổ khí huyết – Dưỡng sinh', slug: 'bo-khi-huyet-duong-sinh', values: ['bo-khi-huyet', 'duong-sinh'], parentSlugs: ['tra-thao-moc', 'tra-thao-moc-mix'] },
-              ],
-            };
-          })
-        )
-      )
+      catchError(() => of({ mainCategories: [], benefits: [] }))
     );
   }
 
-  private slugify(value: string): string {
-    return String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[đĐ]/g, 'd')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-  }
 }

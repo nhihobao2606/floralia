@@ -21,9 +21,9 @@
         <ul class="navbar-nav mx-auto">
           <li class="nav-item"><a class="nav-link" routerLink="/home" routerLinkActive="active">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" routerLink="/about" routerLinkActive="active">Giới thiệu</a></li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" routerLink="/products" routerLinkActive="active">Sản phẩm <i class="bi bi-chevron-down nav-caret" aria-hidden="true"></i></a>
-            <ul class="dropdown-menu">
+          <li class="nav-item dropdown product-nav-dropdown" (mouseenter)="openProductMenu()" (mouseleave)="onProductMenuMouseLeave()" (focusin)="openProductMenu()" (focusout)="closeProductMenu()">
+            <a class="nav-link dropdown-toggle" routerLink="/products" routerLinkActive="active" [attr.aria-expanded]="productMenuOpen" (click)="closeProductMenuForNavigation()">Sản phẩm <i class="bi bi-chevron-down nav-caret" aria-hidden="true"></i></a>
+            <ul class="dropdown-menu" [class.show]="productMenuOpen">
               <li *ngFor="let cat of headerCategories"><a class="dropdown-item" routerLink="/products" [queryParams]="{ category: cat.slug }">{{ cat.name }}</a></li>
 
 

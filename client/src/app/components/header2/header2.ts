@@ -47,6 +47,12 @@ export class Header2 implements OnInit, OnDestroy {
   showInvite = false;
   hasUnreadChat = false;
   headerCategories: Array<{ name: string; slug: string }> = [];
+  productMenuOpen = false;
+  categoriesLoaded = false;
+  private categoriesRequestPending = false;
+  private productMenuSuppressedUntilMouseLeave = false;
+  private productMenuNavigationPending = false;
+  private lastPointerPosition: { x: number; y: number } | null = null;
 
   private subs = new Subscription();
   private timers: any[] = [];
@@ -69,6 +75,11 @@ export class Header2 implements OnInit, OnDestroy {
     this.subs.add(
       this.router.events.subscribe((e) => {
         if (e instanceof NavigationEnd) {
+          this.productMenuOpen = false;
+          if (this.productMenuNavigationPending) {
+            this.productMenuSuppressedUntilMouseLeave = true;
+            this.productMenuNavigationPending = false;
+          }
           this.searchOpen = false;
           this.closeCart();
           this.loadCart();
@@ -90,15 +101,61 @@ export class Header2 implements OnInit, OnDestroy {
   }
 
   private loadHeaderCategories(): void {
+    if (this.categoriesRequestPending || this.categoriesLoaded) return;
+    this.categoriesRequestPending = true;
     this.productService.getCategories().subscribe({
       next: response => {
-        this.headerCategories = (response?.mainCategories || []).map(category => ({
-          name: category.name,
-          slug: category.slug,
-        }));
+        const categories = (response?.mainCategories || [])
+          .map(category => ({ name: String(category.name || '').trim(), slug: String(category.slug || '').trim() }))
+          .filter(category => category.name && category.slug);
+        this.headerCategories = categories;
+        this.categoriesLoaded = true;
+        this.categoriesRequestPending = false;
       },
-      error: () => undefined,
+      error: () => {
+        this.categoriesRequestPending = false;
+        this.categoriesLoaded = true;
+      },
     });
+  }
+
+  openProductMenu(): void {
+    if (this.productMenuSuppressedUntilMouseLeave) return;
+    this.productMenuOpen = true;
+    this.loadHeaderCategories();
+  }
+
+  closeProductMenu(): void {
+    this.productMenuOpen = false;
+  }
+
+  closeProductMenuForNavigation(): void {
+    this.productMenuOpen = false;
+    this.productMenuSuppressedUntilMouseLeave = true;
+    this.productMenuNavigationPending = true;
+  }
+
+  onProductMenuMouseLeave(): void {
+    this.productMenuOpen = false;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onDocumentMouseMove(event: MouseEvent): void {
+    const moved = !this.lastPointerPosition ||
+      event.clientX !== this.lastPointerPosition.x || event.clientY !== this.lastPointerPosition.y;
+    this.lastPointerPosition = { x: event.clientX, y: event.clientY };
+    if (!this.productMenuSuppressedUntilMouseLeave || !moved) return;
+    const target = event.target;
+    const overProductMenu = target instanceof Element && Boolean(target.closest('.product-nav-dropdown'));
+    this.productMenuSuppressedUntilMouseLeave = false;
+    this.productMenuNavigationPending = false;
+    if (overProductMenu) this.productMenuOpen = true;
+  }
+
+  @HostListener('window:blur')
+  onWindowBlur(): void {
+    this.productMenuOpen = false;
+    this.productMenuSuppressedUntilMouseLeave = true;
   }
 
   private popInvite(): void {

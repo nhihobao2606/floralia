@@ -88,12 +88,12 @@
       <button class="tab" routerLink="/sales">Khuyến mãi</button>
     </div>
 
-    <div class="product-list" *ngIf="!loading(); else skeleton">
+    <div class="product-list" *ngIf="!loading() && recommendationsReady(); else skeleton">
       <ng-container *ngFor="let p of featured()">
         <ng-container *ngTemplateOutlet="card; context: { $implicit: p, reason: getRecommendationReason(p) }"></ng-container>
       </ng-container>
     </div>
-    <p class="empty" *ngIf="!loading() && featured().length === 0">
+    <p class="empty" *ngIf="!loading() && recommendationsReady() && featured().length === 0">
       Sản phẩm đang được cập nhật, bạn quay lại sau nhé.
     </p>
     <div class="view-more">
