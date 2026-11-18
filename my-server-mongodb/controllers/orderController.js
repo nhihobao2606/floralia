@@ -5,6 +5,7 @@ const { cancelOrderAndRestoreStock } = require('../models/order-cancellation-ser
 const AdminProduct = require('../models/adminProduct');
 const User = require('../models/user');
 const Voucher = require('../models/voucher');
+const ProductRecommendations = require('../services/product-recommendation-service');
 const { randomBytes, createHash, timingSafeEqual } = require('crypto');
 const { ObjectId } = require('mongodb');
 
@@ -663,7 +664,6 @@ async function createOrder(req, res) {
       total: subtotal - discount + shippingFee,
       ...(req.userId ? { userId: String(req.userId) } : {})
     };
-
     const insertResult = await Product.withTransaction(async session => {
       await Product.deductStockBulk(verifiedItems, session);
       await ProductSalesService.incrementSoldCounts(verifiedItems, session);
@@ -756,6 +756,7 @@ async function updateOrderStatus(req, res) {
     const updated = status === 'cancelled'
       ? await cancelOrderAndRestoreStock(order, updateFields)
       : await Order.findOneAndUpdate({ id: order.id }, { $set: updateFields });
+    if (updated) ProductRecommendations.notifyOrdersChanged();
     if (!updated) {
       return res.status(status === 'cancelled' ? 409 : 404).json({
         success: false,
@@ -843,6 +844,7 @@ async function updateAdminOrderStatus(req, res) {
       };
     }
     const updated = await Order.findOneAndUpdate({ id: order.id, status: order.status }, update);
+    if (updated) ProductRecommendations.notifyOrdersChanged();
     res.json({ success: true, order: updated });
   } catch (err) {
     console.error('Lỗi cập nhật đơn hàng quản trị:', err);
@@ -861,6 +863,7 @@ async function approveRefund(req, res) {
       { id: order.id, status: 'refund_pending' },
       { $set: { status: 'refund_approved', statusLabel: 'ĐÃ DUYỆT HOÀN TIỀN', refundAmount: order.total } }
     );
+    if (updated) ProductRecommendations.notifyOrdersChanged();
     if (!updated) {
       return res.status(409).json({ success: false, message: 'Yêu cầu hoàn tiền đã được xử lý.' });
     }

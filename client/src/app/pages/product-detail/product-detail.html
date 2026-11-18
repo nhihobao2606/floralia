@@ -316,6 +316,7 @@
                 <img [src]="productImage(related)" [alt]="related.name || 'Sản phẩm'" (error)="onImageError($event)">
                 <span class="out-of-stock-overlay" *ngIf="!hasRelatedStock(related)">H&#7870;T H&#192;NG</span>
                 <span *ngIf="related.discount" class="related-discount">-{{ related.discount }}%</span>
+                <span class="related-model-badge" [title]="getModelRecommendationReason(related)"><i class="bi bi-stars" aria-hidden="true"></i> Gợi ý theo hành vi</span>
               </a>
             </div>
             <div class="related-info">

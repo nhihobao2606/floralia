@@ -22,7 +22,7 @@
 }
 .sidebar-brand img { display: block; width: 168px; max-height: 72px; object-fit: contain; }
 .sidebar-brand-mark { display: none; }
-.sidebar-nav { display: grid; gap: 4px; }
+.sidebar-nav { display: grid; min-height: 0; gap: 4px; overflow-y: auto; }
 .sidebar-link {
   display: flex;
   min-height: 46px;
@@ -114,3 +114,4 @@
   .sidebar-link i { width: auto; font-size: 18px; }
   .admin-sidebar.collapsed { width: 100%; flex-basis: auto; padding: 5px 8px; }
 }
+.sidebar-nav .sidebar-link.disabled:nth-of-type(5) { display: none; }

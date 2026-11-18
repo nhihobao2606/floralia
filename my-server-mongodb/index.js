@@ -31,6 +31,8 @@ const adminOrderRoutes = require('./routes/adminOrderRoutes');
 const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const chatController = require('./controllers/chatController');
+const adminRecommendationRoutes = require('./routes/adminRecommendationRoutes');
+const ProductRecommendations = require('./services/product-recommendation-service');
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -54,6 +56,7 @@ app.use('/api/admin/profile', adminProfileRoutes);
 app.use('/blogs', blogRoutes);
 app.use('/api/admin/blogs', adminBlogRoutes);
 app.use('/api/admin/products', adminProductRoutes);
+app.use('/api/admin/recommendations', adminRecommendationRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/admin/orders', adminOrderRoutes);
@@ -123,6 +126,15 @@ async function startServer() {
             }
         );
         await usersCollection.createIndex({ phone: 1 });
+        ProductRecommendations.setCollections(
+            db.collection('Settings'),
+            db.collection('Users'),
+            db.collection('Orders'),
+            db.collection('Product'),
+            db.collection('ProductViews')
+        );
+
+        await db.collection('ProductViews').createIndex({ viewerKey: 1, sku: 1 }, { unique: true });
         await db.collection('Orders').createIndex({ id: 1 });
         await db.collection('Orders').createIndex({ code: 1 });
         await db.collection('Orders').createIndex({ orderCode: 1 });

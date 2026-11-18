@@ -79,7 +79,9 @@
 <section class="featured">
   <div class="container">
     <p class="sub-title text-center">Được tuyển chọn dành cho bạn</p>
-    <h2 class="heading text-center">Sản phẩm đặc trưng</h2>
+      <h2 class="heading text-center">{{ recommendationTitle() }}</h2>
+    <p class="section-sub text-center" *ngIf="recommendationModelStats() as modelStats">
+    </p>
 
     <div class="product-tab">
       <button class="tab" [class.active]="true">Nổi bật</button>
@@ -88,7 +90,7 @@
 
     <div class="product-list" *ngIf="!loading(); else skeleton">
       <ng-container *ngFor="let p of featured()">
-        <ng-container *ngTemplateOutlet="card; context: { $implicit: p }"></ng-container>
+        <ng-container *ngTemplateOutlet="card; context: { $implicit: p, reason: getRecommendationReason(p) }"></ng-container>
       </ng-container>
     </div>
     <p class="empty" *ngIf="!loading() && featured().length === 0">
@@ -160,9 +162,10 @@
 </section>
 
 <!-- ================= TEMPLATE THẺ SẢN PHẨM ================= -->
-<ng-template #card let-p let-rank="rank">
+<ng-template #card let-p let-rank="rank" let-reason="reason">
   <div class="product-card">
     <div class="product-img">
+      <span class="rank-badge recommendation-reason" *ngIf="reason" [title]="reason">Hợp gu bạn</span>
       <span class="rank-badge" *ngIf="rank">Top {{ rank }}</span>
       <span class="sale-badge" *ngIf="getDiscount(p) > 0">-{{ getDiscount(p) }}%</span>
       <a [routerLink]="productNavigation.detailRoute(p)" [state]="{ product: p, products: products(), selectedVariantSku: getDisplayVariant(p)?.sku }">

@@ -345,10 +345,10 @@ export class CategoryEditor implements OnInit {
         this.successMessage = this.isEdit
           ? 'Đã lưu thay đổi danh mục thành công.'
           : 'Đã thêm danh mục mới thành công.';
-        if (!this.isEdit && saved._id) {
-          this.isEdit = true;
-          this.categoryId = saved._id;
-          void this.router.navigate(['/categories', saved._id, 'edit'], { replaceUrl: true });
+        if (!this.isEdit) {
+          this.lastSavedSnapshot = this.createFormSnapshot();
+          void this.router.navigate(['/categories']);
+          return;
         }
         this.changeDetector.markForCheck();
       },

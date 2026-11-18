@@ -1,4 +1,6 @@
-import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { NgModule, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeVi from '@angular/common/locales/vi';
 import { BrowserModule } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterOutlet } from '@angular/router';
@@ -24,6 +26,8 @@ import { AdminUserForm } from './pages/users_manage/user-form/user-form';
 import { Overview } from './pages/overview/overview';
 import { ApiOriginInterceptor } from './services/api-origin.interceptor';
 
+registerLocaleData(localeVi);
+
 @NgModule({
   declarations: [App, Pagenotfound, Products, ProductEditor, Categories, CategoryEditor],
   imports: [
@@ -47,6 +51,7 @@ import { ApiOriginInterceptor } from './services/api-origin.interceptor';
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideZonelessChangeDetection(),
     { provide: HTTP_INTERCEPTORS, useClass: ApiOriginInterceptor, multi: true },
   ],
   bootstrap: [App],

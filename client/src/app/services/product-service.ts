@@ -1,6 +1,6 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, Subject, catchError, finalize, map, shareReplay, tap, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, Subject, catchError, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
 import { Products } from '../classes/Products';
 
 export interface PublicCategoryItem {
@@ -20,6 +20,16 @@ export interface PublicBenefitItem {
 export interface PublicCategoriesResponse {
   mainCategories: PublicCategoryItem[];
   benefits: PublicBenefitItem[];
+}
+
+export interface ProductRecommendationsResponse {
+  success: boolean;
+  segmentId: string | null;
+  segmentName: string;
+  modelVersion: string;
+  modelStats?: { trainedOrders: number; learnedProducts: number; customerProfileProducts: number; customerViewProducts: number };
+  recommendationReasons?: { sku: string; reason: string }[];
+  products: Products[];
 }
 
 export interface CheckoutProduct {
@@ -75,9 +85,23 @@ export class ProductService implements OnDestroy {
   private cacheVersion = 0;
   private readonly changesSubject = new Subject<void>();
   private eventSource: EventSource | null = null;
+  private readonly recommendationChangesSubject = new Subject<void>();
+  private recommendationEventSource: EventSource | null = null;
+  private recommendationRanks = new Map<string, number>();
   private readonly onWindowFocus = () => {
     this.invalidateCache();
     this.changesSubject.next();
+  };
+  private readonly onAuthChanged = () => {
+    this.invalidateCache();
+    this.recommendationRanks.clear();
+    this.changesSubject.next();
+    this.recommendationChangesSubject.next();
+  };
+  private readonly onStorageChanged = (event: StorageEvent) => {
+    if (event.key === 'token' || event.key === 'currentUser' || event.key === null) {
+      this.onAuthChanged();
+    }
   };
 
   readonly productsChanges$: Observable<void> = new Observable<void>((subscriber) => {
@@ -85,19 +109,69 @@ export class ProductService implements OnDestroy {
     const sub = this.changesSubject.subscribe(subscriber);
     return () => sub.unsubscribe();
   });
+  readonly recommendationChanges$: Observable<void> = new Observable<void>((subscriber) => {
+    this.ensureRecommendationEventStream();
+    const sub = this.recommendationChangesSubject.subscribe(subscriber);
+    return () => sub.unsubscribe();
+  });
 
   constructor(private http: HttpClient, private ngZone: NgZone) {
     if (typeof window !== 'undefined') {
       window.addEventListener('focus', this.onWindowFocus);
+      window.addEventListener('auth-changed', this.onAuthChanged);
+      window.addEventListener('storage', this.onStorageChanged);
     }
+  }
+
+  getRecommendations(): Observable<ProductRecommendationsResponse> {
+    return this.http.get<ProductRecommendationsResponse>(`${this.apiUrl}/recommendations`, {
+      params: new HttpParams().set('visitorId', this.getRecommendationVisitorId()),
+    }).pipe(tap(recommendation => {
+      this.recommendationRanks = new Map((recommendation.products || []).map((product, index) => [String(product.sku), index]));
+    }));
+  }
+
+  personalizeProducts(products: Products[]): Products[] {
+    return [...products].sort((left, right) => {
+      const leftRank = this.recommendationRanks.get(String(left.sku));
+      const rightRank = this.recommendationRanks.get(String(right.sku));
+      if (leftRank !== undefined || rightRank !== undefined) {
+        return (leftRank ?? Number.MAX_SAFE_INTEGER) - (rightRank ?? Number.MAX_SAFE_INTEGER);
+      }
+      return 0;
+    });
+  }
+
+  recordProductView(sku: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/recommendations/views`, {
+      sku,
+      visitorId: this.getRecommendationVisitorId(),
+    });
+  }
+
+  private getRecommendationVisitorId(): string {
+    if (typeof window === 'undefined') return '';
+    const storageKey = 'floralia-recommendation-visitor';
+    let visitorId = window.localStorage.getItem(storageKey);
+    if (!visitorId) {
+      visitorId = typeof window.crypto?.randomUUID === 'function'
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+      window.localStorage.setItem(storageKey, visitorId);
+    }
+    return visitorId;
   }
 
   ngOnDestroy(): void {
     if (typeof window !== 'undefined') {
       window.removeEventListener('focus', this.onWindowFocus);
+      window.removeEventListener('auth-changed', this.onAuthChanged);
+      window.removeEventListener('storage', this.onStorageChanged);
     }
     this.eventSource?.close();
     this.eventSource = null;
+    this.recommendationEventSource?.close();
+    this.recommendationEventSource = null;
   }
 
   private ensureEventStream(): void {
@@ -128,6 +202,29 @@ export class ProductService implements OnDestroy {
     });
   }
 
+  private ensureRecommendationEventStream(): void {
+    if (this.recommendationEventSource || typeof window === 'undefined' || typeof EventSource === 'undefined') return;
+    this.ngZone.runOutsideAngular(() => {
+      try {
+        const source = new EventSource(`${this.apiUrl}/recommendations/events`);
+        let initialMessage = true;
+        source.onmessage = () => {
+          if (initialMessage) {
+            initialMessage = false;
+            return;
+          }
+          this.ngZone.run(() => {
+            this.recommendationChangesSubject.next();
+          });
+        };
+        source.onerror = () => undefined;
+        this.recommendationEventSource = source;
+      } catch {
+        this.recommendationEventSource = null;
+      }
+    });
+  }
+
   getAll(): Observable<Products[]> {
     return this.getProducts();
   }
@@ -151,7 +248,9 @@ export class ProductService implements OnDestroy {
 
     const requestVersion = this.cacheVersion;
     let request: Observable<Products[]>;
-    request = this.http.get<Products[]>(this.apiUrl).pipe(
+    request = this.http.get<Products[]>(this.apiUrl, {
+      params: new HttpParams().set('visitorId', this.getRecommendationVisitorId()),
+    }).pipe(
       tap((products) => {
         if (requestVersion === this.cacheVersion) {
           this.productsCache = products;

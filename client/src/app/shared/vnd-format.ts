@@ -6,7 +6,7 @@ const vietnameseDongFormatter = new Intl.NumberFormat('vi-VN', {
 
 export function formatVietnameseDong(value: number | string | null | undefined): string {
   const amount = Number(value);
-  return `${vietnameseDongFormatter.format(Number.isFinite(amount) ? amount : 0)} đ̲`;
+  return `${vietnameseDongFormatter.format(Number.isFinite(amount) ? amount : 0)} ₫`;
 }
 
 @Pipe({ name: 'vnd', standalone: false })

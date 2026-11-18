@@ -46,6 +46,7 @@ export class Header2 implements OnInit, OnDestroy {
   showFloat = false;
   showInvite = false;
   hasUnreadChat = false;
+  headerCategories: Array<{ name: string; slug: string }> = [];
 
   private subs = new Subscription();
   private timers: any[] = [];
@@ -60,6 +61,8 @@ export class Header2 implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCart();
+    this.loadHeaderCategories();
+    this.subs.add(this.productService.productsChanges$.subscribe(() => this.loadHeaderCategories()));
     this.subs.add(this.chatService.hasUnread$.subscribe((v) => (this.hasUnreadChat = v)));
     this.onScroll();
 
@@ -69,6 +72,7 @@ export class Header2 implements OnInit, OnDestroy {
           this.searchOpen = false;
           this.closeCart();
           this.loadCart();
+          this.loadHeaderCategories();
         }
       })
     );
@@ -83,6 +87,18 @@ export class Header2 implements OnInit, OnDestroy {
     this.subs.unsubscribe();
     this.timers.forEach((t) => { clearTimeout(t); clearInterval(t); });
     document.body.style.overflow = '';
+  }
+
+  private loadHeaderCategories(): void {
+    this.productService.getCategories().subscribe({
+      next: response => {
+        this.headerCategories = (response?.mainCategories || []).map(category => ({
+          name: category.name,
+          slug: category.slug,
+        }));
+      },
+      error: () => undefined,
+    });
   }
 
   private popInvite(): void {

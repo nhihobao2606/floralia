@@ -72,6 +72,8 @@ export class ProductDetail implements OnInit {
 
   product: ProductDetails | null = null;
   allProducts: ProductDetails[] = [];
+  modelRelatedProducts: ProductDetails[] = [];
+  modelRecommendationReasons = new Map<string, string>();
   selectedVariant: ProductVariant | null = null;
   galleryImages: string[] = [];
   reviews: ProductReview[] = [];
@@ -301,6 +303,14 @@ export class ProductDetail implements OnInit {
     this.product = product;
     this.favorite = this.isProductFavorite(product);
     if (!sameProduct) {
+      this.modelRelatedProducts = [];
+      this.modelRecommendationReasons.clear();
+      if (product.sku) {
+        this.productService.recordProductView(product.sku).subscribe({
+          next: () => this.loadModelRecommendations(),
+          error: () => this.loadModelRecommendations(),
+        });
+      }
       this.reviewSubmitRequestId++;
       this.reviewComment = '';
       this.reviewRating = 0;
@@ -402,6 +412,7 @@ export class ProductDetail implements OnInit {
 
   get relatedProducts(): ProductDetails[] {
     if (!this.product) return [];
+    if (this.modelRelatedProducts.length) return this.modelRelatedProducts;
 
     const sameCategory = this.allProducts.filter((item) =>
       item.slug !== this.product?.slug &&
@@ -415,6 +426,31 @@ export class ProductDetail implements OnInit {
     );
 
     return [...sameCategory, ...others].slice(0, 4);
+  }
+
+  getModelRecommendationReason(product: ProductDetails): string {
+    return this.modelRecommendationReasons.get(String(product.sku || '')) || 'Mô hình chọn dựa trên hành vi mua sắm';
+  }
+
+  private loadModelRecommendations(): void {
+    this.productService.getRecommendations().subscribe({
+      next: recommendation => {
+        const currentSku = String(this.product?.sku || '');
+        const catalogBySku = new Map(this.allProducts.map(item => [String(item.sku || ''), item]));
+        this.modelRelatedProducts = (recommendation.products || [])
+          .filter(item => String(item.sku) !== currentSku)
+          .slice(0, 4)
+          .map(item => catalogBySku.get(String(item.sku)) || item as ProductDetails);
+        this.modelRecommendationReasons = new Map(
+          (recommendation.recommendationReasons || []).map(item => [item.sku, item.reason]),
+        );
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.modelRelatedProducts = [];
+        this.changeDetector.markForCheck();
+      },
+    });
   }
 
   get displayedRatingAverage(): number {

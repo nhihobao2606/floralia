@@ -30,6 +30,8 @@ export const routes: Routes = [
   { path: 'articles', component: Articles, canActivate: [adminAuthGuard] },
   { path: 'vouchers/new', loadComponent: () => import('./pages/vouchers_manage/voucher-form/voucher-form').then(module => module.AdminVoucherForm), canActivate: [adminAuthGuard], canDeactivate: [canDeactivateUnsavedChanges] },
   { path: 'vouchers/:id/edit', loadComponent: () => import('./pages/vouchers_manage/voucher-form/voucher-form').then(module => module.AdminVoucherForm), canActivate: [adminAuthGuard], canDeactivate: [canDeactivateUnsavedChanges] },
+  { path: 'recommendations', loadComponent: () => import('./pages/recommendations/recommendations').then(module => module.Recommendations), canActivate: [adminAuthGuard] },
+  { path: 'forecast', loadComponent: () => import('./pages/sales-forecast/sales-forecast').then(module => module.SalesForecastPage), canActivate: [adminAuthGuard] },
   { path: 'vouchers/:id', loadComponent: () => import('./pages/vouchers_manage/voucher-detail/voucher-detail').then(module => module.AdminVoucherDetail), canActivate: [adminAuthGuard] },
   { path: 'vouchers', loadComponent: () => import('./pages/vouchers_manage/vouchers/vouchers').then(module => module.AdminVouchers), canActivate: [adminAuthGuard] },
   { path: 'users/new', component: AdminUserForm, canActivate: [adminAuthGuard], canDeactivate: [canDeactivateUnsavedChanges] },

@@ -1,5 +1,6 @@
 const Product = require('../models/product');
 const AdminProduct = require('../models/adminProduct');
+const ProductRecommendations = require('../services/product-recommendation-service');
 
 const DEFAULT_ACTIVE_STOCK = 20;
 
@@ -116,7 +117,23 @@ async function normalizeClientProducts(products) {
 async function getClientProducts(req, res) {
     try {
         const products = await Product.getAll();
-        const normalizedProducts = await normalizeClientProducts(products);
+        let personalizedProducts = products;
+        try {
+            const recommendation = await ProductRecommendations.getForCustomer(req.authenticatedUser || null, req.query.visitorId);
+            const ranks = new Map((recommendation.products || []).map((product, index) => [String(product.sku), index]));
+            personalizedProducts = [...products].sort((left, right) => {
+                const leftRank = ranks.get(String(left.sku));
+                const rightRank = ranks.get(String(right.sku));
+                if (leftRank !== undefined || rightRank !== undefined) {
+                    return (leftRank ?? Number.MAX_SAFE_INTEGER) - (rightRank ?? Number.MAX_SAFE_INTEGER);
+                }
+                return 0;
+            });
+        } catch (recommendationError) {
+            // Recommendation failures must never prevent the storefront catalog from loading.
+            console.warn('Không thể cá nhân hóa thứ tự sản phẩm, trả danh sách gốc:', recommendationError);
+        }
+        const normalizedProducts = await normalizeClientProducts(personalizedProducts);
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
         res.json(normalizedProducts);
     } catch (error) {

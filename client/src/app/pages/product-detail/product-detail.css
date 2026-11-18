@@ -13,6 +13,9 @@
   font-family: 'Roboto', sans-serif;
 }
 
+.related-visual { position: relative; }
+.related-model-badge { position: absolute; z-index: 2; left: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 18px; background: rgba(237, 246, 233, .96); color: #235338; font-size: 10px; font-weight: 700; box-shadow: 0 2px 8px rgba(29, 83, 56, .12); }
+
 .product-detail-page {
   min-height: 100vh;
   padding-bottom: 72px;

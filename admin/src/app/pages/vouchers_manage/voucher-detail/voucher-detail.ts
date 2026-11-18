@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminLogoutDialog } from '../../../components/admin-logout-dialog/admin-logout-dialog';
 import { AdminSidebar } from '../../../components/admin-sidebar/admin-sidebar';
 import { AdminVoucher, AdminVoucherService, VoucherOrder } from '../../../services/admin-voucher-service';
+import { AdminCategory, AdminCategoryService } from '../../../services/admin-category-service';
 import { finalize, timeout } from 'rxjs';
 
 @Component({
@@ -25,14 +26,18 @@ export class AdminVoucherDetail implements OnInit {
   period: 14 | 30 | 0 = 14;
   adminName = 'Admin';
   logoutConfirmationVisible = false;
+  categories: AdminCategory[] = [];
   currentPage = 1;
   readonly pageSize = 5;
 
-  constructor(private readonly route: ActivatedRoute, private readonly router: Router, private readonly service: AdminVoucherService, private readonly changeDetector: ChangeDetectorRef) {}
+  constructor(private readonly route: ActivatedRoute, private readonly router: Router, private readonly service: AdminVoucherService, private readonly categoryService: AdminCategoryService, private readonly changeDetector: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     const saved = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser');
     if (saved) { try { const user = JSON.parse(saved); this.adminName = user.fullName || user.name || 'Admin'; } catch { this.adminName = 'Admin'; } }
+    this.categoryService.getAll().subscribe({
+      next: result => { this.categories = (result.data || []).filter(category => category.visible !== false && category.level === 'main'); this.changeDetector.detectChanges(); },
+    });
     this.load();
   }
 
@@ -104,6 +109,17 @@ export class AdminVoucherDetail implements OnInit {
     return counts.map((item, index) => ({ label: index % Math.ceil(days / 5) === 0 || index === days - 1 ? `${item.date.getDate()}/${item.date.getMonth() + 1}` : '', count: item.count, height: item.count ? Math.max(8, item.count / max * 100) : 2 }));
   }
   money(value: number): string { return Number(value || 0).toLocaleString('vi-VN'); }
+  get categoryLabels(): string[] {
+    const available = new Map<string, AdminCategory>();
+    for (const category of this.categories) {
+      for (const value of [category.slug, category.name, category.code]) {
+        if (value) available.set(value.trim().toLocaleLowerCase(), category);
+      }
+    }
+    return [...new Set((this.voucher?.categories || [])
+      .map(value => available.get(String(value).trim().toLocaleLowerCase())?.name)
+      .filter((value): value is string => Boolean(value)))];
+  }
   discountText(): string { if (!this.voucher) return ''; return this.voucher.discountType === 'percent' ? `${this.voucher.discountValue}%` : `${this.money(this.voucher.discountValue)}₫`; }
   statusLabel(): string {
     const status = this.voucher?.status;

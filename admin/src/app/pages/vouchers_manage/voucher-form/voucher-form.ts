@@ -48,10 +48,15 @@ export class AdminVoucherForm implements OnInit {
     if (saved) { try { const user = JSON.parse(saved); this.adminName = user.fullName || user.name || 'Admin'; } catch { this.adminName = 'Admin'; } }
     this.categoryService.getAll().subscribe({
       next: response => {
-        this.categories = (response.data || []).filter(category => category.visible !== false);
+        this.categories = (response.data || []).filter(category => category.visible !== false && category.level === 'main');
         this.form.categories = this.form.categories.map(value => this.categoryValue(value));
         this.categoriesLoaded = true;
         this.setBaselineWhenReady();
+        if (this.categories.length) {
+          this.form.categories = this.form.categories
+            .map(value => this.categoryValue(value))
+            .filter(value => this.categories.some(category => category.slug === value));
+        }
         this.cdr.detectChanges();
       },
       error: () => { this.categoriesLoaded = true; this.setBaselineWhenReady(); this.error = 'Could not load product categories.'; },
@@ -81,6 +86,11 @@ export class AdminVoucherForm implements OnInit {
         this.form.categories = this.form.categories.map(value => this.categoryValue(value));
         this.voucherLoaded = true;
         this.setBaselineWhenReady();
+        if (this.categories.length) {
+          this.form.categories = this.form.categories
+            .map(value => this.categoryValue(value))
+            .filter(value => this.categories.some(category => category.slug === value));
+        }
         this.cdr.detectChanges();
       },
       error: err => {

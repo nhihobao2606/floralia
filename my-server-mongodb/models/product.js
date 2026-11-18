@@ -107,10 +107,12 @@ async function getAll() {
         : [];
     const assetSkuSet = new Set(Array.isArray(assetSkus) ? assetSkus : []);
 
-    // Nếu MongoDB collection rỗng thì fallback về catalog local
-    if (products.length === 0 && assetSkuSet.size > 0) {
+    // Keep the storefront available when the database has no active catalog yet.
+    // ProductAssets may be empty in a fresh database, so it cannot be a prerequisite
+    // for using the checked-in catalog.
+    if (products.length === 0) {
         const catalog = getLocalCatalog();
-        products = catalog.filter(p => assetSkuSet.has(p.sku) && p.isActive !== false);
+        products = catalog.filter(p => p.isActive !== false && (!assetSkuSet.size || assetSkuSet.has(p.sku)));
     }
 
     // Attach ratings from MongoDB Reviews collection

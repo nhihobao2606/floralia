@@ -25,6 +25,10 @@ export class Homepage implements OnInit {
   products = signal<Products[]>([]);
   featured = signal<Products[]>([]);
   bestSelling = signal<Products[]>([]);
+  recommendationTitle = signal('Gợi ý dành riêng cho bạn');
+  recommendationReasons = signal<Record<string, string>>({});
+  recommendationModelStats = signal<{ trainedOrders: number; learnedProducts: number; customerProfileProducts: number; customerViewProducts: number } | null>(null);
+  private recommendationRequestId = 0;
   loading = signal(true);
 
   // Danh sách sản phẩm yêu thích (lưu tạm trong phiên).
@@ -152,6 +156,37 @@ export class Homepage implements OnInit {
   buyNow(product: Products): void {
     this.buyNowService.open(product, this.getProductImage(product), this.getDisplayVariant(product));
   }
+
+  private loadRecommendations(catalog: Products[]): void {
+    const requestId = ++this.recommendationRequestId;
+    this.productService.getRecommendations().subscribe({
+      next: recommendation => {
+        if (requestId !== this.recommendationRequestId) return;
+        const currentProducts = this.products().length ? this.products() : catalog;
+        const bySku = new Map(currentProducts.map(product => [product.sku, product] as const));
+        const recommended = (recommendation.products || [])
+          .map(product => bySku.get(product.sku))
+          .filter((product): product is Products => Boolean(product));
+        this.featured.set(recommended);
+        const soldRanked = [...currentProducts].sort((a, b) => Number(b.sold || 0) - Number(a.sold || 0));
+        this.bestSelling.set(this.productService.personalizeProducts(soldRanked).slice(0, 4));
+        this.recommendationTitle.set(`G\u1ee3i \u00fd cho ${recommendation.segmentName.toLowerCase()}`);
+        this.recommendationReasons.set(Object.fromEntries(
+          (recommendation.recommendationReasons || []).map(item => [item.sku, item.reason]),
+        ));
+        this.recommendationModelStats.set(recommendation.modelStats || null);
+      },
+      error: error => {
+        if (requestId === this.recommendationRequestId) {
+          console.warn('Could not refresh product recommendations:', error);
+        }
+      },
+    });
+  }
+
+  getRecommendationReason(product: Products): string {
+    return this.recommendationReasons()[product.sku] || '';
+  }
   
 
   ngOnInit(): void {
@@ -167,6 +202,10 @@ export class Homepage implements OnInit {
         this.featured.update(applyRating);
         this.bestSelling.update(applyRating);
       });
+
+    this.productService.recommendationChanges$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadRecommendations(this.products()));
 
     this.productService.getAll().subscribe({
       next: (res: any) => {
@@ -192,6 +231,8 @@ export class Homepage implements OnInit {
           (a: any, b: any) => Number(b.sold || 0) - Number(a.sold || 0)
         );
         this.bestSelling.set(bestList.slice(0, 4));
+
+        this.loadRecommendations(list);
 
         this.loading.set(false);
       },
@@ -239,6 +280,7 @@ export class Homepage implements OnInit {
         this.bestSelling.set([...list]
           .sort((a, b) => Number(b.sold || 0) - Number(a.sold || 0))
           .slice(0, 4));
+        this.loadRecommendations(list);
       },
       error: error => console.error('Không thể làm mới sản phẩm:', error),
     });

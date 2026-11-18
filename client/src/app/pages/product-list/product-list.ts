@@ -29,6 +29,7 @@ export class ProductListComponent implements OnInit {
   selectedPriceRange: string = 'all';
   selectedTag: string = '';
   currentPage = 1;
+  recommendationRanks = new Map<string, number>();
   wishlist = new Set<string>();
   cartPopupProduct: Products | null = null;
   cartPopupVariant: Products['variants'][number] | null = null;
@@ -157,8 +158,27 @@ export class ProductListComponent implements OnInit {
         this.loadPublicCategories();
         this.fetchProducts(false);
       });
+    this.productService.recommendationChanges$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadRecommendations());
     this.loadPublicCategories();
     this.fetchProducts(true);
+    this.loadRecommendations();
+  }
+
+  private loadRecommendations(): void {
+    this.productService.getRecommendations().subscribe({
+      next: recommendation => {
+        this.recommendationRanks = new Map(
+          (recommendation.products || []).map((product, index) => [product.sku, index]),
+        );
+        this.applyFilters();
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.recommendationRanks.clear();
+      },
+    });
   }
 
   private loadPublicCategories(): void {
@@ -523,6 +543,13 @@ export class ProductListComponent implements OnInit {
       }
 
       return matchCat && matchSubCategory && matchPrice && matchTag;
+    }).sort((a, b) => {
+      const rankA = this.recommendationRanks.get(a.sku);
+      const rankB = this.recommendationRanks.get(b.sku);
+      if (rankA !== undefined || rankB !== undefined) {
+        return (rankA ?? Number.MAX_SAFE_INTEGER) - (rankB ?? Number.MAX_SAFE_INTEGER);
+      }
+      return 0;
     });
     this.currentPage = 1;
   }

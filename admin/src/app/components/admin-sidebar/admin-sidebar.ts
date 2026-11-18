@@ -51,6 +51,8 @@ export class AdminSidebar implements OnInit, OnChanges {
     { label: 'Quản lý người dùng', icon: 'bi-person', route: '/users', disabled: false },
     { label: 'Quản lý bài viết Blog', icon: 'bi-journal-text', route: '/articles', disabled: false },
     { label: 'Quản lý khuyến mãi', icon: 'bi-tag', route: '/vouchers', disabled: false },
+    { label: 'Dự báo doanh số', icon: 'bi-graph-up-arrow', route: '/forecast', disabled: false },
+    { label: 'Gợi ý sản phẩm', icon: 'bi-stars', route: '/recommendations', disabled: false },
   ];
 
   ngOnInit(): void {

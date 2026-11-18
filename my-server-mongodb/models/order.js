@@ -34,6 +34,43 @@ function getAll(filter = {}, options = {}) {
     return cursor.toArray();
 }
 
+function getRecommendationHistory(limit = 3000) {
+    if (!ordersCollection) return Promise.resolve([]);
+    return ordersCollection.find(
+        { isDemo: { $ne: true } },
+        { projection: {
+            userId: 1,
+            'receiver.email': 1,
+            status: 1,
+            createdAt: 1,
+            total: 1,
+            'items.sku': 1,
+            'items.quantity': 1,
+            'items.category': 1,
+            'items.categorySlug': 1
+        } }
+    ).sort({ createdAt: -1 }).limit(limit).maxTimeMS(10000).toArray();
+}
+
+function getDemandHistory(fromDate) {
+    if (!ordersCollection) return Promise.resolve([]);
+    return ordersCollection.find({
+        isDemo: { $ne: true },
+        status: { $in: ['pending', 'processing', 'shipping', 'delivered', 'completed'] },
+        $or: [
+            { createdAt: { $gte: fromDate } },
+            { createdAt: { $gte: fromDate.toISOString() } }
+        ]
+    }, { projection: {
+        status: 1,
+        createdAt: 1,
+        'items.sku': 1,
+        'items.quantity': 1,
+        'items.salePrice': 1,
+        'items.price': 1
+    } }).sort({ createdAt: 1 }).maxTimeMS(12000).toArray();
+}
+
 function getById(id) {
     if (!ordersCollection) return Promise.resolve(null);
     return ordersCollection.findOne(getIdFilter(id));
@@ -105,6 +142,8 @@ module.exports = {
     setCollection,
     getIdFilter,
     getAll,
+    getRecommendationHistory,
+    getDemandHistory,
     getById,
     getBySlug,
     create,

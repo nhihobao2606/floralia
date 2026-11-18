@@ -52,6 +52,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
 
   private timerInterval: any;
   private productChangesSubscription?: Subscription;
+  private recommendationChangesSubscription?: Subscription;
   private targetTime = Date.now() + (5 * 24 * 3600 + 13 * 3600 + 51 * 60 + 5) * 1000;
 
   constructor(
@@ -66,6 +67,10 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     this.loadProducts();
     this.productChangesSubscription = this.productService.productsChanges$.subscribe(() => this.loadProducts());
     this.loadVouchers();
+    this.productService.getRecommendations().subscribe({ next: () => this.applyPersonalizedOrder(), error: () => undefined });
+    this.recommendationChangesSubscription = this.productService.recommendationChanges$.subscribe(() => {
+      this.productService.getRecommendations().subscribe({ next: () => this.loadProducts(), error: () => this.loadProducts() });
+    });
     this.startCountdown();
   }
 
@@ -139,8 +144,14 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     return Number.isNaN(date.getTime()) ? 'Không thời hạn' : date.toLocaleDateString('vi-VN');
   }
 
+  private applyPersonalizedOrder(): void {
+    this.specialPromos.set(this.productService.personalizeProducts(this.specialPromos()));
+    this.bigDeals.set(this.productService.personalizeProducts(this.bigDeals()));
+  }
+
   ngOnDestroy(): void {
     this.productChangesSubscription?.unsubscribe();
+    this.recommendationChangesSubscription?.unsubscribe();
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
@@ -168,6 +179,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
           .sort((a, b) => this.getDiscount(b) - this.getDiscount(a));
 
         this.bigDeals.set(bigDealsList);
+        this.applyPersonalizedOrder();
 
         this.loading.set(false);
       },
