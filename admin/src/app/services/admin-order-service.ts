@@ -1,4 +1,4 @@
-﻿import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -122,6 +122,28 @@ export interface ProductCatalogItem {
   variants: ProductCatalogVariant[];
 }
 
+function fixOrderImage(img?: string): string {
+  if (!img) return '/assets/images/products/74.png';
+  if (img.startsWith('http://localhost:3002') || img.startsWith('http://127.0.0.1:3002')) {
+    return img.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002\/?/, 'https://floralia-1.onrender.com/');
+  }
+  if (img.startsWith('/products/image/')) {
+    return `https://floralia-1.onrender.com${img}`;
+  }
+  return img;
+}
+
+function normalizeAdminOrder(order: AdminOrder): AdminOrder {
+  if (!order) return order;
+  return {
+    ...order,
+    items: (order.items || []).map((it) => ({
+      ...it,
+      image: fixOrderImage(it.image),
+    })),
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminOrderService {
   private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/orders';
@@ -170,6 +192,10 @@ export class AdminOrderService {
       .set('paymentStatus', options.paymentStatus || 'all');
     if (options.query && options.query.trim()) params = params.set('q', options.query.trim());
     return this.http.get<AdminOrderListResponse>(this.apiUrl, { headers: this.authHeaders(), params }).pipe(
+      map(res => ({
+        ...res,
+        orders: (res.orders || []).map(normalizeAdminOrder)
+      })),
       tap(response => {
         if (response?.stats) this.pendingCount$.next(response.stats.pending);
       })
@@ -177,7 +203,12 @@ export class AdminOrderService {
   }
 
   getById(id: string): Observable<{ success: boolean; order: AdminOrder }> {
-    return this.http.get<{ success: boolean; order: AdminOrder }>(this.apiUrl + '/' + encodeURIComponent(id), { headers: this.authHeaders() });
+    return this.http.get<{ success: boolean; order: AdminOrder }>(this.apiUrl + '/' + encodeURIComponent(id), { headers: this.authHeaders() }).pipe(
+      map(res => ({
+        ...res,
+        order: normalizeAdminOrder(res.order)
+      }))
+    );
   }
 
   getForUser(userId: string | number): Observable<{ success: boolean; orders: AdminOrder[] }> {

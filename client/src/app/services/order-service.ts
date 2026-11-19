@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, timeout } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -79,11 +79,30 @@ export interface Order {
   refundAmount?: number;
 }
 
+function normalizeOrderItemImage(img?: string): string {
+  if (!img) return '/assets/images/no-image.svg';
+  if (img.startsWith('http://localhost:3002') || img.startsWith('http://127.0.0.1:3002')) {
+    return img.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002\/?/, 'https://floralia-1.onrender.com/');
+  }
+  if (img.startsWith('/products/image/')) {
+    return `https://floralia-1.onrender.com${img}`;
+  }
+  return img;
+}
+
 function normalizeOrderShipping(order: Order): Order {
   return {
     ...order,
     shippingUnit: order.shippingUnit || '',
-    trackingCode: order.trackingCode || ''
+    trackingCode: order.trackingCode || '',
+    items: (order.items || []).map(it => ({
+      ...it,
+      image: normalizeOrderItemImage(it.image)
+    })),
+    cancelledItems: (order.cancelledItems || []).map(it => ({
+      ...it,
+      image: normalizeOrderItemImage(it.image)
+    }))
   };
 }
 

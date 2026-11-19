@@ -1,4 +1,4 @@
-﻿const { ObjectId } = require('mongodb');
+const { ObjectId } = require('mongodb');
 const { randomBytes } = require('crypto');
 const path = require('path');
 const fs = require('fs');
@@ -15,13 +15,17 @@ function escapeRegex(value) {
 function normalizeOrder(order) {
   if (!order) return null;
   const receiver = order.receiver || order.customer || order.sender || {};
-  const items = Array.isArray(order.items) ? order.items.map(it => {
-    let img = it.image || '';
-    if (img && img.startsWith('/products/image/')) {
-      img = `https://floralia-1.onrender.com${img}`;
-    } else if (!img) {
-      img = '/assets/images/products/74.png';
+  const fixImg = (img) => {
+    if (!img || typeof img !== 'string') return '/assets/images/products/74.png';
+    if (img.includes('localhost:3002') || img.includes('127.0.0.1:3002')) {
+      const p = img.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002\/?/, '');
+      return `https://floralia-1.onrender.com/${p}`;
     }
+    if (img.startsWith('/products/image/')) return `https://floralia-1.onrender.com${img}`;
+    if (img.startsWith('products/image/')) return `https://floralia-1.onrender.com/${img}`;
+    return img;
+  };
+  const items = Array.isArray(order.items) ? order.items.map(it => {
     return {
       sku: it.sku || '',
       slug: it.slug || '',
@@ -35,7 +39,7 @@ function normalizeOrder(order) {
       productDiscount: Number(it.productDiscount || 0),
       quantity: Number(it.quantity || 1),
       total: Number(it.total || (Number(it.price || 0) * Number(it.quantity || 1))),
-      image: img
+      image: fixImg(it.image)
     };
   }) : [];
   
@@ -348,7 +352,10 @@ async function createAdminOrder(req, res) {
         }
       }
 
-      if (!image || !image.startsWith('http')) {
+      if (image && (image.includes('localhost:3002') || image.includes('127.0.0.1:3002'))) {
+        const p = image.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002\/?/, '');
+        image = `https://floralia-1.onrender.com/${p}`;
+      } else if (!image || !image.startsWith('http')) {
         if (image && image.startsWith('/products/image/')) {
           image = `https://floralia-1.onrender.com${image}`;
         } else if (foundProd && foundProd.thumbnail) {

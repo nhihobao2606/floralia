@@ -152,7 +152,7 @@
               <div class="order-items-table">
                 <article *ngFor="let item of ord.items" class="order-item-row">
                   <div class="item-thumb-box">
-                    <img [src]="item.image || '/assets/images/products/74.png'" [alt]="item.name" class="item-thumb">
+                    <img [src]="item.image || '/assets/images/products/74.png'" (error)="$any($event.target).src='/assets/images/products/74.png'" [alt]="item.name" class="item-thumb">
                   </div>
                   <div class="item-meta">
                     <h4 class="item-name">{{ item.name }}</h4>

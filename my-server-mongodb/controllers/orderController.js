@@ -1,4 +1,4 @@
-﻿const Order = require('../models/order');
+const Order = require('../models/order');
 const Product = require('../models/product');
 const ProductSalesService = require('../models/product-sales-service');
 const { cancelOrderAndRestoreStock } = require('../models/order-cancellation-service');
@@ -401,8 +401,22 @@ function normalizeClientOrder(order) {
     refunded: 'Đã hoàn tiền', refund_pending: 'Chờ duyệt hoàn tiền',
     refund_approved: 'Đã duyệt hoàn tiền'
   };
+  const fixImg = (img) => {
+    if (!img || typeof img !== 'string') return '/assets/images/no-image.svg';
+    if (img.includes('localhost:3002') || img.includes('127.0.0.1:3002')) {
+      const p = img.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002\/?/, '');
+      return `https://floralia-1.onrender.com/${p}`;
+    }
+    if (img.startsWith('/products/image/')) return `https://floralia-1.onrender.com${img}`;
+    if (img.startsWith('products/image/')) return `https://floralia-1.onrender.com/${img}`;
+    return img;
+  };
+  const items = Array.isArray(order.items) ? order.items.map(it => ({ ...it, image: fixImg(it.image) })) : [];
+  const cancelledItems = Array.isArray(order.cancelledItems) ? order.cancelledItems.map(it => ({ ...it, image: fixImg(it.image) })) : [];
   return {
     ...order,
+    items,
+    cancelledItems,
     shippingUnit,
     trackingCode,
     status,
@@ -444,7 +458,11 @@ async function getAdminOrdersForUser(req, res) {
     const orders = sortOrdersNewestFirst(await getOrdersForUser(user._id?.toString() || String(user.id), 'all', ''));
     for (const order of orders) {
       order.items = await Promise.all((order.items || []).map(async item => {
-        const currentImage = typeof item.image === 'string' ? item.image.trim() : '';
+        let currentImage = typeof item.image === 'string' ? item.image.trim() : '';
+        if (currentImage.includes('localhost:3002') || currentImage.includes('127.0.0.1:3002')) {
+          const p = currentImage.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002\/?/, '');
+          return { ...item, image: `https://floralia-1.onrender.com/${p}` };
+        }
         if (/^(https?:|data:|blob:)/i.test(currentImage)) return item;
 
         const product = item.sku ? await Product.getBySku(item.sku) : null;
