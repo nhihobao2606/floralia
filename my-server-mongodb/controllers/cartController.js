@@ -1,4 +1,4 @@
-const Cart = require('../models/cart');
+﻿const Cart = require('../models/cart');
 const User = require('../models/user');
 const Product = require('../models/product');
 
@@ -8,7 +8,7 @@ function resolveCartImage(product) {
     const value = String(thumbnail);
     if (/^(https?:|data:image\/|blob:)/i.test(value) || value.startsWith('/assets/')) return value;
     if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(value)) return `/assets/images/${value}`;
-    return `http://localhost:3002/products/image/${encodeURIComponent(value)}`;
+    return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(value)}`;
 }
 
 async function hydrateCartItem(item) {
@@ -131,4 +131,5 @@ module.exports = {
     getCart,
     updateCart
 };
+
 

@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb');
+﻿const { ObjectId } = require('mongodb');
 const { randomBytes } = require('crypto');
 const path = require('path');
 const fs = require('fs');
@@ -18,7 +18,7 @@ function normalizeOrder(order) {
   const items = Array.isArray(order.items) ? order.items.map(it => {
     let img = it.image || '';
     if (img && img.startsWith('/products/image/')) {
-      img = `http://localhost:3002${img}`;
+      img = `https://floralia-1.onrender.com${img}`;
     } else if (!img) {
       img = '/assets/images/products/74.png';
     }
@@ -335,7 +335,7 @@ async function createAdminOrder(req, res) {
         categorySlug = foundProd.categorySlug || categorySlug;
         const thumb = foundProd.thumbnail || (foundProd.sku ? `${foundProd.sku}_THUMB` : '');
         if (thumb) {
-          image = `http://localhost:3002/products/image/${thumb}`;
+          image = `https://floralia-1.onrender.com/products/image/${thumb}`;
         }
         if (Array.isArray(foundProd.variants)) {
           const matchedVar = foundProd.variants.find(v => v.label === it.variant || v.sku === it.sku);
@@ -350,9 +350,9 @@ async function createAdminOrder(req, res) {
 
       if (!image || !image.startsWith('http')) {
         if (image && image.startsWith('/products/image/')) {
-          image = `http://localhost:3002${image}`;
+          image = `https://floralia-1.onrender.com${image}`;
         } else if (foundProd && foundProd.thumbnail) {
-          image = `http://localhost:3002/products/image/${foundProd.thumbnail}`;
+          image = `https://floralia-1.onrender.com/products/image/${foundProd.thumbnail}`;
         } else {
           image = '/assets/images/products/74.png';
         }
@@ -628,3 +628,4 @@ module.exports = {
   deleteAdminOrder,
   bulkDeleteAdminOrders
 };
+

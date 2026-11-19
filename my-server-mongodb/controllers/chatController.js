@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb');
+﻿const { ObjectId } = require('mongodb');
 const {
     buildProductSearchText,
     embedText,
@@ -97,8 +97,8 @@ function formatProductImage(thumbnail) {
     if (!thumbnail) return null;
     const str = String(thumbnail);
     if (str.startsWith('http://') || str.startsWith('https://')) return str;
-    if (str.startsWith('/products/image/')) return `http://localhost:3002${str}`;
-    return `http://localhost:3002/products/image/${encodeURIComponent(str)}`;
+    if (str.startsWith('/products/image/')) return `https://floralia-1.onrender.com${str}`;
+    return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(str)}`;
 }
 
 // Hàm tìm kiếm từ khóa dự phòng cục bộ
@@ -331,3 +331,4 @@ module.exports = {
     clearSessionMessages,
     syncProductEmbeddings
 };
+

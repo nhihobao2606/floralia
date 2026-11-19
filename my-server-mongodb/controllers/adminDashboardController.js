@@ -1,4 +1,4 @@
-const Order = require('../models/order');
+﻿const Order = require('../models/order');
 const Product = require('../models/product');
 const User = require('../models/user');
 const Blog = require('../models/blog');
@@ -32,9 +32,9 @@ function parseOrderDate(order) {
 function normalizeImageUrl(thumbOrUrl) {
   if (!thumbOrUrl) return '/assets/images/products/74.png';
   if (thumbOrUrl.startsWith('http://') || thumbOrUrl.startsWith('https://')) return thumbOrUrl;
-  if (thumbOrUrl.startsWith('/products/image/')) return `http://localhost:3002${thumbOrUrl}`;
+  if (thumbOrUrl.startsWith('/products/image/')) return `https://floralia-1.onrender.com${thumbOrUrl}`;
   if (thumbOrUrl.startsWith('/assets/')) return thumbOrUrl;
-  return `http://localhost:3002/products/image/${thumbOrUrl}`;
+  return `https://floralia-1.onrender.com/products/image/${thumbOrUrl}`;
 }
 
 async function getDashboardData(req, res) {
@@ -173,7 +173,7 @@ async function getDashboardData(req, res) {
           if (!productSalesMap.has(key)) {
             let img = item.image || '';
             if (img && img.startsWith('/products/image/')) {
-              img = `http://localhost:3002${img}`;
+              img = `https://floralia-1.onrender.com${img}`;
             } else if (!img) {
               img = matchedProd ? normalizeImageUrl(matchedProd.thumbnail || `${matchedProd.sku}_THUMB`) : '/assets/images/products/74.png';
             }
@@ -260,7 +260,7 @@ async function getDashboardData(req, res) {
 
       let firstItemImage = firstItem?.image || '';
       if (firstItemImage && firstItemImage.startsWith('/products/image/')) {
-        firstItemImage = `http://localhost:3002${firstItemImage}`;
+        firstItemImage = `https://floralia-1.onrender.com${firstItemImage}`;
       } else if (!firstItemImage) {
         firstItemImage = '/assets/images/products/74.png';
       }
@@ -372,3 +372,4 @@ async function getDashboardData(req, res) {
 module.exports = {
   getDashboardData
 };
+

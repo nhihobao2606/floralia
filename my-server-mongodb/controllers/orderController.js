@@ -1,4 +1,4 @@
-const Order = require('../models/order');
+﻿const Order = require('../models/order');
 const Product = require('../models/product');
 const ProductSalesService = require('../models/product-sales-service');
 const { cancelOrderAndRestoreStock } = require('../models/order-cancellation-service');
@@ -455,7 +455,7 @@ async function getAdminOrdersForUser(req, res) {
         return {
           ...item,
           image: imageId
-            ? `http://localhost:3002/products/image/${encodeURIComponent(imageId)}`
+            ? `https://floralia-1.onrender.com/products/image/${encodeURIComponent(imageId)}`
             : currentImage.startsWith('/assets/') ? currentImage : ''
         };
       }));
@@ -887,3 +887,4 @@ module.exports = {
   verifyGuestTrackingOtp,
   cancelGuestOrder
 };
+
