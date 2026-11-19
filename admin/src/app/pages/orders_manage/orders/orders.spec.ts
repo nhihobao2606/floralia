@@ -1,4 +1,4 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+﻿import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Orders } from './orders';
@@ -62,7 +62,7 @@ describe('Orders', () => {
     http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
 
-    const prodReqs = http.match('http://localhost:3002/products');
+    const prodReqs = http.match('https://floralia-1.onrender.com/products');
     prodReqs.forEach(r => r.flush([]));
   });
 
@@ -72,7 +72,7 @@ describe('Orders', () => {
   });
 
   it('shows simulated pending order notifications and can mark them read', () => {
-    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+    http.expectOne(request => request.url === 'https://floralia-1.onrender.com/api/admin/orders').flush({
       success: true, orders: [], total: 0, page: 1, limit: 5,
       stats: { total: 0, pending: 0, processing: 0, shipping: 0, delivered: 0, cancelled: 0 }
     });
@@ -85,7 +85,7 @@ describe('Orders', () => {
 
   it('loads live orders and populates the 5 metric stat cards', () => {
     const req = http.expectOne(request =>
-      request.url === 'http://localhost:3002/api/admin/orders' &&
+      request.url === 'https://floralia-1.onrender.com/api/admin/orders' &&
       request.params.get('page') === '1' &&
       request.params.get('limit') === '5'
     );
@@ -117,7 +117,7 @@ describe('Orders', () => {
   });
 
   it('toggles metric status filter when clicking a status card', () => {
-    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+    http.expectOne(request => request.url === 'https://floralia-1.onrender.com/api/admin/orders').flush({
       success: true,
       orders: [mockOrder],
       total: 1,
@@ -131,7 +131,7 @@ describe('Orders', () => {
     expect(component.activeStatusFilter).toBe('delivered');
 
     const filterReq = http.expectOne(request =>
-      request.url === 'http://localhost:3002/api/admin/orders' &&
+      request.url === 'https://floralia-1.onrender.com/api/admin/orders' &&
       request.params.get('status') === 'delivered'
     );
     filterReq.flush({
@@ -147,7 +147,7 @@ describe('Orders', () => {
   });
 
   it('handles order row checkbox selection and select all', () => {
-    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+    http.expectOne(request => request.url === 'https://floralia-1.onrender.com/api/admin/orders').flush({
       success: true,
       orders: [mockOrder],
       total: 1,
@@ -167,7 +167,7 @@ describe('Orders', () => {
   });
 
   it('confirms pending order and triggers quick status change', () => {
-    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+    http.expectOne(request => request.url === 'https://floralia-1.onrender.com/api/admin/orders').flush({
       success: true,
       orders: [mockOrder],
       total: 1,
@@ -179,7 +179,7 @@ describe('Orders', () => {
 
     component.confirmOrder(component.orders[0]);
 
-    const patchReq = http.expectOne('http://localhost:3002/api/admin/orders/FL0011/status');
+    const patchReq = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0011/status');
     expect(patchReq.request.method).toBe('PATCH');
     expect(patchReq.request.body.status).toBe('processing');
     patchReq.flush({
@@ -188,7 +188,7 @@ describe('Orders', () => {
     });
 
     // It refreshes orders after status change
-    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+    http.expectOne(request => request.url === 'https://floralia-1.onrender.com/api/admin/orders').flush({
       success: true,
       orders: [{ ...mockOrder, status: 'processing', statusLabel: 'Đang chuẩn bị' }],
       total: 1,
@@ -202,7 +202,7 @@ describe('Orders', () => {
   });
 
   it('opens and closes the invoice preview dialog', () => {
-    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+    http.expectOne(request => request.url === 'https://floralia-1.onrender.com/api/admin/orders').flush({
       success: true,
       orders: [mockOrder],
       total: 1,
@@ -222,7 +222,7 @@ describe('Orders', () => {
   });
 
   it('opens and cancels the logout confirmation dialog', () => {
-    http.expectOne(request => request.url === 'http://localhost:3002/api/admin/orders').flush({
+    http.expectOne(request => request.url === 'https://floralia-1.onrender.com/api/admin/orders').flush({
       success: true,
       orders: [],
       total: 0,
@@ -239,3 +239,4 @@ describe('Orders', () => {
     expect(component.logoutConfirmationVisible).toBe(false);
   });
 });
+

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -34,7 +34,7 @@ export class PasswordRecovery implements OnInit {
   readonly emailPattern = '^\\s*[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}\\s*$';
   readonly passwordPattern = '^(?=.*[A-Za-z])(?=.*\\d).{8,}$';
 
-  private readonly apiUrl = 'http://localhost:3002/api/auth';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/auth';
 
   constructor(
     private readonly http: HttpClient,
@@ -100,3 +100,4 @@ export class PasswordRecovery implements OnInit {
     void this.router.navigate(['/login']);
   }
 }
+

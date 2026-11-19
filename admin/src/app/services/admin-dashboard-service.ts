@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+﻿import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -128,7 +128,7 @@ export const INITIAL_DASHBOARD_DATA: DashboardData = {
 
 @Injectable({ providedIn: 'root' })
 export class AdminDashboardService {
-  private readonly apiUrl = 'http://localhost:3002/api/admin/dashboard';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/dashboard';
   private cachedData: Map<string, DashboardData> = new Map();
 
   constructor(private readonly http: HttpClient) {}
@@ -167,3 +167,4 @@ export class AdminDashboardService {
     );
   }
 }
+

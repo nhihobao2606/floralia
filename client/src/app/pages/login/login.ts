@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
@@ -50,7 +50,7 @@ export class Login implements OnInit {
     }
 
     const identifier = this.identifier.trim();
-    this.http.post<any>('http://localhost:3002/api/auth/login', {
+    this.http.post<any>('https://floralia-1.onrender.com/api/auth/login', {
       identifier,
       // Keep compatibility with API instances that still expect email instead of identifier.
       email: identifier.includes('@') ? identifier : undefined,
@@ -127,3 +127,4 @@ export class Login implements OnInit {
     void this.router.navigate(['/forgot-password']);
   }
 }
+

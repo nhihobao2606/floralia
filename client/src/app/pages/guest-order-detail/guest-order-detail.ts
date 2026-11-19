@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { timeout } from 'rxjs';
@@ -30,7 +30,7 @@ export class GuestOrderDetail implements OnInit {
     'Khác'
   ];
 
-  private readonly guestTrackingApi = 'http://localhost:3002/api/orders/guest-tracking';
+  private readonly guestTrackingApi = 'https://floralia-1.onrender.com/api/orders/guest-tracking';
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -157,3 +157,4 @@ export class GuestOrderDetail implements OnInit {
     });
   }
 }
+

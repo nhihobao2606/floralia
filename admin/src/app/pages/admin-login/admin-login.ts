@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+﻿import { HttpClient } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -60,7 +60,7 @@ export class AdminLogin {
     }
 
     this.isSubmitting.set(true);
-    this.http.post<AdminLoginResponse>('http://localhost:3002/api/auth/login', {
+    this.http.post<AdminLoginResponse>('https://floralia-1.onrender.com/api/auth/login', {
       email: this.email.trim(),
       password: this.password,
     }).pipe(
@@ -98,3 +98,4 @@ export class AdminLogin {
     });
   }
 }
+

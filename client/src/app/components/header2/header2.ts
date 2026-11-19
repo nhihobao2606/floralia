@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+﻿import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
@@ -315,7 +315,7 @@ export class Header2 implements OnInit, OnDestroy {
         return product.imageUrl;
       }
 
-      return `http://localhost:3002${product.imageUrl}`;
+      return `https://floralia-1.onrender.com${product.imageUrl}`;
     }
 
     if (
@@ -565,16 +565,16 @@ export class Header2 implements OnInit, OnDestroy {
   private resolveImage(src: any): string {
     if (typeof src !== 'string' || !src) return '/assets/images/no-image.svg';
     if (/^(https?:|data:image\/)/.test(src)) return src;
-    if (src.startsWith('/products/')) return `http://localhost:3002${src}`;
-    if (src.startsWith('products/')) return `http://localhost:3002/${src}`;
+    if (src.startsWith('/products/')) return `https://floralia-1.onrender.com${src}`;
+    if (src.startsWith('products/')) return `https://floralia-1.onrender.com/${src}`;
     const legacyAssetId = /^\/?assets\/images\/([^/?]+)$/i.exec(src);
     if (legacyAssetId && !/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(legacyAssetId[1])) {
-      return `http://localhost:3002/products/image/${encodeURIComponent(legacyAssetId[1])}`;
+      return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(legacyAssetId[1])}`;
     }
     if (src.startsWith('/assets/')) return src;
     if (src.startsWith('assets/')) return `/${src}`;
     if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(src)) return `/assets/images/${src}`;
-    return `http://localhost:3002/products/image/${encodeURIComponent(src)}`;
+    return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(src)}`;
   }
 
   formatPrice(price: number): string {
@@ -587,3 +587,4 @@ export class Header2 implements OnInit, OnDestroy {
     img.src = '/assets/images/no-image.svg';
   }
 }
+

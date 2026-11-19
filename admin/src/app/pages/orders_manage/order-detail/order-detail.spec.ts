@@ -1,4 +1,4 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+﻿import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
@@ -90,7 +90,7 @@ describe('OrderDetail', () => {
   });
 
   it('loads and displays order detail matching #FL0009', () => {
-    const req = http.expectOne('http://localhost:3002/api/admin/orders/FL0009');
+    const req = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009');
     expect(req.request.headers.get('Authorization')).toBe('Bearer test-admin-token');
 
     req.flush({ success: true, order: mockOrder });
@@ -105,7 +105,7 @@ describe('OrderDetail', () => {
   });
 
   it('updates order status to processing on confirmOrder', () => {
-    http.expectOne('http://localhost:3002/api/admin/orders/FL0009').flush({
+    http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009').flush({
       success: true,
       order: mockOrder,
     });
@@ -113,7 +113,7 @@ describe('OrderDetail', () => {
 
     component.confirmOrder();
 
-    const patchReq = http.expectOne('http://localhost:3002/api/admin/orders/FL0009/status');
+    const patchReq = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009/status');
     expect(patchReq.request.method).toBe('PATCH');
     expect(patchReq.request.body).toEqual({ status: 'processing', statusLabel: 'Chờ lấy hàng' });
 
@@ -127,7 +127,7 @@ describe('OrderDetail', () => {
   });
 
   it('adds a new note to the order notes list', () => {
-    http.expectOne('http://localhost:3002/api/admin/orders/FL0009').flush({
+    http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009').flush({
       success: true,
       order: mockOrder,
     });
@@ -136,7 +136,7 @@ describe('OrderDetail', () => {
     component.newNoteText = 'Đã gọi điện xác nhận địa chỉ giao hàng';
     component.submitAddNote();
 
-    const noteReq = http.expectOne('http://localhost:3002/api/admin/orders/FL0009/notes');
+    const noteReq = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009/notes');
     expect(noteReq.request.method).toBe('POST');
     expect(noteReq.request.body).toEqual({
       text: 'Đã gọi điện xác nhận địa chỉ giao hàng',
@@ -154,7 +154,7 @@ describe('OrderDetail', () => {
   });
 
   it('opens and closes the invoice preview modal', () => {
-    http.expectOne('http://localhost:3002/api/admin/orders/FL0009').flush({
+    http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009').flush({
       success: true,
       order: mockOrder,
     });
@@ -168,3 +168,4 @@ describe('OrderDetail', () => {
     expect(component.invoiceModalVisible).toBe(false);
   });
 });
+

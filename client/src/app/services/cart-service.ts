@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 
 export interface CartProduct {
@@ -60,7 +60,7 @@ interface CartUser {
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private readonly http = inject(HttpClient, { optional: true });
-  private readonly apiUrl = 'http://localhost:3002/products/cart';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/products/cart';
   private readonly syncedKeys = new Set<string>();
   readonly cartMessage = signal('');
   private cartMessageTimeout: number | undefined;
@@ -351,3 +351,4 @@ export class CartService {
     }, 3000);
   }
 }
+

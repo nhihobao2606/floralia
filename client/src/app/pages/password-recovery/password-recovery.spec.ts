@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { NgForm } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -35,7 +35,7 @@ describe('PasswordRecovery', () => {
 
     component.requestReset(form);
 
-    const request = http.expectOne('http://localhost:3002/api/auth/forgot-password');
+    const request = http.expectOne('https://floralia-1.onrender.com/api/auth/forgot-password');
     expect(request.request.body).toEqual({ email: 'customer@example.com' });
     request.flush({
       success: true,
@@ -55,7 +55,7 @@ describe('PasswordRecovery', () => {
     } as unknown as NgForm;
 
     component.requestReset(form);
-    http.expectOne('http://localhost:3002/api/auth/forgot-password').flush(
+    http.expectOne('https://floralia-1.onrender.com/api/auth/forgot-password').flush(
       { message: 'Chưa thể gửi email đặt lại mật khẩu.' },
       { status: 503, statusText: 'Service Unavailable' },
     );
@@ -64,3 +64,4 @@ describe('PasswordRecovery', () => {
     expect(component.errorMessage).toBe('Chưa thể gửi email đặt lại mật khẩu.');
   });
 });
+

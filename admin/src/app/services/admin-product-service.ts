@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { timeout } from 'rxjs/operators';
@@ -118,7 +118,7 @@ export interface AdminProductList {
 
 @Injectable({ providedIn: 'root' })
 export class AdminProductService {
-  private readonly apiUrl = 'http://localhost:3002/api/admin/products';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/products';
   private productListCache: AdminProductList | null = null;
 
   constructor(private readonly http: HttpClient) {}
@@ -188,3 +188,4 @@ export class AdminProductService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

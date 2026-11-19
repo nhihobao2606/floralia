@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -124,8 +124,8 @@ export interface ProductCatalogItem {
 
 @Injectable({ providedIn: 'root' })
 export class AdminOrderService {
-  private readonly apiUrl = 'http://localhost:3002/api/admin/orders';
-  private readonly productsApiUrl = 'http://localhost:3002/products';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/orders';
+  private readonly productsApiUrl = 'https://floralia-1.onrender.com/products';
   readonly pendingCount$ = new BehaviorSubject<number>(0);
 
   constructor(private readonly http: HttpClient) {}
@@ -138,7 +138,7 @@ export class AdminOrderService {
         }
         return prods.map(p => {
           const thumb = p.thumbnail || (p.sku ? `${p.sku}_THUMB` : '');
-          const imgUrl = thumb ? `http://localhost:3002/products/image/${thumb}` : '/assets/images/products/74.png';
+          const imgUrl = thumb ? `https://floralia-1.onrender.com/products/image/${thumb}` : '/assets/images/products/74.png';
 
           const variants: ProductCatalogVariant[] = Array.isArray(p.variants) && p.variants.length > 0
             ? p.variants.map((v: any) => ({
@@ -274,3 +274,4 @@ export class AdminOrderService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

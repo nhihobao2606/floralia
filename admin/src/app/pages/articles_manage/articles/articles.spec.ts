@@ -1,4 +1,4 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+﻿import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Articles } from './articles';
@@ -42,7 +42,7 @@ describe('Articles', () => {
 
   it('loads live article rows and refreshes the selected status filter', () => {
     const listRequest = http.expectOne(request =>
-      request.url === 'http://localhost:3002/api/admin/blogs'
+      request.url === 'https://floralia-1.onrender.com/api/admin/blogs'
       && request.params.get('page') === '1'
       && request.params.get('limit') === '5'
       && request.params.get('status') === 'all'
@@ -71,7 +71,7 @@ describe('Articles', () => {
 
     component.selectFilter('draft');
     const draftRequest = http.expectOne(request =>
-      request.url === 'http://localhost:3002/api/admin/blogs'
+      request.url === 'https://floralia-1.onrender.com/api/admin/blogs'
       && request.params.get('status') === 'draft'
     );
     draftRequest.flush({
@@ -88,7 +88,7 @@ describe('Articles', () => {
   });
 
   it('opens and dismisses the logout confirmation from the top bar', () => {
-    http.expectOne('http://localhost:3002/api/admin/blogs?page=1&limit=5&status=all').flush({
+    http.expectOne('https://floralia-1.onrender.com/api/admin/blogs?page=1&limit=5&status=all').flush({
       data: [],
       total: 0,
       page: 1,
@@ -117,7 +117,7 @@ describe('Articles', () => {
       status: 'published' as const,
       views: 1284,
     };
-    const initialRequest = http.expectOne('http://localhost:3002/api/admin/blogs?page=1&limit=5&status=all');
+    const initialRequest = http.expectOne('https://floralia-1.onrender.com/api/admin/blogs?page=1&limit=5&status=all');
     initialRequest.flush({
       data: [article],
       total: 1,
@@ -135,11 +135,11 @@ describe('Articles', () => {
     component.confirmDeleteArticle();
     const deleteRequest = http.expectOne(request =>
       request.method === 'DELETE'
-      && request.url === `http://localhost:3002/api/admin/blogs/${article._id}`
+      && request.url === `https://floralia-1.onrender.com/api/admin/blogs/${article._id}`
     );
     deleteRequest.flush({ success: true });
 
-    const refreshedRequest = http.expectOne('http://localhost:3002/api/admin/blogs?page=1&limit=5&status=all');
+    const refreshedRequest = http.expectOne('https://floralia-1.onrender.com/api/admin/blogs?page=1&limit=5&status=all');
     refreshedRequest.flush({
       data: [],
       total: 0,
@@ -151,3 +151,4 @@ describe('Articles', () => {
     expect(component.articles).toEqual([]);
   });
 });
+

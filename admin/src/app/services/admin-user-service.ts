@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 
@@ -24,14 +24,14 @@ export interface AdminUsersSummary {
 
 @Injectable({ providedIn: 'root' })
 export class AdminUserService {
-  private readonly apiUrl = 'http://localhost:3002/api/users';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/users';
   private cachedUsers: { success: boolean; users: AdminUser[]; summary: AdminUsersSummary } | null = null;
 
   constructor(private readonly http: HttpClient) {}
 
   login(email: string, password: string): Observable<{ success: boolean; token?: string; user?: { role?: string }; message?: string }> {
     return this.http.post<{ success: boolean; token?: string; user?: { role?: string }; message?: string }>(
-      'http://localhost:3002/api/auth/login',
+      'https://floralia-1.onrender.com/api/auth/login',
       { email, password }
     );
   }
@@ -141,3 +141,4 @@ export class AdminUserService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

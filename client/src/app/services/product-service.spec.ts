@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProductService } from './product-service';
 
@@ -25,7 +25,7 @@ describe('ProductService', () => {
     service.getProducts().subscribe((products) => {
       firstSoldCount = products[0].sold;
     });
-    httpMock.expectOne('http://localhost:3002/products').flush([{ sku: 'TEA-1', sold: 4 }]);
+    httpMock.expectOne('https://floralia-1.onrender.com/products').flush([{ sku: 'TEA-1', sold: 4 }]);
 
     service.invalidateCache();
 
@@ -33,9 +33,10 @@ describe('ProductService', () => {
     service.getProducts().subscribe((products) => {
       refreshedSoldCount = products[0].sold;
     });
-    httpMock.expectOne('http://localhost:3002/products').flush([{ sku: 'TEA-1', sold: 5 }]);
+    httpMock.expectOne('https://floralia-1.onrender.com/products').flush([{ sku: 'TEA-1', sold: 5 }]);
 
     expect(firstSoldCount).toBe(4);
     expect(refreshedSoldCount).toBe(5);
   });
 });
+

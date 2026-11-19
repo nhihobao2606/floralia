@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, timeout } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -142,7 +142,7 @@ export function sortOrdersNewestFirst(orders: Order[]): Order[] {
   providedIn: 'root'
 })
 export class OrderService {
-  private readonly apiUrl = 'http://localhost:3002/api/orders';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/orders';
   private ordersCache: Order[] = [];
   private ordersCacheOwner: string | null = null;
 
@@ -297,3 +297,4 @@ export class OrderService {
     return formatVietnameseDong(num);
   }
 }
+

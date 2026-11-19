@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+﻿import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, catchError, throwError } from 'rxjs';
@@ -13,7 +13,7 @@ export class AuthSessionInterceptor implements HttpInterceptor {
     const isLoginRequest = request.url.includes('/api/auth/login') || request.url.includes('/api/auth/signup');
     const configuredOrigin = (window as Window & { FLORALIA_API_ORIGIN?: string }).FLORALIA_API_ORIGIN?.trim();
     const apiOrigin = configuredOrigin || `${window.location.protocol}//${window.location.hostname}:3002`;
-    const apiRequest = request.url.startsWith('http://localhost:3002') || request.url.startsWith('http://127.0.0.1:3002')
+    const apiRequest = request.url.startsWith('https://floralia-1.onrender.com') || request.url.startsWith('http://127.0.0.1:3002')
       ? request.clone({ url: request.url.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002/, apiOrigin) })
       : request;
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -46,3 +46,4 @@ export class AuthSessionInterceptor implements HttpInterceptor {
     });
   }
 }
+

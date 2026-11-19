@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap, timeout } from 'rxjs/operators';
@@ -51,7 +51,7 @@ export interface CategoryFormValue {
 
 @Injectable({ providedIn: 'root' })
 export class AdminCategoryService {
-  private readonly apiUrl = 'http://localhost:3002/api/admin/products/categories';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/products/categories';
   private categoryListCache: AdminCategoryList | null = null;
 
   constructor(private readonly http: HttpClient) {}
@@ -125,3 +125,4 @@ export class AdminCategoryService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

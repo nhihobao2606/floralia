@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, HostListener, NgZone, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { NgControl, NgForm } from '@angular/forms';
@@ -11,7 +11,7 @@ import { NgControl, NgForm } from '@angular/forms';
 })
 export class Profile implements OnInit {
   showLogoutConfirm = false;
-  private readonly API = 'http://localhost:3002/api/users';
+  private readonly API = 'https://floralia-1.onrender.com/api/users';
 
   // Menu bên trái
   menu = [
@@ -382,3 +382,4 @@ export class Profile implements OnInit {
     this.logout();
   }
 }
+

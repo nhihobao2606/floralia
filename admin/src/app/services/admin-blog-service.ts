@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -83,7 +83,7 @@ export type BlogFormValue = Pick<
 
 @Injectable({ providedIn: 'root' })
 export class AdminBlogService {
-  private readonly apiUrl = 'http://localhost:3002/api/admin/blogs';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/blogs';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -143,3 +143,4 @@ export class AdminBlogService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

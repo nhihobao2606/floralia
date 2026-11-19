@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+﻿import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CartItem, CartService, CartVariant } from '../../services/cart-service';
 import { ProductNavigationService } from '../../services/product-navigation-service';
@@ -91,15 +91,15 @@ export class CartComponent implements OnInit {
     const source = item.image || item.thumbnail;
     if (!source) return '/assets/images/no-image.svg';
     if (/^(https?:|data:image\/)/i.test(source)) return source;
-    if (source.startsWith('/products/')) return `http://localhost:3002${source}`;
+    if (source.startsWith('/products/')) return `https://floralia-1.onrender.com${source}`;
     const legacyAssetId = /^\/?assets\/images\/([^/?]+)$/i.exec(source);
     if (legacyAssetId && !/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(legacyAssetId[1])) {
-      return `http://localhost:3002/products/image/${encodeURIComponent(legacyAssetId[1])}`;
+      return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(legacyAssetId[1])}`;
     }
     if (source.startsWith('/assets/')) return source;
     if (source.startsWith('assets/')) return `/${source}`;
     if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(source)) return `/assets/images/${source}`;
-    return `http://localhost:3002/products/image/${encodeURIComponent(source)}`;
+    return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(source)}`;
   }
 
   toggleSelect(item: CartDisplayItem): void {
@@ -243,3 +243,4 @@ export class CartComponent implements OnInit {
     void this.router.navigate(['/products']);
   }
 }
+

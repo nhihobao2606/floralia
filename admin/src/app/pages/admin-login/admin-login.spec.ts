@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { FormControl, NgForm, Validators } from '@angular/forms';
@@ -72,7 +72,7 @@ describe('AdminLogin', () => {
     expect(form.invalid).toBe(true);
     expect(form.form.controls['email'].touched).toBe(true);
     expect(form.form.controls['password'].touched).toBe(true);
-    httpTestingController.expectNone('http://localhost:3002/api/auth/login');
+    httpTestingController.expectNone('https://floralia-1.onrender.com/api/auth/login');
   });
 
   it('accepts administrator credentials and stores the session', () => {
@@ -80,7 +80,7 @@ describe('AdminLogin', () => {
     component.password = 'secure-password';
     component.login(createForm(component.email, component.password));
 
-    const request = httpTestingController.expectOne('http://localhost:3002/api/auth/login');
+    const request = httpTestingController.expectOne('https://floralia-1.onrender.com/api/auth/login');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({
       email: 'admin@floralia.vn',
@@ -101,7 +101,7 @@ describe('AdminLogin', () => {
     component.email = 'user@floralia.vn';
     component.password = 'secure-password';
     component.login(createForm(component.email, component.password));
-    httpTestingController.expectOne('http://localhost:3002/api/auth/login').flush({
+    httpTestingController.expectOne('https://floralia-1.onrender.com/api/auth/login').flush({
       success: true,
       token: 'user-token',
       user: { id: 'user-1', email: 'user@floralia.vn', role: 'user' },
@@ -119,10 +119,11 @@ describe('AdminLogin', () => {
     component.login(createForm(component.email, component.password));
 
     expect(component.isSubmitting()).toBe(true);
-    httpTestingController.expectOne('http://localhost:3002/api/auth/login')
+    httpTestingController.expectOne('https://floralia-1.onrender.com/api/auth/login')
       .error(new ProgressEvent('error'));
 
     expect(component.isSubmitting()).toBe(false);
     expect(component.errorMessage()).toContain('Không thể kết nối');
   });
 });
+

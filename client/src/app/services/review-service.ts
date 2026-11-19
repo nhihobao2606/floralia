@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { ProductService } from './product-service';
@@ -29,7 +29,7 @@ export interface ProductRatingUpdate {
   providedIn: 'root',
 })
 export class ReviewService {
-  private readonly apiUrl = 'http://localhost:3002/products';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/products';
   readonly ratingUpdates = new Subject<ProductRatingUpdate>();
 
   constructor(
@@ -62,3 +62,4 @@ export class ReviewService {
     this.ratingUpdates.next({ productSku, ratingAverage, ratingCount });
   }
 }
+

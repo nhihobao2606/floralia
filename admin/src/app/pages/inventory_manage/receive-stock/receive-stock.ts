@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -86,7 +86,7 @@ export class ReceiveStock implements OnInit {
     return this.variantFor(line)?.stock ?? product?.stock ?? 0;
   }
   projectedStock(line: ReceiveLine): number { return (this.currentStock(line) ?? 0) + (Number(line.quantity) || 0); }
-  imageUrl(path?: string | null): string { return path ? `http://localhost:3002${path}` : '/assets/images/products/74.png'; }
+  imageUrl(path?: string | null): string { return path ? `https://floralia-1.onrender.com${path}` : '/assets/images/products/74.png'; }
 
   addLine(): void { this.lines = [...this.lines, { productSku: '', variantSku: '', quantity: 1 }]; }
   removeLine(index: number): void {
@@ -167,4 +167,5 @@ export class ReceiveStock implements OnInit {
     catch { this.adminName = 'Admin'; }
   }
 }
+
 

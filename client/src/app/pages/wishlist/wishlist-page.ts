@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+﻿import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Products } from '../../classes/Products';
@@ -122,7 +122,7 @@ export class WishlistPage implements OnInit {
     if (product.imageUrl) {
       return /^https?:\/\//i.test(product.imageUrl)
         ? product.imageUrl
-        : `http://localhost:3002${product.imageUrl.startsWith('/') ? '' : '/'}${product.imageUrl}`;
+        : `https://floralia-1.onrender.com${product.imageUrl.startsWith('/') ? '' : '/'}${product.imageUrl}`;
     }
     if (product.imageData) {
       return product.imageData.startsWith('data:image/')
@@ -257,3 +257,4 @@ export class WishlistPage implements OnInit {
     image.src = '/assets/images/no-image.svg';
   }
 }
+

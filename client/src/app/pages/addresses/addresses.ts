@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 })
 export class Addresses implements OnInit {
   showLogoutConfirm = false;
-  private readonly API = 'http://localhost:3002/api';
+  private readonly API = 'https://floralia-1.onrender.com/api';
   private readonly PROVINCES_API = 'https://provinces.open-api.vn/api/v2';
 
   menu = [
@@ -460,3 +460,4 @@ export class Addresses implements OnInit {
     this.logout();
   }
 }
+

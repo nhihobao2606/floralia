@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Blog } from '../classes/Blog';
@@ -14,7 +14,7 @@ export interface BlogResponse {
   providedIn: 'root'
 })
 export class BlogService {
-  private apiUrl = 'http://localhost:3002/blogs';
+  private apiUrl = 'https://floralia-1.onrender.com/blogs';
 
   constructor(private http: HttpClient) {}
 

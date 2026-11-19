@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -51,7 +51,7 @@ export interface VoucherSummary {
 
 @Injectable({ providedIn: 'root' })
 export class AdminVoucherService {
-  private readonly apiUrl = 'http://localhost:3002/api/vouchers/admin';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/vouchers/admin';
   constructor(private readonly http: HttpClient) {}
 
   getAll(): Observable<{ success: boolean; vouchers: AdminVoucher[]; summary: VoucherSummary }> {
@@ -88,3 +88,4 @@ export class AdminVoucherService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

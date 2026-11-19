@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+﻿import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize, timeout } from 'rxjs';
@@ -20,7 +20,7 @@ export class GuestOrderTracking {
   info = '';
   orders: GuestOrder[] = [];
 
-  private readonly apiUrl = 'http://localhost:3002/api/orders/guest-tracking';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/orders/guest-tracking';
 
   constructor(
     private readonly http: HttpClient,
@@ -142,3 +142,4 @@ export class GuestOrderTracking {
     return [order.date, order.time].filter(Boolean).join(' · ');
   }
 }
+

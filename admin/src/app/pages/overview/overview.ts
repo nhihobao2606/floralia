@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -253,7 +253,7 @@ export class Overview implements OnInit {
           category: product.category || 'Trà',
           stock,
           price: Number(variant.price ?? product.price) || 0,
-          imageUrl: product.imageUrl?.startsWith('/products/') ? `http://localhost:3002${product.imageUrl}` : product.imageUrl || '/assets/images/products/74.png',
+          imageUrl: product.imageUrl?.startsWith('/products/') ? `https://floralia-1.onrender.com${product.imageUrl}` : product.imageUrl || '/assets/images/products/74.png',
           statusText: out ? 'Hết hàng' : 'Sắp hết hàng',
           statusClass: out ? 'out-of-stock' : 'low-stock',
         }];
@@ -379,3 +379,4 @@ export class Overview implements OnInit {
     return time.length > 5 ? time.substring(0, 5) : time;
   }
 }
+

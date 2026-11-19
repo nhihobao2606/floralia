@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 
@@ -37,7 +37,7 @@ export interface ChatMessage {
   providedIn: 'root'
 })
 export class ChatService {
-  private apiUrl = 'http://localhost:3002/api/chat';
+  private apiUrl = 'https://floralia-1.onrender.com/api/chat';
 
   private chatOpenSubject = new BehaviorSubject<boolean>(false);
   isOpen$ = this.chatOpenSubject.asObservable();
@@ -97,3 +97,4 @@ export class ChatService {
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/clear`, { sessionId });
   }
 }
+

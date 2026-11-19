@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -286,7 +286,7 @@ export class Inventory implements OnInit {
 
   closeAdjustment(): void { if (!this.saving) this.adjustingProduct = null; }
   formatPrice(price: number): string { return `${Number(price || 0).toLocaleString('vi-VN')}₫`; }
-  imageUrl(path?: string | null): string { return path ? `http://localhost:3002${path}` : '/assets/images/products/74.png'; }
+  imageUrl(path?: string | null): string { return path ? `https://floralia-1.onrender.com${path}` : '/assets/images/products/74.png'; }
 
   exportCsv(): void {
     const rows = [['SKU', 'Tên sản phẩm', 'Danh mục', 'Tồn kho', 'Trạng thái'], ...this.filteredProducts.map(product => [product.sku, product.name, product.category || '', String(product.stock), this.statusLabel(product.stock)])];
@@ -312,3 +312,4 @@ export class Inventory implements OnInit {
     catch { this.adminName = 'Admin'; }
   }
 }
+

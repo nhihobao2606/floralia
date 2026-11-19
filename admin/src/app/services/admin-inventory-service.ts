@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { forkJoin, map, Observable } from 'rxjs';
 
@@ -23,8 +23,8 @@ export interface InventoryProductVariant {
 
 @Injectable({ providedIn: 'root' })
 export class AdminInventoryService {
-  private readonly apiUrl = 'http://localhost:3002/products/admin/inventory';
-  private readonly catalogUrl = 'http://localhost:3002/products';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/products/admin/inventory';
+  private readonly catalogUrl = 'https://floralia-1.onrender.com/products';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -85,3 +85,4 @@ export class AdminInventoryService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

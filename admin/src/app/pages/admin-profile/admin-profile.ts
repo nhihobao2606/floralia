@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit, signal } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, NgZone, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgControl, NgForm } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -14,7 +14,7 @@ import { AdminSidebar } from '../../components/admin-sidebar/admin-sidebar';
   styleUrl: './admin-profile.css',
 })
 export class AdminProfile implements OnInit {
-  private readonly API = 'http://localhost:3002/api/admin/profile';
+  private readonly API = 'https://floralia-1.onrender.com/api/admin/profile';
 
   user: any = null;
   adminName = '';
@@ -301,3 +301,4 @@ export class AdminProfile implements OnInit {
   get unreadNotificationsCount(): number { return 0; }
   toggleNotifications(): void { this.notificationsOpen = !this.notificationsOpen; }
 }
+

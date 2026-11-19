@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, DestroyRef, HostListener, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../services/product-service';
@@ -401,13 +401,13 @@ export class ProductDetail implements OnInit {
     if (/^(https?:|data:image\/)/i.test(source)) return source;
     if (source.startsWith('/assets/')) return source;
     if (source.startsWith('assets/')) return `/${source}`;
-    if (source.startsWith('/products/')) return `http://localhost:3002${source}`;
+    if (source.startsWith('/products/')) return `https://floralia-1.onrender.com${source}`;
     if (/\.(jpg|jpeg|png|webp|gif|svg)$/i.test(source)) {
       return `/assets/images/${source}`;
     }
 
     const imagePath = `/products/image/${encodeURIComponent(source)}`;
-    return `http://localhost:3002${imagePath}?v=${Date.now()}`;
+    return `https://floralia-1.onrender.com${imagePath}?v=${Date.now()}`;
   }
 
   get relatedProducts(): ProductDetails[] {
@@ -805,3 +805,4 @@ export class ProductDetail implements OnInit {
     this.router.navigate(['/products']);
   }
 }
+

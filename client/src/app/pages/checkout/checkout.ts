@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { getOrderSlug, OrderService, Order } from '../../services/order-service';
@@ -134,7 +134,7 @@ export class CheckoutComponent implements OnInit {
     if (token) {
       this.isLoadingAddress = true;
       const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-      this.http.get<any>('http://localhost:3002/api/addresses', { headers }).subscribe({
+      this.http.get<any>('https://floralia-1.onrender.com/api/addresses', { headers }).subscribe({
         next: (res) => {
           this.ngZone.run(() => {
             this.isLoadingAddress = false;
@@ -506,8 +506,8 @@ export class CheckoutComponent implements OnInit {
     };
 
     const request = this.editingAddressId
-      ? this.http.put<any>(`http://localhost:3002/api/addresses/${this.editingAddressId}`, body, { headers })
-      : this.http.post<any>('http://localhost:3002/api/addresses', body, { headers });
+      ? this.http.put<any>(`https://floralia-1.onrender.com/api/addresses/${this.editingAddressId}`, body, { headers })
+      : this.http.post<any>('https://floralia-1.onrender.com/api/addresses', body, { headers });
     request.subscribe({
       next: response => this.ngZone.run(() => {
         this.addAddressSaving = false;
@@ -651,7 +651,7 @@ export class CheckoutComponent implements OnInit {
       sku: String(item.sku || item.variantSku || item.productSku || item.productId || ''),
       name: String(item.name || item.title || 'Sản phẩm'),
       image: image.startsWith('/products/')
-        ? `http://localhost:3002${image}`
+        ? `https://floralia-1.onrender.com${image}`
         : image,
       variant: String(item.variantLabel || item.variant || ''),
       oldPrice: Math.max(price, Number(item.oldPrice) || price),
@@ -670,7 +670,7 @@ export class CheckoutComponent implements OnInit {
       sku: product.sku,
       name: product.name,
       image: product.imageUrl
-        ? `http://localhost:3002${product.imageUrl}`
+        ? `https://floralia-1.onrender.com${product.imageUrl}`
         : '/assets/images/no-image.svg',
       variant: product.variant,
       oldPrice,
@@ -926,8 +926,8 @@ export class CheckoutComponent implements OnInit {
         isDefault: true
       };
       const request = this.selectedAddressId
-        ? this.http.put<any>(`http://localhost:3002/api/addresses/${this.selectedAddressId}`, addressData, { headers })
-        : this.http.post<any>('http://localhost:3002/api/addresses', addressData, { headers });
+        ? this.http.put<any>(`https://floralia-1.onrender.com/api/addresses/${this.selectedAddressId}`, addressData, { headers })
+        : this.http.post<any>('https://floralia-1.onrender.com/api/addresses', addressData, { headers });
 
       request.subscribe({
         error: error => {
@@ -975,3 +975,4 @@ export class CheckoutComponent implements OnInit {
     this.router.navigate(['/products']);
   }
 }
+

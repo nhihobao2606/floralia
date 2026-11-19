@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ProductService } from '../../services/product-service';
 import { CartService } from '../../services/cart-service';
@@ -309,7 +309,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     if (p.imageUrl) {
       return p.imageUrl.startsWith('http://') || p.imageUrl.startsWith('https://')
         ? p.imageUrl
-        : `http://localhost:3002${p.imageUrl}`;
+        : `https://floralia-1.onrender.com${p.imageUrl}`;
     }
 
     if (p.imageData) {
@@ -426,3 +426,4 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     return this.savedCoupons().has(code);
   }
 }
+

@@ -1,4 +1,4 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+﻿import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AdminOrder, AdminOrderService } from './admin-order-service';
 
@@ -71,7 +71,7 @@ describe('AdminOrderService', () => {
     });
 
     const req = http.expectOne(request =>
-      request.url === 'http://localhost:3002/api/admin/orders' &&
+      request.url === 'https://floralia-1.onrender.com/api/admin/orders' &&
       request.params.get('page') === '1' &&
       request.params.get('limit') === '5' &&
       request.params.get('status') === 'pending' &&
@@ -95,7 +95,7 @@ describe('AdminOrderService', () => {
       expect(res.order.id).toBe('FL0009');
     });
 
-    const req = http.expectOne('http://localhost:3002/api/admin/orders/FL0009');
+    const req = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009');
     req.flush({
       success: true,
       order: {
@@ -131,7 +131,7 @@ describe('AdminOrderService', () => {
     } as Partial<AdminOrder>;
 
     service.createOrder(payload).subscribe(response => expect(response.order.items[0].sku).toBe('TTM007-150G'));
-    const request = http.expectOne('http://localhost:3002/api/admin/orders');
+    const request = http.expectOne('https://floralia-1.onrender.com/api/admin/orders');
     expect(request.request.method).toBe('POST');
     expect(request.request.headers.get('Authorization')).toBe('Bearer test-admin-token');
     expect(request.request.body).toEqual(payload);
@@ -146,7 +146,7 @@ describe('AdminOrderService', () => {
     });
 
     const req = http.expectOne(request =>
-      request.url === 'http://localhost:3002/api/admin/orders' &&
+      request.url === 'https://floralia-1.onrender.com/api/admin/orders' &&
       request.params.get('userId') === 'user-123'
     );
     req.flush({
@@ -165,7 +165,7 @@ describe('AdminOrderService', () => {
       expect(res.order.status).toBe('processing');
     });
 
-    const req = http.expectOne('http://localhost:3002/api/admin/orders/FL0011/status');
+    const req = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0011/status');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual({ status: 'processing', statusLabel: 'Đang chuẩn bị' });
 
@@ -186,7 +186,7 @@ describe('AdminOrderService', () => {
       expect(res.note.text).toBe('Yêu cầu gói quà');
     });
 
-    const req = http.expectOne('http://localhost:3002/api/admin/orders/FL0009/notes');
+    const req = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0009/notes');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ text: 'Yêu cầu gói quà', author: 'Khách hàng' });
 
@@ -201,7 +201,7 @@ describe('AdminOrderService', () => {
       expect(res.success).toBe(true);
     });
 
-    const req = http.expectOne('http://localhost:3002/api/admin/orders/FL0007');
+    const req = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/FL0007');
     expect(req.request.method).toBe('DELETE');
     req.flush({ success: true, message: 'Đã xóa đơn hàng thành công.' });
   });
@@ -211,9 +211,10 @@ describe('AdminOrderService', () => {
       expect(res.success).toBe(true);
     });
 
-    const req = http.expectOne('http://localhost:3002/api/admin/orders/bulk-delete');
+    const req = http.expectOne('https://floralia-1.onrender.com/api/admin/orders/bulk-delete');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ ids: ['FL0007', 'FL0008'] });
     req.flush({ success: true, message: 'Đã xóa 2 đơn hàng thành công.' });
   });
 });
+

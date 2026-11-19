@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgControl, NgForm } from '@angular/forms';
@@ -55,7 +55,7 @@ export class Signup implements OnDestroy {
   // Mật khẩu: tối thiểu 8 ký tự, có cả chữ và số.
   readonly passwordPattern = '^(?=.*[A-Za-z])(?=.*\\d).{8,}$';
 
-  private readonly API_URL = 'http://localhost:3002/api/auth/signup';
+  private readonly API_URL = 'https://floralia-1.onrender.com/api/auth/signup';
 
   constructor(
     private http: HttpClient,
@@ -132,7 +132,7 @@ export class Signup implements OnDestroy {
     this.checkingEmail = email;
     this.emailCheckError = '';
     this.emailCheckSubscription = this.http.post<any>(
-      'http://localhost:3002/api/auth/check-availability',
+      'https://floralia-1.onrender.com/api/auth/check-availability',
       { email }
     ).pipe(timeout(5000)).subscribe({
       next: () => {
@@ -211,7 +211,7 @@ export class Signup implements OnDestroy {
     const version = ++this.phoneCheckVersion;
     this.phoneCheckInFlight = phone;
     this.continueToOtpAfterPhoneCheck = continueToOtp;
-    this.availabilityCheckSubscription = this.http.post<any>('http://localhost:3002/api/auth/check-availability', {
+    this.availabilityCheckSubscription = this.http.post<any>('https://floralia-1.onrender.com/api/auth/check-availability', {
       phone
     }).pipe(timeout(5000)).subscribe({
       next: () => {
@@ -345,7 +345,7 @@ export class Signup implements OnDestroy {
 
   private loginAfterSignup(): void {
     const returnUrl = getAuthReturnUrl(this.route, this.router);
-    this.http.post<any>('http://localhost:3002/api/auth/login', {
+    this.http.post<any>('https://floralia-1.onrender.com/api/auth/login', {
       identifier: this.phone.trim(),
       password: this.password,
     }).subscribe({
@@ -384,3 +384,4 @@ export class Signup implements OnDestroy {
     });
   }
 }
+

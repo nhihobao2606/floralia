@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -388,7 +388,7 @@ export class AdminUserDetail implements OnInit {
     const image = order.items?.[0]?.image?.trim() || '';
     if (!image) return '';
     if (/^(https?:|data:|blob:)/i.test(image)) return image;
-    return image.startsWith('/') ? `http://localhost:3002${image}` : '';
+    return image.startsWith('/') ? `https://floralia-1.onrender.com${image}` : '';
   }
 
   onOrderImageError(order: OrderRow): void {
@@ -398,3 +398,4 @@ export class AdminUserDetail implements OnInit {
     return `${value.toLocaleString('vi-VN')}đ`;
   }
 }
+

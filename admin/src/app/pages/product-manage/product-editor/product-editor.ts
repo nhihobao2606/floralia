@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+﻿import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute, CanDeactivateFn, Router } from '@angular/router';
 import { AdminProduct, AdminProductService, AdminProductVariant, ProductFormValue, ProductImageUpload } from '../../../services/admin-product-service';
@@ -253,7 +253,7 @@ export class ProductEditor implements OnInit {
   private imageUrl(value: string): string {
     if (!value) return '';
     if (/^(https?:|data:image\/)/i.test(value) || value.startsWith('/assets/')) return value;
-    return `http://localhost:3002/products/image/${encodeURIComponent(value)}?v=${Date.now()}`;
+    return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(value)}?v=${Date.now()}`;
   }
 
   async onImagesSelected(event: Event): Promise<void> {
@@ -707,3 +707,4 @@ export class ProductEditor implements OnInit {
 
 export const canDeactivateProductEditor: CanDeactivateFn<ProductEditor> =
   component => component.confirmCanDeactivate();
+

@@ -1,4 +1,4 @@
-import { HttpErrorResponse } from '@angular/common/http';
+﻿import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminProduct, AdminProductService, AdminProductStats } from '../../../services/admin-product-service';
@@ -208,8 +208,8 @@ export class Products implements OnInit, OnDestroy {
     const image = product.imageUrl || product.thumbnail;
     if (!image) return '/assets/logo.png';
     if (/^(https?:|data:image\/)/i.test(image) || image.startsWith('/assets/')) return image;
-    if (image.startsWith('/products/')) return `http://localhost:3002${image}`;
-    return `http://localhost:3002/products/image/${encodeURIComponent(image)}`;
+    if (image.startsWith('/products/')) return `https://floralia-1.onrender.com${image}`;
+    return `https://floralia-1.onrender.com/products/image/${encodeURIComponent(image)}`;
   }
 
   stockOf(product: AdminProduct): number { return Number(product.stock) || 0; }
@@ -272,3 +272,4 @@ export class Products implements OnInit, OnDestroy {
     }
   }
 }
+

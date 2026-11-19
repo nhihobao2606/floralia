@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+﻿import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, timeout } from 'rxjs';
 
@@ -20,7 +20,7 @@ export interface SalesForecast {
 
 @Injectable({ providedIn: 'root' })
 export class AdminRecommendationService {
-  private readonly apiUrl = 'http://localhost:3002/api/admin/recommendations';
+  private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/recommendations';
   constructor(private readonly http: HttpClient) {}
   getOverview(): Observable<RecommendationOverview> {
     return this.http.get<RecommendationOverview>(this.apiUrl, { headers: this.authHeaders() }).pipe(timeout({ first: 12000 }));
@@ -36,3 +36,4 @@ export class AdminRecommendationService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 }
+

@@ -1,4 +1,4 @@
-import { Component, OnInit, Optional } from '@angular/core';
+﻿import { Component, OnInit, Optional } from '@angular/core';
 import { Products } from '../../classes/Products';
 import { ProductService } from '../../services/product-service';
 
@@ -136,7 +136,7 @@ export class MixTeaPage implements OnInit {
       : '';
     const apiOrigin = configured || (typeof window !== 'undefined'
       ? `${window.location.protocol}//${window.location.hostname}:3002`
-      : 'http://localhost:3002');
+      : 'https://floralia-1.onrender.com');
     return `${apiOrigin}/products/image/${encodeURIComponent(assetId)}`;
   }
 
@@ -304,3 +304,4 @@ export class MixTeaPage implements OnInit {
     }
   }
 }
+

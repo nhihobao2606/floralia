@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, signal } from '@angular/core';
+﻿import { Component, HostListener, OnDestroy, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { WishlistService } from './services/wishlist-service';
@@ -39,7 +39,7 @@ export class App implements OnInit, OnDestroy {
     this.subs.add(interval(15000).pipe(
       startWith(0),
       filter(() => !!(localStorage.getItem('token') || sessionStorage.getItem('token'))),
-      switchMap(() => this.http.get('http://localhost:3002/api/users/me').pipe(catchError(() => EMPTY))),
+      switchMap(() => this.http.get('https://floralia-1.onrender.com/api/users/me').pipe(catchError(() => EMPTY))),
     ).subscribe());
   }
 
@@ -55,3 +55,4 @@ export class App implements OnInit, OnDestroy {
     this.isLoggedIn = !!raw;
   }
 }
+

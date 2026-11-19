@@ -1,4 +1,4 @@
-import { CanActivateFn, Router } from '@angular/router';
+﻿import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, of } from 'rxjs';
@@ -26,7 +26,7 @@ export const adminAuthGuard: CanActivateFn = () => {
   }
 
   return http.get<{ success: boolean; user?: { role?: string } }>(
-    'http://localhost:3002/api/users/me',
+    'https://floralia-1.onrender.com/api/users/me',
     { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
   ).pipe(
     map(result => {
@@ -42,3 +42,4 @@ export const adminAuthGuard: CanActivateFn = () => {
     }),
   );
 };
+

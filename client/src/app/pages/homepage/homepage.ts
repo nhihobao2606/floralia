@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+﻿import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService } from '../../services/product-service';
 import { ReviewService } from '../../services/review-service';
@@ -447,7 +447,7 @@ export class Homepage implements OnInit {
     if (p.imageUrl) {
       return p.imageUrl.startsWith('http://') || p.imageUrl.startsWith('https://')
         ? p.imageUrl
-        : `http://localhost:3002${p.imageUrl.startsWith('/') ? '' : '/'}${p.imageUrl}`;
+        : `https://floralia-1.onrender.com${p.imageUrl.startsWith('/') ? '' : '/'}${p.imageUrl}`;
     }
 
     return '/assets/images/no-image.svg';
@@ -474,3 +474,4 @@ export class Homepage implements OnInit {
     img.src = '/assets/images/no-image.svg';
   }
 }
+

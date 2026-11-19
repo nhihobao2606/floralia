@@ -1,4 +1,4 @@
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+﻿import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, Subject, catchError, finalize, map, of, shareReplay, tap, throwError } from 'rxjs';
 import { Products } from '../classes/Products';
@@ -78,7 +78,7 @@ export interface PublicPromoVoucher {
   providedIn: 'root'
 })
 export class ProductService implements OnDestroy {
-  private apiUrl = 'http://localhost:3002/products';
+  private apiUrl = 'https://floralia-1.onrender.com/products';
   private productsCache: Products[] | null = null;
   private productsCacheExpiresAt = 0;
   private productsRequest: Observable<Products[]> | null = null;
@@ -288,7 +288,7 @@ export class ProductService implements OnDestroy {
   getAvailableVouchers(subtotal: number, items: Array<{ sku: string; quantity: number; variant?: string }> = []): Observable<{ success: boolean; vouchers: AvailableVoucher[] }> {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     return this.http.post<{ success: boolean; vouchers: AvailableVoucher[] }>(
-      'http://localhost:3002/api/vouchers/available',
+      'https://floralia-1.onrender.com/api/vouchers/available',
       { subtotal, items },
       { headers: new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {}) }
     );
@@ -296,14 +296,14 @@ export class ProductService implements OnDestroy {
 
   getPublicPromoVouchers(): Observable<{ success: boolean; vouchers: PublicPromoVoucher[] }> {
     return this.http.get<{ success: boolean; vouchers: PublicPromoVoucher[] }>(
-      'http://localhost:3002/api/vouchers/public'
+      'https://floralia-1.onrender.com/api/vouchers/public'
     );
   }
 
   validateVoucher(code: string, subtotal: number, items: Array<{ sku: string; quantity: number; variant?: string }> = []): Observable<{ success: boolean; voucher: ValidatedVoucher }> {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     return this.http.post<{ success: boolean; voucher: ValidatedVoucher }>(
-      'http://localhost:3002/api/vouchers/validate',
+      'https://floralia-1.onrender.com/api/vouchers/validate',
       { code, subtotal, items },
       { headers: new HttpHeaders(token ? { Authorization: `Bearer ${token}` } : {}) }
     );
@@ -316,3 +316,4 @@ export class ProductService implements OnDestroy {
   }
 
 }
+

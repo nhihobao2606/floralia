@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../services/product-service';
@@ -476,7 +476,7 @@ export class ProductListComponent implements OnInit {
     if (imageUrl) {
       return imageUrl.startsWith('http://') || imageUrl.startsWith('https://')
         ? imageUrl
-        : `http://localhost:3002${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+        : `https://floralia-1.onrender.com${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
     }
 
     const thumbnail = product.thumbnail || '';
@@ -554,3 +554,4 @@ export class ProductListComponent implements OnInit {
     this.currentPage = 1;
   }
 }
+

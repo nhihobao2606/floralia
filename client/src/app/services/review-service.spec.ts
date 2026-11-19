@@ -1,4 +1,4 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+﻿import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { ProductService } from './product-service';
@@ -44,7 +44,7 @@ describe('ReviewService', () => {
     let response: unknown;
     service.getReviews('TEA / 1').subscribe((reviews) => response = reviews);
 
-    const request = http.expectOne('http://localhost:3002/products/reviews/TEA%20%2F%201');
+    const request = http.expectOne('https://floralia-1.onrender.com/products/reviews/TEA%20%2F%201');
     request.flush([]);
 
     expect(response).toEqual([]);
@@ -59,7 +59,7 @@ describe('ReviewService', () => {
       comment: 'Rất thơm.',
     }).subscribe((review) => response = review);
 
-    const request = http.expectOne('http://localhost:3002/products/reviews');
+    const request = http.expectOne('https://floralia-1.onrender.com/products/reviews');
     expect(request.request.method).toBe('POST');
     expect(request.request.headers.get('Authorization')).toBe('Bearer signed-in-token');
     expect(request.request.body).toEqual({
@@ -84,3 +84,4 @@ describe('ReviewService', () => {
     subscription.unsubscribe();
   });
 });
+
