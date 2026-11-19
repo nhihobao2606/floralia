@@ -6,3 +6,8 @@
 
 - **Website khách hàng:** https://floraliatea.web.app
 - **Trang quản trị:** https://floraliatea-admin.web.app/admin-login
+
+## Tài khoản quản trị
+
+- **Email:** floraliatea@gmail.com
+- **Mật khẩu:** floralia123
