@@ -1,4 +1,4 @@
-﻿import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -126,6 +126,37 @@ export const INITIAL_DASHBOARD_DATA: DashboardData = {
   ],
 };
 
+function fixUrl(url?: string): string {
+  if (!url) return '/assets/images/products/74.png';
+  if (url.startsWith('http://localhost:3002') || url.startsWith('http://127.0.0.1:3002')) {
+    return url.replace(/^http:\/\/(?:localhost|127\.0\.0\.1):3002/, 'https://floralia-1.onrender.com');
+  }
+  if (url.startsWith('/products/image/')) {
+    return `https://floralia-1.onrender.com${url}`;
+  }
+  return url;
+}
+
+function normalizeDashboardImages(data: DashboardData): DashboardData {
+  if (!data) return data;
+  if (Array.isArray(data.recentOrders)) {
+    data.recentOrders.forEach((o) => {
+      o.firstItemImage = fixUrl(o.firstItemImage);
+    });
+  }
+  if (Array.isArray(data.topProducts)) {
+    data.topProducts.forEach((p) => {
+      p.image = fixUrl(p.image);
+    });
+  }
+  if (Array.isArray(data.lowStockAlerts)) {
+    data.lowStockAlerts.forEach((a) => {
+      a.imageUrl = fixUrl(a.imageUrl);
+    });
+  }
+  return data;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminDashboardService {
   private readonly apiUrl = 'https://floralia-1.onrender.com/api/admin/dashboard';
@@ -140,7 +171,7 @@ export class AdminDashboardService {
     try {
       const raw = localStorage.getItem(`floralia_dashboard_cache_${period}`);
       if (raw) {
-        const parsed = JSON.parse(raw) as DashboardData;
+        const parsed = normalizeDashboardImages(JSON.parse(raw) as DashboardData);
         this.cachedData.set(period, parsed);
         return parsed;
       }
@@ -153,7 +184,7 @@ export class AdminDashboardService {
   getDashboardData(period: 'all' | '7days' | '30days' | 'month' = 'all'): Observable<DashboardData> {
     const params = new HttpParams().set('period', period);
     return this.http.get<DashboardApiResponse>(this.apiUrl, { params }).pipe(
-      map((res) => res.data),
+      map((res) => normalizeDashboardImages(res.data)),
       tap((data) => {
         if (data) {
           this.cachedData.set(period, data);
