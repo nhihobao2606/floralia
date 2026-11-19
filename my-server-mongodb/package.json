@@ -7,7 +7,8 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec \"node --env-file-if-exists=.env\" index.js",
+    "start": "node index.js",
+    "dev": "nodemon --exec \"node --env-file-if-exists=.env\" index.js",
     "sync-embeddings": "node scripts/sync-embeddings.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

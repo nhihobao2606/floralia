@@ -1,4 +1,11 @@
 const path = require('path');
+const dns = require('dns');
+
+try {
+    dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (e) {
+    console.warn('Không thể thiết lập DNS servers tùy chỉnh:', e.message);
+}
 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
